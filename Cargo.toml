@@ -1,12 +1,12 @@
 [package]
 name = "equip-penguin"
 version = "0.0.0"
-authors = [ "you",]
-edition = "2018"
+authors = [ "Angry Penguins",]
+edition = "2021"
 publish = false
 
 [lib]
-path = "src/adder.rs"
+path = "src/lib.rs"
 
 [dependencies.elrond-wasm]
 version = "0.25.0"

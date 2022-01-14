@@ -46,7 +46,12 @@
             "tx": {
                 "from": "address:owner",
                 "contractCode": "file:../output/equip-penguin.wasm",
-                "arguments": [],
+                "arguments": [
+                    [
+                        ["hat", "HAT-0"],
+                        ["background", "RED-0", "YELLOW-0"]
+                    ]
+                ],
                 "gasLimit": "5,000,000",
                 "gasPrice": "0"
             },

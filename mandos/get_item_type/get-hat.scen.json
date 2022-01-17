@@ -1,0 +1,27 @@
+{
+  "name": "equip_penguin",
+  "comment": "add then check",
+  "gasSchedule": "v3",
+  "steps": [
+    {
+      "step": "externalSteps",
+      "path": "../init.scen.json"
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:equip",
+        "function": "getItemType",
+        "arguments": [
+          "str:HAT-000005"
+        ]
+      },
+      "expect": {
+        "out": [
+          "str:hat"
+        ],
+        "status": "0"
+      }
+    }
+  ]
+}

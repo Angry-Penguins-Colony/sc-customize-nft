@@ -20,12 +20,34 @@ pub trait Equip {
 
     #[endpoint(registerItem)]
     #[only_owner]
-    fn register_item(&self, item_type: &ManagedBuffer, #[var_args] items_id: ManagedVarArgs<TokenIdentifier>)
-    {
+    fn register_item(
+        &self,
+        item_type: &ManagedBuffer,
+        #[var_args] items_id: ManagedVarArgs<TokenIdentifier>,
+    ) {
         // TODO tester si ça override pas
-        self.items_types().insert(item_type.clone(), items_id.to_vec());
+        self.items_types()
+            .insert(item_type.clone(), items_id.to_vec());
     }
 
+    #[view(getItemType)]
+    fn get_item_type(&self, item_id: &TokenIdentifier) -> OptionalResult<ManagedBuffer> {
+        // NE MARCHE PAS
+        // idée 1 : registerItem, ne marche pas
+        // idée 2 : equality check ne marche pas car ce sont des addresses
+        // idée 3 : la map n'est pas parcouru en fait
+
+        // iterate over all items_types
+        for (item_type, compare_items_ids) in self.items_types().iter() {
+            for compare_item_id in compare_items_ids.iter() {
+                if &compare_item_id == item_id {
+                    return OptionalResult::Some(item_type.clone());
+                }
+            }
+        }
+
+        return OptionalResult::None;
+    }
 
     // #[endpoint]
     // fn equip(&self, penguin_id: &String, items_ids: &[String]) -> SCResult<()> {
@@ -41,19 +63,6 @@ pub trait Equip {
     //     }
     //
     //     Ok(())
-    // }
-
-    // #[view(getItemType)]
-    // fn get_item_type(&self, item_id: &String) -> OptionalResult<String> {
-    //     for (item_type, items_ids) in self.items_types().iter() {
-    //         for compare_item_id in items_ids {
-    //             if item_id == &compare_item_id {
-    //                 return OptionalResult::Some(item_type);
-    //             }
-    //         }
-    //     }
-    //
-    //     return OptionalResult::None;
     // }
 
     // #[endpoint]

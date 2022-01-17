@@ -1,5 +1,5 @@
 [package]
-name = "equip-penguin-wasm"
+name = "equip_penguin-wasm"
 version = "0.0.0"
 authors = [ "you",]
 edition = "2018"
@@ -20,7 +20,7 @@ lto = true
 debug = false
 panic = "abort"
 
-[dependencies.equip-penguin]
+[dependencies.equip_penguin]
 path = ".."
 
 [dependencies.elrond-wasm-node]

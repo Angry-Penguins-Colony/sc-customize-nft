@@ -1,5 +1,5 @@
 [package]
-name = "equip-penguin"
+name = "equip_penguin"
 version = "0.0.0"
 authors = [ "Angry Penguins",]
 edition = "2021"
@@ -13,3 +13,8 @@ version = "0.25.0"
 
 [dev-dependencies.elrond-wasm-debug]
 version = "0.25.0"
+
+[dev-dependencies]
+num-bigint = "0.4.2"
+num-traits = "0.2"
+hex = "0.4"

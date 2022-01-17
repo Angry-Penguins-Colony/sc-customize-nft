@@ -1,5 +1,5 @@
 {
-    "name": "equip-penguin",
+    "name": "equip_penguin",
     "comment": "add then check",
     "gasSchedule": "v3",
     "steps": [
@@ -60,7 +60,7 @@
                     "storage": {
                         "str:sum": "8"
                     },
-                    "code": "file:../output/equip-penguin.wasm"
+                    "code": "file:../output/equip_penguin.wasm"
                 }
             }
         }

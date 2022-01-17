@@ -1,5 +1,5 @@
 [package]
-name = "equip-penguin-meta"
+name = "equip_penguin-meta"
 version = "0.0.0"
 edition = "2018"
 publish = false
@@ -7,7 +7,7 @@ authors = [ "you",]
 
 [dev-dependencies]
 
-[dependencies.equip-penguin]
+[dependencies.equip_penguin]
 path = ".."
 
 [dependencies.elrond-wasm]

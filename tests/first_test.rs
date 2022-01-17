@@ -14,9 +14,9 @@ const HAT_ID: &'static str = "HAT-7e8f";
 fn test_get_item() {
     let contract = setup();
 
-    let token = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_ID.as_bytes());
+    let hat_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_ID.as_bytes());
 
-    match contract.get_item_type(&token) {
+    match contract.get_item_type(&hat_token) {
         OptionalResult::Some(item_type) => {
             assert_eq!(
                 item_type,
@@ -26,6 +26,16 @@ fn test_get_item() {
         OptionalResult::None => {
             panic!("no item_type found");
         }
+    }
+
+    let not_existing_token =
+        TokenIdentifier::<DebugApi>::from_esdt_bytes("PAR ALLAH PELO".as_bytes());
+
+    match contract.get_item_type(&not_existing_token) {
+        OptionalResult::Some(_) => {
+            panic!("item_type found");
+        }
+        OptionalResult::None => {}
     }
 }
 

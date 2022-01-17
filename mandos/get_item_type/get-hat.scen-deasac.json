@@ -1,0 +1,61 @@
+{
+  "name": "equip-penguin",
+  "comment": "add then check",
+  "gasSchedule": "v3",
+  "steps": [
+    {
+      "step": "externalSteps",
+      "path": "../init.scen.json"
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:equip",
+        "function": "getItemType",
+        "arguments": [
+          "str:HAT-0"
+        ]
+      },
+      "expect": {
+        "out": [
+          "str:hat"
+        ],
+        "status": "",
+      }
+    },
+    {
+      "step": "checkState",
+      "accounts": {
+        "address:owner": {
+          "nonce": "*",
+          "balance": "0",
+          "storage": {},
+          "code": ""
+        },
+        "address:participant1": {
+          "nonce": "2",
+          "balance": "0",
+          "esdt": {
+            "str:PEN-0": {
+              "instances": [
+                {
+                  "nonce": "1",
+                  "balance": "1",
+                  "attributes": "str:hat:HAT-0"
+                }
+              ]
+            }
+          }
+        },
+        "sc:equip": {
+          "nonce": "0",
+          "balance": "0",
+          "storage": {
+            "str:sum": "8"
+          },
+          "code": "file:../output/equip-penguin.wasm"
+        }
+      }
+    }
+  ]
+}

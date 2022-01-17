@@ -11,7 +11,7 @@
             "step": "scCall",
             "tx": {
                 "from": "address:participant1",
-                "to": "sc:equiper",
+                "to": "sc:equip",
                 "function": "equip",
                 "arguments": [
                     "str:PEN-0",
@@ -54,7 +54,7 @@
                         }
                     }
                 },
-                "sc:equiper": {
+                "sc:equip": {
                     "nonce": "0",
                     "balance": "0",
                     "storage": {

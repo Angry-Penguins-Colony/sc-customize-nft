@@ -11,20 +11,21 @@ imports!();
 #[elrond_wasm::derive::contract]
 pub trait Equip {
     #[storage_mapper("items_types")]
-    fn items_types(&self) -> MapMapper<String, Vec<String>>;
+    fn items_types(&self) -> MapMapper<ManagedBuffer, ManagedVec<TokenIdentifier>>;
 
     #[init]
-    fn init(&self, items_types: &Vec<Vec<String>>) -> SCResult<()> {
-        for item_type in items_types {
-
-            require!(item_type.len() > 2, "The items types must contain at least 2 elements. One for the item types and the others for the collections identifiers corresponding to the items");
-
-            self.items_types()
-                .insert(item_type[0].clone(), item_type[1..].to_vec());
-        }
-
+    fn init(&self) -> SCResult<()> {
         Ok(())
     }
+
+    #[endpoint(registerItem)]
+    #[only_owner]
+    fn register_item(&self, item_type: &ManagedBuffer, #[var_args] items_id: ManagedVarArgs<TokenIdentifier>)
+    {
+        // TODO tester si ça override pas
+        self.items_types().insert(item_type.clone(), items_id.to_vec());
+    }
+
 
     // #[endpoint]
     // fn equip(&self, penguin_id: &String, items_ids: &[String]) -> SCResult<()> {
@@ -42,18 +43,18 @@ pub trait Equip {
     //     Ok(())
     // }
 
-    #[view(getItemType)]
-    fn get_item_type(&self, item_id: &String) -> OptionalResult<String> {
-        for (item_type, items_ids) in self.items_types().iter() {
-            for compare_item_id in items_ids {
-                if item_id == &compare_item_id {
-                    return OptionalResult::Some(item_type)
-                }
-            }
-        }
-
-        return OptionalResult::None
-    }
+    // #[view(getItemType)]
+    // fn get_item_type(&self, item_id: &String) -> OptionalResult<String> {
+    //     for (item_type, items_ids) in self.items_types().iter() {
+    //         for compare_item_id in items_ids {
+    //             if item_id == &compare_item_id {
+    //                 return OptionalResult::Some(item_type);
+    //             }
+    //         }
+    //     }
+    //
+    //     return OptionalResult::None;
+    // }
 
     // #[endpoint]
     // fn equip(&self, penguin_id: &String, items_ids: &[String]) -> SCResult<()> {

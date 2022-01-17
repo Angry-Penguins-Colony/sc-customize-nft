@@ -1,5 +1,5 @@
-use elrond_wasm::types::ManagedVec;
 use elrond_wasm::types::{ManagedBuffer, ManagedVarArgs};
+use elrond_wasm::types::{ManagedVec, OptionalResult};
 use elrond_wasm_debug::tx_mock::TxContextRef;
 use elrond_wasm_debug::{testing_framework::*, DebugApi};
 use equip_penguin::*;
@@ -9,6 +9,25 @@ use equip_penguin::*;
 // const PENGUIN_ID: &'static str = "PENG-ae5a";
 const ITEM_TYPE_HAT: &'static str = "hat";
 const HAT_ID: &'static str = "HAT-7e8f";
+
+#[test]
+fn test_get_item() {
+    let contract = setup();
+
+    let token = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_ID.as_bytes());
+
+    match contract.get_item_type(&token) {
+        OptionalResult::Some(item_type) => {
+            assert_eq!(
+                item_type,
+                ManagedBuffer::<DebugApi>::new_from_bytes(ITEM_TYPE_HAT.as_bytes())
+            );
+        }
+        OptionalResult::None => {
+            panic!("no item_type found");
+        }
+    }
+}
 
 #[test]
 fn test_register_item() {
@@ -27,6 +46,13 @@ fn test_register_item() {
             panic!("no item_type found");
         }
     }
+}
+
+fn setup() -> equip_penguin::ContractObj<TxContextRef> {
+    let contract = deploy();
+    let (_, _) = register_items(&contract, ITEM_TYPE_HAT, HAT_ID);
+
+    contract
 }
 
 fn register_items(
@@ -50,6 +76,3 @@ fn deploy() -> equip_penguin::ContractObj<TxContextRef> {
     let _ = contract.init();
     contract
 }
-
-#[test]
-fn test_get_item() {}

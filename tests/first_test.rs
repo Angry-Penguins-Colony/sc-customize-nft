@@ -1,5 +1,6 @@
 use elrond_wasm::types::ManagedVec;
 use elrond_wasm::types::{ManagedBuffer, ManagedVarArgs};
+use elrond_wasm_debug::tx_mock::TxContextRef;
 use elrond_wasm_debug::{testing_framework::*, DebugApi};
 use equip_penguin::*;
 
@@ -11,16 +12,9 @@ const HAT_ID: &'static str = "HAT-7e8f";
 
 #[test]
 fn test_register_item() {
-    let contract = equip_penguin::contract_obj(DebugApi::dummy());
-    let _ = contract.init();
+    let contract = deploy();
 
-    let item_type = ManagedBuffer::<DebugApi>::new_from_bytes(ITEM_TYPE_HAT.as_bytes());
-    let hat_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_ID.as_bytes());
-
-    let mut items_ids = ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
-    items_ids.push(hat_token.clone());
-
-    contract.register_item(&item_type, items_ids);
+    let (item_type, hat_token) = register_items(&contract, ITEM_TYPE_HAT, HAT_ID);
 
     let mut o = ManagedVec::new();
     o.push(hat_token);
@@ -33,6 +27,28 @@ fn test_register_item() {
             panic!("no item_type found");
         }
     }
+}
+
+fn register_items(
+    contract: &ContractObj<TxContextRef>,
+    item_type: &str,
+    token_id: &str,
+) -> (
+    ManagedBuffer<elrond_wasm_debug::tx_mock::TxContextRef>,
+    TokenIdentifier<elrond_wasm_debug::tx_mock::TxContextRef>,
+) {
+    let item_type = ManagedBuffer::<DebugApi>::new_from_bytes(item_type.as_bytes());
+    let hat_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(token_id.as_bytes());
+    let mut items_ids = ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
+    items_ids.push(hat_token.clone());
+    contract.register_item(&item_type, items_ids);
+    (item_type, hat_token)
+}
+
+fn deploy() -> equip_penguin::ContractObj<TxContextRef> {
+    let contract = equip_penguin::contract_obj(DebugApi::dummy());
+    let _ = contract.init();
+    contract
 }
 
 #[test]

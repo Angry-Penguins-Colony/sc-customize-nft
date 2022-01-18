@@ -16,6 +16,9 @@ pub struct PenguinAttributes<M: ManagedTypeApi> {
     pub background: ManagedBuffer<M>,
 }
 
+#[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
+pub struct ItemAttributes {}
+
 #[elrond_wasm::derive::contract]
 pub trait Equip {
     #[storage_mapper("items_types")]
@@ -65,12 +68,15 @@ pub trait Equip {
         penguin_nonce: u64,
         #[var_args] items_ids: ManagedVarArgs<TokenIdentifier>,
     ) -> SCResult<()> {
+        let caller = self.blockchain().get_caller();
+
         // reads attributes from the penguin
-        self.blockchain().get_esdt_token_data(
-            &self.blockchain().get_sc_address(),
-            &penguin_id,
-            penguin_nonce,
-        );
+        // should => This only works for addresses that are in the same shard as the smart contract.
+        // how to send NFT and call a method ?
+        self.blockchain()
+            .get_esdt_token_data(&caller, &penguin_id, penguin_nonce);
+
+        // self.blockchain().
         //     .decode_attributes::<YourStruct<Self::Api>>()?;
 
         // for item_id in items_ids {

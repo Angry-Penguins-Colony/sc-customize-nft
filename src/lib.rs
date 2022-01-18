@@ -8,6 +8,14 @@ use elrond_wasm::String;
 
 imports!();
 
+elrond_wasm::derive_imports!();
+
+#[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
+pub struct PenguinAttributes<M: ManagedTypeApi> {
+    pub hat: ManagedBuffer<M>,
+    pub background: ManagedBuffer<M>,
+}
+
 #[elrond_wasm::derive::contract]
 pub trait Equip {
     #[storage_mapper("items_types")]
@@ -24,19 +32,16 @@ pub trait Equip {
         &self,
         item_type: &ManagedBuffer,
         #[var_args] items_id: ManagedVarArgs<TokenIdentifier>,
-    ) {
+    ) -> SCResult<()> {
         // TODO tester si ça override pas
         self.items_types()
             .insert(item_type.clone(), items_id.to_vec());
+
+        Ok(())
     }
 
     #[view(getItemType)]
     fn get_item_type(&self, item_id: &TokenIdentifier) -> OptionalResult<ManagedBuffer> {
-        // NE MARCHE PAS
-        // idée 1 : registerItem, ne marche pas
-        // idée 2 : equality check ne marche pas car ce sont des addresses
-        // idée 3 : la map n'est pas parcouru en fait
-
         // iterate over all items_types
         for (item_type, compare_items_ids) in self.items_types().iter() {
             for compare_item_id in compare_items_ids.iter() {
@@ -49,21 +54,42 @@ pub trait Equip {
         return OptionalResult::None;
     }
 
-    // #[endpoint]
-    // fn equip(&self, penguin_id: &String, items_ids: &[String]) -> SCResult<()> {
-    //     for item_id in items_ids {
-    //
-    //         // determine itemType from ID
-    //
-    //         // set attributes[itemType] = item_id
-    //
-    //         // burn player item
-    //
-    //         // update penguin attributes
-    //     }
-    //
-    //     Ok(())
+    // fn update_penguin(&self, penguin_id: &TokenIdentifier, item_id: &TokenIdentifier) {
+    //     // TODO
     // }
+
+    #[endpoint]
+    fn equip(
+        &self,
+        penguin_id: &TokenIdentifier,
+        penguin_nonce: u64,
+        #[var_args] items_ids: ManagedVarArgs<TokenIdentifier>,
+    ) -> SCResult<()> {
+        // reads attributes from the penguin
+        self.blockchain().get_esdt_token_data(
+            &self.blockchain().get_sc_address(),
+            &penguin_id,
+            penguin_nonce,
+        );
+        //     .decode_attributes::<YourStruct<Self::Api>>()?;
+
+        // for item_id in items_ids {
+        //     // determine itemType from ID
+        //     let item_type_out = self.get_item_type(&item_id);
+
+        //     if let OptionalResult::None = item_type_out {
+        //         require!(false, "An items provided is not considered like an item.")
+        //     }
+
+        //     // set attributes[itemType] = item_id
+
+        //     // burn player item
+        // }
+
+        // update penguin
+
+        Ok(())
+    }
 
     // #[endpoint]
     // fn equip(&self, penguin_id: &String, items_ids: &[String]) -> SCResult<()> {

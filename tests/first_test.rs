@@ -28,7 +28,7 @@ where
 fn test_equip() {
     let mut setup = setup(equip_penguin::contract_obj);
 
-    let b_wrapper = &mut setup.blockchain_wrapper;
+    let mut b_wrapper = &mut setup.blockchain_wrapper;
 
     let mut transfers = Vec::new();
     transfers.push(TxInputESDT {
@@ -41,6 +41,14 @@ fn test_equip() {
         nonce: 1,
         value: rust_biguint!(1),
     });
+
+    b_wrapper.check_nft_balance(
+        &setup.first_user_address,
+        HAT_TOKEN_ID,
+        1,
+        &rust_biguint!(1),
+        &ItemAttributes {},
+    );
 
     b_wrapper.execute_esdt_multi_transfer(
         &setup.first_user_address,
@@ -57,9 +65,23 @@ fn test_equip() {
 
             assert_eq!(result, SCResult::Ok(()));
 
+            // check la balance
+
+            // assert_eq!(&balance, &rust_biguint!(1));
+
             StateChange::Commit
         },
     );
+
+    b_wrapper.check_nft_balance(
+        &setup.first_user_address,
+        HAT_TOKEN_ID,
+        1,
+        &rust_biguint!(0),
+        &ItemAttributes {},
+    );
+
+    // b_wrapper.check_esdt_balance(&setup.first_user_address, HAT_TOKEN_ID, &rust_biguint!(1));
 }
 
 #[test]
@@ -187,6 +209,14 @@ where
     );
 
     blockchain_wrapper.set_nft_balance(
+        &first_user_address,
+        HAT_TOKEN_ID,
+        1,
+        &rust_biguint!(1),
+        &ItemAttributes {},
+    );
+
+    blockchain_wrapper.check_nft_balance(
         &first_user_address,
         HAT_TOKEN_ID,
         1,

@@ -116,7 +116,7 @@ pub trait Equip {
     }
 
     #[endpoint]
-    fn desequip_penguin(
+    fn desequip(
         &self,
         penguin_id: &TokenIdentifier,
         penguin_nonce: u64,

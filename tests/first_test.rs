@@ -103,12 +103,32 @@ fn test_equip() {
     );
 
     b_wrapper.check_nft_balance(
+        &setup.cf_wrapper.address_ref(),
+        PENGUIN_TOKEN_ID,
+        INIT_NONCE,
+        &rust_biguint!(0),
+        &PenguinAttributes {
+            hat: none_value.clone(),
+        },
+    );
+
+    b_wrapper.check_nft_balance(
         &setup.first_user_address,
         PENGUIN_TOKEN_ID,
         1u64,
         &rust_biguint!(1),
         &PenguinAttributes {
             hat: TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
+        },
+    );
+
+    b_wrapper.check_nft_balance(
+        &setup.first_user_address,
+        PENGUIN_TOKEN_ID,
+        INIT_NONCE,
+        &rust_biguint!(0),
+        &PenguinAttributes {
+            hat: none_value.clone(),
         },
     );
 }

@@ -11,14 +11,9 @@ use equip_penguin::*;
 
 mod utils;
 
-const WASM_PATH: &'static str = "sc-equip-penguin/output/equip_penguin.wasm";
-
-const PENGUIN_TOKEN_ID: &[u8] = b"PENG-ae5a";
-const HAT_TOKEN_ID: &[u8] = b"HAT-7e8f";
-
-// This is the nonce for the NFTs not generated from the contract but from the setup
-// Because, the contract will generate an NFT with the nonce '1', we don't want the INIT_NONCE to be '1'
-const INIT_NONCE: u64 = 65535;
+const PENGUIN_TOKEN_ID: &[u8] = utils::utils::PENGUIN_TOKEN_ID;
+const HAT_TOKEN_ID: &[u8] = utils::utils::HAT_TOKEN_ID;
+const INIT_NONCE: u64 = utils::utils::INIT_NONCE;
 
 // create NFT on blockchain wrapper
 #[test]

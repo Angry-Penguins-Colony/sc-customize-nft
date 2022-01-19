@@ -10,10 +10,6 @@ pub mod utils {
     pub const PENGUIN_TOKEN_ID: &[u8] = b"PENG-ae5a";
     pub const HAT_TOKEN_ID: &[u8] = b"HAT-7e8f";
 
-    // This is the nonce for the NFTs not generated from the contract but from the setup
-    // Because, the contract will generate an NFT with the nonce '1', we don't want the INIT_NONCE to be '1'
-    pub const INIT_NONCE: u64 = 65535;
-
     pub struct EquipSetup<CrowdfundingObjBuilder>
     where
         CrowdfundingObjBuilder:
@@ -54,16 +50,24 @@ pub mod utils {
 
         DebugApi::dummy();
 
+        let contract_roles = [
+            EsdtLocalRole::NftCreate,
+            EsdtLocalRole::NftBurn,
+            EsdtLocalRole::NftAddQuantity,
+            EsdtLocalRole::Mint,
+            EsdtLocalRole::Burn,
+        ];
+
         blockchain_wrapper.set_esdt_local_roles(
             cf_wrapper.address_ref(),
             PENGUIN_TOKEN_ID,
-            &[EsdtLocalRole::NftCreate, EsdtLocalRole::NftBurn],
+            &contract_roles,
         );
 
         blockchain_wrapper.set_esdt_local_roles(
             cf_wrapper.address_ref(),
             HAT_TOKEN_ID,
-            &[EsdtLocalRole::NftCreate, EsdtLocalRole::NftBurn],
+            &contract_roles,
         );
 
         let mut equip_setup = EquipSetup {

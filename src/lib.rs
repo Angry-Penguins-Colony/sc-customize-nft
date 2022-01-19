@@ -19,22 +19,37 @@ pub enum ItemSlot {
 
 #[derive(TopEncode, TopDecode, TypeAbi)]
 pub struct PenguinAttributes<M: ManagedTypeApi> {
-    pub hat: TokenIdentifier<M>,
-    // pub background: TokenIdentifier<M>,
+    pub hat: (TokenIdentifier<M>, u64), // pub background: TokenIdentifier<M>,
 }
 
 impl<M: ManagedTypeApi> PenguinAttributes<M> {
-    pub fn set_item(&mut self, slot: ItemSlot, token: TokenIdentifier<M>) -> Result<(), ()> {
+    pub fn set_item(
+        &mut self,
+        slot: &ItemSlot,
+        token: TokenIdentifier<M>,
+        nonce: u64,
+    ) -> Result<(), ()> {
         match slot {
-            ItemSlot::Hat => self.hat = token,
+            ItemSlot::Hat => self.hat = (token, nonce),
             _ => return Result::Err(()),
         }
 
         Result::Ok(())
     }
 
-    pub fn empty_slot(&mut self, slot: ItemSlot) -> Result<(), ()> {
-        return self.set_item(slot, TokenIdentifier::from(ManagedBuffer::new()));
+    pub fn get_item(&self, slot: &ItemSlot) -> Result<MultiResult2<TokenIdentifier<M>, u64>, ()> {
+        match slot {
+            &ItemSlot::Hat => return Result::Ok(MultiResult2::from(self.hat.clone())),
+            _ => return Result::Err(()),
+        };
+    }
+
+    pub fn empty_slot(&mut self, slot: &ItemSlot) -> Result<(), ()> {
+        return self.set_item(slot, self.empty_item(), 0);
+    }
+
+    pub fn empty_item(&self) -> TokenIdentifier<M> {
+        return TokenIdentifier::<M>::from(ManagedBuffer::<M>::new());
     }
 }
 
@@ -96,7 +111,7 @@ pub trait Equip {
 
             match item_type_out {
                 OptionalResult::Some(item_type) => {
-                    let result = attributes.set_item(item_type, item_id.clone());
+                    let result = attributes.set_item(&item_type, item_id.clone(), item_nonce);
                     require!(
                         result == Result::Ok(()),
                         "Cannot set item. Maybe the item is not considered like an item."
@@ -122,12 +137,28 @@ pub trait Equip {
         penguin_nonce: u64,
         #[var_args] slots: ManagedVarArgs<ItemSlot>,
     ) -> SCResult<u64> {
+        let caller = self.blockchain().get_caller();
         let mut attributes = self.parse_penguin_attributes(penguin_id, penguin_nonce);
 
         for slot in slots {
-            attributes.empty_slot(slot);
+            let result = attributes.get_item(&slot);
+
+            if let Result::Err(()) = result {
+                return SCResult::Err("Error while getting an item".into());
+            }
+
+            let (item_id, item_nonce) = result.unwrap().into_tuple();
+
+            self.send()
+                .esdt_local_mint(&item_id, item_nonce, &BigUint::from(1u32));
+
+            self.send()
+                .direct(&caller, &item_id, item_nonce, &BigUint::from(1u32), &[]);
+
+            attributes.empty_slot(&slot);
         }
 
+        // return items nonces
         return self.update_penguin(&penguin_id, penguin_nonce, &attributes);
     }
 

@@ -1,5 +1,4 @@
 use elrond_wasm::types::{ManagedVarArgs, MultiArg2, SCResult};
-use elrond_wasm::types::{ManagedVec, OptionalResult};
 use elrond_wasm_debug::testing_framework::*;
 use elrond_wasm_debug::tx_mock::TxInputESDT;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
@@ -9,7 +8,7 @@ mod utils;
 
 const PENGUIN_TOKEN_ID: &[u8] = utils::utils::PENGUIN_TOKEN_ID;
 const HAT_TOKEN_ID: &[u8] = utils::utils::HAT_TOKEN_ID;
-const INIT_NONCE: u64 = utils::utils::INIT_NONCE;
+const INIT_NONCE: u64 = 65535;
 
 // create NFT on blockchain wrapper
 #[test]
@@ -30,7 +29,10 @@ fn test_equip() {
         value: rust_biguint!(1),
     });
 
-    let none_value = TokenIdentifier::<DebugApi>::from_esdt_bytes(b"NONE-000000");
+    let none_value = (
+        TokenIdentifier::<DebugApi>::from_esdt_bytes(b"NONE-000000"),
+        0,
+    );
 
     b_wrapper.set_nft_balance(
         &setup.first_user_address,
@@ -100,7 +102,10 @@ fn test_equip() {
         1u64,
         &rust_biguint!(0),
         &PenguinAttributes {
-            hat: TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
+            hat: (
+                TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
+                INIT_NONCE,
+            ),
         },
     );
 
@@ -133,7 +138,10 @@ fn test_equip() {
         1u64,
         &rust_biguint!(1),
         &PenguinAttributes {
-            hat: TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
+            hat: (
+                TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
+                INIT_NONCE,
+            ),
         },
     );
 

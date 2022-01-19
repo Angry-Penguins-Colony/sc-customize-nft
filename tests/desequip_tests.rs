@@ -1,5 +1,4 @@
-use elrond_wasm::types::{ManagedBuffer, ManagedVarArgs, MultiArg2, SCResult};
-use elrond_wasm::types::{ManagedVec, OptionalResult};
+use elrond_wasm::types::{ManagedBuffer, ManagedVarArgs, SCResult};
 use elrond_wasm_debug::tx_mock::TxInputESDT;
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
@@ -9,10 +8,10 @@ mod utils;
 
 const PENGUIN_TOKEN_ID: &[u8] = utils::utils::PENGUIN_TOKEN_ID;
 const HAT_TOKEN_ID: &[u8] = utils::utils::HAT_TOKEN_ID;
-const INIT_NONCE: u64 = utils::utils::INIT_NONCE;
+const INIT_NONCE: u64 = 65535;
 
 #[test]
-fn desquip() {
+fn test_desequip() {
     let mut setup = utils::utils::setup(equip_penguin::contract_obj);
 
     let b_wrapper = &mut setup.blockchain_wrapper;
@@ -24,16 +23,25 @@ fn desquip() {
         value: rust_biguint!(1),
     });
 
-    let equiped_attributes = PenguinAttributes {
-        hat: TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
-    };
+    b_wrapper.set_nft_balance(
+        &setup.first_user_address,
+        HAT_TOKEN_ID,
+        INIT_NONCE,
+        &rust_biguint!(0),
+        &ItemAttributes {},
+    );
 
     b_wrapper.set_nft_balance(
         &setup.first_user_address,
         PENGUIN_TOKEN_ID,
         INIT_NONCE,
         &rust_biguint!(1),
-        &equiped_attributes,
+        &PenguinAttributes {
+            hat: (
+                TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
+                INIT_NONCE,
+            ),
+        },
     );
 
     b_wrapper.execute_esdt_multi_transfer(
@@ -45,7 +53,7 @@ fn desquip() {
             managed_slots.push(ItemSlot::Hat);
 
             let result = sc.desequip(
-                &managed_token_id!(PENGUIN_TOKEN_ID),
+                &TokenIdentifier::<DebugApi>::from_esdt_bytes(PENGUIN_TOKEN_ID),
                 INIT_NONCE,
                 managed_slots,
             );
@@ -62,7 +70,18 @@ fn desquip() {
         1u64,
         &rust_biguint!(1),
         &PenguinAttributes {
-            hat: TokenIdentifier::<DebugApi>::from(ManagedBuffer::new()),
+            hat: (
+                TokenIdentifier::<DebugApi>::from(ManagedBuffer::new()),
+                0u64,
+            ),
         },
+    );
+
+    b_wrapper.check_nft_balance(
+        &setup.first_user_address,
+        HAT_TOKEN_ID,
+        1u64,
+        &rust_biguint!(1),
+        &ItemAttributes {},
     )
 }

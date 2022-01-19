@@ -12,6 +12,11 @@
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
+#[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi, Debug, PartialEq)]
+pub enum ItemSlot {
+    Hat,
+}
+
 #[derive(TopEncode, TopDecode, TypeAbi)]
 pub struct PenguinAttributes<M: ManagedTypeApi> {
     pub hat: TokenIdentifier<M>,
@@ -24,7 +29,7 @@ pub struct ItemAttributes {}
 #[elrond_wasm::derive::contract]
 pub trait Equip {
     #[storage_mapper("items_types")]
-    fn items_types(&self) -> MapMapper<ManagedBuffer, ManagedVec<TokenIdentifier>>;
+    fn items_types(&self) -> MapMapper<ItemSlot, ManagedVec<TokenIdentifier>>;
 
     #[init]
     fn init(&self) -> SCResult<()> {
@@ -35,23 +40,22 @@ pub trait Equip {
     #[only_owner]
     fn register_item(
         &self,
-        item_type: &ManagedBuffer,
+        item_type: ItemSlot,
         #[var_args] items_id: ManagedVarArgs<TokenIdentifier>,
     ) -> SCResult<()> {
         // TODO tester si ça override pas
-        self.items_types()
-            .insert(item_type.clone(), items_id.to_vec());
+        self.items_types().insert(item_type, items_id.to_vec());
 
         Ok(())
     }
 
     #[view(getItemType)]
-    fn get_item_type(&self, item_id: &TokenIdentifier) -> OptionalResult<ManagedBuffer> {
+    fn get_item_type(&self, item_id: &TokenIdentifier) -> OptionalResult<ItemSlot> {
         // iterate over all items_types
         for (item_type, compare_items_ids) in self.items_types().iter() {
             for compare_item_id in compare_items_ids.iter() {
                 if &compare_item_id == item_id {
-                    return OptionalResult::Some(item_type.clone());
+                    return OptionalResult::Some(item_type);
                 }
             }
         }

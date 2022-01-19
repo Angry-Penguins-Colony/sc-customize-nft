@@ -11,7 +11,6 @@ use equip_penguin::*;
 const WASM_PATH: &'static str = "sc-equip-penguin/output/equip_penguin.wasm";
 
 const PENGUIN_TOKEN_ID: &[u8] = b"PENG-ae5a";
-const ITEM_TYPE_HAT: &[u8] = b"hat";
 const HAT_TOKEN_ID: &[u8] = b"HAT-7e8f";
 
 struct EquipSetup<CrowdfundingObjBuilder>
@@ -163,10 +162,7 @@ fn test_get_item() {
 
             match sc.get_item_type(&hat_token) {
                 OptionalResult::Some(item_type) => {
-                    assert_eq!(
-                        item_type,
-                        ManagedBuffer::<DebugApi>::new_from_bytes(ITEM_TYPE_HAT)
-                    );
+                    assert_eq!(item_type, ItemSlot::Hat);
                 }
                 OptionalResult::None => {
                     panic!("no item_type found");
@@ -200,7 +196,7 @@ fn test_get_item() {
 fn test_register_item() {
     let mut setup = setup(equip_penguin::contract_obj);
 
-    register_item(&mut setup, ITEM_TYPE_HAT, HAT_TOKEN_ID);
+    register_item(&mut setup, ItemSlot::Hat, HAT_TOKEN_ID);
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -209,13 +205,11 @@ fn test_register_item() {
         &setup.cf_wrapper,
         &rust_biguint!(0u64),
         |sc| {
-            let managed_item_type = ManagedBuffer::<DebugApi>::new_from_bytes(ITEM_TYPE_HAT);
-
             let managed_token_id = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID);
             let mut managed_items_ids = ManagedVec::<DebugApi, TokenIdentifier<DebugApi>>::new();
             managed_items_ids.push(managed_token_id.clone());
 
-            match sc.items_types().get(&managed_item_type) {
+            match sc.items_types().get(&ItemSlot::Hat) {
                 Some(output_items) => {
                     assert_eq!(output_items, managed_items_ids);
                 }
@@ -301,14 +295,14 @@ where
     };
 
     // register items
-    register_item(&mut equip_setup, ITEM_TYPE_HAT, HAT_TOKEN_ID);
+    register_item(&mut equip_setup, ItemSlot::Hat, HAT_TOKEN_ID);
 
     equip_setup
 }
 
 fn register_item<EquipObjBuilder>(
     setup: &mut EquipSetup<EquipObjBuilder>,
-    item_type: &[u8],
+    item_type: ItemSlot,
     item_id: &[u8],
 ) where
     EquipObjBuilder: 'static + Copy + Fn(DebugApi) -> equip_penguin::ContractObj<DebugApi>,
@@ -325,10 +319,7 @@ fn register_item<EquipObjBuilder>(
                 ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
             managed_items_ids.push(managed_token_id.clone());
 
-            let result = sc.register_item(
-                &ManagedBuffer::<DebugApi>::from(item_type),
-                managed_items_ids,
-            );
+            let result = sc.register_item(item_type, managed_items_ids);
             assert_eq!(result, SCResult::Ok(()));
 
             StateChange::Commit

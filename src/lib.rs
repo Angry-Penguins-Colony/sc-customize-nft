@@ -74,10 +74,6 @@ pub trait Equip {
         return OptionalResult::None;
     }
 
-    // fn update_penguin(&self, penguin_id: &TokenIdentifier, item_id: &TokenIdentifier) {
-    //     // TODO
-    // }
-
     #[endpoint]
     fn equip(
         &self,
@@ -117,6 +113,22 @@ pub trait Equip {
         }
 
         // update penguin
+        let token_nonce = self.update_penguin(&penguin_id, penguin_nonce, &attributes);
+
+        match token_nonce {
+            SCResult::Ok(nonce) => return Ok(nonce),
+            SCResult::Err(error) => return SCResult::Err(error),
+        }
+    }
+
+    fn update_penguin(
+        &self,
+        penguin_id: &TokenIdentifier,
+        penguin_nonce: u64,
+        attributes: &PenguinAttributes<Self::Api>,
+    ) -> SCResult<u64> {
+        let caller = self.blockchain().get_caller();
+
         let mut uris = ManagedVec::new();
         uris.push(ManagedBuffer::new_from_bytes(b"https://www.google.com"));
 
@@ -128,7 +140,6 @@ pub trait Equip {
 
         // self.send().esdt_nft_create::<PenguinAttributes<Self::Api>>(
 
-        // burn the old one
         self.send()
             .esdt_local_burn(&penguin_id, penguin_nonce, &BigUint::from(1u32));
 

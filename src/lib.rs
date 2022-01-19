@@ -23,6 +23,17 @@ pub struct PenguinAttributes<M: ManagedTypeApi> {
     // pub background: TokenIdentifier<M>,
 }
 
+impl<M: ManagedTypeApi> PenguinAttributes<M> {
+    pub fn set_item(&mut self, slot: ItemSlot, token: TokenIdentifier<M>) -> Result<(), ()> {
+        match slot {
+            ItemSlot::Hat => self.hat = token,
+            _ => return Result::Err(()),
+        }
+
+        Result::Ok(())
+    }
+}
+
 #[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
 pub struct ItemAttributes {}
 
@@ -88,17 +99,17 @@ pub trait Equip {
             // determine itemType from ID
             let item_type_out = self.get_item_type(&item_id);
 
-            if let OptionalResult::None = item_type_out {
-                require!(false, "An items provided is not considered like an item.")
-            }
-
-            let _hat = ManagedBuffer::new_from_bytes(b"hat");
-            let _bg = ManagedBuffer::new_from_bytes(b"background");
-
-            match Some(item_type_out) {
-                Some(_hat) => attributes.hat = item_id.clone(),
-                // Some(_bg) => attributes.background = item_id,
-                _ => require!(false, "An items provided is not considered like an item."),
+            match item_type_out {
+                OptionalResult::Some(item_type) => {
+                    let result = attributes.set_item(item_type, item_id.clone());
+                    require!(
+                        result == Result::Ok(()),
+                        "Cannot set item. Maybe the item is not considered like an item."
+                    );
+                }
+                OptionalResult::None => {
+                    require!(false, "An items provided is not considered like an item.")
+                }
             }
 
             self.send()

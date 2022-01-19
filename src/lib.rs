@@ -3,6 +3,7 @@
 #![allow(unused_attributes)]
 #![allow(unused_imports)]
 
+use elrond_wasm::elrond_codec::TopEncode;
 use elrond_wasm::imports;
 use elrond_wasm::String;
 
@@ -10,10 +11,10 @@ imports!();
 
 elrond_wasm::derive_imports!();
 
-#[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
+#[derive(TopEncode, TopDecode, TypeAbi)]
 pub struct PenguinAttributes<M: ManagedTypeApi> {
-    pub hat: ManagedBuffer<M>,
-    pub background: ManagedBuffer<M>,
+    pub hat: TokenIdentifier<M>,
+    // pub background: TokenIdentifier<M>,
 }
 
 #[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
@@ -67,34 +68,70 @@ pub trait Equip {
         penguin_id: &TokenIdentifier,
         penguin_nonce: u64,
         #[var_args] items_ids: ManagedVarArgs<TokenIdentifier>,
-    ) -> SCResult<()> {
+    ) -> SCResult<u64> {
         let caller = self.blockchain().get_caller();
 
-        // reads attributes from the penguin
-        // should => This only works for addresses that are in the same shard as the smart contract.
-        // how to send NFT and call a method ?
-        self.blockchain()
-            .get_esdt_token_data(&caller, &penguin_id, penguin_nonce);
+        let mut attributes = self
+            .blockchain()
+            .get_esdt_token_data(&caller, &penguin_id, penguin_nonce)
+            .decode_attributes::<PenguinAttributes<Self::Api>>()
+            .unwrap();
 
-        // self.blockchain().
-        //     .decode_attributes::<YourStruct<Self::Api>>()?;
+        for item_id in items_ids {
+            // determine itemType from ID
+            let item_type_out = self.get_item_type(&item_id);
 
-        // for item_id in items_ids {
-        //     // determine itemType from ID
-        //     let item_type_out = self.get_item_type(&item_id);
+            if let OptionalResult::None = item_type_out {
+                require!(false, "An items provided is not considered like an item.")
+            }
 
-        //     if let OptionalResult::None = item_type_out {
-        //         require!(false, "An items provided is not considered like an item.")
-        //     }
+            // if (OptionalResult::Some(item_type_out)) = ManagedBuffer::new_from_bytes(b"hat") {
+            //     require!(false, "A penguin can't have more than one hat.")
+            // }
 
-        //     // set attributes[itemType] = item_id
+            let _hat = ManagedBuffer::new_from_bytes(b"hat");
+            let _bg = ManagedBuffer::new_from_bytes(b"background");
 
-        //     // burn player item
-        // }
+            match Some(item_type_out) {
+                Some(_hat) => attributes.hat = item_id,
+                // Some(_bg) => attributes.background = item_id,
+                _ => require!(false, "An items provided is not considered like an item."),
+            }
+
+            // TODO: mint previous item if there were one
+            // TODO: burn player item
+        }
 
         // update penguin
+        let mut uris = ManagedVec::new();
+        uris.push(ManagedBuffer::new_from_bytes(b"https://www.google.com"));
 
-        Ok(())
+        // let mut serialized_attributes = Vec::new();
+        // &new_attributes.top_encode(&mut serialized_attributes)?;
+
+        // let attributes_hash = self.crypto().sha256(&serialized_attributes);
+        // let hash_buffer = ManagedBuffer::from(attributes_hash.as_bytes());
+
+        // self.send().esdt_nft_create::<PenguinAttributes<Self::Api>>(
+
+        // burn the old one
+        self.send()
+            .esdt_local_burn(&penguin_id, penguin_nonce, &BigUint::from(1u32));
+
+        let token_nonce = self.send().esdt_nft_create::<PenguinAttributes<Self::Api>>(
+            &penguin_id,
+            &BigUint::from(1u32),
+            &ManagedBuffer::new_from_bytes(b"new penguin"),
+            &BigUint::zero(),
+            &ManagedBuffer::new(),
+            &attributes,
+            &uris,
+        );
+
+        self.send()
+            .direct(&caller, &penguin_id, token_nonce, &BigUint::from(1u32), &[]);
+
+        Ok(token_nonce)
     }
 
     // #[endpoint]

@@ -1,7 +1,8 @@
-use elrond_wasm::types::{Address, ManagedBuffer, ManagedVarArgs, SCResult};
+use elrond_wasm::api::ESDT_NFT_CREATE_FUNC_NAME;
+use elrond_wasm::types::{Address, EsdtLocalRole, ManagedBuffer, ManagedVarArgs, SCResult};
 use elrond_wasm::types::{ManagedVec, OptionalResult};
-use elrond_wasm_debug::testing_framework::*;
 use elrond_wasm_debug::tx_mock::{TxContextRef, TxInputESDT};
+use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::*;
 
@@ -23,6 +24,10 @@ where
         ContractObjWrapper<equip_penguin::ContractObj<DebugApi>, CrowdfundingObjBuilder>,
 }
 
+// This is the nonce for the NFTs not generated from the contract but from the setup
+// Because, the contract will generate an NFT with the nonce '1', we don't want the INIT_NONCE to be '1'
+const INIT_NONCE: u64 = 65535;
+
 // create NFT on blockchain wrapper
 #[test]
 fn test_equip() {
@@ -33,21 +38,33 @@ fn test_equip() {
     let mut transfers = Vec::new();
     transfers.push(TxInputESDT {
         token_identifier: PENGUIN_TOKEN_ID.to_vec(),
-        nonce: 1,
+        nonce: INIT_NONCE,
         value: rust_biguint!(1),
     });
     transfers.push(TxInputESDT {
         token_identifier: HAT_TOKEN_ID.to_vec(),
-        nonce: 1,
+        nonce: INIT_NONCE,
         value: rust_biguint!(1),
     });
+
+    let none_value = TokenIdentifier::<DebugApi>::from_esdt_bytes(b"NONE-000000");
 
     b_wrapper.check_nft_balance(
         &setup.first_user_address,
         HAT_TOKEN_ID,
-        1,
+        INIT_NONCE,
         &rust_biguint!(1),
         &ItemAttributes {},
+    );
+
+    b_wrapper.check_nft_balance(
+        &setup.first_user_address,
+        PENGUIN_TOKEN_ID,
+        INIT_NONCE,
+        &rust_biguint!(1),
+        &PenguinAttributes {
+            hat: none_value.clone(),
+        },
     );
 
     b_wrapper.execute_esdt_multi_transfer(
@@ -55,33 +72,45 @@ fn test_equip() {
         &setup.cf_wrapper,
         &transfers,
         |sc| {
-            let penguin_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(PENGUIN_TOKEN_ID);
+            let managed_penguin_token_id =
+                TokenIdentifier::<DebugApi>::from_esdt_bytes(PENGUIN_TOKEN_ID);
 
-            let hat_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID);
-            let mut items_to_equip = ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
-            items_to_equip.push(hat_token);
+            let managed_hat_token_id = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID);
+            let mut managed_items_to_equip =
+                ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
+            managed_items_to_equip.push(managed_hat_token_id);
 
-            let result = sc.equip(&penguin_token, 1, items_to_equip);
+            let result = sc.equip(
+                &managed_penguin_token_id,
+                INIT_NONCE,
+                managed_items_to_equip,
+            );
 
-            assert_eq!(result, SCResult::Ok(()));
-
-            // check la balance
-
-            // assert_eq!(&balance, &rust_biguint!(1));
+            assert_eq!(result, SCResult::Ok(1u64));
 
             StateChange::Commit
         },
     );
 
     b_wrapper.check_nft_balance(
-        &setup.first_user_address,
-        HAT_TOKEN_ID,
-        1,
+        &setup.cf_wrapper.address_ref(),
+        PENGUIN_TOKEN_ID,
+        1u64,
         &rust_biguint!(0),
-        &ItemAttributes {},
+        &PenguinAttributes {
+            hat: TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
+        },
     );
 
-    // b_wrapper.check_esdt_balance(&setup.first_user_address, HAT_TOKEN_ID, &rust_biguint!(1));
+    b_wrapper.check_nft_balance(
+        &setup.first_user_address,
+        PENGUIN_TOKEN_ID,
+        1u64,
+        &rust_biguint!(1),
+        &PenguinAttributes {
+            hat: TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
+        },
+    );
 }
 
 #[test]
@@ -193,17 +222,17 @@ where
     DebugApi::dummy();
 
     // set NFTs balance
-    let none_value = ManagedBuffer::<DebugApi>::new_from_bytes(b"none");
+    let none_value = TokenIdentifier::<DebugApi>::from_esdt_bytes(b"NONE-000000");
 
     let nft_attributes = PenguinAttributes {
         hat: none_value.clone(),
-        background: none_value.clone(),
+        // background: none_value.clone(),
     };
 
     blockchain_wrapper.set_nft_balance(
         &first_user_address,
         PENGUIN_TOKEN_ID,
-        1,
+        INIT_NONCE,
         &rust_biguint!(1),
         &nft_attributes,
     );
@@ -211,17 +240,15 @@ where
     blockchain_wrapper.set_nft_balance(
         &first_user_address,
         HAT_TOKEN_ID,
-        1,
+        INIT_NONCE,
         &rust_biguint!(1),
         &ItemAttributes {},
     );
 
-    blockchain_wrapper.check_nft_balance(
-        &first_user_address,
-        HAT_TOKEN_ID,
-        1,
-        &rust_biguint!(1),
-        &ItemAttributes {},
+    blockchain_wrapper.set_esdt_local_roles(
+        cf_wrapper.address_ref(),
+        PENGUIN_TOKEN_ID,
+        &[EsdtLocalRole::NftCreate, EsdtLocalRole::NftBurn],
     );
 
     let mut equip_setup = EquipSetup {

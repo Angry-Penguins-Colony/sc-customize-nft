@@ -32,6 +32,10 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
 
         Result::Ok(())
     }
+
+    pub fn empty_slot(&mut self, slot: ItemSlot) -> Result<(), ()> {
+        return self.set_item(slot, TokenIdentifier::from(ManagedBuffer::new()));
+    }
 }
 
 #[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
@@ -116,16 +120,15 @@ pub trait Equip {
         &self,
         penguin_id: &TokenIdentifier,
         penguin_nonce: u64,
-        #[var_args] items_token: ManagedVarArgs<ItemSlot>,
-    ) {
+        #[var_args] slots: ManagedVarArgs<ItemSlot>,
+    ) -> SCResult<u64> {
+        let mut attributes = self.parse_penguin_attributes(penguin_id, penguin_nonce);
 
-        // get attributes
+        for slot in slots {
+            attributes.empty_slot(slot);
+        }
 
-        // foreach items_token, remove item
-
-        // update penguin
-
-        // throw token nonce
+        return self.update_penguin(&penguin_id, penguin_nonce, &attributes);
     }
 
     fn parse_penguin_attributes(
@@ -178,20 +181,4 @@ pub trait Equip {
 
         Ok(token_nonce)
     }
-
-    // #[endpoint]
-    // fn equip(&self, penguin_id: &String, items_ids: &[String]) -> SCResult<()> {
-    //     for item_id in items_ids {
-
-    //         // determine itemType from ID
-
-    //         // set attributes[itemType] = item_id
-
-    //         // burn player item
-
-    //         // update penguin attributes
-    //     }
-
-    //     Ok(())
-    // }
 }

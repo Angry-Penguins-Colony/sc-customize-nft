@@ -1,11 +1,7 @@
-#[cfg(test)]
-use elrond_wasm::api::ESDT_NFT_CREATE_FUNC_NAME;
-use elrond_wasm::types::{
-    Address, EsdtLocalRole, ManagedBuffer, ManagedVarArgs, MultiArg2, SCResult,
-};
+use elrond_wasm::types::{ManagedVarArgs, MultiArg2, SCResult};
 use elrond_wasm::types::{ManagedVec, OptionalResult};
-use elrond_wasm_debug::tx_mock::{TxContextRef, TxInputESDT};
-use elrond_wasm_debug::{managed_token_id, testing_framework::*};
+use elrond_wasm_debug::testing_framework::*;
+use elrond_wasm_debug::tx_mock::TxInputESDT;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::*;
 
@@ -20,7 +16,7 @@ const INIT_NONCE: u64 = utils::utils::INIT_NONCE;
 fn test_equip() {
     let mut setup = utils::utils::setup(equip_penguin::contract_obj);
 
-    let mut b_wrapper = &mut setup.blockchain_wrapper;
+    let b_wrapper = &mut setup.blockchain_wrapper;
 
     let mut transfers = Vec::new();
     transfers.push(TxInputESDT {

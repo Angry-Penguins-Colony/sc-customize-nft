@@ -136,12 +136,12 @@ pub trait Equip {
         penguin_id: &TokenIdentifier,
         penguin_nonce: u64,
     ) -> PenguinAttributes<Self::Api> {
-        let mut attributes = self
+        let attributes = self
             .blockchain()
             .get_esdt_token_data(&self.blockchain().get_caller(), &penguin_id, penguin_nonce)
             .decode_attributes::<PenguinAttributes<Self::Api>>()
             .unwrap();
-        attributes
+        return attributes;
     }
 
     fn update_penguin(
@@ -179,6 +179,6 @@ pub trait Equip {
         self.send()
             .direct(&caller, &penguin_id, token_nonce, &BigUint::from(1u32), &[]);
 
-        Ok(token_nonce)
+        return Ok(token_nonce);
     }
 }

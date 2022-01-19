@@ -1,11 +1,7 @@
 #[cfg(test)]
 pub mod utils {
-    use elrond_wasm::types::{
-        Address, EsdtLocalRole, ManagedBuffer, ManagedVarArgs, MultiArg2, SCResult,
-    };
-    use elrond_wasm::types::{ManagedVec, OptionalResult};
-    use elrond_wasm_debug::tx_mock::{TxContextRef, TxInputESDT};
-    use elrond_wasm_debug::{managed_token_id, testing_framework::*};
+    use elrond_wasm::types::{Address, EsdtLocalRole, ManagedVarArgs, SCResult};
+    use elrond_wasm_debug::testing_framework::*;
     use elrond_wasm_debug::{rust_biguint, DebugApi};
     use equip_penguin::*;
 
@@ -134,20 +130,4 @@ pub mod utils {
             },
         );
     }
-
-    // fn register_items(
-    //     contract: &ContractObjWrapper<TxContextRef>,
-    //     item_type: &str,
-    //     token_id: &str,
-    // ) -> (
-    //     ManagedBuffer<elrond_wasm_debug::tx_mock::TxContextRef>,
-    //     TokenIdentifier<elrond_wasm_debug::tx_mock::TxContextRef>,
-    // ) {
-    //     let item_type = ManagedBuffer::<DebugApi>::new_from_bytes(item_type.as_bytes());
-    //     let hat_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(token_id.as_bytes());
-    //     let mut items_ids = ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
-    //     items_ids.push(hat_token.clone());
-    //     contract.register_item(&item_type, items_ids);
-    //     (item_type, hat_token)
-    // }
 }

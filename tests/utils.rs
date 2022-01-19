@@ -54,30 +54,6 @@ pub mod utils {
 
         DebugApi::dummy();
 
-        // set NFTs balance
-        let none_value = TokenIdentifier::<DebugApi>::from_esdt_bytes(b"NONE-000000");
-
-        let nft_attributes = PenguinAttributes {
-            hat: none_value.clone(),
-            // background: none_value.clone(),
-        };
-
-        blockchain_wrapper.set_nft_balance(
-            &first_user_address,
-            PENGUIN_TOKEN_ID,
-            INIT_NONCE,
-            &rust_biguint!(1),
-            &nft_attributes,
-        );
-
-        blockchain_wrapper.set_nft_balance(
-            &first_user_address,
-            HAT_TOKEN_ID,
-            INIT_NONCE,
-            &rust_biguint!(1),
-            &ItemAttributes {},
-        );
-
         blockchain_wrapper.set_esdt_local_roles(
             cf_wrapper.address_ref(),
             PENGUIN_TOKEN_ID,

@@ -32,6 +32,24 @@ fn test_equip() {
 
     let none_value = TokenIdentifier::<DebugApi>::from_esdt_bytes(b"NONE-000000");
 
+    b_wrapper.set_nft_balance(
+        &setup.first_user_address,
+        PENGUIN_TOKEN_ID,
+        INIT_NONCE,
+        &rust_biguint!(1),
+        &PenguinAttributes {
+            hat: none_value.clone(),
+        },
+    );
+
+    b_wrapper.set_nft_balance(
+        &setup.first_user_address,
+        HAT_TOKEN_ID,
+        INIT_NONCE,
+        &rust_biguint!(1),
+        &ItemAttributes {},
+    );
+
     b_wrapper.check_nft_balance(
         &setup.first_user_address,
         HAT_TOKEN_ID,
@@ -126,81 +144,5 @@ fn test_equip() {
         INIT_NONCE,
         &rust_biguint!(0),
         &ItemAttributes {},
-    );
-}
-
-#[test]
-fn test_get_item() {
-    let mut setup = utils::utils::setup(equip_penguin::contract_obj);
-
-    let b_wrapper = &mut setup.blockchain_wrapper;
-
-    b_wrapper.execute_tx(
-        &setup.owner_address,
-        &setup.cf_wrapper,
-        &rust_biguint!(0u64),
-        |sc| {
-            let hat_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID);
-
-            match sc.get_item_type(&hat_token) {
-                OptionalResult::Some(item_type) => {
-                    assert_eq!(item_type, ItemSlot::Hat);
-                }
-                OptionalResult::None => {
-                    panic!("no item_type found");
-                }
-            }
-
-            StateChange::Commit
-        },
-    );
-
-    b_wrapper.execute_tx(
-        &setup.owner_address,
-        &setup.cf_wrapper,
-        &rust_biguint!(0u64),
-        |sc| {
-            let not_existing_token =
-                TokenIdentifier::<DebugApi>::from_esdt_bytes("PAR ALLAH PELO".as_bytes());
-
-            match sc.get_item_type(&not_existing_token) {
-                OptionalResult::Some(_) => {
-                    panic!("item_type found");
-                }
-                OptionalResult::None => {}
-            }
-
-            StateChange::Commit
-        },
-    );
-} // */
-#[test]
-fn test_register_item() {
-    let mut setup = utils::utils::setup(equip_penguin::contract_obj);
-
-    utils::utils::register_item(&mut setup, ItemSlot::Hat, HAT_TOKEN_ID);
-
-    let b_wrapper = &mut setup.blockchain_wrapper;
-
-    b_wrapper.execute_tx(
-        &setup.owner_address,
-        &setup.cf_wrapper,
-        &rust_biguint!(0u64),
-        |sc| {
-            let managed_token_id = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID);
-            let mut managed_items_ids = ManagedVec::<DebugApi, TokenIdentifier<DebugApi>>::new();
-            managed_items_ids.push(managed_token_id.clone());
-
-            match sc.items_types().get(&ItemSlot::Hat) {
-                Some(output_items) => {
-                    assert_eq!(output_items, managed_items_ids);
-                }
-                None => {
-                    panic!("no item_type found");
-                }
-            }
-
-            StateChange::Commit
-        },
     );
 }

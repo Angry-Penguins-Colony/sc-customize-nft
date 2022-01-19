@@ -81,14 +81,9 @@ pub trait Equip {
         penguin_nonce: u64,
         #[var_args] items_token: ManagedVarArgs<MultiArg2<TokenIdentifier, u64>>,
     ) -> SCResult<u64> {
-        let caller = self.blockchain().get_caller();
+        let mut attributes = self.parse_penguin_attributes(penguin_id, penguin_nonce);
 
-        let mut attributes = self
-            .blockchain()
-            .get_esdt_token_data(&caller, &penguin_id, penguin_nonce)
-            .decode_attributes::<PenguinAttributes<Self::Api>>()
-            .unwrap();
-
+        // let's equip each item
         for item_token in items_token {
             let (item_id, item_nonce) = item_token.into_tuple();
 
@@ -113,12 +108,37 @@ pub trait Equip {
         }
 
         // update penguin
-        let token_nonce = self.update_penguin(&penguin_id, penguin_nonce, &attributes);
+        return self.update_penguin(&penguin_id, penguin_nonce, &attributes);
+    }
 
-        match token_nonce {
-            SCResult::Ok(nonce) => return Ok(nonce),
-            SCResult::Err(error) => return SCResult::Err(error),
-        }
+    #[endpoint]
+    fn desequip_penguin(
+        &self,
+        penguin_id: &TokenIdentifier,
+        penguin_nonce: u64,
+        #[var_args] items_token: ManagedVarArgs<ItemSlot>,
+    ) {
+
+        // get attributes
+
+        // foreach items_token, remove item
+
+        // update penguin
+
+        // throw token nonce
+    }
+
+    fn parse_penguin_attributes(
+        &self,
+        penguin_id: &TokenIdentifier,
+        penguin_nonce: u64,
+    ) -> PenguinAttributes<Self::Api> {
+        let mut attributes = self
+            .blockchain()
+            .get_esdt_token_data(&self.blockchain().get_caller(), &penguin_id, penguin_nonce)
+            .decode_attributes::<PenguinAttributes<Self::Api>>()
+            .unwrap();
+        attributes
     }
 
     fn update_penguin(

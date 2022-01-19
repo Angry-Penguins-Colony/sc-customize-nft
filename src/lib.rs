@@ -3,12 +3,13 @@
 #![allow(unused_attributes)]
 #![allow(unused_imports)]
 
-use elrond_wasm::elrond_codec::TopEncode;
-use elrond_wasm::imports;
-use elrond_wasm::String;
+// use elrond_wasm::elrond_codec::TopEncode;
+// use elrond_wasm::imports;
+// use elrond_wasm::String;
 
-imports!();
+// imports!();
 
+elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
 #[derive(TopEncode, TopDecode, TypeAbi)]
@@ -67,7 +68,7 @@ pub trait Equip {
         &self,
         penguin_id: &TokenIdentifier,
         penguin_nonce: u64,
-        #[var_args] items_ids: ManagedVarArgs<TokenIdentifier>,
+        #[var_args] items_token: ManagedVarArgs<MultiArg2<TokenIdentifier, u64>>,
     ) -> SCResult<u64> {
         let caller = self.blockchain().get_caller();
 
@@ -77,7 +78,9 @@ pub trait Equip {
             .decode_attributes::<PenguinAttributes<Self::Api>>()
             .unwrap();
 
-        for item_id in items_ids {
+        for item_token in items_token {
+            let (item_id, item_nonce) = item_token.into_tuple();
+
             // determine itemType from ID
             let item_type_out = self.get_item_type(&item_id);
 
@@ -85,21 +88,17 @@ pub trait Equip {
                 require!(false, "An items provided is not considered like an item.")
             }
 
-            // if (OptionalResult::Some(item_type_out)) = ManagedBuffer::new_from_bytes(b"hat") {
-            //     require!(false, "A penguin can't have more than one hat.")
-            // }
-
             let _hat = ManagedBuffer::new_from_bytes(b"hat");
             let _bg = ManagedBuffer::new_from_bytes(b"background");
 
             match Some(item_type_out) {
-                Some(_hat) => attributes.hat = item_id,
+                Some(_hat) => attributes.hat = item_id.clone(),
                 // Some(_bg) => attributes.background = item_id,
                 _ => require!(false, "An items provided is not considered like an item."),
             }
 
-            // TODO: mint previous item if there were one
-            // TODO: burn player item
+            self.send()
+                .esdt_local_burn(&item_id, item_nonce, &BigUint::from(1u32));
         }
 
         // update penguin

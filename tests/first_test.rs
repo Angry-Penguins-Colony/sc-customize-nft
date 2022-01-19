@@ -1,5 +1,7 @@
 use elrond_wasm::api::ESDT_NFT_CREATE_FUNC_NAME;
-use elrond_wasm::types::{Address, EsdtLocalRole, ManagedBuffer, ManagedVarArgs, SCResult};
+use elrond_wasm::types::{
+    Address, EsdtLocalRole, ManagedBuffer, ManagedVarArgs, MultiArg2, SCResult,
+};
 use elrond_wasm::types::{ManagedVec, OptionalResult};
 use elrond_wasm_debug::tx_mock::{TxContextRef, TxInputESDT};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
@@ -77,8 +79,8 @@ fn test_equip() {
 
             let managed_hat_token_id = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID);
             let mut managed_items_to_equip =
-                ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
-            managed_items_to_equip.push(managed_hat_token_id);
+                ManagedVarArgs::<DebugApi, MultiArg2<TokenIdentifier<DebugApi>, u64>>::new();
+            managed_items_to_equip.push(MultiArg2((managed_hat_token_id, INIT_NONCE)));
 
             let result = sc.equip(
                 &managed_penguin_token_id,
@@ -92,6 +94,7 @@ fn test_equip() {
         },
     );
 
+    // generated penguin has been sent
     b_wrapper.check_nft_balance(
         &setup.cf_wrapper.address_ref(),
         PENGUIN_TOKEN_ID,
@@ -102,6 +105,7 @@ fn test_equip() {
         },
     );
 
+    // the transfered penguin has been burn
     b_wrapper.check_nft_balance(
         &setup.cf_wrapper.address_ref(),
         PENGUIN_TOKEN_ID,
@@ -112,6 +116,18 @@ fn test_equip() {
         },
     );
 
+    // the transfered penguin has not been sent back
+    b_wrapper.check_nft_balance(
+        &setup.first_user_address,
+        PENGUIN_TOKEN_ID,
+        INIT_NONCE,
+        &rust_biguint!(0),
+        &PenguinAttributes {
+            hat: none_value.clone(),
+        },
+    );
+
+    // the NEW penguin has been received
     b_wrapper.check_nft_balance(
         &setup.first_user_address,
         PENGUIN_TOKEN_ID,
@@ -122,14 +138,13 @@ fn test_equip() {
         },
     );
 
+    // the transfered hat has been burn
     b_wrapper.check_nft_balance(
         &setup.first_user_address,
-        PENGUIN_TOKEN_ID,
+        HAT_TOKEN_ID,
         INIT_NONCE,
         &rust_biguint!(0),
-        &PenguinAttributes {
-            hat: none_value.clone(),
-        },
+        &ItemAttributes {},
     );
 }
 
@@ -268,6 +283,12 @@ where
     blockchain_wrapper.set_esdt_local_roles(
         cf_wrapper.address_ref(),
         PENGUIN_TOKEN_ID,
+        &[EsdtLocalRole::NftCreate, EsdtLocalRole::NftBurn],
+    );
+
+    blockchain_wrapper.set_esdt_local_roles(
+        cf_wrapper.address_ref(),
+        HAT_TOKEN_ID,
         &[EsdtLocalRole::NftCreate, EsdtLocalRole::NftBurn],
     );
 

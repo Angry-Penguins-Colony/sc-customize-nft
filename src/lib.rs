@@ -88,9 +88,14 @@ pub trait Equip {
     #[storage_mapper("items_types")]
     fn items_types(&self) -> MapMapper<ItemSlot, ManagedVec<TokenIdentifier>>;
 
+    #[storage_mapper("penguins_identifier")]
+    fn penguins_identifier(&self) -> SingleValueMapper<TokenIdentifier>;
+
     #[init]
-    fn init(&self) -> SCResult<()> {
-        Ok(())
+    fn init(&self, penguins_identifier: TokenIdentifier) -> SCResult<()> {
+        self.penguins_identifier().set(&penguins_identifier);
+
+        return Ok(());
     }
 
     #[endpoint(registerItem)]
@@ -127,6 +132,11 @@ pub trait Equip {
         penguin_nonce: u64,
         #[var_args] items_token: ManagedVarArgs<MultiArg2<TokenIdentifier, u64>>,
     ) -> SCResult<u64> {
+        require!(
+            penguin_id == &self.penguins_identifier().get(),
+            "Please provide a penguin"
+        );
+
         let mut attributes = self.parse_penguin_attributes(penguin_id, penguin_nonce);
 
         // let's equip each item

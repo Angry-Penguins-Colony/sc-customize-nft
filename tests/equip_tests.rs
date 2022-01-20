@@ -8,6 +8,7 @@ mod utils;
 
 const PENGUIN_TOKEN_ID: &[u8] = utils::utils::PENGUIN_TOKEN_ID;
 const HAT_TOKEN_ID: &[u8] = utils::utils::HAT_TOKEN_ID;
+const NOT_PENGUIN_TOKEN_ID: &[u8] = b"QUACK-a456e";
 const INIT_NONCE: u64 = 65535;
 
 // create NFT on blockchain wrapper
@@ -230,5 +231,58 @@ fn test_equip_while_overlap() {
     assert_eq!(
         b_wrapper.get_esdt_balance(&setup.first_user_address, HAT_TOKEN_ID, hat_to_remove_nonce),
         rust_biguint!(1)
+    );
+}
+
+#[test]
+fn equip_while_nft_to_equip_is_not_a_penguin() {
+    let mut setup = utils::utils::setup(equip_penguin::contract_obj);
+
+    let b_wrapper = &mut setup.blockchain_wrapper;
+
+    // not a penguin
+    b_wrapper.set_nft_balance(
+        &setup.first_user_address,
+        NOT_PENGUIN_TOKEN_ID,
+        INIT_NONCE,
+        &rust_biguint!(1),
+        &{},
+    );
+
+    b_wrapper.set_nft_balance(
+        &setup.first_user_address,
+        HAT_TOKEN_ID,
+        INIT_NONCE,
+        &rust_biguint!(1),
+        &ItemAttributes {},
+    );
+
+    let esdt_transfers = &utils::utils::create_esdt_transfers(&[
+        (NOT_PENGUIN_TOKEN_ID, INIT_NONCE),
+        (HAT_TOKEN_ID, INIT_NONCE),
+    ]);
+
+    b_wrapper.execute_esdt_multi_transfer(
+        &setup.first_user_address,
+        &setup.cf_wrapper,
+        esdt_transfers,
+        |sc| {
+            let mut managed_items_to_equip =
+                ManagedVarArgs::<DebugApi, MultiArg2<TokenIdentifier<DebugApi>, u64>>::new();
+            managed_items_to_equip.push(MultiArg2((
+                TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
+                INIT_NONCE,
+            )));
+
+            let result = sc.equip(
+                &TokenIdentifier::<DebugApi>::from_esdt_bytes(NOT_PENGUIN_TOKEN_ID),
+                INIT_NONCE,
+                managed_items_to_equip,
+            );
+
+            assert_eq!(result, SCResult::Err("Please provide a penguin".into()));
+
+            StateChange::Commit
+        },
     );
 }

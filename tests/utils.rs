@@ -3,8 +3,8 @@ pub mod utils {
     use std::u8;
 
     use elrond_wasm::types::{Address, EsdtLocalRole, ManagedVarArgs, SCResult};
-    use elrond_wasm_debug::testing_framework::*;
     use elrond_wasm_debug::tx_mock::TxInputESDT;
+    use elrond_wasm_debug::{managed_token_id, testing_framework::*};
     use elrond_wasm_debug::{rust_biguint, DebugApi};
     use equip_penguin::*;
 
@@ -44,7 +44,7 @@ pub mod utils {
 
         // deploy contract
         blockchain_wrapper.execute_tx(&owner_address, &cf_wrapper, &rust_zero, |sc| {
-            let result = sc.init();
+            let result = sc.init(managed_token_id!(PENGUIN_TOKEN_ID));
             assert_eq!(result, SCResult::Ok(()));
 
             StateChange::Commit

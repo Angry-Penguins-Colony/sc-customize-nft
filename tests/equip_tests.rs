@@ -8,15 +8,15 @@ use equip_penguin::*;
 
 mod utils;
 
-const PENGUIN_TOKEN_ID: &[u8] = utils::utils::PENGUIN_TOKEN_ID;
-const HAT_TOKEN_ID: &[u8] = utils::utils::HAT_TOKEN_ID;
+const PENGUIN_TOKEN_ID: &[u8] = utils::PENGUIN_TOKEN_ID;
+const HAT_TOKEN_ID: &[u8] = utils::HAT_TOKEN_ID;
 const NOT_PENGUIN_TOKEN_ID: &[u8] = b"QUACK-a456e";
 const INIT_NONCE: u64 = 65535;
 
 // create NFT on blockchain wrapper
 #[test]
 fn test_equip() {
-    let mut setup = utils::utils::setup(equip_penguin::contract_obj);
+    let mut setup = utils::setup(equip_penguin::contract_obj);
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -47,10 +47,8 @@ fn test_equip() {
         &ItemAttributes {},
     );
 
-    let transfers = utils::utils::create_esdt_transfers(&[
-        (PENGUIN_TOKEN_ID, INIT_NONCE),
-        (HAT_TOKEN_ID, INIT_NONCE),
-    ]);
+    let transfers =
+        utils::create_esdt_transfers(&[(PENGUIN_TOKEN_ID, INIT_NONCE), (HAT_TOKEN_ID, INIT_NONCE)]);
 
     b_wrapper.execute_esdt_multi_transfer(
         &setup.first_user_address,
@@ -135,7 +133,7 @@ fn test_equip() {
 
 #[test]
 fn test_equip_while_overlap() {
-    let mut setup = utils::utils::setup(equip_penguin::contract_obj);
+    let mut setup = utils::setup(equip_penguin::contract_obj);
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -165,7 +163,7 @@ fn test_equip_while_overlap() {
         &ItemAttributes {},
     );
 
-    let esdt_transfers = &utils::utils::create_esdt_transfers(&[
+    let esdt_transfers = &utils::create_esdt_transfers(&[
         (PENGUIN_TOKEN_ID, INIT_NONCE),
         (HAT_TOKEN_ID, hat_to_equip_nonce),
     ]);
@@ -238,7 +236,7 @@ fn test_equip_while_overlap() {
 
 #[test]
 fn equip_while_nft_to_equip_is_not_a_penguin() {
-    let mut setup = utils::utils::setup(equip_penguin::contract_obj);
+    let mut setup = utils::setup(equip_penguin::contract_obj);
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -259,7 +257,7 @@ fn equip_while_nft_to_equip_is_not_a_penguin() {
         &ItemAttributes {},
     );
 
-    let esdt_transfers = &utils::utils::create_esdt_transfers(&[
+    let esdt_transfers = &utils::create_esdt_transfers(&[
         (NOT_PENGUIN_TOKEN_ID, INIT_NONCE),
         (HAT_TOKEN_ID, INIT_NONCE),
     ]);

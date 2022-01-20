@@ -5,17 +5,17 @@ use equip_penguin::item_attributes::ItemAttributes;
 use equip_penguin::item_slot::ItemSlot;
 use equip_penguin::penguins_attributes::PenguinAttributes;
 use equip_penguin::*;
-use utils::utils::create_esdt_transfers;
+use utils::create_esdt_transfers;
 
 mod utils;
 
-const PENGUIN_TOKEN_ID: &[u8] = utils::utils::PENGUIN_TOKEN_ID;
-const HAT_TOKEN_ID: &[u8] = utils::utils::HAT_TOKEN_ID;
+const PENGUIN_TOKEN_ID: &[u8] = utils::PENGUIN_TOKEN_ID;
+const HAT_TOKEN_ID: &[u8] = utils::HAT_TOKEN_ID;
 const INIT_NONCE: u64 = 65535;
 
 #[test]
 fn test_desequip() {
-    let mut setup = utils::utils::setup(equip_penguin::contract_obj);
+    let mut setup = utils::setup(equip_penguin::contract_obj);
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 

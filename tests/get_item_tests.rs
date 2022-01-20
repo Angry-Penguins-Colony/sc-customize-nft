@@ -6,11 +6,11 @@ use equip_penguin::*;
 
 mod utils;
 
-const HAT_TOKEN_ID: &[u8] = utils::utils::HAT_TOKEN_ID;
+const HAT_TOKEN_ID: &[u8] = utils::HAT_TOKEN_ID;
 
 #[test]
 fn test_get_item() {
-    let mut setup = utils::utils::setup(equip_penguin::contract_obj);
+    let mut setup = utils::setup(equip_penguin::contract_obj);
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 

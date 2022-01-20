@@ -29,7 +29,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         token: TokenIdentifier<M>,
         nonce: u64,
     ) -> Result<(), ManagedBuffer<M>> {
-        if (token != self.empty_item()) {
+        if token != self.empty_item() {
             match self.is_slot_empty(slot) {
                 Result::Ok(false) => {
                     return Result::Err(ManagedBuffer::new_from_bytes(
@@ -190,29 +190,51 @@ pub trait Equip {
         penguin_nonce: u64,
         #[var_args] slots: ManagedVarArgs<ItemSlot>,
     ) -> SCResult<u64> {
-        let caller = self.blockchain().get_caller();
         let mut attributes = self.parse_penguin_attributes(penguin_id, penguin_nonce);
 
         for slot in slots {
-            let result = attributes.get_item(&slot);
+            let result = self.sent_item_from_slot(&mut attributes, &slot);
 
-            if let Result::Err(()) = result {
-                return SCResult::Err("Error while getting an item".into());
+            match result {
+                SCResult::Err(err) => return SCResult::Err(err),
+                _ => (),
             }
-
-            let (item_id, item_nonce) = result.unwrap().into_tuple();
-
-            self.send()
-                .esdt_local_mint(&item_id, item_nonce, &BigUint::from(1u32));
-
-            self.send()
-                .direct(&caller, &item_id, item_nonce, &BigUint::from(1u32), &[]);
-
-            attributes.empty_slot(&slot);
         }
 
         // return items nonces
         return self.update_penguin(&penguin_id, penguin_nonce, &attributes);
+    }
+
+    /// Empty the item at the slot proivided and sent it to the caller.
+    fn sent_item_from_slot(
+        &self,
+        attributes: &mut PenguinAttributes<Self::Api>,
+        slot: &ItemSlot,
+    ) -> SCResult<()> {
+        let caller = self.blockchain().get_caller();
+
+        require!(
+            attributes.is_slot_empty(&slot).unwrap() == false,
+            "Cannot sent item from an empty slot"
+        );
+
+        let result = attributes.get_item(&slot);
+
+        if let Result::Err(()) = result {
+            return SCResult::Err("Error while minting and sending an item".into());
+        }
+
+        let (item_id, item_nonce) = result.unwrap().into_tuple();
+
+        self.send()
+            .esdt_local_mint(&item_id, item_nonce, &BigUint::from(1u32));
+
+        self.send()
+            .direct(&caller, &item_id, item_nonce, &BigUint::from(1u32), &[]);
+
+        attributes.empty_slot(&slot);
+
+        return SCResult::Ok(());
     }
 
     fn parse_penguin_attributes(

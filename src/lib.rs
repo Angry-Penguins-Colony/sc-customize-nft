@@ -28,16 +28,30 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         slot: &ItemSlot,
         token: TokenIdentifier<M>,
         nonce: u64,
-    ) -> Result<(), ()> {
-        // match self.is_slot_empty(slot) {
-        //     Result::Ok(false) => return Result::Err(()),
-        //     Result::Err(()) => return Result::Err(()),
-        //     _ => {}
-        // }
+    ) -> Result<(), ManagedBuffer<M>> {
+        if (token != self.empty_item()) {
+            match self.is_slot_empty(slot) {
+                Result::Ok(false) => {
+                    return Result::Err(ManagedBuffer::new_from_bytes(
+                        b"The slot is not empty. Please free it, before setting an item.",
+                    ))
+                }
+                Result::Err(()) => {
+                    return Result::Err(ManagedBuffer::new_from_bytes(
+                        b"Error while getting slot is empty",
+                    ))
+                }
+                _ => {}
+            }
+        }
 
         match slot {
             ItemSlot::Hat => self.hat = (token, nonce),
-            _ => return Result::Err(()),
+            _ => {
+                return Result::Err(ManagedBuffer::new_from_bytes(
+                    b"The slot provided is not supported",
+                ))
+            }
         }
 
         Result::Ok(())
@@ -57,7 +71,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         };
     }
 
-    pub fn empty_slot(&mut self, slot: &ItemSlot) -> Result<(), ()> {
+    pub fn empty_slot(&mut self, slot: &ItemSlot) -> Result<(), ManagedBuffer<M>> {
         return self.set_item(slot, self.empty_item(), 0);
     }
 

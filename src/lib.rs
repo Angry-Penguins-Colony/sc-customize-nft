@@ -140,23 +140,12 @@ pub trait Equip {
                 OptionalResult::Some(item_slot) => {
                     match attributes.is_slot_empty(&item_slot) {
                         Result::Ok(false) => {
-                            // slot is not empty, we need to remove it
+                            let result = self.sent_item_from_slot(&mut attributes, &item_slot);
 
-                            let (item_id, item_nonce) =
-                                attributes.get_item(&item_slot).unwrap().into_tuple();
-
-                            self.send()
-                                .esdt_local_mint(&item_id, item_nonce, &BigUint::from(1u32));
-
-                            self.send().direct(
-                                &self.blockchain().get_caller(),
-                                &item_id,
-                                item_nonce,
-                                &BigUint::from(1u32),
-                                &[],
-                            );
-
-                            attributes.empty_slot(&item_slot);
+                            match result {
+                                SCResult::Err(err) => return SCResult::Err(err),
+                                _ => (),
+                            }
                         }
                         Result::Err(_) => {
                             require!(false, "Error while checking if slot is empty");

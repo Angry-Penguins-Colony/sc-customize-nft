@@ -1,6 +1,7 @@
 use elrond_wasm::types::OptionalResult;
 use elrond_wasm_debug::testing_framework::*;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
+use equip_penguin::item_slot::ItemSlot;
 use equip_penguin::*;
 
 mod utils;

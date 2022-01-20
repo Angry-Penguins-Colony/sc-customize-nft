@@ -3,85 +3,16 @@
 #![allow(unused_attributes)]
 #![allow(unused_imports)]
 
-// use elrond_wasm::elrond_codec::TopEncode;
-// use elrond_wasm::imports;
-// use elrond_wasm::String;
-
-// imports!();
-
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-#[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi, Debug, PartialEq)]
-pub enum ItemSlot {
-    Hat,
-}
+pub mod item_attributes;
+pub mod item_slot;
+pub mod penguins_attributes;
 
-#[derive(TopEncode, TopDecode, TypeAbi)]
-pub struct PenguinAttributes<M: ManagedTypeApi> {
-    pub hat: (TokenIdentifier<M>, u64), // pub background: TokenIdentifier<M>,
-}
-
-impl<M: ManagedTypeApi> PenguinAttributes<M> {
-    pub fn set_item(
-        &mut self,
-        slot: &ItemSlot,
-        token: TokenIdentifier<M>,
-        nonce: u64,
-    ) -> Result<(), ManagedBuffer<M>> {
-        if token != self.empty_item() {
-            match self.is_slot_empty(slot) {
-                Result::Ok(false) => {
-                    return Result::Err(ManagedBuffer::new_from_bytes(
-                        b"The slot is not empty. Please free it, before setting an item.",
-                    ))
-                }
-                Result::Err(()) => {
-                    return Result::Err(ManagedBuffer::new_from_bytes(
-                        b"Error while getting slot is empty",
-                    ))
-                }
-                _ => {}
-            }
-        }
-
-        match slot {
-            ItemSlot::Hat => self.hat = (token, nonce),
-            _ => {
-                return Result::Err(ManagedBuffer::new_from_bytes(
-                    b"The slot provided is not supported",
-                ))
-            }
-        }
-
-        Result::Ok(())
-    }
-
-    pub fn get_item(&self, slot: &ItemSlot) -> Result<MultiResult2<TokenIdentifier<M>, u64>, ()> {
-        match slot {
-            &ItemSlot::Hat => return Result::Ok(MultiResult2::from(self.hat.clone())),
-            _ => return Result::Err(()),
-        };
-    }
-
-    pub fn is_slot_empty(&self, slot: &ItemSlot) -> Result<bool, ()> {
-        match slot {
-            &ItemSlot::Hat => return Result::Ok(self.hat.0.is_empty()),
-            _ => return Result::Err(()),
-        };
-    }
-
-    pub fn empty_slot(&mut self, slot: &ItemSlot) -> Result<(), ManagedBuffer<M>> {
-        return self.set_item(slot, self.empty_item(), 0);
-    }
-
-    pub fn empty_item(&self) -> TokenIdentifier<M> {
-        return TokenIdentifier::<M>::from(ManagedBuffer::<M>::new());
-    }
-}
-
-#[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
-pub struct ItemAttributes {}
+use item_attributes::ItemAttributes;
+use item_slot::ItemSlot;
+use penguins_attributes::PenguinAttributes;
 
 #[elrond_wasm::derive::contract]
 pub trait Equip {

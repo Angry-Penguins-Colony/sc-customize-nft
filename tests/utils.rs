@@ -6,6 +6,8 @@ pub mod utils {
     use elrond_wasm_debug::tx_mock::TxInputESDT;
     use elrond_wasm_debug::{managed_token_id, testing_framework::*};
     use elrond_wasm_debug::{rust_biguint, DebugApi};
+    use equip_penguin::item_slot::ItemSlot;
+    use equip_penguin::penguins_attributes::PenguinAttributes;
     use equip_penguin::*;
 
     const WASM_PATH: &'static str = "sc-equip-penguin/output/equip_penguin.wasm";

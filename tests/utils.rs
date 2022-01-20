@@ -1,7 +1,10 @@
 #[cfg(test)]
 pub mod utils {
+    use std::u8;
+
     use elrond_wasm::types::{Address, EsdtLocalRole, ManagedVarArgs, SCResult};
     use elrond_wasm_debug::testing_framework::*;
+    use elrond_wasm_debug::tx_mock::TxInputESDT;
     use elrond_wasm_debug::{rust_biguint, DebugApi};
     use equip_penguin::*;
 
@@ -107,6 +110,40 @@ pub mod utils {
                 assert_eq!(result, SCResult::Ok(()));
 
                 StateChange::Commit
+            },
+        );
+    }
+
+    pub fn create_esdt_transfers(tokens: &[(&[u8], u64)]) -> Vec<TxInputESDT> {
+        let mut transfers = Vec::new();
+
+        for (token_id, nonce) in tokens {
+            transfers.push(TxInputESDT {
+                token_identifier: token_id.to_vec(),
+                nonce: nonce.clone(),
+                value: rust_biguint!(1u64),
+            })
+        }
+
+        return transfers;
+    }
+
+    pub fn give_one_penguin_with_hat(
+        blockchain_wrapper: &mut BlockchainStateWrapper,
+        user_address: &Address,
+        penguin_nonce: u64,
+        hat_nonce: u64,
+    ) {
+        blockchain_wrapper.set_nft_balance(
+            &user_address,
+            PENGUIN_TOKEN_ID,
+            penguin_nonce,
+            &rust_biguint!(1),
+            &PenguinAttributes {
+                hat: (
+                    TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
+                    hat_nonce,
+                ),
             },
         );
     }

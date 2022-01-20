@@ -29,6 +29,12 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         token: TokenIdentifier<M>,
         nonce: u64,
     ) -> Result<(), ()> {
+        // match self.is_slot_empty(slot) {
+        //     Result::Ok(false) => return Result::Err(()),
+        //     Result::Err(()) => return Result::Err(()),
+        //     _ => {}
+        // }
+
         match slot {
             ItemSlot::Hat => self.hat = (token, nonce),
             _ => return Result::Err(()),
@@ -40,6 +46,13 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
     pub fn get_item(&self, slot: &ItemSlot) -> Result<MultiResult2<TokenIdentifier<M>, u64>, ()> {
         match slot {
             &ItemSlot::Hat => return Result::Ok(MultiResult2::from(self.hat.clone())),
+            _ => return Result::Err(()),
+        };
+    }
+
+    pub fn is_slot_empty(&self, slot: &ItemSlot) -> Result<bool, ()> {
+        match slot {
+            &ItemSlot::Hat => return Result::Ok(self.hat.0.is_empty()),
             _ => return Result::Err(()),
         };
     }
@@ -107,11 +120,37 @@ pub trait Equip {
             let (item_id, item_nonce) = item_token.into_tuple();
 
             // determine itemType from ID
-            let item_type_out = self.get_item_type(&item_id);
+            let item_slot_out = self.get_item_type(&item_id);
 
-            match item_type_out {
-                OptionalResult::Some(item_type) => {
-                    let result = attributes.set_item(&item_type, item_id.clone(), item_nonce);
+            match item_slot_out {
+                OptionalResult::Some(item_slot) => {
+                    match attributes.is_slot_empty(&item_slot) {
+                        Result::Ok(false) => {
+                            // slot is not empty, we need to remove it
+
+                            let (item_id, item_nonce) =
+                                attributes.get_item(&item_slot).unwrap().into_tuple();
+
+                            self.send()
+                                .esdt_local_mint(&item_id, item_nonce, &BigUint::from(1u32));
+
+                            self.send().direct(
+                                &self.blockchain().get_caller(),
+                                &item_id,
+                                item_nonce,
+                                &BigUint::from(1u32),
+                                &[],
+                            );
+
+                            attributes.empty_slot(&item_slot);
+                        }
+                        Result::Err(_) => {
+                            require!(false, "Error while checking if slot is empty");
+                        }
+                        _ => {}
+                    }
+
+                    let result = attributes.set_item(&item_slot, item_id.clone(), item_nonce);
                     require!(
                         result == Result::Ok(()),
                         "Cannot set item. Maybe the item is not considered like an item."

@@ -1,8 +1,8 @@
 use elrond_wasm::types::{ManagedBuffer, ManagedVarArgs, SCResult};
-use elrond_wasm_debug::tx_mock::TxInputESDT;
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::*;
+use utils::utils::create_esdt_transfers;
 
 mod utils;
 
@@ -16,20 +16,7 @@ fn test_desequip() {
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
-    let mut transfers = Vec::new();
-    transfers.push(TxInputESDT {
-        token_identifier: PENGUIN_TOKEN_ID.to_vec(),
-        nonce: INIT_NONCE,
-        value: rust_biguint!(1),
-    });
-
-    b_wrapper.set_nft_balance(
-        &setup.first_user_address,
-        HAT_TOKEN_ID,
-        INIT_NONCE,
-        &rust_biguint!(0),
-        &ItemAttributes {},
-    );
+    let transfers = create_esdt_transfers(&[(PENGUIN_TOKEN_ID, INIT_NONCE)]);
 
     b_wrapper.set_nft_balance(
         &setup.first_user_address,
@@ -80,7 +67,7 @@ fn test_desequip() {
     b_wrapper.check_nft_balance(
         &setup.first_user_address,
         HAT_TOKEN_ID,
-        1u64,
+        INIT_NONCE,
         &rust_biguint!(1),
         &ItemAttributes {},
     )

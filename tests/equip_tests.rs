@@ -1,6 +1,6 @@
 use elrond_wasm::types::{ManagedVarArgs, MultiArg2, SCResult};
-use elrond_wasm_debug::testing_framework::*;
 use elrond_wasm_debug::tx_mock::TxInputESDT;
+use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::*;
 
@@ -17,21 +17,15 @@ fn test_equip() {
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
-    let mut transfers = Vec::new();
-    transfers.push(TxInputESDT {
-        token_identifier: PENGUIN_TOKEN_ID.to_vec(),
-        nonce: INIT_NONCE,
-        value: rust_biguint!(1),
-    });
-    transfers.push(TxInputESDT {
-        token_identifier: HAT_TOKEN_ID.to_vec(),
-        nonce: INIT_NONCE,
-        value: rust_biguint!(1),
-    });
+    let none_value = (TokenIdentifier::<DebugApi>::from_esdt_bytes(b""), 0);
 
-    let none_value = (
-        TokenIdentifier::<DebugApi>::from_esdt_bytes(b"NONE-000000"),
-        0,
+    let penguin_attributes = PenguinAttributes {
+        hat: none_value.clone(),
+    };
+
+    assert_eq!(
+        penguin_attributes.is_slot_empty(&ItemSlot::Hat),
+        Result::Ok(true)
     );
 
     b_wrapper.set_nft_balance(
@@ -39,9 +33,7 @@ fn test_equip() {
         PENGUIN_TOKEN_ID,
         INIT_NONCE,
         &rust_biguint!(1),
-        &PenguinAttributes {
-            hat: none_value.clone(),
-        },
+        &penguin_attributes,
     );
 
     b_wrapper.set_nft_balance(
@@ -52,39 +44,22 @@ fn test_equip() {
         &ItemAttributes {},
     );
 
-    b_wrapper.check_nft_balance(
-        &setup.first_user_address,
-        HAT_TOKEN_ID,
-        INIT_NONCE,
-        &rust_biguint!(1),
-        &ItemAttributes {},
-    );
-
-    b_wrapper.check_nft_balance(
-        &setup.first_user_address,
-        PENGUIN_TOKEN_ID,
-        INIT_NONCE,
-        &rust_biguint!(1),
-        &PenguinAttributes {
-            hat: none_value.clone(),
-        },
-    );
+    let transfers = utils::utils::create_esdt_transfers(&[
+        (PENGUIN_TOKEN_ID, INIT_NONCE),
+        (HAT_TOKEN_ID, INIT_NONCE),
+    ]);
 
     b_wrapper.execute_esdt_multi_transfer(
         &setup.first_user_address,
         &setup.cf_wrapper,
         &transfers,
         |sc| {
-            let managed_penguin_token_id =
-                TokenIdentifier::<DebugApi>::from_esdt_bytes(PENGUIN_TOKEN_ID);
-
-            let managed_hat_token_id = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID);
             let mut managed_items_to_equip =
                 ManagedVarArgs::<DebugApi, MultiArg2<TokenIdentifier<DebugApi>, u64>>::new();
-            managed_items_to_equip.push(MultiArg2((managed_hat_token_id, INIT_NONCE)));
+            managed_items_to_equip.push(MultiArg2((managed_token_id!(HAT_TOKEN_ID), INIT_NONCE)));
 
             let result = sc.equip(
-                &managed_penguin_token_id,
+                &managed_token_id!(PENGUIN_TOKEN_ID),
                 INIT_NONCE,
                 managed_items_to_equip,
             );
@@ -152,5 +127,108 @@ fn test_equip() {
         INIT_NONCE,
         &rust_biguint!(0),
         &ItemAttributes {},
+    );
+}
+
+#[test]
+fn test_equip_while_overlap() {
+    let mut setup = utils::utils::setup(equip_penguin::contract_obj);
+
+    let b_wrapper = &mut setup.blockchain_wrapper;
+
+    let hat_to_remove_nonce = 56;
+
+    // user own a penguin equiped with an hat
+    b_wrapper.set_nft_balance(
+        &setup.first_user_address,
+        PENGUIN_TOKEN_ID,
+        INIT_NONCE,
+        &rust_biguint!(1),
+        &PenguinAttributes {
+            hat: (
+                TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
+                hat_to_remove_nonce,
+            ),
+        },
+    );
+
+    let hat_to_equip_nonce = 30;
+    // give the player a hat
+    b_wrapper.set_nft_balance(
+        &setup.first_user_address,
+        HAT_TOKEN_ID,
+        hat_to_equip_nonce,
+        &rust_biguint!(1),
+        &ItemAttributes {},
+    );
+
+    let esdt_transfers = &utils::utils::create_esdt_transfers(&[
+        (PENGUIN_TOKEN_ID, INIT_NONCE),
+        (HAT_TOKEN_ID, hat_to_equip_nonce),
+    ]);
+
+    b_wrapper.execute_esdt_multi_transfer(
+        &setup.first_user_address,
+        &setup.cf_wrapper,
+        esdt_transfers,
+        |sc| {
+            let mut managed_items_to_equip =
+                ManagedVarArgs::<DebugApi, MultiArg2<TokenIdentifier<DebugApi>, u64>>::new();
+            managed_items_to_equip.push(MultiArg2((
+                TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
+                hat_to_equip_nonce,
+            )));
+
+            let result = sc.equip(
+                &TokenIdentifier::<DebugApi>::from_esdt_bytes(PENGUIN_TOKEN_ID),
+                INIT_NONCE,
+                managed_items_to_equip,
+            );
+
+            assert_eq!(result, SCResult::Ok(1u64));
+
+            StateChange::Commit
+        },
+    );
+
+    // SHOULD sent removed equipment
+    b_wrapper.check_nft_balance(
+        &setup.first_user_address,
+        HAT_TOKEN_ID,
+        INIT_NONCE,
+        &rust_biguint!(1),
+        &ItemAttributes {},
+    );
+
+    // SHOULD sent generated penguin
+    b_wrapper.check_nft_balance(
+        &setup.first_user_address,
+        PENGUIN_TOKEN_ID,
+        1,
+        &rust_biguint!(1),
+        &PenguinAttributes {
+            hat: (
+                TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
+                hat_to_equip_nonce,
+            ),
+        },
+    );
+
+    // sent penguin is burned
+    assert_eq!(
+        b_wrapper.get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, INIT_NONCE),
+        rust_biguint!(0)
+    );
+
+    // new penguin is received
+    assert_eq!(
+        b_wrapper.get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, 1),
+        rust_biguint!(1)
+    );
+
+    // previously hat is sent
+    assert_eq!(
+        b_wrapper.get_esdt_balance(&setup.first_user_address, HAT_TOKEN_ID, hat_to_remove_nonce),
+        rust_biguint!(1)
     );
 }

@@ -1,8 +1,9 @@
-
 use std::u8;
 
-use elrond_wasm::types::{Address, EsdtLocalRole, ManagedVarArgs, SCResult};
-use elrond_wasm_debug::tx_mock::TxInputESDT;
+use elrond_wasm::types::{
+    Address, EsdtLocalRole, ManagedMultiResultVec, ManagedVarArgs, MultiArg2, SCResult,
+};
+use elrond_wasm_debug::tx_mock::{TxContextRef, TxInputESDT};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::item_slot::ItemSlot;
@@ -126,6 +127,25 @@ pub fn create_esdt_transfers(tokens: &[(&[u8], u64)]) -> Vec<TxInputESDT> {
     }
 
     return transfers;
+}
+
+pub fn create_managed_items_to_equip(
+    tokens: &[(&[u8], u64)],
+) -> ManagedMultiResultVec<
+    TxContextRef,
+    MultiArg2<elrond_wasm::types::TokenIdentifier<TxContextRef>, u64>,
+> {
+    let mut managed_items_to_equip =
+        ManagedVarArgs::<DebugApi, MultiArg2<TokenIdentifier<DebugApi>, u64>>::new();
+
+    for (token_id, nonce) in tokens {
+        managed_items_to_equip.push(MultiArg2((
+            TokenIdentifier::<DebugApi>::from_esdt_bytes(token_id.clone()),
+            nonce.clone(),
+        )));
+    }
+
+    return managed_items_to_equip;
 }
 
 pub fn give_one_penguin_with_hat(

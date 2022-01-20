@@ -55,9 +55,8 @@ fn test_equip() {
         &setup.cf_wrapper,
         &transfers,
         |sc| {
-            let mut managed_items_to_equip =
-                ManagedVarArgs::<DebugApi, MultiArg2<TokenIdentifier<DebugApi>, u64>>::new();
-            managed_items_to_equip.push(MultiArg2((managed_token_id!(HAT_TOKEN_ID), INIT_NONCE)));
+            let managed_items_to_equip =
+                utils::create_managed_items_to_equip(&[(HAT_TOKEN_ID, INIT_NONCE)]);
 
             let result = sc.equip(
                 &managed_token_id!(PENGUIN_TOKEN_ID),
@@ -173,12 +172,8 @@ fn test_equip_while_overlap() {
         &setup.cf_wrapper,
         esdt_transfers,
         |sc| {
-            let mut managed_items_to_equip =
-                ManagedVarArgs::<DebugApi, MultiArg2<TokenIdentifier<DebugApi>, u64>>::new();
-            managed_items_to_equip.push(MultiArg2((
-                TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
-                hat_to_equip_nonce,
-            )));
+            let managed_items_to_equip =
+                utils::create_managed_items_to_equip(&[(HAT_TOKEN_ID, hat_to_equip_nonce)]);
 
             let result = sc.equip(
                 &TokenIdentifier::<DebugApi>::from_esdt_bytes(PENGUIN_TOKEN_ID),
@@ -267,12 +262,8 @@ fn equip_while_nft_to_equip_is_not_a_penguin() {
         &setup.cf_wrapper,
         esdt_transfers,
         |sc| {
-            let mut managed_items_to_equip =
-                ManagedVarArgs::<DebugApi, MultiArg2<TokenIdentifier<DebugApi>, u64>>::new();
-            managed_items_to_equip.push(MultiArg2((
-                TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
-                INIT_NONCE,
-            )));
+            let managed_items_to_equip =
+                utils::create_managed_items_to_equip(&[(HAT_TOKEN_ID, INIT_NONCE)]);
 
             let result = sc.equip(
                 &TokenIdentifier::<DebugApi>::from_esdt_bytes(NOT_PENGUIN_TOKEN_ID),

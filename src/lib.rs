@@ -17,7 +17,7 @@ use penguins_attributes::PenguinAttributes;
 #[elrond_wasm::derive::contract]
 pub trait Equip {
     #[storage_mapper("items_types")]
-    fn items_types(&self) -> MapMapper<ItemSlot, ManagedVec<TokenIdentifier>>;
+    fn items_slot(&self, token: &TokenIdentifier) -> SingleValueMapper<ItemSlot>;
 
     #[storage_mapper("penguins_identifier")]
     fn penguins_identifier(&self) -> SingleValueMapper<TokenIdentifier>;
@@ -33,27 +33,22 @@ pub trait Equip {
     #[only_owner]
     fn register_item(
         &self,
-        item_type: ItemSlot,
-        #[var_args] items_id: ManagedVarArgs<TokenIdentifier>,
+        item_slot: ItemSlot,
+        #[var_args] items_id_to_add: ManagedVarArgs<TokenIdentifier>,
     ) -> SCResult<()> {
-        // TODO tester si ça override pas
-        self.items_types().insert(item_type, items_id.to_vec());
+        for item_id in items_id_to_add {
+            self.items_slot(&item_id.into()).set(&item_slot);
+        }
 
-        Ok(())
+        return Ok(());
     }
 
     #[view(getItemType)]
-    fn get_item_type(&self, item_id: &TokenIdentifier) -> OptionalResult<ItemSlot> {
-        // iterate over all items_types
-        for (item_type, compare_items_ids) in self.items_types().iter() {
-            for compare_item_id in compare_items_ids.iter() {
-                if &compare_item_id == item_id {
-                    return OptionalResult::Some(item_type);
-                }
-            }
+    fn get_item_slot(&self, item_id: &TokenIdentifier) -> OptionalResult<ItemSlot> {
+        match self.items_slot(item_id).get() {
+            ItemSlot::None => return OptionalResult::None,
+            slot => return OptionalResult::Some(slot),
         }
-
-        return OptionalResult::None;
     }
 
     #[endpoint]
@@ -75,7 +70,7 @@ pub trait Equip {
             let (item_id, item_nonce) = item_token.into_tuple();
 
             // determine itemType from ID
-            let item_slot_out = self.get_item_type(&item_id);
+            let item_slot_out = self.get_item_slot(&item_id);
 
             match item_slot_out {
                 OptionalResult::Some(item_slot) => {
@@ -101,7 +96,7 @@ pub trait Equip {
                     );
                 }
                 OptionalResult::None => {
-                    require!(false, "An items provided is not considered like an item.")
+                    require!(false, "An item provided is not considered like an item.")
                 }
             }
 

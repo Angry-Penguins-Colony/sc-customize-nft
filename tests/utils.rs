@@ -13,7 +13,8 @@ use equip_penguin::*;
 const WASM_PATH: &'static str = "sc-equip-penguin/output/equip_penguin.wasm";
 
 pub const PENGUIN_TOKEN_ID: &[u8] = b"PENG-ae5a";
-pub const HAT_TOKEN_ID: &[u8] = b"HAT-7e8f";
+pub const HAT_TOKEN_ID: &[u8] = b"HAT-a";
+pub const HAT_2_TOKEN_ID: &[u8] = b"HAT-b";
 
 pub struct EquipSetup<CrowdfundingObjBuilder>
 where
@@ -102,10 +103,9 @@ pub fn register_item<EquipObjBuilder>(
         &setup.cf_wrapper,
         &rust_biguint!(0u64),
         |sc| {
-            let managed_token_id = TokenIdentifier::<DebugApi>::from_esdt_bytes(item_id);
             let mut managed_items_ids =
                 ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
-            managed_items_ids.push(managed_token_id.clone());
+            managed_items_ids.push(managed_token_id!(item_id));
 
             let result = sc.register_item(item_type, managed_items_ids);
             assert_eq!(result, SCResult::Ok(()));

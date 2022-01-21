@@ -36,7 +36,17 @@ pub trait Equip {
         item_slot: ItemSlot,
         #[var_args] items_id_to_add: ManagedVarArgs<TokenIdentifier>,
     ) -> SCResult<()> {
+        require!(
+            self.blockchain().get_caller() == self.blockchain().get_owner_address(),
+            "Only the owner can call this method."
+        );
+
         for item_id in items_id_to_add {
+            require!(
+                item_id != self.penguins_identifier().get(),
+                "You cannot register a penguin as an item."
+            );
+
             self.items_slot(&item_id.into()).set(&item_slot);
         }
 

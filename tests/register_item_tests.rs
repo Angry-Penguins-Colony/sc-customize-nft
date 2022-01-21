@@ -1,4 +1,4 @@
-use elrond_wasm::types::ManagedVec;
+use elrond_wasm::types::{ManagedVarArgs, ManagedVec, SCError, SCResult, StaticSCError};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::item_slot::ItemSlot;
@@ -71,4 +71,62 @@ fn change_item_slot() {
         let result = sc.items_slot(&managed_token_id!(ITEM_ID)).get();
         assert_eq!(result, ItemSlot::Background);
     });
+}
+
+#[test]
+fn register_penguin_as_item_should_not_work() {
+    let mut setup = utils::setup(equip_penguin::contract_obj);
+
+    const PENGUIN_TOKEN_ID: &[u8] = utils::PENGUIN_TOKEN_ID;
+
+    let b_wrapper = &mut setup.blockchain_wrapper;
+
+    b_wrapper.execute_tx(
+        &setup.owner_address,
+        &setup.cf_wrapper,
+        &rust_biguint!(0u64),
+        |sc| {
+            let mut managed_items_ids =
+                ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
+            managed_items_ids.push(managed_token_id!(PENGUIN_TOKEN_ID));
+
+            let result = sc.register_item(ItemSlot::Hat, managed_items_ids);
+            assert_eq!(
+                result,
+                SCResult::Err(StaticSCError::from(
+                    &b"You cannot register a penguin as an item."[..]
+                ))
+            );
+
+            StateChange::Revert
+        },
+    );
+}
+
+#[test]
+fn register_while_not_the_owner() {
+    let mut setup = utils::setup(equip_penguin::contract_obj);
+
+    let b_wrapper = &mut setup.blockchain_wrapper;
+
+    b_wrapper.execute_tx(
+        &setup.first_user_address,
+        &setup.cf_wrapper,
+        &rust_biguint!(0u64),
+        |sc| {
+            let mut managed_items_ids =
+                ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
+            managed_items_ids.push(managed_token_id!(HAT_TOKEN_ID));
+
+            let result = sc.register_item(ItemSlot::Hat, managed_items_ids);
+            assert_eq!(
+                result,
+                SCResult::Err(StaticSCError::from(
+                    &b"Only the owner can call this method."[..]
+                ))
+            );
+
+            StateChange::Revert
+        },
+    );
 }

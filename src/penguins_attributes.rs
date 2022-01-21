@@ -5,7 +5,7 @@ elrond_wasm::derive_imports!();
 
 #[derive(TopEncode, TopDecode, TypeAbi)]
 pub struct PenguinAttributes<M: ManagedTypeApi> {
-    pub hat: (TokenIdentifier<M>, u64), // pub background: TokenIdentifier<M>,
+    pub hat: (TokenIdentifier<M>, u64),
 }
 
 impl<M: ManagedTypeApi> PenguinAttributes<M> {
@@ -15,7 +15,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         token: TokenIdentifier<M>,
         nonce: u64,
     ) -> Result<(), ManagedBuffer<M>> {
-        if token != self.empty_item() {
+        if token != self.get_empty_item() {
             match self.is_slot_empty(slot) {
                 Result::Ok(false) => {
                     return Result::Err(ManagedBuffer::new_from_bytes(
@@ -54,17 +54,14 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
 
     #[allow(unreachable_patterns)]
     pub fn is_slot_empty(&self, slot: &ItemSlot) -> Result<bool, ()> {
-        match slot {
-            &ItemSlot::Hat => return Result::Ok(self.hat.0.is_empty()),
-            _ => return Result::Err(()),
-        };
+        return Result::Ok(self.get_item(slot)?.into_tuple().0.is_empty());
     }
 
     pub fn empty_slot(&mut self, slot: &ItemSlot) -> Result<(), ManagedBuffer<M>> {
-        return self.set_item(slot, self.empty_item(), 0);
+        return self.set_item(slot, self.get_empty_item(), 0);
     }
 
-    pub fn empty_item(&self) -> TokenIdentifier<M> {
+    fn get_empty_item(&self) -> TokenIdentifier<M> {
         return TokenIdentifier::<M>::from(ManagedBuffer::<M>::new());
     }
 }

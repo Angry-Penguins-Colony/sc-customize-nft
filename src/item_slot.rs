@@ -5,4 +5,5 @@ elrond_wasm::derive_imports!();
 pub enum ItemSlot {
     None,
     Hat,
+    Background,
 }

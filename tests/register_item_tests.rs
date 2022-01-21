@@ -34,8 +34,9 @@ fn test_register_item() {
     );
 }
 
+/// Ce test vérifie que si on associe 2 items au même slot, tout fonctionne bien
 #[test]
-fn register_item_should_insert() {
+fn register_another_item_on_slot() {
     let mut setup = utils::setup(equip_penguin::contract_obj);
 
     utils::register_item(&mut setup, ItemSlot::Hat, HAT_TOKEN_ID);
@@ -52,5 +53,22 @@ fn register_item_should_insert() {
             .get();
 
         assert_eq!(result2, ItemSlot::Hat);
+    });
+}
+
+#[test]
+fn change_item_slot() {
+    let mut setup = utils::setup(equip_penguin::contract_obj);
+
+    const ITEM_ID: &[u8] = HAT_TOKEN_ID;
+
+    utils::register_item(&mut setup, ItemSlot::Hat, ITEM_ID);
+    utils::register_item(&mut setup, ItemSlot::Background, ITEM_ID);
+
+    let b_wrapper = &mut setup.blockchain_wrapper;
+
+    b_wrapper.execute_query(&setup.cf_wrapper, |sc| {
+        let result = sc.items_slot(&managed_token_id!(ITEM_ID)).get();
+        assert_eq!(result, ItemSlot::Background);
     });
 }

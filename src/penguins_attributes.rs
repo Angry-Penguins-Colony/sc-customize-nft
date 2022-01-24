@@ -20,26 +20,9 @@ pub struct PenguinAttributes<M: ManagedTypeApi> {
     pub eye: (TokenIdentifier<M>, u64),
 }
 
-impl<M: ManagedTypeApi> Default for PenguinAttributes<M> {
-    fn default() -> Self {
-        let empty_item = (TokenIdentifier::<M>::from_esdt_bytes(b""), 0);
-
-        Self {
-            hat: empty_item.clone(),
-            background: empty_item.clone(),
-            skin: empty_item.clone(),
-            chain: empty_item.clone(),
-            beak: empty_item.clone(),
-            weapon: empty_item.clone(),
-            clothes: empty_item.clone(),
-            eye: empty_item.clone(),
-        }
-    }
-}
-
 impl<M: ManagedTypeApi> PenguinAttributes<M> {
     pub fn new(args: &[(&ItemSlot, TokenIdentifier<M>, u64)]) -> Self {
-        let mut attributes = Self::default();
+        let mut attributes = Self::empty();
 
         for (slot, token_id, nonce) in args {
             let item = (token_id.clone(), nonce.clone());
@@ -57,7 +40,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
             }
         }
 
-        attributes
+        return attributes;
     }
 
     pub fn set_item(
@@ -130,5 +113,20 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
 
     fn get_empty_item(&self) -> TokenIdentifier<M> {
         return TokenIdentifier::<M>::from(ManagedBuffer::<M>::new());
+    }
+
+    pub fn empty() -> Self {
+        let empty_item = (TokenIdentifier::<M>::from_esdt_bytes(b""), 0);
+
+        Self {
+            hat: empty_item.clone(),
+            background: empty_item.clone(),
+            skin: empty_item.clone(),
+            chain: empty_item.clone(),
+            beak: empty_item.clone(),
+            weapon: empty_item.clone(),
+            clothes: empty_item.clone(),
+            eye: empty_item.clone(),
+        }
     }
 }

@@ -1,10 +1,12 @@
-use elrond_wasm::types::{ManagedBuffer, MultiArg2, SCResult, TokenIdentifier};
+use elrond_wasm::types::{ManagedBuffer, TokenIdentifier};
 use elrond_wasm_debug::DebugApi;
-use equip_penguin::{item_slot::ItemSlot, penguins_attributes::PenguinAttributes};
+use equip_penguin::penguins_attributes::PenguinAttributes;
+
+mod utils;
 
 #[test]
 fn is_empty_while_not_empty() {
-    execute_for_all_slot(|slot| {
+    utils::execute_for_all_slot(|slot| {
         DebugApi::dummy();
 
         let penguin = PenguinAttributes::<DebugApi>::new(&[(
@@ -19,7 +21,7 @@ fn is_empty_while_not_empty() {
 
 #[test]
 fn is_empty_while_empty() {
-    execute_for_all_slot(|slot| {
+    utils::execute_for_all_slot(|slot| {
         DebugApi::dummy();
 
         let penguin =
@@ -31,7 +33,7 @@ fn is_empty_while_empty() {
 
 #[test]
 fn set_item_on_empty_slot() {
-    execute_for_all_slot(|slot| {
+    utils::execute_for_all_slot(|slot| {
         DebugApi::dummy();
 
         let mut penguin =
@@ -53,7 +55,7 @@ fn set_item_on_empty_slot() {
 
 #[test]
 fn set_item_on_not_empty_slot() {
-    execute_for_all_slot(|slot| {
+    utils::execute_for_all_slot(|slot| {
         DebugApi::dummy();
 
         let mut penguin = PenguinAttributes::<DebugApi>::new(&[(
@@ -78,7 +80,7 @@ fn set_item_on_not_empty_slot() {
 
 #[test]
 fn empty_slot_while_slot_is_empty() {
-    execute_for_all_slot(|slot| {
+    utils::execute_for_all_slot(|slot| {
         DebugApi::dummy();
 
         let mut penguin =
@@ -91,7 +93,7 @@ fn empty_slot_while_slot_is_empty() {
 
 #[test]
 fn empty_slot_while_slot_is_not_empty() {
-    execute_for_all_slot(|slot| {
+    utils::execute_for_all_slot(|slot| {
         DebugApi::dummy();
 
         let mut penguin = PenguinAttributes::<DebugApi>::new(&[(
@@ -103,11 +105,4 @@ fn empty_slot_while_slot_is_not_empty() {
         let result = penguin.empty_slot(&slot);
         assert_eq!(result, Result::Ok(()));
     });
-}
-
-fn execute_for_all_slot(execute: fn(&ItemSlot) -> ()) {
-    // execute(&ItemSlot::Hat);
-    for slot in ItemSlot::VALUES.iter() {
-        execute(slot);
-    }
 }

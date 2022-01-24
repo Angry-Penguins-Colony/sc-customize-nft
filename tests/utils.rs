@@ -75,7 +75,7 @@ where
         &contract_roles,
     );
 
-    let mut equip_setup = EquipSetup {
+    let equip_setup = EquipSetup {
         blockchain_wrapper,
         owner_address,
         first_user_address,
@@ -84,9 +84,9 @@ where
     };
 
     // register items
-    register_item(&mut equip_setup, ItemSlot::Hat, HAT_TOKEN_ID);
+    // register_item(&mut equip_setup, ItemSlot::Hat, HAT_TOKEN_ID);
 
-    equip_setup
+    return equip_setup;
 }
 
 pub fn register_item<EquipObjBuilder>(
@@ -164,7 +164,14 @@ pub fn give_one_penguin_with_hat(
                 TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
                 hat_nonce,
             ),
-            ..Default::default()
+            ..PenguinAttributes::empty()
         },
     );
+}
+
+pub fn execute_for_all_slot(execute: fn(&ItemSlot) -> ()) {
+    // execute(&ItemSlot::Hat);
+    for slot in ItemSlot::VALUES.iter() {
+        execute(slot);
+    }
 }

@@ -117,112 +117,116 @@ fn test_equip() {
 
 #[test]
 fn test_equip_while_overlap() {
-    let mut setup = utils::setup(equip_penguin::contract_obj);
+    utils::execute_for_all_slot(|slot| {
+        const ITEM_TO_EQUIP: &[u8] = b"ITEM-a";
 
-    utils::set_all_permissions_on_token(&mut setup, HAT_TOKEN_ID);
-    utils::register_item(&mut setup, ItemSlot::Hat, HAT_TOKEN_ID);
+        let mut setup = utils::setup(equip_penguin::contract_obj);
 
-    let b_wrapper = &mut setup.blockchain_wrapper;
-    let hat_to_remove_nonce = 56;
+        utils::set_all_permissions_on_token(&mut setup, ITEM_TO_EQUIP);
+        utils::register_item(&mut setup, slot.clone(), ITEM_TO_EQUIP);
 
-    // user own a penguin equiped with an hat
-    b_wrapper.set_nft_balance(
-        &setup.first_user_address,
-        PENGUIN_TOKEN_ID,
-        INIT_NONCE,
-        &rust_biguint!(1),
-        &PenguinAttributes {
-            hat: (
-                TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
+        let b_wrapper = &mut setup.blockchain_wrapper;
+        let hat_to_remove_nonce = 56;
+
+        // user own a penguin equiped with an hat
+        b_wrapper.set_nft_balance(
+            &setup.first_user_address,
+            PENGUIN_TOKEN_ID,
+            INIT_NONCE,
+            &rust_biguint!(1),
+            &PenguinAttributes::<DebugApi>::new(&[(
+                slot,
+                managed_token_id!(ITEM_TO_EQUIP),
                 hat_to_remove_nonce,
-            ),
-            ..PenguinAttributes::empty()
-        },
-    );
+            )]),
+        );
 
-    let hat_to_equip_nonce = 30;
-    // give the player a hat
-    b_wrapper.set_nft_balance(
-        &setup.first_user_address,
-        HAT_TOKEN_ID,
-        hat_to_equip_nonce,
-        &rust_biguint!(1),
-        &ItemAttributes {},
-    );
+        let hat_to_equip_nonce = 30;
+        // give the player a hat
+        b_wrapper.set_nft_balance(
+            &setup.first_user_address,
+            ITEM_TO_EQUIP,
+            hat_to_equip_nonce,
+            &rust_biguint!(1),
+            &ItemAttributes {},
+        );
 
-    let esdt_transfers = &utils::create_esdt_transfers(&[
-        (PENGUIN_TOKEN_ID, INIT_NONCE),
-        (HAT_TOKEN_ID, hat_to_equip_nonce),
-    ]);
+        let esdt_transfers = &utils::create_esdt_transfers(&[
+            (PENGUIN_TOKEN_ID, INIT_NONCE),
+            (ITEM_TO_EQUIP, hat_to_equip_nonce),
+        ]);
 
-    b_wrapper.execute_esdt_multi_transfer(
-        &setup.first_user_address,
-        &setup.cf_wrapper,
-        esdt_transfers,
-        |sc| {
-            let managed_items_to_equip =
-                utils::create_managed_items_to_equip(&[(HAT_TOKEN_ID, hat_to_equip_nonce)]);
+        b_wrapper.execute_esdt_multi_transfer(
+            &setup.first_user_address,
+            &setup.cf_wrapper,
+            esdt_transfers,
+            |sc| {
+                let managed_items_to_equip =
+                    utils::create_managed_items_to_equip(&[(ITEM_TO_EQUIP, hat_to_equip_nonce)]);
 
-            let result = sc.equip(
-                &TokenIdentifier::<DebugApi>::from_esdt_bytes(PENGUIN_TOKEN_ID),
-                INIT_NONCE,
-                managed_items_to_equip,
-            );
-
-            if let SCResult::Err(err) = result {
-                panic!(
-                    "register_item failed: {:?}",
-                    std::str::from_utf8(&err.as_bytes()).unwrap(),
+                let result = sc.equip(
+                    &TokenIdentifier::<DebugApi>::from_esdt_bytes(PENGUIN_TOKEN_ID),
+                    INIT_NONCE,
+                    managed_items_to_equip,
                 );
-            }
 
-            assert_eq!(result, SCResult::Ok(1u64));
+                if let SCResult::Err(err) = result {
+                    panic!(
+                        "register_item failed: {:?}",
+                        std::str::from_utf8(&err.as_bytes()).unwrap(),
+                    );
+                }
 
-            StateChange::Commit
-        },
-    );
+                assert_eq!(result, SCResult::Ok(1u64));
 
-    // SHOULD sent removed equipment
-    b_wrapper.check_nft_balance(
-        &setup.first_user_address,
-        HAT_TOKEN_ID,
-        INIT_NONCE,
-        &rust_biguint!(1),
-        &ItemAttributes {},
-    );
+                StateChange::Commit
+            },
+        );
 
-    // SHOULD sent generated penguin
-    b_wrapper.check_nft_balance(
-        &setup.first_user_address,
-        PENGUIN_TOKEN_ID,
-        1,
-        &rust_biguint!(1),
-        &PenguinAttributes {
-            hat: (
-                TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
+        // SHOULD sent removed equipment
+        b_wrapper.check_nft_balance(
+            &setup.first_user_address,
+            ITEM_TO_EQUIP,
+            INIT_NONCE,
+            &rust_biguint!(1),
+            &ItemAttributes {},
+        );
+
+        // SHOULD sent generated penguin
+        b_wrapper.check_nft_balance(
+            &setup.first_user_address,
+            PENGUIN_TOKEN_ID,
+            1,
+            &rust_biguint!(1),
+            &PenguinAttributes::<DebugApi>::new(&[(
+                slot,
+                managed_token_id!(ITEM_TO_EQUIP),
                 hat_to_equip_nonce,
+            )]),
+        );
+
+        // sent penguin is burned
+        assert_eq!(
+            b_wrapper.get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, INIT_NONCE),
+            rust_biguint!(0)
+        );
+
+        // new penguin is received
+        assert_eq!(
+            b_wrapper.get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, 1),
+            rust_biguint!(1)
+        );
+
+        // previously hat is sent
+        assert_eq!(
+            b_wrapper.get_esdt_balance(
+                &setup.first_user_address,
+                ITEM_TO_EQUIP,
+                hat_to_remove_nonce
             ),
-            ..PenguinAttributes::empty()
-        },
-    );
-
-    // sent penguin is burned
-    assert_eq!(
-        b_wrapper.get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, INIT_NONCE),
-        rust_biguint!(0)
-    );
-
-    // new penguin is received
-    assert_eq!(
-        b_wrapper.get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, 1),
-        rust_biguint!(1)
-    );
-
-    // previously hat is sent
-    assert_eq!(
-        b_wrapper.get_esdt_balance(&setup.first_user_address, HAT_TOKEN_ID, hat_to_remove_nonce),
-        rust_biguint!(1)
-    );
+            rust_biguint!(1)
+        );
+    });
 }
 
 #[test]

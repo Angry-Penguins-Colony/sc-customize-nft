@@ -273,3 +273,62 @@ fn equip_while_nft_to_equip_is_not_a_penguin() {
         },
     );
 }
+
+#[test]
+fn equip_while_item_is_not_an_item() {
+    utils::execute_for_all_slot(|slot| {
+        const ITEM_TO_EQUIP_ID: &[u8] = b"NOT-AN-ITEM-a";
+
+        let mut setup = utils::setup(equip_penguin::contract_obj);
+
+        let b_wrapper = &mut setup.blockchain_wrapper;
+
+        let penguin_attributes = PenguinAttributes::<DebugApi>::empty();
+
+        b_wrapper.set_nft_balance(
+            &setup.first_user_address,
+            PENGUIN_TOKEN_ID,
+            INIT_NONCE,
+            &rust_biguint!(1),
+            &penguin_attributes,
+        );
+
+        b_wrapper.set_nft_balance(
+            &setup.first_user_address,
+            ITEM_TO_EQUIP_ID,
+            INIT_NONCE,
+            &rust_biguint!(1),
+            &ItemAttributes {},
+        );
+
+        let transfers = utils::create_esdt_transfers(&[
+            (PENGUIN_TOKEN_ID, INIT_NONCE),
+            (ITEM_TO_EQUIP_ID, INIT_NONCE),
+        ]);
+
+        b_wrapper.execute_esdt_multi_transfer(
+            &setup.first_user_address,
+            &setup.cf_wrapper,
+            &transfers,
+            |sc| {
+                let managed_items_to_equip =
+                    utils::create_managed_items_to_equip(&[(ITEM_TO_EQUIP_ID, INIT_NONCE)]);
+
+                let result = sc.equip(
+                    &managed_token_id!(PENGUIN_TOKEN_ID),
+                    INIT_NONCE,
+                    managed_items_to_equip,
+                );
+
+                assert_eq!(
+                    result,
+                    SCResult::Err(
+                        "You are trying to equip a token that is not considered as an item".into()
+                    )
+                );
+
+                StateChange::Revert
+            },
+        );
+    });
+}

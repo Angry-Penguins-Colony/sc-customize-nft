@@ -81,10 +81,17 @@ pub trait Equip {
         for item_token in items_token {
             let (item_id, item_nonce) = item_token.into_tuple();
 
-            // determine itemType from ID
+            require!(
+                self.items_slot(&item_id).get() != ItemSlot::None,
+                "You are trying to equip a token that is not considered as an item"
+            );
+
             let item_slot_out = self.get_item_slot(&item_id);
 
             match item_slot_out {
+                OptionalResult::None => {
+                    require!(false, "An item provided is not considered like an item.")
+                }
                 OptionalResult::Some(item_slot) => {
                     match attributes.is_slot_empty(&item_slot) {
                         Result::Ok(false) => {
@@ -106,9 +113,6 @@ pub trait Equip {
                         result == Result::Ok(()),
                         "Cannot set item. Maybe the item is not considered like an item."
                     );
-                }
-                OptionalResult::None => {
-                    require!(false, "An item provided is not considered like an item.")
                 }
             }
 

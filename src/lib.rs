@@ -47,6 +47,8 @@ pub trait Equip {
                 "You cannot register a penguin as an item."
             );
 
+            self.require_item_roles_set(&item_id)?;
+
             self.items_slot(&item_id.into()).set(&item_slot);
         }
 
@@ -138,6 +140,22 @@ pub trait Equip {
 
         // return items nonces
         return self.update_penguin(&penguin_id, penguin_nonce, &attributes);
+    }
+
+    fn require_item_roles_set(&self, token_id: &TokenIdentifier) -> SCResult<()> {
+        let roles = self.blockchain().get_esdt_local_roles(token_id);
+
+        require!(
+            roles.has_role(&EsdtLocalRole::Mint) == true,
+            "Local mint role not set"
+        );
+
+        require!(
+            roles.has_role(&EsdtLocalRole::Burn) == true,
+            "Local burn role not set"
+        );
+
+        Ok(())
     }
 
     /// Empty the item at the slot proivided and sent it to the caller.

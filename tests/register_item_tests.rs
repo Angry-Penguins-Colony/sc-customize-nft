@@ -1,4 +1,6 @@
-use elrond_wasm::types::{ManagedVarArgs, ManagedVec, SCError, SCResult, StaticSCError};
+use elrond_wasm::types::{
+    EsdtLocalRole, ManagedVarArgs, ManagedVec, SCError, SCResult, StaticSCError,
+};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::item_slot::ItemSlot;
@@ -54,6 +56,62 @@ fn register_another_item_on_slot() {
 
         assert_eq!(result2, ItemSlot::Hat);
     });
+}
+
+#[test]
+fn register_unmintable_item() {
+    let mut setup = utils::setup(equip_penguin::contract_obj);
+
+    let b_wrapper = &mut setup.blockchain_wrapper;
+
+    b_wrapper.execute_tx(
+        &setup.owner_address,
+        &setup.cf_wrapper,
+        &rust_biguint!(0),
+        |sc| {
+            let mut managed_items_ids =
+                ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
+            managed_items_ids.push(managed_token_id!(b"a token without minting rights"));
+
+            let result = sc.register_item(ItemSlot::Hat, managed_items_ids);
+
+            assert_eq!(result, SCResult::Err("Local mint role not set".into()));
+
+            StateChange::Revert
+        },
+    );
+}
+
+#[test]
+fn register_unburnable_item() {
+    const UNBURNABLE: &[u8] = b"a token without minting rights";
+
+    let mut setup = utils::setup(equip_penguin::contract_obj);
+
+    let b_wrapper = &mut setup.blockchain_wrapper;
+
+    b_wrapper.set_esdt_local_roles(
+        setup.cf_wrapper.address_ref(),
+        UNBURNABLE,
+        &[EsdtLocalRole::Mint],
+    );
+
+    b_wrapper.execute_tx(
+        &setup.owner_address,
+        &setup.cf_wrapper,
+        &rust_biguint!(0),
+        |sc| {
+            let mut managed_items_ids =
+                ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
+            managed_items_ids.push(managed_token_id!(UNBURNABLE));
+
+            let result = sc.register_item(ItemSlot::Hat, managed_items_ids);
+
+            assert_eq!(result, SCResult::Err("Local burn role not set".into()));
+
+            StateChange::Revert
+        },
+    );
 }
 
 #[test]

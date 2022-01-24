@@ -31,6 +31,7 @@ fn test_desequip() {
                 TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
                 INIT_NONCE,
             ),
+            ..Default::default()
         },
     );
 
@@ -64,6 +65,7 @@ fn test_desequip() {
                 TokenIdentifier::<DebugApi>::from(ManagedBuffer::new()),
                 0u64,
             ),
+            ..Default::default()
         },
     );
 

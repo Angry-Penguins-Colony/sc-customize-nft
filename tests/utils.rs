@@ -164,6 +164,7 @@ pub fn give_one_penguin_with_hat(
                 TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
                 hat_nonce,
             ),
+            ..Default::default()
         },
     );
 }

@@ -24,6 +24,7 @@ fn test_equip() {
 
     let penguin_attributes = PenguinAttributes {
         hat: none_value.clone(),
+        ..Default::default()
     };
 
     assert_eq!(
@@ -81,6 +82,7 @@ fn test_equip() {
                 TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
                 INIT_NONCE,
             ),
+            ..Default::default()
         },
     );
 
@@ -92,6 +94,7 @@ fn test_equip() {
         &rust_biguint!(0),
         &PenguinAttributes {
             hat: none_value.clone(),
+            ..Default::default()
         },
     );
 
@@ -103,6 +106,7 @@ fn test_equip() {
         &rust_biguint!(0),
         &PenguinAttributes {
             hat: none_value.clone(),
+            ..Default::default()
         },
     );
 
@@ -117,6 +121,7 @@ fn test_equip() {
                 TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
                 INIT_NONCE,
             ),
+            ..Default::default()
         },
     );
 
@@ -149,6 +154,7 @@ fn test_equip_while_overlap() {
                 TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
                 hat_to_remove_nonce,
             ),
+            ..Default::default()
         },
     );
 
@@ -207,6 +213,7 @@ fn test_equip_while_overlap() {
                 TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
                 hat_to_equip_nonce,
             ),
+            ..Default::default()
         },
     );
 

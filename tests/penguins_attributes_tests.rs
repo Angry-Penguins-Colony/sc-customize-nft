@@ -7,22 +7,11 @@ fn is_empty_while_not_empty() {
     execute_for_all_slot(|slot| {
         DebugApi::dummy();
 
-        let penguin = PenguinAttributes {
-            hat: (TokenIdentifier::<DebugApi>::from_esdt_bytes(b"HAT-a"), 1),
-            background: (
-                TokenIdentifier::<DebugApi>::from_esdt_bytes(b"BACKGROUND-a"),
-                1,
-            ),
-            skin: (TokenIdentifier::<DebugApi>::from_esdt_bytes(b"SKIN-a"), 1),
-            chain: (TokenIdentifier::<DebugApi>::from_esdt_bytes(b"CHAIN-a"), 1),
-            beak: (TokenIdentifier::<DebugApi>::from_esdt_bytes(b"BEAK-a"), 1),
-            weapon: (TokenIdentifier::<DebugApi>::from_esdt_bytes(b"WEAPON-a"), 1),
-            clothes: (
-                TokenIdentifier::<DebugApi>::from_esdt_bytes(b"CLOTHES-a"),
-                1,
-            ),
-            eye: (TokenIdentifier::<DebugApi>::from_esdt_bytes(b"EYE-a"), 1),
-        };
+        let penguin = PenguinAttributes::<DebugApi>::new(&[(
+            slot,
+            TokenIdentifier::from_esdt_bytes(b"ITEM-a"),
+            0,
+        )]);
 
         assert_eq!(penguin.is_slot_empty(slot), Result::Ok(false));
     });
@@ -33,10 +22,8 @@ fn is_empty_while_empty() {
     execute_for_all_slot(|slot| {
         DebugApi::dummy();
 
-        let penguin = PenguinAttributes {
-            hat: (TokenIdentifier::<DebugApi>::from_esdt_bytes(b""), 1),
-            ..Default::default()
-        };
+        let penguin =
+            PenguinAttributes::<DebugApi>::new(&[(slot, TokenIdentifier::from_esdt_bytes(b""), 0)]);
 
         assert_eq!(penguin.is_slot_empty(slot), Result::Ok(true));
     });
@@ -47,10 +34,8 @@ fn set_item_on_empty_slot() {
     execute_for_all_slot(|slot| {
         DebugApi::dummy();
 
-        let mut penguin = PenguinAttributes {
-            hat: (TokenIdentifier::<DebugApi>::from_esdt_bytes(b""), 0),
-            ..Default::default()
-        };
+        let mut penguin =
+            PenguinAttributes::<DebugApi>::new(&[(slot, TokenIdentifier::from_esdt_bytes(b""), 0)]);
 
         let token = b"ITEM-b";
         let managed_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(token);
@@ -71,23 +56,11 @@ fn set_item_on_not_empty_slot() {
     execute_for_all_slot(|slot| {
         DebugApi::dummy();
 
-        let mut penguin = PenguinAttributes {
-            hat: (TokenIdentifier::<DebugApi>::from_esdt_bytes(b"HAT-a"), 1),
-            background: (
-                TokenIdentifier::<DebugApi>::from_esdt_bytes(b"BACKGROUND-a"),
-                1,
-            ),
-            skin: (TokenIdentifier::<DebugApi>::from_esdt_bytes(b"SKIN-a"), 1),
-            chain: (TokenIdentifier::<DebugApi>::from_esdt_bytes(b"CHAIN-a"), 1),
-            beak: (TokenIdentifier::<DebugApi>::from_esdt_bytes(b"BEAK-a"), 1),
-            weapon: (TokenIdentifier::<DebugApi>::from_esdt_bytes(b"WEAPON-a"), 1),
-            clothes: (
-                TokenIdentifier::<DebugApi>::from_esdt_bytes(b"CLOTHES-a"),
-                1,
-            ),
-            eye: (TokenIdentifier::<DebugApi>::from_esdt_bytes(b"EYE-a"), 1),
-            ..Default::default()
-        };
+        let mut penguin = PenguinAttributes::<DebugApi>::new(&[(
+            slot,
+            TokenIdentifier::from_esdt_bytes(b"ITEM-a"),
+            0,
+        )]);
 
         let token = b"ITEM-b";
         let managed_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(token);
@@ -108,10 +81,8 @@ fn empty_slot_while_slot_is_empty() {
     execute_for_all_slot(|slot| {
         DebugApi::dummy();
 
-        let mut penguin = PenguinAttributes {
-            hat: (TokenIdentifier::<DebugApi>::from_esdt_bytes(b""), 1),
-            ..Default::default()
-        };
+        let mut penguin =
+            PenguinAttributes::<DebugApi>::new(&[(slot, TokenIdentifier::from_esdt_bytes(b""), 0)]);
 
         let result = penguin.empty_slot(&slot);
         assert_eq!(result, Result::Ok(()));
@@ -123,10 +94,11 @@ fn empty_slot_while_slot_is_not_empty() {
     execute_for_all_slot(|slot| {
         DebugApi::dummy();
 
-        let mut penguin = PenguinAttributes {
-            hat: (TokenIdentifier::<DebugApi>::from_esdt_bytes(b"HAT-aaaa"), 1),
-            ..Default::default()
-        };
+        let mut penguin = PenguinAttributes::<DebugApi>::new(&[(
+            slot,
+            TokenIdentifier::from_esdt_bytes(b"HAT-aaaa"),
+            0,
+        )]);
 
         let result = penguin.empty_slot(&slot);
         assert_eq!(result, Result::Ok(()));

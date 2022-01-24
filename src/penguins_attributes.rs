@@ -38,6 +38,28 @@ impl<M: ManagedTypeApi> Default for PenguinAttributes<M> {
 }
 
 impl<M: ManagedTypeApi> PenguinAttributes<M> {
+    pub fn new(args: &[(&ItemSlot, TokenIdentifier<M>, u64)]) -> Self {
+        let mut attributes = Self::default();
+
+        for (slot, token_id, nonce) in args {
+            let item = (token_id.clone(), nonce.clone());
+
+            match slot {
+                ItemSlot::Hat => attributes.hat = item,
+                ItemSlot::Background => attributes.background = item,
+                ItemSlot::Skin => attributes.skin = item,
+                ItemSlot::Chain => attributes.chain = item,
+                ItemSlot::Beak => attributes.beak = item,
+                ItemSlot::Weapon => attributes.weapon = item,
+                ItemSlot::Clothes => attributes.clothes = item,
+                ItemSlot::Eye => attributes.eye = item,
+                _ => panic!("Invalid slot"),
+            }
+        }
+
+        attributes
+    }
+
     pub fn set_item(
         &mut self,
         slot: &ItemSlot,

@@ -86,9 +86,14 @@ fn test_desequip() {
             &ItemAttributes {},
         );
 
-        // assert_eq!(
-        //     b_wrapper.get_esdt_balance(&setup.first_user_address, ITEM_TO_DESEQUIP_ID, INIT_NONCE),
-        //     rust_biguint!(1)
-        // );
+        assert_eq!(
+            b_wrapper.get_esdt_balance(&setup.first_user_address, ITEM_TO_DESEQUIP_ID, INIT_NONCE),
+            rust_biguint!(1)
+        );
+
+        assert_eq!(
+            b_wrapper.get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, 1u64),
+            rust_biguint!(1)
+        );
     });
 }

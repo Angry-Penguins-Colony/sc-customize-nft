@@ -16,117 +16,103 @@ const INIT_NONCE: u64 = 65535;
 // create NFT on blockchain wrapper
 #[test]
 fn test_equip() {
-    let mut setup = utils::setup(equip_penguin::contract_obj);
+    utils::execute_for_all_slot(|slot| {
+        const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a";
 
-    utils::set_all_permissions_on_token(&mut setup, HAT_TOKEN_ID);
-    utils::register_item(&mut setup, ItemSlot::Hat, HAT_TOKEN_ID);
+        let mut setup = utils::setup(equip_penguin::contract_obj);
 
-    let b_wrapper = &mut setup.blockchain_wrapper;
+        utils::set_all_permissions_on_token(&mut setup, ITEM_TO_EQUIP_ID);
+        utils::register_item(&mut setup, slot.clone(), ITEM_TO_EQUIP_ID);
 
-    let penguin_attributes = PenguinAttributes::<DebugApi>::empty();
+        let b_wrapper = &mut setup.blockchain_wrapper;
 
-    assert_eq!(
-        penguin_attributes.is_slot_empty(&ItemSlot::Hat),
-        Result::Ok(true)
-    );
+        let penguin_attributes = PenguinAttributes::<DebugApi>::empty();
 
-    b_wrapper.set_nft_balance(
-        &setup.first_user_address,
-        PENGUIN_TOKEN_ID,
-        INIT_NONCE,
-        &rust_biguint!(1),
-        &penguin_attributes,
-    );
+        assert_eq!(penguin_attributes.is_slot_empty(&slot), Result::Ok(true));
 
-    b_wrapper.set_nft_balance(
-        &setup.first_user_address,
-        HAT_TOKEN_ID,
-        INIT_NONCE,
-        &rust_biguint!(1),
-        &ItemAttributes {},
-    );
+        b_wrapper.set_nft_balance(
+            &setup.first_user_address,
+            PENGUIN_TOKEN_ID,
+            INIT_NONCE,
+            &rust_biguint!(1),
+            &penguin_attributes,
+        );
 
-    let transfers =
-        utils::create_esdt_transfers(&[(PENGUIN_TOKEN_ID, INIT_NONCE), (HAT_TOKEN_ID, INIT_NONCE)]);
+        b_wrapper.set_nft_balance(
+            &setup.first_user_address,
+            ITEM_TO_EQUIP_ID,
+            INIT_NONCE,
+            &rust_biguint!(1),
+            &ItemAttributes {},
+        );
 
-    b_wrapper.execute_esdt_multi_transfer(
-        &setup.first_user_address,
-        &setup.cf_wrapper,
-        &transfers,
-        |sc| {
-            let managed_items_to_equip =
-                utils::create_managed_items_to_equip(&[(HAT_TOKEN_ID, INIT_NONCE)]);
+        let transfers = utils::create_esdt_transfers(&[
+            (PENGUIN_TOKEN_ID, INIT_NONCE),
+            (ITEM_TO_EQUIP_ID, INIT_NONCE),
+        ]);
 
-            let result = sc.equip(
-                &managed_token_id!(PENGUIN_TOKEN_ID),
-                INIT_NONCE,
-                managed_items_to_equip,
-            );
+        b_wrapper.execute_esdt_multi_transfer(
+            &setup.first_user_address,
+            &setup.cf_wrapper,
+            &transfers,
+            |sc| {
+                let managed_items_to_equip =
+                    utils::create_managed_items_to_equip(&[(ITEM_TO_EQUIP_ID, INIT_NONCE)]);
 
-            utils::verbose_log_if_error(&result, "".to_string());
+                let result = sc.equip(
+                    &managed_token_id!(PENGUIN_TOKEN_ID),
+                    INIT_NONCE,
+                    managed_items_to_equip,
+                );
 
-            assert_eq!(result, SCResult::Ok(1u64));
+                utils::verbose_log_if_error(&result, "".to_string());
 
-            StateChange::Commit
-        },
-    );
+                assert_eq!(result, SCResult::Ok(1u64));
 
-    // generated penguin has been sent
-    b_wrapper.check_nft_balance(
-        &setup.cf_wrapper.address_ref(),
-        PENGUIN_TOKEN_ID,
-        1u64,
-        &rust_biguint!(0),
-        &PenguinAttributes {
-            hat: (
-                TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
-                INIT_NONCE,
+                StateChange::Commit
+            },
+        );
+
+        // the SC don't onw the penguin
+        assert_eq!(
+            b_wrapper.get_esdt_balance(
+                &setup.cf_wrapper.address_ref(),
+                PENGUIN_TOKEN_ID,
+                INIT_NONCE
             ),
-            ..PenguinAttributes::empty()
-        },
-    );
+            rust_biguint!(0)
+        );
 
-    // the transfered penguin has been burn
-    b_wrapper.check_nft_balance(
-        &setup.cf_wrapper.address_ref(),
-        PENGUIN_TOKEN_ID,
-        INIT_NONCE,
-        &rust_biguint!(0),
-        &PenguinAttributes::<DebugApi>::empty(),
-    );
+        // the transfered penguin has not been sent back
+        assert_eq!(
+            b_wrapper.get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, INIT_NONCE),
+            rust_biguint!(0)
+        );
 
-    // the transfered penguin has not been sent back
-    b_wrapper.check_nft_balance(
-        &setup.first_user_address,
-        PENGUIN_TOKEN_ID,
-        INIT_NONCE,
-        &rust_biguint!(0),
-        &PenguinAttributes::<DebugApi>::empty(),
-    );
+        // the NEW penguin has been received
+        assert_eq!(
+            b_wrapper.get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, 1),
+            rust_biguint!(1)
+        );
 
-    // the NEW penguin has been received
-    b_wrapper.check_nft_balance(
-        &setup.first_user_address,
-        PENGUIN_TOKEN_ID,
-        1u64,
-        &rust_biguint!(1),
-        &PenguinAttributes {
-            hat: (
-                TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
+        // the transfered hat has been burn
+        assert_eq!(
+            b_wrapper.get_esdt_balance(&setup.first_user_address, HAT_TOKEN_ID, INIT_NONCE),
+            rust_biguint!(0)
+        );
+
+        b_wrapper.check_nft_balance(
+            &setup.first_user_address,
+            PENGUIN_TOKEN_ID,
+            1u64,
+            &rust_biguint!(1),
+            &PenguinAttributes::<DebugApi>::new(&[(
+                slot,
+                managed_token_id!(ITEM_TO_EQUIP_ID),
                 INIT_NONCE,
-            ),
-            ..PenguinAttributes::empty()
-        },
-    );
-
-    // the transfered hat has been burn
-    b_wrapper.check_nft_balance(
-        &setup.first_user_address,
-        HAT_TOKEN_ID,
-        INIT_NONCE,
-        &rust_biguint!(0),
-        &ItemAttributes {},
-    );
+            )]),
+        );
+    });
 }
 
 #[test]

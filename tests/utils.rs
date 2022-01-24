@@ -55,27 +55,7 @@ where
 
     DebugApi::dummy();
 
-    let contract_roles = [
-        EsdtLocalRole::NftCreate,
-        EsdtLocalRole::NftBurn,
-        EsdtLocalRole::NftAddQuantity,
-        EsdtLocalRole::Mint,
-        EsdtLocalRole::Burn,
-    ];
-
-    blockchain_wrapper.set_esdt_local_roles(
-        cf_wrapper.address_ref(),
-        PENGUIN_TOKEN_ID,
-        &contract_roles,
-    );
-
-    blockchain_wrapper.set_esdt_local_roles(
-        cf_wrapper.address_ref(),
-        HAT_TOKEN_ID,
-        &contract_roles,
-    );
-
-    let equip_setup = EquipSetup {
+    let mut equip_setup = EquipSetup {
         blockchain_wrapper,
         owner_address,
         first_user_address,
@@ -83,8 +63,7 @@ where
         cf_wrapper,
     };
 
-    // register items
-    // register_item(&mut equip_setup, ItemSlot::Hat, HAT_TOKEN_ID);
+    set_all_permissions_on_token(&mut equip_setup, PENGUIN_TOKEN_ID);
 
     return equip_setup;
 }

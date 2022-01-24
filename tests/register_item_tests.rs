@@ -15,6 +15,7 @@ const ANOTHER_HAT_TOKEN_ID: &[u8] = utils::HAT_2_TOKEN_ID;
 fn test_register_item() {
     let mut setup = utils::setup(equip_penguin::contract_obj);
 
+    utils::set_all_permissions_on_token(&mut setup, HAT_TOKEN_ID);
     utils::register_item(&mut setup, ItemSlot::Hat, HAT_TOKEN_ID);
     let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -122,6 +123,7 @@ fn change_item_slot() {
 
     const ITEM_ID: &[u8] = HAT_TOKEN_ID;
 
+    utils::set_all_permissions_on_token(&mut setup, ITEM_ID);
     utils::register_item(&mut setup, ItemSlot::Hat, ITEM_ID);
     utils::register_item(&mut setup, ItemSlot::Background, ITEM_ID);
 

@@ -12,6 +12,7 @@ const HAT_TOKEN_ID: &[u8] = utils::HAT_TOKEN_ID;
 fn test_get_item() {
     let mut setup = utils::setup(equip_penguin::contract_obj);
 
+    utils::set_all_permissions_on_token(&mut setup, HAT_TOKEN_ID);
     utils::register_item(&mut setup, ItemSlot::Hat, HAT_TOKEN_ID);
 
     let b_wrapper = &mut setup.blockchain_wrapper;

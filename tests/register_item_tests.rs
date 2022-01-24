@@ -41,6 +41,8 @@ fn test_register_item() {
 fn register_another_item_on_slot() {
     let mut setup = utils::setup(equip_penguin::contract_obj);
 
+    utils::set_all_permissions_on_token(&mut setup, HAT_TOKEN_ID);
+    utils::set_all_permissions_on_token(&mut setup, ANOTHER_HAT_TOKEN_ID);
     utils::register_item(&mut setup, ItemSlot::Hat, HAT_TOKEN_ID);
     utils::register_item(&mut setup, ItemSlot::Hat, ANOTHER_HAT_TOKEN_ID);
     let b_wrapper = &mut setup.blockchain_wrapper;
@@ -107,7 +109,7 @@ fn register_unburnable_item() {
 
             let result = sc.register_item(ItemSlot::Hat, managed_items_ids);
 
-            assert_eq!(result, SCResult::Err("Local burn role not set".into()));
+            assert_eq!(result, SCResult::Err(("Local burn role not set").into()));
 
             StateChange::Revert
         },

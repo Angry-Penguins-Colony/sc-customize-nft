@@ -16,28 +16,12 @@ const INIT_NONCE: u64 = 65535;
 fn test_desequip() {
     execute_for_all_slot(|slot| {
         let mut setup = utils::setup(equip_penguin::contract_obj);
-        const ITEM_TO_DESEQUIP_ID: &[u8] = b"ITEM-a";
 
+        const ITEM_TO_DESEQUIP_ID: &[u8] = b"ITEM-a";
+        utils::set_all_permissions_on_token(&mut setup, ITEM_TO_DESEQUIP_ID);
         utils::register_item(&mut setup, slot.clone(), ITEM_TO_DESEQUIP_ID);
 
-        let b_wrapper = &mut setup.blockchain_wrapper;
-
-        let contract_roles = [
-            EsdtLocalRole::NftCreate,
-            EsdtLocalRole::NftBurn,
-            EsdtLocalRole::NftAddQuantity,
-            EsdtLocalRole::Mint,
-            EsdtLocalRole::Burn,
-        ];
-
-        b_wrapper.set_esdt_local_roles(
-            setup.cf_wrapper.address_ref(),
-            ITEM_TO_DESEQUIP_ID,
-            &contract_roles,
-        );
-
-        let transfers = create_esdt_transfers(&[(PENGUIN_TOKEN_ID, INIT_NONCE)]);
-
+        let mut b_wrapper = setup.blockchain_wrapper;
         b_wrapper.set_nft_balance(
             &setup.first_user_address,
             PENGUIN_TOKEN_ID,
@@ -50,6 +34,7 @@ fn test_desequip() {
             )]),
         );
 
+        let transfers = create_esdt_transfers(&[(PENGUIN_TOKEN_ID, INIT_NONCE)]);
         b_wrapper.execute_esdt_multi_transfer(
             &setup.first_user_address,
             &setup.cf_wrapper,

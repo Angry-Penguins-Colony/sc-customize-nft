@@ -108,11 +108,30 @@ pub fn register_item<EquipObjBuilder>(
             managed_items_ids.push(managed_token_id!(item_id));
 
             let result = sc.register_item(item_type, managed_items_ids);
+
+            if let SCResult::Err(err) = result {
+                panic!(
+                    "register_item {:?} failed: {:?}",
+                    std::str::from_utf8(&item_id).unwrap(),
+                    std::str::from_utf8(&err.as_bytes()).unwrap(),
+                );
+            }
+
             assert_eq!(result, SCResult::Ok(()));
 
             StateChange::Commit
         },
     );
+}
+
+pub fn verbose_log_if_error<T>(result: &SCResult<T>, message: String) {
+    if let SCResult::Err(err) = &*result {
+        panic!(
+            "{} | failed {:?}",
+            message,
+            std::str::from_utf8(&err.as_bytes()).unwrap(),
+        );
+    }
 }
 
 pub fn create_esdt_transfers(tokens: &[(&[u8], u64)]) -> Vec<TxInputESDT> {
@@ -146,6 +165,26 @@ pub fn create_managed_items_to_equip(
     }
 
     return managed_items_to_equip;
+}
+
+pub fn set_all_permissions_on_token<EquipObjBuilder>(
+    setup: &mut EquipSetup<EquipObjBuilder>,
+    token_id: &[u8],
+) where
+    EquipObjBuilder: 'static + Copy + Fn(DebugApi) -> equip_penguin::ContractObj<DebugApi>,
+{
+    let contract_roles = [
+        EsdtLocalRole::NftCreate,
+        EsdtLocalRole::NftBurn,
+        EsdtLocalRole::NftAddQuantity,
+        EsdtLocalRole::Mint,
+        EsdtLocalRole::Burn,
+    ];
+    setup.blockchain_wrapper.set_esdt_local_roles(
+        setup.cf_wrapper.address_ref(),
+        token_id,
+        &contract_roles,
+    );
 }
 
 pub fn give_one_penguin_with_hat(

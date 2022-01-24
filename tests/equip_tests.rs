@@ -18,14 +18,12 @@ const INIT_NONCE: u64 = 65535;
 fn test_equip() {
     let mut setup = utils::setup(equip_penguin::contract_obj);
 
+    utils::set_all_permissions_on_token(&mut setup, HAT_TOKEN_ID);
+    utils::register_item(&mut setup, ItemSlot::Hat, HAT_TOKEN_ID);
+
     let b_wrapper = &mut setup.blockchain_wrapper;
 
-    let none_value = (TokenIdentifier::<DebugApi>::from_esdt_bytes(b""), 0);
-
-    let penguin_attributes = PenguinAttributes {
-        hat: none_value.clone(),
-        ..PenguinAttributes::empty()
-    };
+    let penguin_attributes = PenguinAttributes::<DebugApi>::empty();
 
     assert_eq!(
         penguin_attributes.is_slot_empty(&ItemSlot::Hat),
@@ -65,6 +63,8 @@ fn test_equip() {
                 managed_items_to_equip,
             );
 
+            utils::verbose_log_if_error(&result, "".to_string());
+
             assert_eq!(result, SCResult::Ok(1u64));
 
             StateChange::Commit
@@ -92,10 +92,7 @@ fn test_equip() {
         PENGUIN_TOKEN_ID,
         INIT_NONCE,
         &rust_biguint!(0),
-        &PenguinAttributes {
-            hat: none_value.clone(),
-            ..PenguinAttributes::empty()
-        },
+        &PenguinAttributes::<DebugApi>::empty(),
     );
 
     // the transfered penguin has not been sent back
@@ -104,10 +101,7 @@ fn test_equip() {
         PENGUIN_TOKEN_ID,
         INIT_NONCE,
         &rust_biguint!(0),
-        &PenguinAttributes {
-            hat: none_value.clone(),
-            ..PenguinAttributes::empty()
-        },
+        &PenguinAttributes::<DebugApi>::empty(),
     );
 
     // the NEW penguin has been received
@@ -139,8 +133,10 @@ fn test_equip() {
 fn test_equip_while_overlap() {
     let mut setup = utils::setup(equip_penguin::contract_obj);
 
-    let b_wrapper = &mut setup.blockchain_wrapper;
+    utils::set_all_permissions_on_token(&mut setup, HAT_TOKEN_ID);
+    utils::register_item(&mut setup, ItemSlot::Hat, HAT_TOKEN_ID);
 
+    let b_wrapper = &mut setup.blockchain_wrapper;
     let hat_to_remove_nonce = 56;
 
     // user own a penguin equiped with an hat
@@ -186,6 +182,13 @@ fn test_equip_while_overlap() {
                 INIT_NONCE,
                 managed_items_to_equip,
             );
+
+            if let SCResult::Err(err) = result {
+                panic!(
+                    "register_item failed: {:?}",
+                    std::str::from_utf8(&err.as_bytes()).unwrap(),
+                );
+            }
 
             assert_eq!(result, SCResult::Ok(1u64));
 

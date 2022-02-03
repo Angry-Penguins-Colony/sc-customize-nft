@@ -3,7 +3,7 @@ use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::item_attributes::ItemAttributes;
 use equip_penguin::item_slot::ItemSlot;
-use equip_penguin::penguins_attributes::PenguinAttributes;
+use equip_penguin::penguin_attributes::PenguinAttributes;
 use equip_penguin::*;
 
 mod utils;

@@ -7,7 +7,7 @@ use elrond_wasm_debug::tx_mock::{TxContextRef, TxInputESDT};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::item_slot::ItemSlot;
-use equip_penguin::penguins_attributes::PenguinAttributes;
+use equip_penguin::penguin_attributes::PenguinAttributes;
 use equip_penguin::*;
 
 const WASM_PATH: &'static str = "sc-equip-penguin/output/equip_penguin.wasm";
@@ -156,8 +156,6 @@ pub fn set_all_permissions_on_token<EquipObjBuilder>(
         EsdtLocalRole::NftCreate,
         EsdtLocalRole::NftBurn,
         EsdtLocalRole::NftAddQuantity,
-        EsdtLocalRole::Mint,
-        EsdtLocalRole::Burn,
     ];
     setup.blockchain_wrapper.set_esdt_local_roles(
         setup.cf_wrapper.address_ref(),

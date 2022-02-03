@@ -6,16 +6,17 @@
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
+pub mod image_generator;
 pub mod item_attributes;
 pub mod item_slot;
-pub mod penguins_attributes;
+pub mod penguin_attributes;
 
 use item_attributes::ItemAttributes;
 use item_slot::ItemSlot;
-use penguins_attributes::PenguinAttributes;
+use penguin_attributes::PenguinAttributes;
 
 #[elrond_wasm::derive::contract]
-pub trait Equip {
+pub trait Equip: image_generator::ImageGenerator {
     #[storage_mapper("items_types")]
     fn items_slot(&self, token: &TokenIdentifier) -> SingleValueMapper<ItemSlot>;
 
@@ -150,12 +151,12 @@ pub trait Equip {
         let roles = self.blockchain().get_esdt_local_roles(token_id);
 
         require!(
-            roles.has_role(&EsdtLocalRole::Mint) == true,
-            "Local mint role not set"
+            roles.has_role(&EsdtLocalRole::NftAddQuantity) == true,
+            "Local add quantity role not set"
         );
 
         require!(
-            roles.has_role(&EsdtLocalRole::Burn) == true,
+            roles.has_role(&EsdtLocalRole::NftBurn) == true,
             "Local burn role not set"
         );
 

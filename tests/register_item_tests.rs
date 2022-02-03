@@ -78,7 +78,10 @@ fn register_unmintable_item() {
 
             let result = sc.register_item(ItemSlot::Hat, managed_items_ids);
 
-            assert_eq!(result, SCResult::Err("Local mint role not set".into()));
+            assert_eq!(
+                result,
+                SCResult::Err("Local add quantity role not set".into())
+            );
 
             StateChange::Revert
         },
@@ -96,7 +99,7 @@ fn register_unburnable_item() {
     b_wrapper.set_esdt_local_roles(
         setup.cf_wrapper.address_ref(),
         UNBURNABLE,
-        &[EsdtLocalRole::Mint],
+        &[EsdtLocalRole::NftAddQuantity],
     );
 
     b_wrapper.execute_tx(

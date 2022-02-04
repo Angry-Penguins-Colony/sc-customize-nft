@@ -1,0 +1,19 @@
+{
+    "contract": {
+        "deploy": {
+            "proxy": "https://devnet-gateway.elrond.com",
+            "chain": "D",
+            "verbose": true,
+            "bytecode": "output/equip_penguin.wasm",
+            "recall-nonce": true,
+            "keyfile": "wallets/hjq.json",
+            "passfile": "wallets/hjq.pwd",
+            "gas-limit": 100000000,
+            "arguments": [
+                "0x43454C2D313137613934"
+            ],
+            "send": true,
+            "outfile": "deploy-mainnet.interaction.json"
+        }
+    }
+}

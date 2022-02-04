@@ -1,4 +1,6 @@
-use elrond_wasm::types::{ManagedVarArgs, MultiArg2, SCResult};
+use elrond_wasm::api::CallValueApi;
+use elrond_wasm::contract_base::ContractBase;
+use elrond_wasm::types::{EsdtTokenType, ManagedVarArgs, MultiArg2, SCResult};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::item_attributes::ItemAttributes;
@@ -56,14 +58,7 @@ fn test_equip() {
             &setup.cf_wrapper,
             &transfers,
             |sc| {
-                let managed_items_to_equip =
-                    utils::create_managed_items_to_equip(&[(ITEM_TO_EQUIP_ID, INIT_NONCE)]);
-
-                let result = sc.equip(
-                    &managed_token_id!(PENGUIN_TOKEN_ID),
-                    INIT_NONCE,
-                    managed_items_to_equip,
-                );
+                let result = sc.equip(sc.call_value().all_esdt_transfers());
 
                 utils::verbose_log_if_error(&result, "".to_string());
 
@@ -151,24 +146,21 @@ fn test_equip_while_overlap() {
             &ItemAttributes {},
         );
 
-        let esdt_transfers = &utils::create_esdt_transfers(&[
-            (PENGUIN_TOKEN_ID, INIT_NONCE),
-            (ITEM_TO_EQUIP, hat_to_equip_nonce),
+        let (esdt_transfers, payments) = utils::create_paymens_and_esdt_transfers(&[
+            (PENGUIN_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
+            (
+                ITEM_TO_EQUIP,
+                hat_to_equip_nonce,
+                EsdtTokenType::SemiFungible,
+            ),
         ]);
 
         b_wrapper.execute_esdt_multi_transfer(
             &setup.first_user_address,
             &setup.cf_wrapper,
-            esdt_transfers,
+            &esdt_transfers,
             |sc| {
-                let managed_items_to_equip =
-                    utils::create_managed_items_to_equip(&[(ITEM_TO_EQUIP, hat_to_equip_nonce)]);
-
-                let result = sc.equip(
-                    &TokenIdentifier::<DebugApi>::from_esdt_bytes(PENGUIN_TOKEN_ID),
-                    INIT_NONCE,
-                    managed_items_to_equip,
-                );
+                let result = sc.equip(sc.call_value().all_esdt_transfers());
 
                 if let SCResult::Err(err) = result {
                     panic!(
@@ -176,6 +168,8 @@ fn test_equip_while_overlap() {
                         std::str::from_utf8(&err.as_bytes()).unwrap(),
                     );
                 }
+
+                utils::verbose_log_if_error(&result, "".to_string());
 
                 assert_eq!(result, SCResult::Ok(1u64));
 
@@ -252,26 +246,22 @@ fn equip_while_nft_to_equip_is_not_a_penguin() {
         &ItemAttributes {},
     );
 
-    let esdt_transfers = &utils::create_esdt_transfers(&[
-        (NOT_PENGUIN_TOKEN_ID, INIT_NONCE),
-        (HAT_TOKEN_ID, INIT_NONCE),
+    let (esdt_transfers, payments) = utils::create_paymens_and_esdt_transfers(&[
+        (NOT_PENGUIN_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
+        (HAT_TOKEN_ID, INIT_NONCE, EsdtTokenType::SemiFungible),
     ]);
 
     b_wrapper.execute_esdt_multi_transfer(
         &setup.first_user_address,
         &setup.cf_wrapper,
-        esdt_transfers,
+        &esdt_transfers,
         |sc| {
-            let managed_items_to_equip =
-                utils::create_managed_items_to_equip(&[(HAT_TOKEN_ID, INIT_NONCE)]);
+            let result = sc.equip(sc.call_value().all_esdt_transfers());
 
-            let result = sc.equip(
-                &TokenIdentifier::<DebugApi>::from_esdt_bytes(NOT_PENGUIN_TOKEN_ID),
-                INIT_NONCE,
-                managed_items_to_equip,
+            assert_eq!(
+                result,
+                SCResult::Err("Please provide a penguin as the first payment".into())
             );
-
-            assert_eq!(result, SCResult::Err("Please provide a penguin".into()));
 
             StateChange::Commit
         },
@@ -280,59 +270,50 @@ fn equip_while_nft_to_equip_is_not_a_penguin() {
 
 #[test]
 fn equip_while_item_is_not_an_item() {
-    utils::execute_for_all_slot(|slot| {
-        const ITEM_TO_EQUIP_ID: &[u8] = b"NOT-AN-ITEM-a";
+    const ITEM_TO_EQUIP_ID: &[u8] = b"NOT-AN-ITEM-a";
 
-        let mut setup = utils::setup(equip_penguin::contract_obj);
+    let mut setup = utils::setup(equip_penguin::contract_obj);
 
-        let b_wrapper = &mut setup.blockchain_wrapper;
+    let b_wrapper = &mut setup.blockchain_wrapper;
 
-        let penguin_attributes = PenguinAttributes::<DebugApi>::empty();
+    let penguin_attributes = PenguinAttributes::<DebugApi>::empty();
 
-        b_wrapper.set_nft_balance(
-            &setup.first_user_address,
-            PENGUIN_TOKEN_ID,
-            INIT_NONCE,
-            &rust_biguint!(1),
-            &penguin_attributes,
-        );
+    b_wrapper.set_nft_balance(
+        &setup.first_user_address,
+        PENGUIN_TOKEN_ID,
+        INIT_NONCE,
+        &rust_biguint!(1),
+        &penguin_attributes,
+    );
 
-        b_wrapper.set_nft_balance(
-            &setup.first_user_address,
-            ITEM_TO_EQUIP_ID,
-            INIT_NONCE,
-            &rust_biguint!(1),
-            &ItemAttributes {},
-        );
+    b_wrapper.set_nft_balance(
+        &setup.first_user_address,
+        ITEM_TO_EQUIP_ID,
+        INIT_NONCE,
+        &rust_biguint!(1),
+        &ItemAttributes {},
+    );
 
-        let transfers = utils::create_esdt_transfers(&[
-            (PENGUIN_TOKEN_ID, INIT_NONCE),
-            (ITEM_TO_EQUIP_ID, INIT_NONCE),
-        ]);
+    let (transfers, payments) = utils::create_paymens_and_esdt_transfers(&[
+        (PENGUIN_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
+        (ITEM_TO_EQUIP_ID, INIT_NONCE, EsdtTokenType::SemiFungible),
+    ]);
 
-        b_wrapper.execute_esdt_multi_transfer(
-            &setup.first_user_address,
-            &setup.cf_wrapper,
-            &transfers,
-            |sc| {
-                let managed_items_to_equip =
-                    utils::create_managed_items_to_equip(&[(ITEM_TO_EQUIP_ID, INIT_NONCE)]);
+    b_wrapper.execute_esdt_multi_transfer(
+        &setup.first_user_address,
+        &setup.cf_wrapper,
+        &transfers,
+        |sc| {
+            let result = sc.equip(sc.call_value().all_esdt_transfers());
 
-                let result = sc.equip(
-                    &managed_token_id!(PENGUIN_TOKEN_ID),
-                    INIT_NONCE,
-                    managed_items_to_equip,
-                );
+            assert_eq!(
+                result,
+                SCResult::Err(
+                    "You are trying to equip a token that is not considered as an item".into()
+                )
+            );
 
-                assert_eq!(
-                    result,
-                    SCResult::Err(
-                        "You are trying to equip a token that is not considered as an item".into()
-                    )
-                );
-
-                StateChange::Revert
-            },
-        );
-    });
+            StateChange::Revert
+        },
+    );
 }

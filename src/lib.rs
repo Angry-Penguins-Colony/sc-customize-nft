@@ -64,23 +64,54 @@ pub trait Equip: image_generator::ImageGenerator {
         }
     }
 
+    #[payable("*")]
     #[endpoint]
     fn equip(
         &self,
-        penguin_id: &TokenIdentifier,
-        penguin_nonce: u64,
-        #[var_args] items_token: ManagedVarArgs<MultiArg2<TokenIdentifier, u64>>,
+        #[payment_multi] payments: ManagedVec<EsdtTokenPayment<Self::Api>>,
     ) -> SCResult<u64> {
+        // match (payments.get(0)) {
+        //     Some(EsdtTokenPayment {
+        //         token_identifier: token_id_penguin,
+        //         token_type: token_type,
+        //         amount: amount_penguin,
+        //         token_nonce: token_nonce,
+        //     }) => {
+        //         return SCResult::Err("valid".into());
+
+        //         require!(
+        //             amount_penguin == BigUint::from(1u64),
+        //             "You must send one penguin."
+        //         );
+
+        //         let penguin_id = self.penguins_identifier().get();
+        //         require!(token_id_penguin == penguin_id, "You must send a penguin.");
+        //     }
+        //     None => {
+        //         return SCResult::Err("You must send a penguin.".into());
+        //     }
+        // }
+
+        let first_payment = payments.get(0).unwrap();
+        let penguin_id = first_payment.token_identifier;
+        let penguin_nonce = first_payment.token_nonce;
+
         require!(
-            penguin_id == &self.penguins_identifier().get(),
-            "Please provide a penguin"
+            &penguin_id == &self.penguins_identifier().get(),
+            "Please provide a penguin as the first payment"
         );
 
-        let mut attributes = self.parse_penguin_attributes(penguin_id, penguin_nonce);
+        let items_token = payments
+            .iter()
+            .skip(1)
+            .map(|payment| (payment.token_identifier, payment.token_nonce))
+            .collect::<Vec<_>>();
+
+        let mut attributes = self.parse_penguin_attributes(&penguin_id, penguin_nonce);
 
         // let's equip each item
-        for item_token in items_token {
-            let (item_id, item_nonce) = item_token.into_tuple();
+        for (item_id, item_nonce) in items_token {
+            // let (item_id, item_nonce) = item_token.into_tuple();
 
             require!(
                 self.items_slot(&item_id).get() != ItemSlot::None,

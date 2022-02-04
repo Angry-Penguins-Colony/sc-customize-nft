@@ -1,7 +1,8 @@
 use std::u8;
 
 use elrond_wasm::types::{
-    Address, EsdtLocalRole, ManagedMultiResultVec, ManagedVarArgs, MultiArg2, SCResult,
+    Address, EsdtLocalRole, EsdtTokenPayment, EsdtTokenType, ManagedMultiResultVec, ManagedVarArgs,
+    ManagedVec, MultiArg2, SCResult,
 };
 use elrond_wasm_debug::tx_mock::{TxContextRef, TxInputESDT};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
@@ -113,20 +114,6 @@ pub fn verbose_log_if_error<T>(result: &SCResult<T>, message: String) {
     }
 }
 
-pub fn create_esdt_transfers(tokens: &[(&[u8], u64)]) -> Vec<TxInputESDT> {
-    let mut transfers = Vec::new();
-
-    for (token_id, nonce) in tokens {
-        transfers.push(TxInputESDT {
-            token_identifier: token_id.to_vec(),
-            nonce: nonce.clone(),
-            value: rust_biguint!(1u64),
-        })
-    }
-
-    return transfers;
-}
-
 pub fn create_managed_items_to_equip(
     tokens: &[(&[u8], u64)],
 ) -> ManagedMultiResultVec<
@@ -190,4 +177,54 @@ pub fn execute_for_all_slot(execute: fn(&ItemSlot) -> ()) {
     for slot in ItemSlot::VALUES.iter() {
         execute(slot);
     }
+}
+
+pub fn create_paymens_and_esdt_transfers(
+    tokens: &[(&[u8], u64, EsdtTokenType)],
+) -> (
+    Vec<TxInputESDT>,
+    ManagedVec<DebugApi, EsdtTokenPayment<DebugApi>>,
+) {
+    // remove EsdtTokenType from tokens
+    let mut tokens_without_type = Vec::new();
+    for (token_id, nonce, _) in tokens {
+        tokens_without_type.push((token_id.clone(), nonce.clone()));
+    }
+
+    return (
+        create_esdt_transfers(tokens_without_type.as_slice()),
+        create_payments(tokens),
+    );
+}
+
+pub fn create_esdt_transfers(tokens: &[(&[u8], u64)]) -> Vec<TxInputESDT> {
+    let mut transfers = Vec::new();
+
+    for (token_id, nonce) in tokens {
+        transfers.push(TxInputESDT {
+            token_identifier: token_id.to_vec(),
+            nonce: nonce.clone(),
+            value: rust_biguint!(1u64),
+        })
+    }
+
+    return transfers;
+}
+
+pub fn create_payments(
+    tokens: &[(&[u8], u64, EsdtTokenType)],
+) -> ManagedVec<DebugApi, EsdtTokenPayment<DebugApi>> {
+    let mut payments = ManagedVec::<DebugApi, EsdtTokenPayment<DebugApi>>::new();
+
+    for (token_id, nonce, token_type) in tokens {
+        let payment = EsdtTokenPayment::new(
+            TokenIdentifier::<DebugApi>::from_esdt_bytes(token_id.to_vec()),
+            nonce.clone(),
+            BigUint::from(1u64),
+        );
+
+        payments.push(payment)
+    }
+
+    return payments;
 }

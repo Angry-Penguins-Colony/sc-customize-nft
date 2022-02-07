@@ -10,7 +10,7 @@
             "passfile": "wallets/hjq.pwd",
             "gas-limit": 100000000,
             "arguments": [
-                "0x43454C2D313137613934"
+                "0x43454C2D316133643631"
             ],
             "send": true,
             "outfile": "deploy-mainnet.interaction.json"

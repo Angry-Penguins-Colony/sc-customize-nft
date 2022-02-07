@@ -70,27 +70,7 @@ pub trait Equip: image_generator::ImageGenerator {
         &self,
         #[payment_multi] payments: ManagedVec<EsdtTokenPayment<Self::Api>>,
     ) -> SCResult<u64> {
-        // match (payments.get(0)) {
-        //     Some(EsdtTokenPayment {
-        //         token_identifier: token_id_penguin,
-        //         token_type: token_type,
-        //         amount: amount_penguin,
-        //         token_nonce: token_nonce,
-        //     }) => {
-        //         return SCResult::Err("valid".into());
-
-        //         require!(
-        //             amount_penguin == BigUint::from(1u64),
-        //             "You must send one penguin."
-        //         );
-
-        //         let penguin_id = self.penguins_identifier().get();
-        //         require!(token_id_penguin == penguin_id, "You must send a penguin.");
-        //     }
-        //     None => {
-        //         return SCResult::Err("You must send a penguin.".into());
-        //     }
-        // }
+        require!(payments.len() >= 2, "You must provide at least 2 tokens.");
 
         let first_payment = payments.get(0).unwrap();
         let penguin_id = first_payment.token_identifier;
@@ -107,7 +87,7 @@ pub trait Equip: image_generator::ImageGenerator {
             .map(|payment| (payment.token_identifier, payment.token_nonce))
             .collect::<Vec<_>>();
 
-        let mut attributes = self.parse_penguin_attributes(&penguin_id, penguin_nonce);
+        let mut attributes = self.parse_penguin_attributes(&penguin_id, penguin_nonce)?;
 
         // let's equip each item
         for (item_id, item_nonce) in items_token {
@@ -163,7 +143,7 @@ pub trait Equip: image_generator::ImageGenerator {
         penguin_nonce: u64,
         #[var_args] slots: ManagedVarArgs<ItemSlot>,
     ) -> SCResult<u64> {
-        let mut attributes = self.parse_penguin_attributes(penguin_id, penguin_nonce);
+        let mut attributes = self.parse_penguin_attributes(penguin_id, penguin_nonce)?;
 
         for slot in slots {
             let result = self.sent_item_from_slot(&mut attributes, &slot);
@@ -230,13 +210,16 @@ pub trait Equip: image_generator::ImageGenerator {
         &self,
         penguin_id: &TokenIdentifier,
         penguin_nonce: u64,
-    ) -> PenguinAttributes<Self::Api> {
+    ) -> SCResult<PenguinAttributes<Self::Api>> {
         let attributes = self
             .blockchain()
             .get_esdt_token_data(&self.blockchain().get_caller(), &penguin_id, penguin_nonce)
-            .decode_attributes::<PenguinAttributes<Self::Api>>()
-            .unwrap();
-        return attributes;
+            .decode_attributes::<PenguinAttributes<Self::Api>>();
+
+        match attributes {
+            Result::Ok(attributes) => return SCResult::Ok(attributes),
+            Result::Err(_) => return SCResult::Err("Error while decoding attributes".into()),
+        }
     }
 
     fn update_penguin(

@@ -9,7 +9,7 @@ use crate::item_slot::ItemSlot;
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, TypeAbi)]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, TypeAbi, Debug)]
 pub struct PenguinAttributes<M: ManagedTypeApi> {
     pub hat: Option<Item<M>>,
     pub background: Option<Item<M>>,

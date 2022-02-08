@@ -233,7 +233,11 @@ pub trait Equip {
     ) -> SCResult<PenguinAttributes<Self::Api>> {
         let attributes = self
             .blockchain()
-            .get_esdt_token_data(&self.blockchain().get_caller(), &penguin_id, penguin_nonce)
+            .get_esdt_token_data(
+                &self.blockchain().get_sc_address(),
+                &penguin_id,
+                penguin_nonce,
+            )
             .decode_attributes::<PenguinAttributes<Self::Api>>();
 
         match attributes {
@@ -242,9 +246,9 @@ pub trait Equip {
         }
     }
 
-    #[endpoint]
+    #[endpoint(mintTestPenguin)]
     #[only_owner]
-    fn mint_penguin(&self) -> SCResult<u64> {
+    fn mint_test_penguin(&self) -> SCResult<u64> {
         let penguin_id = self.penguins_identifier().get();
 
         let caller = self.blockchain().get_caller();
@@ -274,6 +278,11 @@ pub trait Equip {
             .direct(&caller, &penguin_id, token_nonce, &BigUint::from(1u32), &[]);
 
         return Ok(token_nonce);
+    }
+
+    #[view]
+    fn empty_attributes(&self) -> PenguinAttributes<Self::Api> {
+        return PenguinAttributes::empty();
     }
 
     fn update_penguin(

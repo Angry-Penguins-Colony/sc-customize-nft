@@ -9,9 +9,10 @@ elrond_wasm_node::wasm_endpoints! {
     (
         init
         desequip
+        empty_attributes
         equip
         getItemType
-        mint_penguin
+        mintTestPenguin
         registerItem
     )
 }

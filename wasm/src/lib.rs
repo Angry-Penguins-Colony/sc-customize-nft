@@ -11,6 +11,7 @@ elrond_wasm_node::wasm_endpoints! {
         desequip
         equip
         getItemType
+        mint_penguin
         registerItem
     )
 }

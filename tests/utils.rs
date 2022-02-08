@@ -7,6 +7,7 @@ use elrond_wasm::types::{
 use elrond_wasm_debug::tx_mock::{TxContextRef, TxInputESDT};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
+use equip_penguin::item::Item;
 use equip_penguin::item_slot::ItemSlot;
 use equip_penguin::penguin_attributes::PenguinAttributes;
 use equip_penguin::*;
@@ -163,10 +164,10 @@ pub fn give_one_penguin_with_hat(
         penguin_nonce,
         &rust_biguint!(1),
         &PenguinAttributes {
-            hat: (
-                TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
-                hat_nonce,
-            ),
+            hat: Option::Some(Item {
+                token: TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
+                nonce: hat_nonce,
+            }),
             ..PenguinAttributes::empty()
         },
     );

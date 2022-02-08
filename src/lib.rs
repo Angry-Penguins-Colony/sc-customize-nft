@@ -6,17 +6,18 @@
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-pub mod image_generator;
+pub mod item;
 pub mod item_attributes;
 pub mod item_slot;
 pub mod penguin_attributes;
 
+use item::Item;
 use item_attributes::ItemAttributes;
 use item_slot::ItemSlot;
 use penguin_attributes::PenguinAttributes;
 
 #[elrond_wasm::derive::contract]
-pub trait Equip: image_generator::ImageGenerator {
+pub trait Equip {
     #[storage_mapper("items_types")]
     fn items_slot(&self, token: &TokenIdentifier) -> SingleValueMapper<ItemSlot>;
 
@@ -120,7 +121,13 @@ pub trait Equip: image_generator::ImageGenerator {
                         _ => {}
                     }
 
-                    let result = attributes.set_item(&item_slot, item_id.clone(), item_nonce);
+                    let result = attributes.set_item(
+                        &item_slot,
+                        Option::Some(Item {
+                            token: item_id.clone(),
+                            nonce: item_nonce,
+                        }),
+                    );
                     require!(
                         result == Result::Ok(()),
                         "Cannot set item. Maybe the item is not considered like an item."
@@ -193,17 +200,28 @@ pub trait Equip: image_generator::ImageGenerator {
             return SCResult::Err("Error while minting and sending an item".into());
         }
 
-        let (item_id, item_nonce) = result.unwrap().into_tuple();
+        let opt_item = result.unwrap();
 
-        self.send()
-            .esdt_local_mint(&item_id, item_nonce, &BigUint::from(1u32));
+        match opt_item {
+            Some(item) => {
+                let item_id = item.token;
+                let item_nonce = item.nonce;
 
-        self.send()
-            .direct(&caller, &item_id, item_nonce, &BigUint::from(1u32), &[]);
+                self.send()
+                    .esdt_local_mint(&item_id, item_nonce, &BigUint::from(1u32));
 
-        attributes.empty_slot(&slot);
+                self.send()
+                    .direct(&caller, &item_id, item_nonce, &BigUint::from(1u32), &[]);
 
-        return SCResult::Ok(());
+                attributes.empty_slot(&slot);
+
+                return SCResult::Ok(());
+            }
+
+            None => {
+                return SCResult::Err("Slot is empty, we can't sent item to it".into());
+            }
+        }
     }
 
     fn parse_penguin_attributes(
@@ -220,6 +238,40 @@ pub trait Equip: image_generator::ImageGenerator {
             Result::Ok(attributes) => return SCResult::Ok(attributes),
             Result::Err(_) => return SCResult::Err("Error while decoding attributes".into()),
         }
+    }
+
+    #[endpoint]
+    #[only_owner]
+    fn mint_penguin(&self) -> SCResult<u64> {
+        let penguin_id = self.penguins_identifier().get();
+
+        let caller = self.blockchain().get_caller();
+
+        let mut uris = ManagedVec::new();
+        uris.push(ManagedBuffer::new_from_bytes(b"https://www.google.com"));
+
+        // let mut serialized_attributes = Vec::new();
+        // &new_attributes.top_encode(&mut serialized_attributes)?;
+
+        // let attributes_hash = self.crypto().sha256(&serialized_attributes);
+        // let hash_buffer = ManagedBuffer::from(attributes_hash.as_bytes());
+
+        // self.send().esdt_nft_create::<PenguinAttributes<Self::Api>>(
+
+        let token_nonce = self.send().esdt_nft_create::<PenguinAttributes<Self::Api>>(
+            &penguin_id,
+            &BigUint::from(1u32),
+            &ManagedBuffer::new_from_bytes(b"new penguin"),
+            &BigUint::zero(),
+            &ManagedBuffer::new(),
+            &PenguinAttributes::empty(),
+            &uris,
+        );
+
+        self.send()
+            .direct(&caller, &penguin_id, token_nonce, &BigUint::from(1u32), &[]);
+
+        return Ok(token_nonce);
     }
 
     fn update_penguin(

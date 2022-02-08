@@ -1,6 +1,7 @@
 use elrond_wasm::types::{EsdtLocalRole, ManagedBuffer, ManagedVarArgs, SCResult};
 use elrond_wasm_debug::testing_framework::*;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
+use equip_penguin::item::Item;
 use equip_penguin::item_attributes::ItemAttributes;
 use equip_penguin::item_slot::ItemSlot;
 use equip_penguin::penguin_attributes::PenguinAttributes;
@@ -29,8 +30,10 @@ fn test_desequip() {
             &rust_biguint!(1),
             &PenguinAttributes::new(&[(
                 &slot,
-                TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_DESEQUIP_ID),
-                INIT_NONCE,
+                Item {
+                    token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_DESEQUIP_ID),
+                    nonce: INIT_NONCE,
+                },
             )]),
         );
 

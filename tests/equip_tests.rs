@@ -3,6 +3,7 @@ use elrond_wasm::contract_base::ContractBase;
 use elrond_wasm::types::{EsdtTokenType, ManagedVarArgs, MultiArg2, SCResult};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
+use equip_penguin::item::Item;
 use equip_penguin::item_attributes::ItemAttributes;
 use equip_penguin::item_slot::ItemSlot;
 use equip_penguin::penguin_attributes::PenguinAttributes;
@@ -103,8 +104,10 @@ fn test_equip() {
             &rust_biguint!(1),
             &PenguinAttributes::<DebugApi>::new(&[(
                 slot,
-                managed_token_id!(ITEM_TO_EQUIP_ID),
-                INIT_NONCE,
+                Item {
+                    token: managed_token_id!(ITEM_TO_EQUIP_ID),
+                    nonce: INIT_NONCE,
+                },
             )]),
         );
     });
@@ -131,8 +134,10 @@ fn test_equip_while_overlap() {
             &rust_biguint!(1),
             &PenguinAttributes::<DebugApi>::new(&[(
                 slot,
-                managed_token_id!(ITEM_TO_EQUIP),
-                hat_to_remove_nonce,
+                Item {
+                    token: managed_token_id!(ITEM_TO_EQUIP),
+                    nonce: hat_to_remove_nonce,
+                },
             )]),
         );
 
@@ -194,8 +199,10 @@ fn test_equip_while_overlap() {
             &rust_biguint!(1),
             &PenguinAttributes::<DebugApi>::new(&[(
                 slot,
-                managed_token_id!(ITEM_TO_EQUIP),
-                hat_to_equip_nonce,
+                Item {
+                    token: managed_token_id!(ITEM_TO_EQUIP),
+                    nonce: hat_to_equip_nonce,
+                },
             )]),
         );
 

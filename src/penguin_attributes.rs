@@ -26,7 +26,11 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         let mut attributes = Self::empty();
 
         for (slot, item) in args {
-            attributes.set_item(slot, Option::Some(item.clone()));
+            let result = attributes.set_item(slot, Option::Some(item.clone()));
+
+            if result.is_err() {
+                panic!("Failed to set item on slot");
+            }
         }
 
         return attributes;
@@ -51,24 +55,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
             _ => {}
         }
 
-        #[allow(unreachable_patterns)]
-        match slot {
-            ItemSlot::Hat => self.hat = item,
-            ItemSlot::Background => self.background = item,
-            ItemSlot::Skin => self.skin = item,
-            ItemSlot::Chain => self.chain = item,
-            ItemSlot::Beak => self.beak = item,
-            ItemSlot::Weapon => self.weapon = item,
-            ItemSlot::Clothes => self.clothes = item,
-            ItemSlot::Eye => self.eye = item,
-            _ => {
-                return Result::Err(ManagedBuffer::new_from_bytes(
-                    b"The slot provided is not supported",
-                ))
-            }
-        }
-
-        Result::Ok(())
+        return self.__set_item_no_check(slot, item);
     }
 
     #[allow(unreachable_patterns)]
@@ -98,7 +85,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
     }
 
     pub fn empty_slot(&mut self, slot: &ItemSlot) -> Result<(), ManagedBuffer<M>> {
-        return self.set_item(slot, Option::None);
+        return self.__set_item_no_check(slot, Option::None);
     }
 
     pub fn empty() -> Self {
@@ -112,5 +99,31 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
             clothes: Option::None,
             eye: Option::None,
         }
+    }
+
+    /// Set an item on a slot, without checking if the slot is empty.
+    fn __set_item_no_check(
+        &mut self,
+        slot: &ItemSlot,
+        item: Option<Item<M>>,
+    ) -> Result<(), ManagedBuffer<M>> {
+        #[allow(unreachable_patterns)]
+        match slot {
+            ItemSlot::Hat => self.hat = item,
+            ItemSlot::Background => self.background = item,
+            ItemSlot::Skin => self.skin = item,
+            ItemSlot::Chain => self.chain = item,
+            ItemSlot::Beak => self.beak = item,
+            ItemSlot::Weapon => self.weapon = item,
+            ItemSlot::Clothes => self.clothes = item,
+            ItemSlot::Eye => self.eye = item,
+            _ => {
+                return Result::Err(ManagedBuffer::new_from_bytes(
+                    b"The slot provided is not supported",
+                ))
+            }
+        }
+
+        Result::Ok(())
     }
 }

@@ -52,6 +52,8 @@ fn test_desequip() {
                     managed_slots,
                 );
 
+                utils::verbose_log_if_error(&result, "".to_string());
+
                 assert_eq!(result, SCResult::Ok(1u64));
 
                 StateChange::Commit

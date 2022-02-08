@@ -26,13 +26,7 @@ fn is_empty_while_empty() {
     utils::execute_for_all_slot(|slot| {
         DebugApi::dummy();
 
-        let penguin = PenguinAttributes::<DebugApi>::new(&[(
-            slot,
-            Item {
-                token: TokenIdentifier::from_esdt_bytes(b""),
-                nonce: 0,
-            },
-        )]);
+        let penguin = PenguinAttributes::<DebugApi>::empty();
 
         assert_eq!(penguin.is_slot_empty(slot), Result::Ok(true));
     });
@@ -43,13 +37,7 @@ fn set_item_on_empty_slot() {
     utils::execute_for_all_slot(|slot| {
         DebugApi::dummy();
 
-        let mut penguin = PenguinAttributes::<DebugApi>::new(&[(
-            slot,
-            Item {
-                token: TokenIdentifier::from_esdt_bytes(b""),
-                nonce: 0,
-            },
-        )]);
+        let mut penguin = PenguinAttributes::<DebugApi>::empty();
 
         let token = b"ITEM-b";
         let managed_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(token);

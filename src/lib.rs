@@ -213,7 +213,9 @@ pub trait Equip {
                 self.send()
                     .direct(&caller, &item_id, item_nonce, &BigUint::from(1u32), &[]);
 
-                attributes.empty_slot(&slot);
+                let result = attributes.empty_slot(&slot);
+
+                require!(result.is_err() == false, "Error while emptying slot");
 
                 return SCResult::Ok(());
             }

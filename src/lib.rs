@@ -71,6 +71,7 @@ pub trait Equip {
         &self,
         #[payment_multi] payments: ManagedVec<EsdtTokenPayment<Self::Api>>,
     ) -> SCResult<u64> {
+        self.require_penguin_roles_set()?;
         require!(payments.len() >= 2, "You must provide at least 2 tokens.");
 
         let first_payment = payments.get(0).unwrap();
@@ -93,6 +94,8 @@ pub trait Equip {
         // let's equip each item
         for (item_id, item_nonce) in items_token {
             // let (item_id, item_nonce) = item_token.into_tuple();
+
+            self.require_item_roles_set(&item_id)?;
 
             require!(
                 self.items_slot(&item_id).get() != ItemSlot::None,
@@ -170,12 +173,29 @@ pub trait Equip {
 
         require!(
             roles.has_role(&EsdtLocalRole::NftAddQuantity) == true,
-            "Local add quantity role not set"
+            "Local add quantity role not set for an item"
         );
 
         require!(
             roles.has_role(&EsdtLocalRole::NftBurn) == true,
-            "Local burn role not set"
+            "Local burn role not set for an item"
+        );
+
+        Ok(())
+    }
+
+    fn require_penguin_roles_set(&self) -> SCResult<()> {
+        let penguin_id = self.penguins_identifier().get();
+        let roles = self.blockchain().get_esdt_local_roles(&penguin_id);
+
+        require!(
+            roles.has_role(&EsdtLocalRole::NftCreate) == true,
+            "Local create role not set for penguin"
+        );
+
+        require!(
+            roles.has_role(&EsdtLocalRole::NftBurn) == true,
+            "Local burn role not set  for penguin"
         );
 
         Ok(())

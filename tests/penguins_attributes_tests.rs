@@ -110,7 +110,7 @@ fn empty_slot_while_slot_is_empty() {
             },
         )]);
 
-        let result = penguin.empty_slot(&slot);
+        let result = penguin.set_empty_slot(&slot);
         assert_eq!(result, Result::Ok(()));
     });
 }
@@ -128,7 +128,7 @@ fn empty_slot_while_slot_is_not_empty() {
             },
         )]);
 
-        let result = penguin.empty_slot(&slot);
+        let result = penguin.set_empty_slot(&slot);
         assert_eq!(result, Result::Ok(()));
     });
 }

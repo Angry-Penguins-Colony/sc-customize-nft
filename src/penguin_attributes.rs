@@ -9,7 +9,7 @@ use crate::item_slot::ItemSlot;
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, TypeAbi, Debug)]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, TypeAbi, Debug)]
 pub struct PenguinAttributes<M: ManagedTypeApi> {
     pub hat: Option<Item<M>>,
     pub background: Option<Item<M>>,
@@ -84,7 +84,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         }
     }
 
-    pub fn empty_slot(&mut self, slot: &ItemSlot) -> Result<(), ManagedBuffer<M>> {
+    pub fn set_empty_slot(&mut self, slot: &ItemSlot) -> Result<(), ManagedBuffer<M>> {
         return self.__set_item_no_check(slot, Option::None);
     }
 

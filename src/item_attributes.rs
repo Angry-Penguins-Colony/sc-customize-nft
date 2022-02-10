@@ -6,5 +6,5 @@
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-#[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
+#[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi, PartialEq, Debug)]
 pub struct ItemAttributes {}

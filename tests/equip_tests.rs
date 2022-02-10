@@ -160,7 +160,7 @@ fn test_equip_while_overlap() {
             ),
         ]);
 
-        b_wrapper.execute_esdt_multi_transfer(
+        let _ = b_wrapper.execute_esdt_multi_transfer(
             &setup.first_user_address,
             &setup.cf_wrapper,
             &esdt_transfers,

@@ -20,7 +20,7 @@ pub const HAT_2_TOKEN_ID: &[u8] = b"HAT-b";
 
 pub struct EquipSetup<CrowdfundingObjBuilder>
 where
-    CrowdfundingObjBuilder: 'static + Copy + Fn(DebugApi) -> equip_penguin::ContractObj<DebugApi>,
+    CrowdfundingObjBuilder: 'static + Copy + Fn() -> equip_penguin::ContractObj<DebugApi>,
 {
     pub blockchain_wrapper: BlockchainStateWrapper,
     pub owner_address: Address,
@@ -32,7 +32,7 @@ where
 
 pub fn setup<TObjBuilder>(cf_builder: TObjBuilder) -> EquipSetup<TObjBuilder>
 where
-    TObjBuilder: 'static + Copy + Fn(DebugApi) -> equip_penguin::ContractObj<DebugApi>,
+    TObjBuilder: 'static + Copy + Fn() -> equip_penguin::ContractObj<DebugApi>,
 {
     let rust_zero = rust_biguint!(0u64);
     let mut blockchain_wrapper = BlockchainStateWrapper::new();
@@ -75,7 +75,7 @@ pub fn register_item<EquipObjBuilder>(
     item_type: ItemSlot,
     item_id: &[u8],
 ) where
-    EquipObjBuilder: 'static + Copy + Fn(DebugApi) -> equip_penguin::ContractObj<DebugApi>,
+    EquipObjBuilder: 'static + Copy + Fn() -> equip_penguin::ContractObj<DebugApi>,
 {
     let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -138,7 +138,7 @@ pub fn set_all_permissions_on_token<EquipObjBuilder>(
     setup: &mut EquipSetup<EquipObjBuilder>,
     token_id: &[u8],
 ) where
-    EquipObjBuilder: 'static + Copy + Fn(DebugApi) -> equip_penguin::ContractObj<DebugApi>,
+    EquipObjBuilder: 'static + Copy + Fn() -> equip_penguin::ContractObj<DebugApi>,
 {
     let contract_roles = [
         EsdtLocalRole::NftCreate,

@@ -74,7 +74,7 @@ pub trait Equip {
         self.require_penguin_roles_set()?;
         require!(payments.len() >= 2, "You must provide at least 2 tokens.");
 
-        let first_payment = payments.get(0).unwrap();
+        let first_payment = payments.get(0);
         let penguin_id = first_payment.token_identifier;
         let penguin_nonce = first_payment.token_nonce;
 
@@ -102,14 +102,10 @@ pub trait Equip {
 
             self.require_item_roles_set(&item_id)?;
 
+            // empty slot
             match attributes.is_slot_empty(&item_slot) {
                 Result::Ok(false) => {
-                    let result = self.sent_item_from_slot(&mut attributes, &item_slot);
-
-                    match result {
-                        SCResult::Err(err) => return SCResult::Err(err),
-                        _ => (),
-                    }
+                    self.desequip_slot(&mut attributes, &item_slot)?;
                 }
                 Result::Err(_) => {
                     require!(false, "Error while checking if slot is empty");
@@ -121,7 +117,7 @@ pub trait Equip {
                 &item_slot,
                 Option::Some(Item {
                     token: item_id.clone(),
-                    nonce: item_nonce,
+                    nonce: item_nonce.clone(),
                 }),
             );
             require!(
@@ -147,7 +143,7 @@ pub trait Equip {
         let mut attributes = self.parse_penguin_attributes(penguin_id, penguin_nonce)?;
 
         for slot in slots {
-            let result = self.sent_item_from_slot(&mut attributes, &slot);
+            let result = self.desequip_slot(&mut attributes, &slot);
 
             match result {
                 SCResult::Err(err) => return SCResult::Err(err),
@@ -192,8 +188,8 @@ pub trait Equip {
         Ok(())
     }
 
-    /// Empty the item at the slot proivided and sent it to the caller.
-    fn sent_item_from_slot(
+    /// Empty the item at the slot provided and sent it to the caller.
+    fn desequip_slot(
         &self,
         attributes: &mut PenguinAttributes<Self::Api>,
         slot: &ItemSlot,
@@ -224,7 +220,7 @@ pub trait Equip {
                 self.send()
                     .direct(&caller, &item_id, item_nonce, &BigUint::from(1u32), &[]);
 
-                let result = attributes.empty_slot(&slot);
+                let result = attributes.set_empty_slot(&slot);
 
                 require!(result.is_err() == false, "Error while emptying slot");
 
@@ -292,7 +288,7 @@ pub trait Equip {
     }
 
     #[view]
-    fn empty_attributes(&self) -> PenguinAttributes<Self::Api> {
+    fn get_empty_attributes(&self) -> PenguinAttributes<Self::Api> {
         return PenguinAttributes::empty();
     }
 

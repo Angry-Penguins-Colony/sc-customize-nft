@@ -86,51 +86,67 @@ pub trait Equip {
         let items_token = payments
             .iter()
             .skip(1)
-            .map(|payment| (payment.token_identifier, payment.token_nonce))
+            .map(|payment| Item {
+                token: payment.token_identifier,
+                nonce: payment.token_nonce,
+            })
             .collect::<Vec<_>>();
 
         let mut attributes = self.parse_penguin_attributes(&penguin_id, penguin_nonce)?;
 
         // let's equip each item
-        for (item_id, item_nonce) in items_token {
-            let item_slot = self.items_slot(&item_id).get();
-
-            require!(
-                item_slot != ItemSlot::None,
-                "You are trying to equip a token that is not considered as an item"
-            );
-
-            self.require_item_roles_set(&item_id)?;
-
-            // empty slot
-            match attributes.is_slot_empty(&item_slot) {
-                Result::Ok(false) => {
-                    self.desequip_slot(&mut attributes, &item_slot)?;
-                }
-                Result::Err(_) => {
-                    require!(false, "Error while checking if slot is empty");
-                }
-                _ => {}
-            }
-
-            let result = attributes.set_item(
-                &item_slot,
-                Option::Some(Item {
-                    token: item_id.clone(),
-                    nonce: item_nonce.clone(),
-                }),
-            );
-            require!(
-                result == Result::Ok(()),
-                "Cannot set item. Maybe the item is not considered like an item."
-            );
-
-            self.send()
-                .esdt_local_burn(&item_id, item_nonce, &BigUint::from(1u32));
+        for item in items_token {
+            self.equip_slot(&mut attributes, &item)?;
         }
 
         // update penguin
         return self.update_penguin(&penguin_id, penguin_nonce, &attributes);
+    }
+
+    fn equip_slot(
+        &self,
+        attributes: &mut PenguinAttributes<Self::Api>,
+        item: &Item<Self::Api>,
+    ) -> SCResult<()> {
+        let item_token = &item.token;
+        let item_nonce = item.nonce;
+
+        let item_slot = self.items_slot(&item_token).get();
+
+        require!(
+            item_slot != ItemSlot::None,
+            "You are trying to equip a token that is not considered as an item"
+        );
+
+        self.require_item_roles_set(&item_token)?;
+
+        // empty slot
+        match attributes.is_slot_empty(&item_slot) {
+            Result::Ok(false) => {
+                self.desequip_slot(attributes, &item_slot)?;
+            }
+            Result::Err(_) => {
+                require!(false, "Error while checking if slot is empty");
+            }
+            _ => {}
+        }
+
+        let result = attributes.set_item(
+            &item_slot,
+            Option::Some(Item {
+                token: item_token.clone(),
+                nonce: item_nonce.clone(),
+            }),
+        );
+        require!(
+            result == Result::Ok(()),
+            "Cannot set item. Maybe the item is not considered like an item."
+        );
+
+        self.send()
+            .esdt_local_burn(&item_token, item_nonce, &BigUint::from(1u32));
+
+        return SCResult::Ok(());
     }
 
     #[endpoint]
@@ -213,6 +229,8 @@ pub trait Equip {
             Some(item) => {
                 let item_id = item.token;
                 let item_nonce = item.nonce;
+
+                // sc_panic!("Got token {} with nonce {}", item_id, item_nonce);
 
                 self.send()
                     .esdt_local_mint(&item_id, item_nonce, &BigUint::from(1u32));

@@ -9,6 +9,7 @@ elrond_wasm_node::wasm_endpoints! {
     (
         desequip
         equip
+        fill
         getItemType
         get_empty_attributes
         mintTestPenguin

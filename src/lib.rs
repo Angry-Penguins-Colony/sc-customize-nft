@@ -204,6 +204,21 @@ pub trait Equip {
         Ok(())
     }
 
+    #[payable("*")]
+    #[endpoint]
+    #[only_owner]
+    fn fill(
+        &self,
+        #[payment_token] token: TokenIdentifier<Self::Api>,
+        #[payment_nonce] nonce: u64,
+        #[payment_amount] amount: BigUint,
+    ) -> SCResult<()> {
+        // TODO: require! that the future balance will be equals to 1
+        // TODO: require! to only send registered SFT
+
+        return Ok(());
+    }
+
     /// Empty the item at the slot provided and sent it to the caller.
     fn desequip_slot(
         &self,
@@ -230,7 +245,15 @@ pub trait Equip {
                 let item_id = item.token;
                 let item_nonce = item.nonce;
 
-                // sc_panic!("Got token {} with nonce {}", item_id, item_nonce);
+                self.require_item_roles_set(&item_id)?;
+
+                if self.blockchain().get_sc_balance(&item_id, item_nonce) == 0 {
+                    sc_panic!(
+                        "To mint the token {} with nonce {:x}, the SC must owns at least one.",
+                        item_id,
+                        item_nonce,
+                    );
+                }
 
                 self.send()
                     .esdt_local_mint(&item_id, item_nonce, &BigUint::from(1u32));

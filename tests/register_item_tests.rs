@@ -80,7 +80,7 @@ fn register_unmintable_item() {
 
             assert_eq!(
                 result,
-                SCResult::Err("Local add quantity role not set".into())
+                SCResult::Err("Local add quantity role not set for an item".into())
             );
 
             StateChange::Revert
@@ -113,7 +113,10 @@ fn register_unburnable_item() {
 
             let result = sc.register_item(ItemSlot::Hat, managed_items_ids);
 
-            assert_eq!(result, SCResult::Err(("Local burn role not set").into()));
+            assert_eq!(
+                result,
+                SCResult::Err(("Local burn role not set for an item").into())
+            );
 
             StateChange::Revert
         },

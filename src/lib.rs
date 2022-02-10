@@ -93,50 +93,41 @@ pub trait Equip {
 
         // let's equip each item
         for (item_id, item_nonce) in items_token {
-            // let (item_id, item_nonce) = item_token.into_tuple();
-
-            self.require_item_roles_set(&item_id)?;
+            let item_slot = self.items_slot(&item_id).get();
 
             require!(
-                self.items_slot(&item_id).get() != ItemSlot::None,
+                item_slot != ItemSlot::None,
                 "You are trying to equip a token that is not considered as an item"
             );
 
-            let item_slot_out = self.get_item_slot(&item_id);
+            self.require_item_roles_set(&item_id)?;
 
-            match item_slot_out {
-                OptionalResult::None => {
-                    require!(false, "An item provided is not considered like an item.")
-                }
-                OptionalResult::Some(item_slot) => {
-                    match attributes.is_slot_empty(&item_slot) {
-                        Result::Ok(false) => {
-                            let result = self.sent_item_from_slot(&mut attributes, &item_slot);
+            match attributes.is_slot_empty(&item_slot) {
+                Result::Ok(false) => {
+                    let result = self.sent_item_from_slot(&mut attributes, &item_slot);
 
-                            match result {
-                                SCResult::Err(err) => return SCResult::Err(err),
-                                _ => (),
-                            }
-                        }
-                        Result::Err(_) => {
-                            require!(false, "Error while checking if slot is empty");
-                        }
-                        _ => {}
+                    match result {
+                        SCResult::Err(err) => return SCResult::Err(err),
+                        _ => (),
                     }
-
-                    let result = attributes.set_item(
-                        &item_slot,
-                        Option::Some(Item {
-                            token: item_id.clone(),
-                            nonce: item_nonce,
-                        }),
-                    );
-                    require!(
-                        result == Result::Ok(()),
-                        "Cannot set item. Maybe the item is not considered like an item."
-                    );
                 }
+                Result::Err(_) => {
+                    require!(false, "Error while checking if slot is empty");
+                }
+                _ => {}
             }
+
+            let result = attributes.set_item(
+                &item_slot,
+                Option::Some(Item {
+                    token: item_id.clone(),
+                    nonce: item_nonce,
+                }),
+            );
+            require!(
+                result == Result::Ok(()),
+                "Cannot set item. Maybe the item is not considered like an item."
+            );
 
             self.send()
                 .esdt_local_burn(&item_id, item_nonce, &BigUint::from(1u32));

@@ -10,7 +10,10 @@ pub mod item;
 pub mod item_attributes;
 pub mod item_slot;
 pub mod penguin_attributes;
+extern crate alloc;
 
+use alloc::string::ToString;
+use elrond_wasm::String;
 use item::Item;
 use item_attributes::ItemAttributes;
 use item_slot::ItemSlot;
@@ -323,7 +326,7 @@ pub trait Equip {
         let token_nonce = self.send().esdt_nft_create::<PenguinAttributes<Self::Api>>(
             &penguin_id,
             &BigUint::from(1u32),
-            &ManagedBuffer::new_from_bytes(b"new penguin"),
+            &self.build_penguin_name_buffer(),
             &BigUint::zero(),
             &ManagedBuffer::new(),
             &PenguinAttributes::empty(),
@@ -334,6 +337,26 @@ pub trait Equip {
             .direct(&caller, &penguin_id, token_nonce, &BigUint::from(1u32), &[]);
 
         return Ok(token_nonce);
+    }
+
+    fn build_penguin_name_buffer(&self) -> ManagedBuffer {
+        let penguin_id = self.penguins_identifier().get();
+
+        let index = self
+            .blockchain()
+            .get_current_esdt_nft_nonce(&self.blockchain().get_sc_address(), &penguin_id)
+            + 1;
+
+        let mut full_token_name = ManagedBuffer::new();
+        let token_name_from_storage = ManagedBuffer::new_from_bytes(b"Penguin");
+        let hash_sign = ManagedBuffer::new_from_bytes(" #".as_bytes());
+        let token_index = ManagedBuffer::new_from_bytes(index.to_string().as_bytes());
+
+        full_token_name.append(&token_name_from_storage);
+        full_token_name.append(&hash_sign);
+        full_token_name.append(&token_index);
+
+        return full_token_name;
     }
 
     #[view]

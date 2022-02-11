@@ -77,6 +77,7 @@ pub trait Equip {
         let first_payment = payments.get(0);
         let penguin_id = first_payment.token_identifier;
         let penguin_nonce = first_payment.token_nonce;
+        require!(first_payment.amount == 1, "You must sent only one item.");
 
         require!(
             &penguin_id == &self.penguins_identifier().get(),
@@ -86,9 +87,13 @@ pub trait Equip {
         let items_token = payments
             .iter()
             .skip(1)
-            .map(|payment| Item {
-                token: payment.token_identifier,
-                nonce: payment.token_nonce,
+            .map(|payment| {
+                require!(payment.amount == 1, "You must sent only one item.");
+
+                Item {
+                    token: payment.token_identifier,
+                    nonce: payment.token_nonce,
+                }
             })
             .collect::<Vec<_>>();
 
@@ -149,22 +154,25 @@ pub trait Equip {
         return SCResult::Ok(());
     }
 
+    #[payable("*")]
     #[endpoint]
     fn desequip(
         &self,
-        penguin_id: &TokenIdentifier,
-        penguin_nonce: u64,
+        #[payment_token] penguin_id: TokenIdentifier,
+        #[payment_nonce] penguin_nonce: u64,
+        #[payment_amount] amount: BigUint<Self::Api>,
         #[var_args] slots: ManagedVarArgs<ItemSlot>,
     ) -> SCResult<u64> {
-        let mut attributes = self.parse_penguin_attributes(penguin_id, penguin_nonce)?;
+        require!(amount == 1, "You can desequip only one penguin at a time.");
+        require!(
+            penguin_id == self.penguins_identifier().get(),
+            "Sent token is not a penguin."
+        );
+
+        let mut attributes = self.parse_penguin_attributes(&penguin_id, penguin_nonce)?;
 
         for slot in slots {
-            let result = self.desequip_slot(&mut attributes, &slot);
-
-            match result {
-                SCResult::Err(err) => return SCResult::Err(err),
-                _ => (),
-            }
+            self.desequip_slot(&mut attributes, &slot)?;
         }
 
         // return items nonces

@@ -383,13 +383,15 @@ pub trait Equip {
 
         // self.send().esdt_nft_create::<PenguinAttributes<Self::Api>>(
 
+        let name = self.get_penguin_name(penguin_nonce);
+
         self.send()
             .esdt_local_burn(&penguin_id, penguin_nonce, &BigUint::from(1u32));
 
         let token_nonce = self.send().esdt_nft_create::<PenguinAttributes<Self::Api>>(
             &penguin_id,
             &BigUint::from(1u32),
-            &ManagedBuffer::new_from_bytes(b"new penguin"),
+            &name,
             &BigUint::zero(),
             &ManagedBuffer::new(),
             &attributes,
@@ -400,5 +402,15 @@ pub trait Equip {
             .direct(&caller, &penguin_id, token_nonce, &BigUint::from(1u32), &[]);
 
         return Ok(token_nonce);
+    }
+
+    fn get_penguin_name(&self, penguin_nonce: u64) -> ManagedBuffer<Self::Api> {
+        let nft_data = self.blockchain().get_esdt_token_data(
+            &self.blockchain().get_sc_address(),
+            &self.penguins_identifier().get(),
+            penguin_nonce,
+        );
+
+        return nft_data.name;
     }
 }

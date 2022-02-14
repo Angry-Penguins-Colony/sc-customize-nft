@@ -1,4 +1,4 @@
-use elrond_wasm::types::{EsdtLocalRole, ManagedVarArgs, ManagedVec, SCResult, StaticSCError};
+use elrond_wasm::types::{EsdtLocalRole, ManagedVarArgs, ManagedVec, SCResult};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::item_slot::ItemSlot;
@@ -11,188 +11,207 @@ const ANOTHER_HAT_TOKEN_ID: &[u8] = utils::HAT_2_TOKEN_ID;
 
 #[test]
 fn test_register_item() {
-    let mut setup = utils::setup(equip_penguin::contract_obj);
+    utils::execute_for_all_slot(|slot| {
+        const TOKEN_ID: &[u8] = b"ITEM-a1a1a1";
 
-    utils::set_all_permissions_on_token(&mut setup, HAT_TOKEN_ID);
-    utils::register_item(&mut setup, ItemSlot::Hat, HAT_TOKEN_ID);
-    let b_wrapper = &mut setup.blockchain_wrapper;
+        let mut setup = utils::setup(equip_penguin::contract_obj);
 
-    let _ = b_wrapper.execute_tx(
-        &setup.owner_address,
-        &setup.cf_wrapper,
-        &rust_biguint!(0u64),
-        |sc| {
-            let managed_token_id = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID);
-            let mut managed_items_ids = ManagedVec::<DebugApi, TokenIdentifier<DebugApi>>::new();
-            managed_items_ids.push(managed_token_id.clone());
+        utils::set_all_permissions_on_token(&mut setup, TOKEN_ID);
+        utils::register_item(&mut setup, slot.clone(), TOKEN_ID);
 
-            let result = sc.items_slot(&managed_token_id!(HAT_TOKEN_ID)).get();
+        let b_wrapper = &mut setup.blockchain_wrapper;
 
-            assert_eq!(result, ItemSlot::Hat);
+        let _ = b_wrapper
+            .execute_tx(
+                &setup.owner_address,
+                &setup.cf_wrapper,
+                &rust_biguint!(0u64),
+                |sc| {
+                    let managed_token_id =
+                        TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID);
+                    let mut managed_items_ids =
+                        ManagedVec::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                    managed_items_ids.push(managed_token_id.clone());
 
-            StateChange::Commit
-        },
-    );
+                    let result = sc.items_slot(&managed_token_id!(TOKEN_ID)).get();
+
+                    assert_eq!(&result, slot);
+
+                    StateChange::Commit
+                },
+            )
+            .assert_ok();
+    });
 }
 
 /// Ce test vérifie que si on associe 2 items au même slot, tout fonctionne bien
 #[test]
 fn register_another_item_on_slot() {
-    let mut setup = utils::setup(equip_penguin::contract_obj);
+    utils::execute_for_all_slot(|slot| {
+        let mut setup = utils::setup(equip_penguin::contract_obj);
 
-    utils::set_all_permissions_on_token(&mut setup, HAT_TOKEN_ID);
-    utils::set_all_permissions_on_token(&mut setup, ANOTHER_HAT_TOKEN_ID);
-    utils::register_item(&mut setup, ItemSlot::Hat, HAT_TOKEN_ID);
-    utils::register_item(&mut setup, ItemSlot::Hat, ANOTHER_HAT_TOKEN_ID);
-    let b_wrapper = &mut setup.blockchain_wrapper;
+        utils::set_all_permissions_on_token(&mut setup, HAT_TOKEN_ID);
+        utils::set_all_permissions_on_token(&mut setup, ANOTHER_HAT_TOKEN_ID);
 
-    let _ = b_wrapper.execute_query(&setup.cf_wrapper, |sc| {
-        let result = sc.items_slot(&managed_token_id!(HAT_TOKEN_ID)).get();
+        utils::register_item(&mut setup, slot.clone(), HAT_TOKEN_ID);
+        utils::register_item(&mut setup, slot.clone(), ANOTHER_HAT_TOKEN_ID);
 
-        assert_eq!(result, ItemSlot::Hat);
+        let b_wrapper = &mut setup.blockchain_wrapper;
 
-        let result2 = sc
-            .items_slot(&managed_token_id!(ANOTHER_HAT_TOKEN_ID))
-            .get();
+        let _ = b_wrapper
+            .execute_query(&setup.cf_wrapper, |sc| {
+                let result = sc.items_slot(&managed_token_id!(HAT_TOKEN_ID)).get();
 
-        assert_eq!(result2, ItemSlot::Hat);
+                assert_eq!(&result, slot);
+
+                let result2 = sc
+                    .items_slot(&managed_token_id!(ANOTHER_HAT_TOKEN_ID))
+                    .get();
+
+                assert_eq!(&result2, slot);
+            })
+            .assert_ok();
     });
 }
 
 #[test]
 fn register_unmintable_item() {
-    let mut setup = utils::setup(equip_penguin::contract_obj);
+    utils::execute_for_all_slot(|slot| {
+        let mut setup = utils::setup(equip_penguin::contract_obj);
 
-    let b_wrapper = &mut setup.blockchain_wrapper;
+        let b_wrapper = &mut setup.blockchain_wrapper;
 
-    let _ = b_wrapper.execute_tx(
-        &setup.owner_address,
-        &setup.cf_wrapper,
-        &rust_biguint!(0),
-        |sc| {
-            let mut managed_items_ids =
-                ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
-            managed_items_ids.push(managed_token_id!(b"a token without minting rights"));
+        let _ = b_wrapper
+            .execute_tx(
+                &setup.owner_address,
+                &setup.cf_wrapper,
+                &rust_biguint!(0),
+                |sc| {
+                    let mut managed_items_ids =
+                        ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                    managed_items_ids.push(managed_token_id!(b"a token without minting rights"));
 
-            let result = sc.register_item(ItemSlot::Hat, managed_items_ids);
+                    let _ = sc.register_item(slot.clone(), managed_items_ids);
 
-            assert_eq!(
-                result,
-                SCResult::Err("Local add quantity role not set for an item".into())
-            );
-
-            StateChange::Revert
-        },
-    );
+                    StateChange::Revert
+                },
+            )
+            .assert_error(4, "Local add quantity role not set for an item");
+    });
 }
 
 #[test]
 fn register_unburnable_item() {
-    const UNBURNABLE: &[u8] = b"a token without minting rights";
+    utils::execute_for_all_slot(|slot| {
+        const UNBURNABLE: &[u8] = b"a token without minting rights";
 
-    let mut setup = utils::setup(equip_penguin::contract_obj);
+        let mut setup = utils::setup(equip_penguin::contract_obj);
 
-    let b_wrapper = &mut setup.blockchain_wrapper;
+        let b_wrapper = &mut setup.blockchain_wrapper;
 
-    b_wrapper.set_esdt_local_roles(
-        setup.cf_wrapper.address_ref(),
-        UNBURNABLE,
-        &[EsdtLocalRole::NftAddQuantity],
-    );
+        b_wrapper.set_esdt_local_roles(
+            setup.cf_wrapper.address_ref(),
+            UNBURNABLE,
+            &[EsdtLocalRole::NftAddQuantity],
+        );
 
-    let _ = b_wrapper.execute_tx(
-        &setup.owner_address,
-        &setup.cf_wrapper,
-        &rust_biguint!(0),
-        |sc| {
-            let mut managed_items_ids =
-                ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
-            managed_items_ids.push(managed_token_id!(UNBURNABLE));
+        let _ = b_wrapper
+            .execute_tx(
+                &setup.owner_address,
+                &setup.cf_wrapper,
+                &rust_biguint!(0),
+                |sc| {
+                    let mut managed_items_ids =
+                        ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                    managed_items_ids.push(managed_token_id!(UNBURNABLE));
 
-            let result = sc.register_item(ItemSlot::Hat, managed_items_ids);
+                    let result = sc.register_item(slot.clone(), managed_items_ids);
 
-            assert_eq!(
-                result,
-                SCResult::Err(("Local burn role not set for an item").into())
-            );
+                    assert_eq!(
+                        result,
+                        SCResult::Err(("Local burn role not set for an item").into())
+                    );
 
-            StateChange::Revert
-        },
-    );
+                    StateChange::Revert
+                },
+            )
+            .assert_error(4, "Local burn role not set for an item");
+    });
 }
 
 #[test]
 fn change_item_slot() {
-    let mut setup = utils::setup(equip_penguin::contract_obj);
+    utils::execute_for_all_slot(|new_slot| {
+        const ITEM_ID: &[u8] = HAT_TOKEN_ID;
+        const OLD_SLOT: ItemSlot = ItemSlot::Hat;
 
-    const ITEM_ID: &[u8] = HAT_TOKEN_ID;
+        let mut setup = utils::setup(equip_penguin::contract_obj);
 
-    utils::set_all_permissions_on_token(&mut setup, ITEM_ID);
-    utils::register_item(&mut setup, ItemSlot::Hat, ITEM_ID);
-    utils::register_item(&mut setup, ItemSlot::Background, ITEM_ID);
+        utils::set_all_permissions_on_token(&mut setup, ITEM_ID);
+        utils::register_item(&mut setup, OLD_SLOT.clone(), ITEM_ID);
+        utils::register_item(&mut setup, new_slot.clone(), ITEM_ID);
 
-    let b_wrapper = &mut setup.blockchain_wrapper;
+        let b_wrapper = &mut setup.blockchain_wrapper;
 
-    let _ = b_wrapper.execute_query(&setup.cf_wrapper, |sc| {
-        let result = sc.items_slot(&managed_token_id!(ITEM_ID)).get();
-        assert_eq!(result, ItemSlot::Background);
+        let _ = b_wrapper
+            .execute_query(&setup.cf_wrapper, |sc| {
+                let result = sc.items_slot(&managed_token_id!(ITEM_ID)).get();
+                assert_eq!(&result, &new_slot.clone());
+            })
+            .assert_ok();
     });
 }
 
 #[test]
 fn register_penguin_as_item_should_not_work() {
-    let mut setup = utils::setup(equip_penguin::contract_obj);
+    utils::execute_for_all_slot(|slot| {
+        let mut setup = utils::setup(equip_penguin::contract_obj);
 
-    const PENGUIN_TOKEN_ID: &[u8] = utils::PENGUIN_TOKEN_ID;
+        const PENGUIN_TOKEN_ID: &[u8] = utils::PENGUIN_TOKEN_ID;
 
-    let b_wrapper = &mut setup.blockchain_wrapper;
+        let b_wrapper = &mut setup.blockchain_wrapper;
 
-    let _ = b_wrapper.execute_tx(
-        &setup.owner_address,
-        &setup.cf_wrapper,
-        &rust_biguint!(0u64),
-        |sc| {
-            let mut managed_items_ids =
-                ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
-            managed_items_ids.push(managed_token_id!(PENGUIN_TOKEN_ID));
+        let _ = b_wrapper
+            .execute_tx(
+                &setup.owner_address,
+                &setup.cf_wrapper,
+                &rust_biguint!(0u64),
+                |sc| {
+                    let mut managed_items_ids =
+                        ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                    managed_items_ids.push(managed_token_id!(PENGUIN_TOKEN_ID));
 
-            let result = sc.register_item(ItemSlot::Hat, managed_items_ids);
-            assert_eq!(
-                result,
-                SCResult::Err(StaticSCError::from(
-                    &b"You cannot register a penguin as an item."[..]
-                ))
-            );
+                    let _ = sc.register_item(slot.clone(), managed_items_ids);
 
-            StateChange::Revert
-        },
-    );
+                    StateChange::Revert
+                },
+            )
+            .assert_error(4, "You cannot register a penguin as an item.");
+    });
 }
 
 #[test]
 fn register_while_not_the_owner() {
-    let mut setup = utils::setup(equip_penguin::contract_obj);
+    utils::execute_for_all_slot(|slot| {
+        let mut setup = utils::setup(equip_penguin::contract_obj);
 
-    let b_wrapper = &mut setup.blockchain_wrapper;
+        let b_wrapper = &mut setup.blockchain_wrapper;
 
-    let _ = b_wrapper.execute_tx(
-        &setup.first_user_address,
-        &setup.cf_wrapper,
-        &rust_biguint!(0u64),
-        |sc| {
-            let mut managed_items_ids =
-                ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
-            managed_items_ids.push(managed_token_id!(HAT_TOKEN_ID));
+        let _ = b_wrapper
+            .execute_tx(
+                &setup.first_user_address,
+                &setup.cf_wrapper,
+                &rust_biguint!(0u64),
+                |sc| {
+                    let mut managed_items_ids =
+                        ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                    managed_items_ids.push(managed_token_id!(HAT_TOKEN_ID));
 
-            let result = sc.register_item(ItemSlot::Hat, managed_items_ids);
-            assert_eq!(
-                result,
-                SCResult::Err(StaticSCError::from(
-                    &b"Only the owner can call this method."[..]
-                ))
-            );
+                    let _ = sc.register_item(slot.clone(), managed_items_ids);
 
-            StateChange::Revert
-        },
-    );
+                    StateChange::Revert
+                },
+            )
+            .assert_error(4, "Only the owner can call this method.");
+    });
 }

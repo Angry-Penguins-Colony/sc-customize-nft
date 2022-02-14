@@ -1,11 +1,9 @@
-use elrond_wasm::api::CallValueApi;
 use elrond_wasm::contract_base::ContractBase;
-use elrond_wasm::types::{EsdtTokenType, ManagedVarArgs, MultiArg2, SCResult};
+use elrond_wasm::types::{EsdtTokenType, SCResult};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::item::Item;
 use equip_penguin::item_attributes::ItemAttributes;
-use equip_penguin::item_slot::ItemSlot;
 use equip_penguin::penguin_attributes::PenguinAttributes;
 use equip_penguin::*;
 
@@ -54,7 +52,7 @@ fn test_equip() {
             (ITEM_TO_EQUIP_ID, INIT_NONCE),
         ]);
 
-        b_wrapper.execute_esdt_multi_transfer(
+        let _ = b_wrapper.execute_esdt_multi_transfer(
             &setup.first_user_address,
             &setup.cf_wrapper,
             &transfers,
@@ -159,7 +157,7 @@ fn test_equip_while_overlap() {
             &ItemAttributes {},
         );
 
-        let (esdt_transfers, payments) = utils::create_paymens_and_esdt_transfers(&[
+        let (esdt_transfers, _) = utils::create_paymens_and_esdt_transfers(&[
             (PENGUIN_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
             (
                 ITEM_TO_EQUIP,
@@ -239,6 +237,43 @@ fn test_equip_while_overlap() {
 }
 
 #[test]
+fn send_penguin_without_items() {
+    let mut setup = utils::setup(equip_penguin::contract_obj);
+
+    let b_wrapper = &mut setup.blockchain_wrapper;
+    // user own a penguin equiped with an hat
+    b_wrapper.set_nft_balance(
+        &setup.first_user_address,
+        PENGUIN_TOKEN_ID,
+        INIT_NONCE,
+        &rust_biguint!(1),
+        &PenguinAttributes::<DebugApi>::empty(),
+    );
+
+    let (esdt_transfers, _) = utils::create_paymens_and_esdt_transfers(&[(
+        PENGUIN_TOKEN_ID,
+        INIT_NONCE,
+        EsdtTokenType::NonFungible,
+    )]);
+
+    let _ = b_wrapper.execute_esdt_multi_transfer(
+        &setup.first_user_address,
+        &setup.cf_wrapper,
+        &esdt_transfers,
+        |sc| {
+            let result = sc.equip(sc.call_value().all_esdt_transfers());
+
+            match result {
+                SCResult::Err(_) => {}
+                SCResult::Ok(_) => panic!("send_penguin_without_items failed"),
+            }
+
+            StateChange::Revert
+        },
+    );
+}
+
+#[test]
 fn equip_while_nft_to_equip_is_not_a_penguin() {
     let mut setup = utils::setup(equip_penguin::contract_obj);
 
@@ -261,17 +296,19 @@ fn equip_while_nft_to_equip_is_not_a_penguin() {
         &ItemAttributes {},
     );
 
-    let (esdt_transfers, payments) = utils::create_paymens_and_esdt_transfers(&[
+    let (esdt_transfers, _) = utils::create_paymens_and_esdt_transfers(&[
         (NOT_PENGUIN_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
         (HAT_TOKEN_ID, INIT_NONCE, EsdtTokenType::SemiFungible),
     ]);
 
-    b_wrapper.execute_esdt_multi_transfer(
+    let _ = b_wrapper.execute_esdt_multi_transfer(
         &setup.first_user_address,
         &setup.cf_wrapper,
         &esdt_transfers,
         |sc| {
             let result = sc.equip(sc.call_value().all_esdt_transfers());
+
+            panic!("stop");
 
             assert_eq!(
                 result,
@@ -309,12 +346,12 @@ fn equip_while_item_is_not_an_item() {
         &ItemAttributes {},
     );
 
-    let (transfers, payments) = utils::create_paymens_and_esdt_transfers(&[
+    let (transfers, _) = utils::create_paymens_and_esdt_transfers(&[
         (PENGUIN_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
         (ITEM_TO_EQUIP_ID, INIT_NONCE, EsdtTokenType::SemiFungible),
     ]);
 
-    b_wrapper.execute_esdt_multi_transfer(
+    let _ = b_wrapper.execute_esdt_multi_transfer(
         &setup.first_user_address,
         &setup.cf_wrapper,
         &transfers,

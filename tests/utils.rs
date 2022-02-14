@@ -12,12 +12,17 @@ use equip_penguin::item_slot::ItemSlot;
 use equip_penguin::penguin_attributes::PenguinAttributes;
 use equip_penguin::*;
 
+#[allow(dead_code)]
 const WASM_PATH: &'static str = "sc-equip-penguin/output/equip_penguin.wasm";
 
+#[allow(dead_code)]
 pub const PENGUIN_TOKEN_ID: &[u8] = b"PENG-ae5a";
+#[allow(dead_code)]
 pub const HAT_TOKEN_ID: &[u8] = b"HAT-a";
+#[allow(dead_code)]
 pub const HAT_2_TOKEN_ID: &[u8] = b"HAT-b";
 
+#[allow(dead_code)]
 pub struct EquipSetup<CrowdfundingObjBuilder>
 where
     CrowdfundingObjBuilder: 'static + Copy + Fn() -> equip_penguin::ContractObj<DebugApi>,
@@ -30,6 +35,7 @@ where
         ContractObjWrapper<equip_penguin::ContractObj<DebugApi>, CrowdfundingObjBuilder>,
 }
 
+#[allow(dead_code)]
 pub fn setup<TObjBuilder>(cf_builder: TObjBuilder) -> EquipSetup<TObjBuilder>
 where
     TObjBuilder: 'static + Copy + Fn() -> equip_penguin::ContractObj<DebugApi>,
@@ -47,7 +53,7 @@ where
     );
 
     // deploy contract
-    blockchain_wrapper.execute_tx(&owner_address, &cf_wrapper, &rust_zero, |sc| {
+    let _ = blockchain_wrapper.execute_tx(&owner_address, &cf_wrapper, &rust_zero, |sc| {
         let result = sc.init(managed_token_id!(PENGUIN_TOKEN_ID));
         assert_eq!(result, SCResult::Ok(()));
 
@@ -70,6 +76,7 @@ where
     return equip_setup;
 }
 
+#[allow(dead_code)]
 pub fn register_item<EquipObjBuilder>(
     setup: &mut EquipSetup<EquipObjBuilder>,
     item_type: ItemSlot,
@@ -79,7 +86,7 @@ pub fn register_item<EquipObjBuilder>(
 {
     let b_wrapper = &mut setup.blockchain_wrapper;
 
-    b_wrapper.execute_tx(
+    let _ = b_wrapper.execute_tx(
         &setup.owner_address,
         &setup.cf_wrapper,
         &rust_biguint!(0u64),
@@ -105,6 +112,7 @@ pub fn register_item<EquipObjBuilder>(
     );
 }
 
+#[allow(dead_code)]
 pub fn verbose_log_if_error<T>(result: &SCResult<T>, message: String) {
     if let SCResult::Err(err) = &*result {
         panic!(
@@ -115,6 +123,7 @@ pub fn verbose_log_if_error<T>(result: &SCResult<T>, message: String) {
     }
 }
 
+#[allow(dead_code)]
 pub fn create_managed_items_to_equip(
     tokens: &[(&[u8], u64)],
 ) -> ManagedMultiResultVec<
@@ -152,6 +161,7 @@ pub fn set_all_permissions_on_token<EquipObjBuilder>(
     );
 }
 
+#[allow(dead_code)]
 pub fn give_one_penguin_with_hat(
     blockchain_wrapper: &mut BlockchainStateWrapper,
     user_address: &Address,
@@ -173,6 +183,7 @@ pub fn give_one_penguin_with_hat(
     );
 }
 
+#[allow(dead_code)]
 pub fn execute_for_all_slot(execute: fn(&ItemSlot) -> ()) {
     // execute(&ItemSlot::Hat);
     for slot in ItemSlot::VALUES.iter() {
@@ -180,6 +191,7 @@ pub fn execute_for_all_slot(execute: fn(&ItemSlot) -> ()) {
     }
 }
 
+#[allow(dead_code)]
 pub fn create_paymens_and_esdt_transfers(
     tokens: &[(&[u8], u64, EsdtTokenType)],
 ) -> (
@@ -198,6 +210,7 @@ pub fn create_paymens_and_esdt_transfers(
     );
 }
 
+#[allow(dead_code)]
 pub fn create_esdt_transfers(tokens: &[(&[u8], u64)]) -> Vec<TxInputESDT> {
     let mut transfers = Vec::new();
 
@@ -212,12 +225,13 @@ pub fn create_esdt_transfers(tokens: &[(&[u8], u64)]) -> Vec<TxInputESDT> {
     return transfers;
 }
 
+#[allow(dead_code)]
 pub fn create_payments(
     tokens: &[(&[u8], u64, EsdtTokenType)],
 ) -> ManagedVec<DebugApi, EsdtTokenPayment<DebugApi>> {
     let mut payments = ManagedVec::<DebugApi, EsdtTokenPayment<DebugApi>>::new();
 
-    for (token_id, nonce, token_type) in tokens {
+    for (token_id, nonce, _) in tokens {
         let payment = EsdtTokenPayment::new(
             TokenIdentifier::<DebugApi>::from_esdt_bytes(token_id.to_vec()),
             nonce.clone(),

@@ -1,6 +1,4 @@
-use elrond_wasm::types::{
-    EsdtLocalRole, ManagedVarArgs, ManagedVec, SCError, SCResult, StaticSCError,
-};
+use elrond_wasm::types::{EsdtLocalRole, ManagedVarArgs, ManagedVec, SCResult, StaticSCError};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::item_slot::ItemSlot;
@@ -19,7 +17,7 @@ fn test_register_item() {
     utils::register_item(&mut setup, ItemSlot::Hat, HAT_TOKEN_ID);
     let b_wrapper = &mut setup.blockchain_wrapper;
 
-    b_wrapper.execute_tx(
+    let _ = b_wrapper.execute_tx(
         &setup.owner_address,
         &setup.cf_wrapper,
         &rust_biguint!(0u64),
@@ -48,7 +46,7 @@ fn register_another_item_on_slot() {
     utils::register_item(&mut setup, ItemSlot::Hat, ANOTHER_HAT_TOKEN_ID);
     let b_wrapper = &mut setup.blockchain_wrapper;
 
-    b_wrapper.execute_query(&setup.cf_wrapper, |sc| {
+    let _ = b_wrapper.execute_query(&setup.cf_wrapper, |sc| {
         let result = sc.items_slot(&managed_token_id!(HAT_TOKEN_ID)).get();
 
         assert_eq!(result, ItemSlot::Hat);
@@ -67,7 +65,7 @@ fn register_unmintable_item() {
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
-    b_wrapper.execute_tx(
+    let _ = b_wrapper.execute_tx(
         &setup.owner_address,
         &setup.cf_wrapper,
         &rust_biguint!(0),
@@ -102,7 +100,7 @@ fn register_unburnable_item() {
         &[EsdtLocalRole::NftAddQuantity],
     );
 
-    b_wrapper.execute_tx(
+    let _ = b_wrapper.execute_tx(
         &setup.owner_address,
         &setup.cf_wrapper,
         &rust_biguint!(0),
@@ -135,7 +133,7 @@ fn change_item_slot() {
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
-    b_wrapper.execute_query(&setup.cf_wrapper, |sc| {
+    let _ = b_wrapper.execute_query(&setup.cf_wrapper, |sc| {
         let result = sc.items_slot(&managed_token_id!(ITEM_ID)).get();
         assert_eq!(result, ItemSlot::Background);
     });
@@ -149,7 +147,7 @@ fn register_penguin_as_item_should_not_work() {
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
-    b_wrapper.execute_tx(
+    let _ = b_wrapper.execute_tx(
         &setup.owner_address,
         &setup.cf_wrapper,
         &rust_biguint!(0u64),
@@ -177,7 +175,7 @@ fn register_while_not_the_owner() {
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
-    b_wrapper.execute_tx(
+    let _ = b_wrapper.execute_tx(
         &setup.first_user_address,
         &setup.cf_wrapper,
         &rust_biguint!(0u64),

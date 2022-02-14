@@ -220,9 +220,9 @@ pub trait Equip {
     #[only_owner]
     fn fill(
         &self,
-        #[payment_token] token: TokenIdentifier<Self::Api>,
-        #[payment_nonce] nonce: u64,
-        #[payment_amount] amount: BigUint,
+        #[payment_token] _token: TokenIdentifier<Self::Api>,
+        #[payment_nonce] _nonce: u64,
+        #[payment_amount] _amount: BigUint,
     ) -> SCResult<()> {
         // TODO: require! that the future balance will be equals to 1
         // TODO: require! to only send registered SFT

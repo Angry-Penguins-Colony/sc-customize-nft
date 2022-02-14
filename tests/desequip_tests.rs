@@ -36,6 +36,13 @@ fn test_desequip() {
                 },
             )]),
         );
+        b_wrapper.set_nft_balance(
+            &setup.cf_wrapper.address_ref(),
+            ITEM_TO_DESEQUIP_ID,
+            INIT_NONCE,
+            &rust_biguint!(1),
+            &ItemAttributes {},
+        );
 
         let transfers = create_esdt_transfers(&[(PENGUIN_TOKEN_ID, INIT_NONCE)]);
         let _ = b_wrapper.execute_esdt_multi_transfer(
@@ -47,8 +54,9 @@ fn test_desequip() {
                 managed_slots.push(slot.clone());
 
                 let result = sc.desequip(
-                    &TokenIdentifier::<DebugApi>::from_esdt_bytes(PENGUIN_TOKEN_ID),
+                    TokenIdentifier::<DebugApi>::from_esdt_bytes(PENGUIN_TOKEN_ID),
                     INIT_NONCE,
+                    BigUint::from(1u64),
                     managed_slots,
                 );
 

@@ -141,6 +141,14 @@ fn test_equip_while_overlap() {
             )]),
         );
 
+        b_wrapper.set_nft_balance(
+            &setup.cf_wrapper.address_ref(),
+            ITEM_TO_EQUIP,
+            hat_to_remove_nonce,
+            &rust_biguint!(1),
+            &ItemAttributes {},
+        );
+
         let hat_to_equip_nonce = 30;
         // give the player a hat
         b_wrapper.set_nft_balance(

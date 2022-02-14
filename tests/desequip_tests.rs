@@ -45,28 +45,30 @@ fn test_desequip() {
         );
 
         let transfers = create_esdt_transfers(&[(PENGUIN_TOKEN_ID, INIT_NONCE)]);
-        let _ = b_wrapper.execute_esdt_multi_transfer(
-            &setup.first_user_address,
-            &setup.cf_wrapper,
-            &transfers,
-            |sc| {
-                let mut managed_slots = ManagedVarArgs::<DebugApi, ItemSlot>::new();
-                managed_slots.push(slot.clone());
+        let _ = b_wrapper
+            .execute_esdt_multi_transfer(
+                &setup.first_user_address,
+                &setup.cf_wrapper,
+                &transfers,
+                |sc| {
+                    let mut managed_slots = ManagedVarArgs::<DebugApi, ItemSlot>::new();
+                    managed_slots.push(slot.clone());
 
-                let result = sc.desequip(
-                    TokenIdentifier::<DebugApi>::from_esdt_bytes(PENGUIN_TOKEN_ID),
-                    INIT_NONCE,
-                    BigUint::from(1u64),
-                    managed_slots,
-                );
+                    let result = sc.desequip(
+                        TokenIdentifier::<DebugApi>::from_esdt_bytes(PENGUIN_TOKEN_ID),
+                        INIT_NONCE,
+                        BigUint::from(1u64),
+                        managed_slots,
+                    );
 
-                utils::verbose_log_if_error(&result, "".to_string());
+                    utils::verbose_log_if_error(&result, "".to_string());
 
-                assert_eq!(result, SCResult::Ok(1u64));
+                    assert_eq!(result, SCResult::Ok(1u64));
 
-                StateChange::Commit
-            },
-        );
+                    StateChange::Commit
+                },
+            )
+            .assert_ok();
 
         b_wrapper.check_nft_balance(
             &setup.first_user_address,

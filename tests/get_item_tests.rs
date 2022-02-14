@@ -17,18 +17,20 @@ fn test_get_item() {
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
-    let _ = b_wrapper.execute_query(&setup.cf_wrapper, |sc| {
-        let hat_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID);
+    let _ = b_wrapper
+        .execute_query(&setup.cf_wrapper, |sc| {
+            let hat_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID);
 
-        match sc.get_item_slot(&hat_token) {
-            OptionalResult::Some(item_type) => {
-                assert_eq!(item_type, ItemSlot::Hat);
+            match sc.get_item_slot(&hat_token) {
+                OptionalResult::Some(item_type) => {
+                    assert_eq!(item_type, ItemSlot::Hat);
+                }
+                OptionalResult::None => {
+                    panic!("The item is not registed, while it should be.");
+                }
             }
-            OptionalResult::None => {
-                panic!("The item is not registed, while it should be.");
-            }
-        }
-    });
+        })
+        .assert_ok();
 }
 
 #[test]
@@ -37,13 +39,15 @@ fn return_none_if_no_token_id() {
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
-    let _ = b_wrapper.execute_query(&setup.cf_wrapper, |sc| {
-        let not_existing_token =
-            TokenIdentifier::<DebugApi>::from_esdt_bytes("NOT_TOKEN_ID".as_bytes());
+    let _ = b_wrapper
+        .execute_query(&setup.cf_wrapper, |sc| {
+            let not_existing_token =
+                TokenIdentifier::<DebugApi>::from_esdt_bytes("NOT_TOKEN_ID".as_bytes());
 
-        match sc.get_item_slot(&not_existing_token) {
-            OptionalResult::Some(_) => panic!("item_type found"),
-            OptionalResult::None => {}
-        }
-    });
+            match sc.get_item_slot(&not_existing_token) {
+                OptionalResult::Some(_) => panic!("item_type found"),
+                OptionalResult::None => {}
+            }
+        })
+        .assert_ok();
 }

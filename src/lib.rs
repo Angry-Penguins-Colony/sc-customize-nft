@@ -75,12 +75,15 @@ pub trait Equip {
         #[payment_multi] payments: ManagedVec<EsdtTokenPayment<Self::Api>>,
     ) -> SCResult<u64> {
         self.require_penguin_roles_set()?;
-        require!(payments.len() >= 2, "You must provide at least 2 tokens.");
+        require!(
+            payments.len() >= 2,
+            "You must provide at least one penguin and one item."
+        );
 
         let first_payment = payments.get(0);
         let penguin_id = first_payment.token_identifier;
         let penguin_nonce = first_payment.token_nonce;
-        require!(first_payment.amount == 1, "You must sent only one item.");
+        require!(first_payment.amount == 1, "You must sent only one penguin.");
 
         require!(
             &penguin_id == &self.penguins_identifier().get(),

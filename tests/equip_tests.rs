@@ -52,20 +52,22 @@ fn test_equip() {
             (ITEM_TO_EQUIP_ID, INIT_NONCE),
         ]);
 
-        let _ = b_wrapper.execute_esdt_multi_transfer(
-            &setup.first_user_address,
-            &setup.cf_wrapper,
-            &transfers,
-            |sc| {
-                let result = sc.equip(sc.call_value().all_esdt_transfers());
+        let _ = b_wrapper
+            .execute_esdt_multi_transfer(
+                &setup.first_user_address,
+                &setup.cf_wrapper,
+                &transfers,
+                |sc| {
+                    let result = sc.equip(sc.call_value().all_esdt_transfers());
 
-                utils::verbose_log_if_error(&result, "".to_string());
+                    utils::verbose_log_if_error(&result, "".to_string());
 
-                assert_eq!(result, SCResult::Ok(1u64));
+                    assert_eq!(result, SCResult::Ok(1u64));
 
-                StateChange::Commit
-            },
-        );
+                    StateChange::Commit
+                },
+            )
+            .assert_ok();
 
         // the SC don't onw the penguin
         assert_eq!(
@@ -166,27 +168,21 @@ fn test_equip_while_overlap() {
             ),
         ]);
 
-        let _ = b_wrapper.execute_esdt_multi_transfer(
-            &setup.first_user_address,
-            &setup.cf_wrapper,
-            &esdt_transfers,
-            |sc| {
-                let result = sc.equip(sc.call_value().all_esdt_transfers());
+        let _ = b_wrapper
+            .execute_esdt_multi_transfer(
+                &setup.first_user_address,
+                &setup.cf_wrapper,
+                &esdt_transfers,
+                |sc| {
+                    let result = sc.equip(sc.call_value().all_esdt_transfers());
+                    utils::verbose_log_if_error(&result, "".to_string());
 
-                if let SCResult::Err(err) = result {
-                    panic!(
-                        "register_item failed: {:?}",
-                        std::str::from_utf8(&err.as_bytes()).unwrap(),
-                    );
-                }
+                    assert_eq!(result, SCResult::Ok(1u64));
 
-                utils::verbose_log_if_error(&result, "".to_string());
-
-                assert_eq!(result, SCResult::Ok(1u64));
-
-                StateChange::Commit
-            },
-        );
+                    StateChange::Commit
+                },
+            )
+            .assert_ok();
 
         // SHOULD sent removed equipment
         b_wrapper.check_nft_balance(
@@ -256,21 +252,18 @@ fn send_penguin_without_items() {
         EsdtTokenType::NonFungible,
     )]);
 
-    let _ = b_wrapper.execute_esdt_multi_transfer(
-        &setup.first_user_address,
-        &setup.cf_wrapper,
-        &esdt_transfers,
-        |sc| {
-            let result = sc.equip(sc.call_value().all_esdt_transfers());
+    let _ = b_wrapper
+        .execute_esdt_multi_transfer(
+            &setup.first_user_address,
+            &setup.cf_wrapper,
+            &esdt_transfers,
+            |sc| {
+                let _ = sc.equip(sc.call_value().all_esdt_transfers());
 
-            match result {
-                SCResult::Err(_) => {}
-                SCResult::Ok(_) => panic!("send_penguin_without_items failed"),
-            }
-
-            StateChange::Revert
-        },
-    );
+                StateChange::Revert
+            },
+        )
+        .assert_error(4, "You must provide at least one penguin and one item.");
 }
 
 #[test]
@@ -301,23 +294,19 @@ fn equip_while_nft_to_equip_is_not_a_penguin() {
         (HAT_TOKEN_ID, INIT_NONCE, EsdtTokenType::SemiFungible),
     ]);
 
-    let _ = b_wrapper.execute_esdt_multi_transfer(
-        &setup.first_user_address,
-        &setup.cf_wrapper,
-        &esdt_transfers,
-        |sc| {
-            let result = sc.equip(sc.call_value().all_esdt_transfers());
+    DebugApi::dummy();
 
-            panic!("stop");
-
-            assert_eq!(
-                result,
-                SCResult::Err("Please provide a penguin as the first payment".into())
-            );
-
-            StateChange::Commit
-        },
-    );
+    let _ = b_wrapper
+        .execute_esdt_multi_transfer(
+            &setup.first_user_address,
+            &setup.cf_wrapper,
+            &esdt_transfers,
+            |sc| {
+                let _ = sc.equip(sc.call_value().all_esdt_transfers());
+                StateChange::Revert
+            },
+        )
+        .assert_error(4, "Please provide a penguin as the first payment");
 }
 
 #[test]
@@ -351,21 +340,24 @@ fn equip_while_item_is_not_an_item() {
         (ITEM_TO_EQUIP_ID, INIT_NONCE, EsdtTokenType::SemiFungible),
     ]);
 
-    let _ = b_wrapper.execute_esdt_multi_transfer(
-        &setup.first_user_address,
-        &setup.cf_wrapper,
-        &transfers,
-        |sc| {
-            let result = sc.equip(sc.call_value().all_esdt_transfers());
+    b_wrapper
+        .execute_esdt_multi_transfer(
+            &setup.first_user_address,
+            &setup.cf_wrapper,
+            &transfers,
+            |sc| {
+                let _ = sc.equip(sc.call_value().all_esdt_transfers());
+                StateChange::Revert
+            },
+        )
+        .assert_error(
+            4,
+            "You are trying to equip a token that is not considered as an item",
+        );
 
-            assert_eq!(
-                result,
-                SCResult::Err(
-                    "You are trying to equip a token that is not considered as an item".into()
-                )
-            );
-
-            StateChange::Revert
-        },
-    );
+    // assert_eq!(
+    //     _result2.result_message,
+    //     "You are trying to equip a token that is not considered as an item"
+    // );
+    // panic!("test");
 }

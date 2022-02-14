@@ -131,15 +131,9 @@ pub trait Equip {
 
         self.require_item_roles_set(&item_token)?;
 
-        // empty slot
-        match attributes.is_slot_empty(&item_slot) {
-            Result::Ok(false) => {
-                self.desequip_slot(attributes, &item_slot)?;
-            }
-            Result::Err(_) => {
-                require!(false, "Error while checking if slot is empty");
-            }
-            _ => {}
+        // empty slot if any
+        if attributes.is_slot_empty(&item_slot) == false {
+            self.desequip_slot(attributes, &item_slot)?;
         }
 
         let result = attributes.set_item(
@@ -242,17 +236,11 @@ pub trait Equip {
         let caller = self.blockchain().get_caller();
 
         require!(
-            attributes.is_slot_empty(&slot).unwrap() == false,
+            attributes.is_slot_empty(&slot) == false,
             "Cannot sent item from an empty slot"
         );
 
-        let result = attributes.get_item(&slot);
-
-        if let Result::Err(()) = result {
-            return SCResult::Err("Error while minting and sending an item".into());
-        }
-
-        let opt_item = result.unwrap();
+        let opt_item = attributes.get_item(&slot);
 
         match opt_item {
             Some(item) => {

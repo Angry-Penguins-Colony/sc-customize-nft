@@ -29,7 +29,7 @@ fn test_equip() {
 
         let penguin_attributes = PenguinAttributes::<DebugApi>::empty();
 
-        assert_eq!(penguin_attributes.is_slot_empty(&slot), Result::Ok(true));
+        assert_eq!(penguin_attributes.is_slot_empty(&slot), true);
 
         b_wrapper.set_nft_balance(
             &setup.first_user_address,

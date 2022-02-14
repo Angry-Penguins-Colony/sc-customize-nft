@@ -17,7 +17,7 @@ fn is_empty_while_not_empty() {
             },
         )]);
 
-        assert_eq!(penguin.is_slot_empty(slot), Result::Ok(false));
+        assert_eq!(penguin.is_slot_empty(slot), false);
     });
 }
 
@@ -28,7 +28,7 @@ fn is_empty_while_empty() {
 
         let penguin = PenguinAttributes::<DebugApi>::empty();
 
-        assert_eq!(penguin.is_slot_empty(slot), Result::Ok(true));
+        assert_eq!(penguin.is_slot_empty(slot), true);
     });
 }
 
@@ -52,15 +52,10 @@ fn set_item_on_empty_slot() {
         );
         assert_eq!(result, Result::Ok(()));
 
-        let opt_result_item = penguin.get_item(slot).unwrap();
+        let item = penguin.get_item(slot).unwrap();
 
-        match opt_result_item {
-            Some(item) => {
-                assert_eq!(item.token, managed_token);
-                assert_eq!(item.nonce, nonce);
-            }
-            None => panic!("Item not found"),
-        }
+        assert_eq!(item.token, managed_token);
+        assert_eq!(item.nonce, nonce);
     });
 }
 

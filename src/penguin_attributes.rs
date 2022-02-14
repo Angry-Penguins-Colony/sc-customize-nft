@@ -41,46 +41,37 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         slot: &ItemSlot,
         item: Option<Item<M>>,
     ) -> Result<(), ManagedBuffer<M>> {
-        match self.is_slot_empty(slot) {
-            Result::Ok(false) => {
-                return Result::Err(ManagedBuffer::new_from_bytes(
-                    b"The slot is not empty. Please free it, before setting an item.",
-                ))
-            }
-            Result::Err(()) => {
-                return Result::Err(ManagedBuffer::new_from_bytes(
-                    b"Error while getting slot is empty",
-                ))
-            }
-            _ => {}
+        if self.is_slot_empty(slot) == false {
+            return Result::Err(ManagedBuffer::new_from_bytes(
+                b"The slot is not empty. Please free it, before setting an item.",
+            ));
         }
 
         return self.__set_item_no_check(slot, item);
     }
 
     #[allow(unreachable_patterns)]
-    pub fn get_item(&self, slot: &ItemSlot) -> Result<Option<Item<M>>, ()> {
+    pub fn get_item(&self, slot: &ItemSlot) -> Option<Item<M>> {
         match slot {
-            &ItemSlot::Hat => return Result::Ok(self.hat.clone()),
-            &ItemSlot::Background => return Result::Ok(self.background.clone()),
-            &ItemSlot::Skin => return Result::Ok(self.skin.clone()),
-            &ItemSlot::Chain => return Result::Ok(self.chain.clone()),
-            &ItemSlot::Beak => return Result::Ok(self.beak.clone()),
-            &ItemSlot::Weapon => return Result::Ok(self.weapon.clone()),
-            &ItemSlot::Clothes => return Result::Ok(self.clothes.clone()),
-            &ItemSlot::Eye => return Result::Ok(self.eye.clone()),
-            _ => return Result::Err(()),
+            &ItemSlot::Hat => return self.hat.clone(),
+            &ItemSlot::Background => return self.background.clone(),
+            &ItemSlot::Skin => return self.skin.clone(),
+            &ItemSlot::Chain => return self.chain.clone(),
+            &ItemSlot::Beak => return self.beak.clone(),
+            &ItemSlot::Weapon => return self.weapon.clone(),
+            &ItemSlot::Clothes => return self.clothes.clone(),
+            &ItemSlot::Eye => return self.eye.clone(),
+            _ => panic!("Missing slot. Please add it in get_item"),
         };
     }
 
     #[allow(unreachable_patterns)]
-    pub fn is_slot_empty(&self, slot: &ItemSlot) -> Result<bool, ()> {
+    pub fn is_slot_empty(&self, slot: &ItemSlot) -> bool {
         let item = self.get_item(slot);
 
         match item {
-            Result::Ok(Some(_)) => Result::Ok(false),
-            Result::Ok(None) => Result::Ok(true),
-            Result::Err(_) => Result::Err(()),
+            Some(_) => false,
+            None => true,
         }
     }
 
@@ -117,11 +108,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
             ItemSlot::Weapon => self.weapon = item,
             ItemSlot::Clothes => self.clothes = item,
             ItemSlot::Eye => self.eye = item,
-            _ => {
-                return Result::Err(ManagedBuffer::new_from_bytes(
-                    b"The slot provided is not supported",
-                ))
-            }
+            _ => panic!("Missing slot. Please add it in get_item"),
         }
 
         Result::Ok(())

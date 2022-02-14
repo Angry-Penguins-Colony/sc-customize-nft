@@ -233,7 +233,7 @@ fn test_equip_while_overlap() {
 }
 
 #[test]
-fn send_penguin_without_items() {
+fn equip_penguin_without_items() {
     let mut setup = utils::setup(equip_penguin::contract_obj);
 
     let b_wrapper = &mut setup.blockchain_wrapper;
@@ -354,10 +354,4 @@ fn equip_while_item_is_not_an_item() {
             4,
             "You are trying to equip a token that is not considered as an item",
         );
-
-    // assert_eq!(
-    //     _result2.result_message,
-    //     "You are trying to equip a token that is not considered as an item"
-    // );
-    // panic!("test");
 }

@@ -83,30 +83,25 @@ pub trait Equip {
         let first_payment = payments.get(0);
         let penguin_id = first_payment.token_identifier;
         let penguin_nonce = first_payment.token_nonce;
-        require!(first_payment.amount == 1, "You must sent only one penguin.");
 
         require!(
             &penguin_id == &self.penguins_identifier().get(),
             "Please provide a penguin as the first payment"
         );
-
-        let items_token = payments
-            .iter()
-            .skip(1)
-            .map(|payment| {
-                require!(payment.amount == 1, "You must sent only one item.");
-
-                Item {
-                    token: payment.token_identifier,
-                    nonce: payment.token_nonce,
-                }
-            })
-            .collect::<Vec<_>>();
+        require!(first_payment.amount == 1, "You must sent only one penguin.");
 
         let mut attributes = self.parse_penguin_attributes(&penguin_id, penguin_nonce)?;
 
         // let's equip each item
-        for item in items_token {
+        let items_token = payments.iter().skip(1);
+        for payment in items_token {
+            require!(payment.amount == 1, "You must sent only one item.");
+
+            let item = Item {
+                token: payment.token_identifier,
+                nonce: payment.token_nonce,
+            };
+
             self.equip_slot(&mut attributes, &item)?;
         }
 
@@ -119,19 +114,24 @@ pub trait Equip {
         attributes: &mut PenguinAttributes<Self::Api>,
         item: &Item<Self::Api>,
     ) -> SCResult<()> {
-        let item_token = &item.token;
+        let item_id = &item.token;
         let item_nonce = item.nonce;
 
-        let item_slot = self.items_slot(&item_token).get();
+        let item_slot = self.items_slot(&item_id).get();
 
         require!(
             item_slot != ItemSlot::None,
             "You are trying to equip a token that is not considered as an item"
         );
 
-        self.require_item_roles_set(&item_token)?;
+        require!(
+            item_id != &self.penguins_identifier().get(),
+            "Cannot equip a penguin as an item."
+        );
 
-        // empty slot if any
+        self.require_item_roles_set(&item_id)?;
+
+        // desequip slot if any
         if attributes.is_slot_empty(&item_slot) == false {
             self.desequip_slot(attributes, &item_slot)?;
         }
@@ -139,7 +139,7 @@ pub trait Equip {
         let result = attributes.set_item(
             &item_slot,
             Option::Some(Item {
-                token: item_token.clone(),
+                token: item_id.clone(),
                 nonce: item_nonce.clone(),
             }),
         );
@@ -149,7 +149,7 @@ pub trait Equip {
         );
 
         self.send()
-            .esdt_local_burn(&item_token, item_nonce, &BigUint::from(1u32));
+            .esdt_local_burn(&item_id, item_nonce, &BigUint::from(1u32));
 
         return SCResult::Ok(());
     }
@@ -247,6 +247,10 @@ pub trait Equip {
                 let item_id = item.token;
                 let item_nonce = item.nonce;
 
+                require!(
+                    self.get_item_slot(&item_id).into_option().is_some(),
+                    "A item to desequip is not considered like an item. The item has maybe been removed. Please contact an administrator."
+                );
                 self.require_item_roles_set(&item_id)?;
 
                 if self.blockchain().get_sc_balance(&item_id, item_nonce) == 0 {

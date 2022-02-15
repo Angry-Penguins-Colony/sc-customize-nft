@@ -6,5 +6,7 @@
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-#[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi, PartialEq, Debug)]
-pub struct ItemAttributes {}
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, TypeAbi, Debug)]
+pub struct ItemAttributes<M: ManagedTypeApi> {
+    pub item_id: ManagedBuffer<M>,
+}

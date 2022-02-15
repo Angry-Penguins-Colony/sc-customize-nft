@@ -27,9 +27,15 @@ pub trait Equip {
     #[storage_mapper("penguins_identifier")]
     fn penguins_identifier(&self) -> SingleValueMapper<TokenIdentifier>;
 
+    #[storage_mapper("uri")]
+    fn uri(&self) -> SingleValueMapper<ManagedBuffer<Self::Api>>;
+
     #[init]
     fn init(&self, penguins_identifier: TokenIdentifier) -> SCResult<()> {
         self.penguins_identifier().set(&penguins_identifier);
+        self.uri().set(ManagedBuffer::new_from_bytes(
+            b"https://intense-way-598.herokuapp.com/",
+        ));
 
         return Ok(());
     }
@@ -376,8 +382,6 @@ pub trait Equip {
         // let attributes_hash = self.crypto().sha256(&serialized_attributes);
         // let hash_buffer = ManagedBuffer::from(attributes_hash.as_bytes());
 
-        // self.send().esdt_nft_create::<PenguinAttributes<Self::Api>>(
-
         let name = self.get_penguin_name(penguin_nonce);
 
         self.send()
@@ -397,6 +401,47 @@ pub trait Equip {
             .direct(&caller, &penguin_id, token_nonce, &BigUint::from(1u32), &[]);
 
         return Ok(token_nonce);
+    }
+
+    fn build_url(
+        &self,
+        attributes: &PenguinAttributes<Self::Api>,
+    ) -> SCResult<ManagedBuffer<Self::Api>> {
+        let mut expected = ManagedBuffer::new();
+        expected.append(&self.uri().get());
+
+        for slot in ItemSlot::VALUES.iter() {
+            if let Some(item) = attributes.get_item(slot) {
+                let token_data = self.parse_item_attributes(&item.token, item.nonce)?;
+
+                let slot_type = token_data.item_id;
+                let slot_id = slot.to_bytes::<Self::Api>();
+
+                expected.append(&ManagedBuffer::new_from_bytes(slot_id));
+                expected.append_bytes(b"_");
+                expected.append(&slot_type);
+            }
+        }
+
+        expected.append_bytes(b"/image.png");
+
+        return SCResult::Ok(expected);
+    }
+
+    fn parse_item_attributes(
+        &self,
+        id: &TokenIdentifier,
+        nonce: u64,
+    ) -> SCResult<ItemAttributes<Self::Api>> {
+        let attributes = self
+            .blockchain()
+            .get_esdt_token_data(&self.blockchain().get_sc_address(), &id, nonce)
+            .decode_attributes::<ItemAttributes<Self::Api>>();
+
+        match attributes {
+            Result::Ok(attributes) => return SCResult::Ok(attributes),
+            Result::Err(_) => return SCResult::Err("Error while decoding item attributes".into()),
+        }
     }
 
     fn get_penguin_name(&self, penguin_nonce: u64) -> ManagedBuffer<Self::Api> {

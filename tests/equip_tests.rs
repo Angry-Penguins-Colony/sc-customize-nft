@@ -22,7 +22,6 @@ fn test_equip() {
 
         let mut setup = utils::setup(equip_penguin::contract_obj);
 
-        setup.set_all_permissions_on_token(ITEM_TO_EQUIP_ID);
         setup.register_item(slot.clone(), ITEM_TO_EQUIP_ID);
 
         let b_wrapper = &mut setup.blockchain_wrapper;
@@ -44,7 +43,9 @@ fn test_equip() {
             ITEM_TO_EQUIP_ID,
             INIT_NONCE,
             &rust_biguint!(1),
-            &ItemAttributes {},
+            &ItemAttributes {
+                item_id: ManagedBuffer::<DebugApi>::new(),
+            },
         );
 
         let transfers = utils::create_esdt_transfers(&[
@@ -120,7 +121,6 @@ fn test_equip_while_overlap() {
 
         let mut setup = utils::setup(equip_penguin::contract_obj);
 
-        setup.set_all_permissions_on_token(ITEM_TO_EQUIP);
         setup.register_item(slot.clone(), ITEM_TO_EQUIP);
 
         let b_wrapper = &mut setup.blockchain_wrapper;
@@ -146,7 +146,9 @@ fn test_equip_while_overlap() {
             ITEM_TO_EQUIP,
             hat_to_remove_nonce,
             &rust_biguint!(1),
-            &ItemAttributes {},
+            &ItemAttributes {
+                item_id: ManagedBuffer::<DebugApi>::new(),
+            },
         );
 
         let hat_to_equip_nonce = 30;
@@ -156,7 +158,9 @@ fn test_equip_while_overlap() {
             ITEM_TO_EQUIP,
             hat_to_equip_nonce,
             &rust_biguint!(1),
-            &ItemAttributes {},
+            &ItemAttributes {
+                item_id: ManagedBuffer::<DebugApi>::new(),
+            },
         );
 
         let (esdt_transfers, _) = utils::create_paymens_and_esdt_transfers(&[
@@ -184,13 +188,10 @@ fn test_equip_while_overlap() {
             )
             .assert_ok();
 
-        // SHOULD sent removed equipment
-        b_wrapper.check_nft_balance(
-            &setup.first_user_address,
-            ITEM_TO_EQUIP,
-            INIT_NONCE,
-            &rust_biguint!(1),
-            &ItemAttributes {},
+        // sent removed equipment
+        assert_eq!(
+            b_wrapper.get_esdt_balance(&setup.first_user_address, ITEM_TO_EQUIP, INIT_NONCE),
+            rust_biguint!(1)
         );
 
         // SHOULD sent generated penguin
@@ -286,7 +287,9 @@ fn equip_while_nft_to_equip_is_not_a_penguin() {
         HAT_TOKEN_ID,
         INIT_NONCE,
         &rust_biguint!(1),
-        &ItemAttributes {},
+        &ItemAttributes {
+            item_id: ManagedBuffer::<DebugApi>::new(),
+        },
     );
 
     let (esdt_transfers, _) = utils::create_paymens_and_esdt_transfers(&[
@@ -332,7 +335,9 @@ fn equip_while_item_is_not_an_item() {
         ITEM_TO_EQUIP_ID,
         INIT_NONCE,
         &rust_biguint!(1),
-        &ItemAttributes {},
+        &ItemAttributes {
+            item_id: ManagedBuffer::<DebugApi>::new(),
+        },
     );
 
     let (transfers, _) = utils::create_paymens_and_esdt_transfers(&[

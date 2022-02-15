@@ -8,6 +8,7 @@ use elrond_wasm_debug::tx_mock::{TxContextRef, TxInputESDT};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::item::Item;
+use equip_penguin::item_attributes::ItemAttributes;
 use equip_penguin::item_slot::ItemSlot;
 use equip_penguin::penguin_attributes::PenguinAttributes;
 use equip_penguin::*;
@@ -40,18 +41,26 @@ where
     CrowdfundingObjBuilder: 'static + Copy + Fn() -> equip_penguin::ContractObj<DebugApi>,
 {
     #[allow(dead_code)]
-    pub fn add_quantity(&mut self, token: &[u8], nonce: u64, quantity: u64) {
+    pub fn add_item(
+        &mut self,
+        token: &[u8],
+        nonce: u64,
+        quantity: u64,
+        attributes: &ItemAttributes<DebugApi>,
+    ) {
         self.blockchain_wrapper.set_nft_balance(
             &self.first_user_address,
             token,
             nonce,
             &rust_biguint!(quantity),
-            &{},
+            attributes,
         );
     }
 
     #[allow(dead_code)]
     pub fn register_item(&mut self, item_type: ItemSlot, item_id: &[u8]) {
+        self.set_all_permissions_on_token(item_id);
+
         let _ = self.blockchain_wrapper.execute_tx(
             &self.owner_address,
             &self.cf_wrapper,
@@ -86,7 +95,7 @@ where
         );
     }
 
-    pub fn set_all_permissions_on_token(&mut self, token_id: &[u8]) {
+    fn set_all_permissions_on_token(&mut self, token_id: &[u8]) {
         let contract_roles = [
             EsdtLocalRole::NftCreate,
             EsdtLocalRole::NftBurn,

@@ -30,4 +30,18 @@ impl ItemSlot {
         Self::Clothes,
         Self::Eye,
     ];
+
+    pub fn to_bytes<M: ManagedTypeApi>(&self) -> &[u8] {
+        match self {
+            Self::Hat => return b"hat",
+            Self::Background => return b"background",
+            Self::Skin => return b"skin",
+            Self::Chain => return b"chain",
+            Self::Beak => return b"beak",
+            Self::Weapon => return b"weapon",
+            Self::Clothes => return b"clothes",
+            Self::Eye => return b"eye",
+            Self::None => return b"none",
+        }
+    }
 }

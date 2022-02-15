@@ -18,7 +18,6 @@ fn test_desequip() {
         let mut setup = utils::setup(equip_penguin::contract_obj);
 
         const ITEM_TO_DESEQUIP_ID: &[u8] = b"ITEM-a";
-        setup.set_all_permissions_on_token(ITEM_TO_DESEQUIP_ID);
         setup.register_item(slot.clone(), ITEM_TO_DESEQUIP_ID);
 
         let mut b_wrapper = setup.blockchain_wrapper;

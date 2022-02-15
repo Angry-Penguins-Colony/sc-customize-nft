@@ -35,6 +35,21 @@ where
         ContractObjWrapper<equip_penguin::ContractObj<DebugApi>, CrowdfundingObjBuilder>,
 }
 
+impl<CrowdfundingObjBuilder> EquipSetup<CrowdfundingObjBuilder>
+where
+    CrowdfundingObjBuilder: 'static + Copy + Fn() -> equip_penguin::ContractObj<DebugApi>,
+{
+    pub fn add_quantity(&mut self, token: &[u8], nonce: u64, quantity: u64) {
+        self.blockchain_wrapper.set_nft_balance(
+            &self.first_user_address,
+            token,
+            nonce,
+            &rust_biguint!(quantity),
+            &{},
+        );
+    }
+}
+
 #[allow(dead_code)]
 pub fn setup<TObjBuilder>(cf_builder: TObjBuilder) -> EquipSetup<TObjBuilder>
 where
@@ -243,3 +258,6 @@ pub fn create_payments(
 
     return payments;
 }
+
+// TODO: register item (arg = slot)
+// TODO: add quantity (arg = quantity)

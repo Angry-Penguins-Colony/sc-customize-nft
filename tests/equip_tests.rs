@@ -1,5 +1,6 @@
 use elrond_wasm::contract_base::ContractBase;
 use elrond_wasm::types::{EsdtTokenType, SCResult};
+use elrond_wasm_debug::tx_mock::TxInputESDT;
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::item::Item;
@@ -355,3 +356,53 @@ fn equip_while_item_is_not_an_item() {
             "You are trying to equip a token that is not considered as an item",
         );
 }
+
+// We can test send_more_than_one_penguins because it is an NFT. And NFT doesn't have quantity.
+
+// #[test]
+// fn send_more_than_one_penguins() {
+//     utils::execute_for_all_slot(|slot| {
+//         const ITEM_TO_EQUIP_ID: &[u8] = b"HAT-a1a1a1";
+
+//         let mut setup = utils::setup(equip_penguin::contract_obj);
+
+//         setup.add_quantity(ITEM_TO_EQUIP_ID, INIT_NONCE, 1);
+//         utils::set_all_permissions_on_token(&mut setup, ITEM_TO_EQUIP_ID);
+//         utils::register_item(&mut setup, slot.clone(), &ITEM_TO_EQUIP_ID);
+
+//         let b_wrapper = &mut setup.blockchain_wrapper;
+
+//         b_wrapper.set_nft_balance(
+//             &setup.first_user_address,
+//             PENGUIN_TOKEN_ID,
+//             INIT_NONCE,
+//             &rust_biguint!(1),
+//             &PenguinAttributes::<DebugApi>::empty(),
+//         );
+
+//         let transfers = vec![
+//             TxInputESDT {
+//                 token_identifier: PENGUIN_TOKEN_ID.to_vec(),
+//                 nonce: INIT_NONCE.clone(),
+//                 value: rust_biguint!(1u64),
+//             },
+//             TxInputESDT {
+//                 token_identifier: ITEM_TO_EQUIP_ID.to_vec(),
+//                 nonce: INIT_NONCE.clone(),
+//                 value: rust_biguint!(2u64),
+//             },
+//         ];
+
+//         b_wrapper
+//             .execute_esdt_multi_transfer(
+//                 &setup.first_user_address,
+//                 &setup.cf_wrapper,
+//                 &transfers,
+//                 |sc| {
+//                     let _ = sc.equip(sc.call_value().all_esdt_transfers());
+//                     StateChange::Revert
+//                 },
+//             )
+//             .assert_user_error("You must sent only one item.");
+//     });
+// }

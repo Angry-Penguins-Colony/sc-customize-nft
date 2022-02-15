@@ -39,6 +39,7 @@ impl<CrowdfundingObjBuilder> EquipSetup<CrowdfundingObjBuilder>
 where
     CrowdfundingObjBuilder: 'static + Copy + Fn() -> equip_penguin::ContractObj<DebugApi>,
 {
+    #[allow(dead_code)]
     pub fn add_quantity(&mut self, token: &[u8], nonce: u64, quantity: u64) {
         self.blockchain_wrapper.set_nft_balance(
             &self.first_user_address,
@@ -46,6 +47,55 @@ where
             nonce,
             &rust_biguint!(quantity),
             &{},
+        );
+    }
+
+    #[allow(dead_code)]
+    pub fn register_item(&mut self, item_type: ItemSlot, item_id: &[u8]) {
+        let _ = self.blockchain_wrapper.execute_tx(
+            &self.owner_address,
+            &self.cf_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                let mut managed_items_ids =
+                    ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                managed_items_ids.push(managed_token_id!(item_id));
+
+                let result = sc.register_item(item_type, managed_items_ids);
+
+                if let SCResult::Err(err) = result {
+                    panic!(
+                        "register_item {:?} failed: {:?}",
+                        std::str::from_utf8(&item_id).unwrap(),
+                        std::str::from_utf8(&err.as_bytes()).unwrap(),
+                    );
+                }
+
+                assert_eq!(result, SCResult::Ok(()));
+
+                StateChange::Commit
+            },
+        );
+
+        self.blockchain_wrapper.set_nft_balance(
+            &self.cf_wrapper.address_ref(),
+            &item_id,
+            65535u64,
+            &rust_biguint!(1u64),
+            &{},
+        );
+    }
+
+    pub fn set_all_permissions_on_token(&mut self, token_id: &[u8]) {
+        let contract_roles = [
+            EsdtLocalRole::NftCreate,
+            EsdtLocalRole::NftBurn,
+            EsdtLocalRole::NftAddQuantity,
+        ];
+        self.blockchain_wrapper.set_esdt_local_roles(
+            self.cf_wrapper.address_ref(),
+            token_id,
+            &contract_roles,
         );
     }
 }
@@ -86,45 +136,9 @@ where
         cf_wrapper,
     };
 
-    set_all_permissions_on_token(&mut equip_setup, PENGUIN_TOKEN_ID);
+    equip_setup.set_all_permissions_on_token(PENGUIN_TOKEN_ID);
 
     return equip_setup;
-}
-
-#[allow(dead_code)]
-pub fn register_item<EquipObjBuilder>(
-    setup: &mut EquipSetup<EquipObjBuilder>,
-    item_type: ItemSlot,
-    item_id: &[u8],
-) where
-    EquipObjBuilder: 'static + Copy + Fn() -> equip_penguin::ContractObj<DebugApi>,
-{
-    let b_wrapper = &mut setup.blockchain_wrapper;
-
-    let _ = b_wrapper.execute_tx(
-        &setup.owner_address,
-        &setup.cf_wrapper,
-        &rust_biguint!(0u64),
-        |sc| {
-            let mut managed_items_ids =
-                ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
-            managed_items_ids.push(managed_token_id!(item_id));
-
-            let result = sc.register_item(item_type, managed_items_ids);
-
-            if let SCResult::Err(err) = result {
-                panic!(
-                    "register_item {:?} failed: {:?}",
-                    std::str::from_utf8(&item_id).unwrap(),
-                    std::str::from_utf8(&err.as_bytes()).unwrap(),
-                );
-            }
-
-            assert_eq!(result, SCResult::Ok(()));
-
-            StateChange::Commit
-        },
-    );
 }
 
 #[allow(dead_code)]
@@ -156,24 +170,6 @@ pub fn create_managed_items_to_equip(
     }
 
     return managed_items_to_equip;
-}
-
-pub fn set_all_permissions_on_token<EquipObjBuilder>(
-    setup: &mut EquipSetup<EquipObjBuilder>,
-    token_id: &[u8],
-) where
-    EquipObjBuilder: 'static + Copy + Fn() -> equip_penguin::ContractObj<DebugApi>,
-{
-    let contract_roles = [
-        EsdtLocalRole::NftCreate,
-        EsdtLocalRole::NftBurn,
-        EsdtLocalRole::NftAddQuantity,
-    ];
-    setup.blockchain_wrapper.set_esdt_local_roles(
-        setup.cf_wrapper.address_ref(),
-        token_id,
-        &contract_roles,
-    );
 }
 
 #[allow(dead_code)]

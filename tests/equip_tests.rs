@@ -1,6 +1,5 @@
 use elrond_wasm::contract_base::ContractBase;
 use elrond_wasm::types::{EsdtTokenType, SCResult};
-use elrond_wasm_debug::tx_mock::TxInputESDT;
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::item::Item;
@@ -23,8 +22,8 @@ fn test_equip() {
 
         let mut setup = utils::setup(equip_penguin::contract_obj);
 
-        utils::set_all_permissions_on_token(&mut setup, ITEM_TO_EQUIP_ID);
-        utils::register_item(&mut setup, slot.clone(), ITEM_TO_EQUIP_ID);
+        setup.set_all_permissions_on_token(ITEM_TO_EQUIP_ID);
+        setup.register_item(slot.clone(), ITEM_TO_EQUIP_ID);
 
         let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -121,8 +120,8 @@ fn test_equip_while_overlap() {
 
         let mut setup = utils::setup(equip_penguin::contract_obj);
 
-        utils::set_all_permissions_on_token(&mut setup, ITEM_TO_EQUIP);
-        utils::register_item(&mut setup, slot.clone(), ITEM_TO_EQUIP);
+        setup.set_all_permissions_on_token(ITEM_TO_EQUIP);
+        setup.register_item(slot.clone(), ITEM_TO_EQUIP);
 
         let b_wrapper = &mut setup.blockchain_wrapper;
         let hat_to_remove_nonce = 56;

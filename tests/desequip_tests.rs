@@ -2,7 +2,6 @@ use elrond_wasm::types::{ManagedVarArgs, SCResult};
 use elrond_wasm_debug::testing_framework::*;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::item::Item;
-use equip_penguin::item_attributes::ItemAttributes;
 use equip_penguin::item_slot::ItemSlot;
 use equip_penguin::penguin_attributes::PenguinAttributes;
 use equip_penguin::*;
@@ -19,8 +18,8 @@ fn test_desequip() {
         let mut setup = utils::setup(equip_penguin::contract_obj);
 
         const ITEM_TO_DESEQUIP_ID: &[u8] = b"ITEM-a";
-        utils::set_all_permissions_on_token(&mut setup, ITEM_TO_DESEQUIP_ID);
-        utils::register_item(&mut setup, slot.clone(), ITEM_TO_DESEQUIP_ID);
+        setup.set_all_permissions_on_token(ITEM_TO_DESEQUIP_ID);
+        setup.register_item(slot.clone(), ITEM_TO_DESEQUIP_ID);
 
         let mut b_wrapper = setup.blockchain_wrapper;
         b_wrapper.set_nft_balance(
@@ -35,13 +34,6 @@ fn test_desequip() {
                     nonce: INIT_NONCE,
                 },
             )]),
-        );
-        b_wrapper.set_nft_balance(
-            &setup.cf_wrapper.address_ref(),
-            ITEM_TO_DESEQUIP_ID,
-            INIT_NONCE,
-            &rust_biguint!(1),
-            &ItemAttributes {},
         );
 
         let transfers = create_esdt_transfers(&[(PENGUIN_TOKEN_ID, INIT_NONCE)]);
@@ -69,22 +61,6 @@ fn test_desequip() {
                 },
             )
             .assert_ok();
-
-        b_wrapper.check_nft_balance(
-            &setup.first_user_address,
-            PENGUIN_TOKEN_ID,
-            1u64,
-            &rust_biguint!(1),
-            &PenguinAttributes::<DebugApi>::empty(),
-        );
-
-        b_wrapper.check_nft_balance(
-            &setup.first_user_address,
-            ITEM_TO_DESEQUIP_ID,
-            INIT_NONCE,
-            &rust_biguint!(1),
-            &ItemAttributes {},
-        );
 
         assert_eq!(
             b_wrapper.get_esdt_balance(&setup.first_user_address, ITEM_TO_DESEQUIP_ID, INIT_NONCE),

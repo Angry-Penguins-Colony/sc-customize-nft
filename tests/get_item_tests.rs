@@ -12,8 +12,8 @@ fn test_get_item() {
     utils::execute_for_all_slot(|slot| {
         let mut setup = utils::setup(equip_penguin::contract_obj);
 
-        utils::set_all_permissions_on_token(&mut setup, HAT_TOKEN_ID);
-        utils::register_item(&mut setup, slot.clone(), HAT_TOKEN_ID);
+        setup.set_all_permissions_on_token(HAT_TOKEN_ID);
+        setup.register_item(slot.clone(), HAT_TOKEN_ID);
 
         let b_wrapper = &mut setup.blockchain_wrapper;
 

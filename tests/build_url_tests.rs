@@ -11,6 +11,26 @@ use equip_penguin::{
 mod utils;
 
 #[test]
+fn build_url_with_no_item() {
+    let mut setup = utils::setup(equip_penguin::contract_obj);
+
+    setup
+        .blockchain_wrapper
+        .execute_query(&setup.cf_wrapper, |sc| {
+            let actual = sc.build_url(&PenguinAttributes::empty());
+
+            assert!(actual.is_ok());
+
+            let mut expected = ManagedBuffer::new();
+            expected.append(&sc.uri().get());
+            expected.append_bytes(b"empty/image.png");
+
+            assert_eq!(actual.unwrap(), expected);
+        })
+        .assert_ok();
+}
+
+#[test]
 fn build_url_with_one_item() {
     // utils::execute_for_all_slot(|mut slot| {
     let slot = &ItemSlot::Hat;
@@ -64,19 +84,83 @@ fn build_url_with_one_item() {
 }
 
 #[test]
-fn build_url_with_no_item() {
+fn build_url_with_two_item() {
+    // utils::execute_for_all_slot(|mut slot| {
+
     let mut setup = utils::setup(equip_penguin::contract_obj);
 
-    setup
-        .blockchain_wrapper
+    const NONCE: u64 = 6000;
+
+    const SLOT_1: &ItemSlot = &ItemSlot::Hat;
+    const ITEM_1_IDENTIFIER: &[u8] = b"ITEM-a1a1a1";
+    const ITEM_1_TYPE: &[u8] = b"first-item";
+
+    const SLOT_2: &ItemSlot = &ItemSlot::Skin;
+    const ITEM_2_IDENTIFIER: &[u8] = b"ITEM-b2b2b2";
+    const ITEM_2_TYPE: &[u8] = b"second-item";
+
+    let items: Vec<(&[u8], &[u8], &ItemSlot)> = vec![
+        (ITEM_1_IDENTIFIER, ITEM_1_TYPE, SLOT_1),
+        (ITEM_2_IDENTIFIER, ITEM_2_TYPE, SLOT_2),
+    ];
+
+    for (id, typeee, slot) in items {
+        setup.register_item(slot.clone(), id);
+
+        setup.blockchain_wrapper.set_nft_balance(
+            setup.cf_wrapper.address_ref(),
+            id,
+            NONCE,
+            &rust_biguint!(1),
+            &ItemAttributes::<DebugApi> {
+                item_id: ManagedBuffer::<DebugApi>::new_from_bytes(typeee),
+            },
+        );
+    }
+
+    let b_wrapper = &mut setup.blockchain_wrapper;
+
+    let _ = b_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
-            let actual = sc.build_url(&PenguinAttributes::empty());
+            // instantiate penguin with item
+            let penguin_attributes = PenguinAttributes::<DebugApi>::new(&[
+                (
+                    &ItemSlot::Hat,
+                    Item::<DebugApi> {
+                        token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_1_IDENTIFIER),
+                        nonce: NONCE,
+                    },
+                ),
+                (
+                    &ItemSlot::Skin,
+                    Item::<DebugApi> {
+                        token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_2_IDENTIFIER),
+                        nonce: NONCE,
+                    },
+                ),
+            ]);
+
+            let actual = sc.build_url(&penguin_attributes);
 
             assert!(actual.is_ok());
 
             let mut expected = ManagedBuffer::new();
             expected.append(&sc.uri().get());
-            expected.append_bytes(b"empty/image.png");
+            expected.append(&ManagedBuffer::new_from_bytes(
+                SLOT_1.to_bytes::<DebugApi>(),
+            ));
+            expected.append_bytes(b"_");
+            expected.append(&ManagedBuffer::new_from_bytes(ITEM_1_TYPE)); // slot value eg. albino
+
+            expected.append_bytes(b"+");
+
+            expected.append(&ManagedBuffer::new_from_bytes(
+                SLOT_2.to_bytes::<DebugApi>(),
+            ));
+            expected.append_bytes(b"_");
+            expected.append(&ManagedBuffer::new_from_bytes(ITEM_2_TYPE)); // slot value eg. albino
+
+            expected.append_bytes(b"/image.png");
 
             assert_eq!(actual.unwrap(), expected);
         })

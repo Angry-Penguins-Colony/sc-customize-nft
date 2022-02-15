@@ -414,6 +414,8 @@ pub trait Equip {
         let mut expected = ManagedBuffer::new();
         expected.append(&self.uri().get());
 
+        let mut is_first_item = true;
+
         for slot in ItemSlot::VALUES.iter() {
             if let Some(item) = attributes.get_item(slot) {
                 let token_data = self.parse_item_attributes(&item.token, item.nonce)?;
@@ -421,9 +423,15 @@ pub trait Equip {
                 let slot_type = token_data.item_id;
                 let slot_id = slot.to_bytes::<Self::Api>();
 
+                if is_first_item == false {
+                    expected.append_bytes(b"+");
+                }
+
                 expected.append(&ManagedBuffer::new_from_bytes(slot_id));
                 expected.append_bytes(b"_");
                 expected.append(&slot_type);
+
+                is_first_item = false;
             }
         }
 

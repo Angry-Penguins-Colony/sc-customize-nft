@@ -50,6 +50,18 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         return self.__set_item_no_check(slot, item);
     }
 
+    pub fn get_fill_count(&self) -> usize {
+        let mut size: usize = 0;
+
+        for slot in ItemSlot::VALUES.iter() {
+            if self.is_slot_empty(slot) == false {
+                size += 1;
+            }
+        }
+
+        return size;
+    }
+
     #[allow(unreachable_patterns)]
     pub fn get_item(&self, slot: &ItemSlot) -> Option<Item<M>> {
         match slot {

@@ -40,7 +40,7 @@ impl ItemSlot {
             Self::Beak => return b"beak",
             Self::Weapon => return b"weapon",
             Self::Clothes => return b"clothes",
-            Self::Eye => return b"eye",
+            Self::Eye => return b"eyes",
             Self::None => return b"none",
         }
     }

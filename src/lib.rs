@@ -407,6 +407,10 @@ pub trait Equip {
         &self,
         attributes: &PenguinAttributes<Self::Api>,
     ) -> SCResult<ManagedBuffer<Self::Api>> {
+        if attributes.get_fill_count() == 0 {
+            return SCResult::Ok(self.get_full_unequiped_penguin_uri());
+        }
+
         let mut expected = ManagedBuffer::new();
         expected.append(&self.uri().get());
 
@@ -452,5 +456,14 @@ pub trait Equip {
         );
 
         return nft_data.name;
+    }
+
+    fn get_full_unequiped_penguin_uri(&self) -> ManagedBuffer<Self::Api> {
+        let mut uri = ManagedBuffer::new();
+
+        uri.append(&self.uri().get());
+        uri.append_bytes(b"empty/image.png");
+
+        return uri;
     }
 }

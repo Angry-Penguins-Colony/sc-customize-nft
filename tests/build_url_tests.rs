@@ -1,8 +1,6 @@
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm::types::TokenIdentifier;
-use elrond_wasm_debug::managed_token_id;
 use elrond_wasm_debug::rust_biguint;
-use elrond_wasm_debug::testing_framework::StateChange;
 use elrond_wasm_debug::DebugApi;
 use equip_penguin::item_slot::ItemSlot;
 use equip_penguin::Equip;
@@ -59,6 +57,26 @@ fn build_url_with_one_item() {
             expected.append_bytes(b"_");
             expected.append(&ManagedBuffer::new_from_bytes(ITEM_TYPE)); // slot value eg. albino
             expected.append_bytes(b"/image.png");
+
+            assert_eq!(actual.unwrap(), expected);
+        })
+        .assert_ok();
+}
+
+#[test]
+fn build_url_with_no_item() {
+    let mut setup = utils::setup(equip_penguin::contract_obj);
+
+    setup
+        .blockchain_wrapper
+        .execute_query(&setup.cf_wrapper, |sc| {
+            let actual = sc.build_url(&PenguinAttributes::empty());
+
+            assert!(actual.is_ok());
+
+            let mut expected = ManagedBuffer::new();
+            expected.append(&sc.uri().get());
+            expected.append_bytes(b"empty/image.png");
 
             assert_eq!(actual.unwrap(), expected);
         })

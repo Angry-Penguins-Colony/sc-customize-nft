@@ -160,7 +160,7 @@ where
         transfers: Vec<TxInputESDT>,
         penguin_nonce: u64,
     ) -> (SCResult<u64>, TxResult) {
-        let mut sc_result: Option<SCResult<u64>> = Option::None;
+        let mut opt_sc_result: Option<SCResult<u64>> = Option::None;
 
         let tx_result = self.blockchain_wrapper.execute_esdt_multi_transfer(
             &self.first_user_address,
@@ -177,13 +177,19 @@ where
                     managed_slots,
                 );
 
-                sc_result = Option::Some(result);
+                opt_sc_result = Option::Some(result.clone());
 
-                StateChange::Commit
+                match result {
+                    SCResult::Ok(_) => StateChange::Commit,
+                    SCResult::Err(_) => StateChange::Revert,
+                }
             },
         );
 
-        return (sc_result.unwrap(), tx_result);
+        match opt_sc_result {
+            Option::Some(sc_result) => return (sc_result, tx_result),
+            Option::None => return (SCResult::Err("".into()), tx_result),
+        }
     }
 
     #[allow(dead_code)]

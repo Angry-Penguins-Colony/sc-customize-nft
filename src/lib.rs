@@ -247,6 +247,11 @@ pub trait Equip {
         let caller = self.blockchain().get_caller();
 
         require!(
+            slot != &ItemSlot::None,
+            "Slot value must be different to ItemSlot::None."
+        );
+
+        require!(
             attributes.is_slot_empty(&slot) == false,
             "Cannot sent item from an empty slot"
         );

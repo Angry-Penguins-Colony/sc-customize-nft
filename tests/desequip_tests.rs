@@ -1,6 +1,6 @@
 use elrond_wasm::types::SCResult;
 use elrond_wasm_debug::rust_biguint;
-use equip_penguin::item_attributes::ItemAttributes;
+use equip_penguin::{item_attributes::ItemAttributes, item_slot::ItemSlot};
 use utils::{create_esdt_transfers, execute_for_all_slot};
 
 mod utils;
@@ -56,4 +56,30 @@ fn test_desequip() {
             rust_biguint!(1)
         );
     });
+}
+
+#[test]
+fn test_desequip_with_slot_none() {
+    const SLOT: ItemSlot = ItemSlot::None;
+    const ITEM_TO_DESEQUIP_ID: &[u8] = b"ITEM-a";
+    const NONCE: u64 = 30;
+
+    // 1. ARRANGE
+    let mut setup = utils::setup(equip_penguin::contract_obj);
+
+    setup.create_penguin_with_registered_item(
+        NONCE,
+        ITEM_TO_DESEQUIP_ID,
+        NONCE,
+        ItemSlot::Hat.clone(), /* we don't use const SLOT, because ItemSlot::None make panics */
+        ItemAttributes::random(),
+    );
+
+    let transfers = create_esdt_transfers(&[(PENGUIN_TOKEN_ID, NONCE)]);
+
+    // 2. ACT
+    let (_, tx_result) = setup.desequip(SLOT.clone(), transfers, NONCE);
+
+    // 3. ASSERT
+    tx_result.assert_user_error("Slot value must be different to ItemSlot::None.");
 }

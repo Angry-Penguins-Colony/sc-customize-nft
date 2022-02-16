@@ -4,7 +4,7 @@ use elrond_wasm::types::{
     Address, EsdtLocalRole, EsdtTokenPayment, EsdtTokenType, ManagedMultiResultVec, ManagedVarArgs,
     ManagedVec, MultiArg2, SCResult,
 };
-use elrond_wasm_debug::tx_mock::{TxContextRef, TxInputESDT};
+use elrond_wasm_debug::tx_mock::{TxContextRef, TxInputESDT, TxResult};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::item::Item;
@@ -117,6 +117,39 @@ where
             token_id,
             &contract_roles,
         );
+    }
+
+    #[allow(dead_code)]
+    pub fn desequip(
+        &mut self,
+        slot: ItemSlot,
+        transfers: Vec<TxInputESDT>,
+        penguin_nonce: u64,
+    ) -> (SCResult<u64>, TxResult) {
+        let mut sc_result: Option<SCResult<u64>> = Option::None;
+
+        let tx_result = self.blockchain_wrapper.execute_esdt_multi_transfer(
+            &self.first_user_address,
+            &self.cf_wrapper,
+            &transfers,
+            |sc| {
+                let mut managed_slots = ManagedVarArgs::<DebugApi, ItemSlot>::new();
+                managed_slots.push(slot.clone());
+
+                let result = sc.desequip(
+                    TokenIdentifier::<DebugApi>::from_esdt_bytes(PENGUIN_TOKEN_ID),
+                    penguin_nonce,
+                    BigUint::from(1u64),
+                    managed_slots,
+                );
+
+                sc_result = Option::Some(result);
+
+                StateChange::Commit
+            },
+        );
+
+        return (sc_result.unwrap(), tx_result);
     }
 
     #[allow(dead_code)]

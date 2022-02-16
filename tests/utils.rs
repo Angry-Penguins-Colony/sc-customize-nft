@@ -116,6 +116,36 @@ where
             &contract_roles,
         );
     }
+
+    #[allow(dead_code)]
+    pub fn assert_is_burn(&mut self, token_id: &[u8], token_nonce: u64) {
+        assert_eq!(
+            self.blockchain_wrapper.get_esdt_balance(
+                &self.first_user_address,
+                token_id,
+                token_nonce
+            ),
+            rust_biguint!(0)
+        );
+
+        assert_eq!(
+            self.blockchain_wrapper.get_esdt_balance(
+                &self.second_user_address,
+                token_id,
+                token_nonce
+            ),
+            rust_biguint!(0)
+        );
+
+        assert_eq!(
+            self.blockchain_wrapper.get_esdt_balance(
+                self.cf_wrapper.address_ref(),
+                token_id,
+                token_nonce
+            ),
+            rust_biguint!(0)
+        );
+    }
 }
 
 #[allow(dead_code)]

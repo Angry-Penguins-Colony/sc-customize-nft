@@ -25,10 +25,8 @@ fn test_equip() {
         let item_attributes = ItemAttributes::random();
         let item_init_nonce = setup.register_item(slot.clone(), ITEM_TO_EQUIP_ID, &item_attributes);
 
-        let b_wrapper = &mut setup.blockchain_wrapper;
-
         // add empty pingouin to the USER
-        b_wrapper.set_nft_balance(
+        setup.blockchain_wrapper.set_nft_balance(
             &setup.first_user_address,
             PENGUIN_TOKEN_ID,
             INIT_NONCE,
@@ -36,7 +34,7 @@ fn test_equip() {
             &PenguinAttributes::<DebugApi>::empty(),
         );
 
-        b_wrapper.set_nft_balance(
+        setup.blockchain_wrapper.set_nft_balance(
             &setup.first_user_address,
             ITEM_TO_EQUIP_ID,
             item_init_nonce,
@@ -49,7 +47,8 @@ fn test_equip() {
             (ITEM_TO_EQUIP_ID, item_init_nonce),
         ]);
 
-        let _ = b_wrapper
+        let _ = setup
+            .blockchain_wrapper
             .execute_esdt_multi_transfer(
                 &setup.first_user_address,
                 &setup.cf_wrapper,
@@ -64,35 +63,21 @@ fn test_equip() {
             )
             .assert_ok();
 
-        // the SC don't onw the penguin
-        assert_eq!(
-            b_wrapper.get_esdt_balance(
-                &setup.cf_wrapper.address_ref(),
-                PENGUIN_TOKEN_ID,
-                INIT_NONCE
-            ),
-            rust_biguint!(0)
-        );
-
-        // the transfered penguin has not been sent back
-        assert_eq!(
-            b_wrapper.get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, INIT_NONCE),
-            rust_biguint!(0)
-        );
-
         // the NEW penguin has been received
         assert_eq!(
-            b_wrapper.get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, 1),
+            setup.blockchain_wrapper.get_esdt_balance(
+                &setup.first_user_address,
+                PENGUIN_TOKEN_ID,
+                1
+            ),
             rust_biguint!(1)
         );
 
-        // the transfered hat has been burn
-        assert_eq!(
-            b_wrapper.get_esdt_balance(&setup.first_user_address, HAT_TOKEN_ID, item_init_nonce),
-            rust_biguint!(0)
-        );
+        // the transfered penguin is burn
+        setup.assert_is_burn(&PENGUIN_TOKEN_ID, INIT_NONCE);
+        setup.assert_is_burn(&HAT_TOKEN_ID, item_init_nonce);
 
-        b_wrapper.check_nft_balance(
+        setup.blockchain_wrapper.check_nft_balance(
             &setup.first_user_address,
             PENGUIN_TOKEN_ID,
             1u64,

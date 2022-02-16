@@ -52,7 +52,7 @@ fn build_url_with_one_item() {
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
-    let _ = b_wrapper
+    b_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             // instantiate penguin with item
             let penguin_attributes = PenguinAttributes::<DebugApi> {
@@ -114,7 +114,7 @@ fn build_url_with_two_item() {
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
-    let _ = b_wrapper
+    b_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             // instantiate penguin with item
             let penguin_attributes = PenguinAttributes::<DebugApi>::new(&[

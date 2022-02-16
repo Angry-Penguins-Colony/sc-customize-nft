@@ -68,30 +68,32 @@ where
     ) -> u64 {
         self.set_all_permissions_on_token(item_id);
 
-        let _ = self.blockchain_wrapper.execute_tx(
-            &self.owner_address,
-            &self.cf_wrapper,
-            &rust_biguint!(0u64),
-            |sc| {
-                let mut managed_items_ids =
-                    ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
-                managed_items_ids.push(managed_token_id!(item_id));
+        self.blockchain_wrapper
+            .execute_tx(
+                &self.owner_address,
+                &self.cf_wrapper,
+                &rust_biguint!(0u64),
+                |sc| {
+                    let mut managed_items_ids =
+                        ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                    managed_items_ids.push(managed_token_id!(item_id));
 
-                let result = sc.register_item(item_type, managed_items_ids);
+                    let result = sc.register_item(item_type, managed_items_ids);
 
-                if let SCResult::Err(err) = result {
-                    panic!(
-                        "register_item {:?} failed: {:?}",
-                        std::str::from_utf8(&item_id).unwrap(),
-                        std::str::from_utf8(&err.as_bytes()).unwrap(),
-                    );
-                }
+                    if let SCResult::Err(err) = result {
+                        panic!(
+                            "register_item {:?} failed: {:?}",
+                            std::str::from_utf8(&item_id).unwrap(),
+                            std::str::from_utf8(&err.as_bytes()).unwrap(),
+                        );
+                    }
 
-                assert_eq!(result, SCResult::Ok(()));
+                    assert_eq!(result, SCResult::Ok(()));
 
-                StateChange::Commit
-            },
-        );
+                    StateChange::Commit
+                },
+            )
+            .assert_ok();
 
         self.blockchain_wrapper.set_nft_balance(
             &self.cf_wrapper.address_ref(),
@@ -166,12 +168,14 @@ where
     );
 
     // deploy contract
-    let _ = blockchain_wrapper.execute_tx(&owner_address, &cf_wrapper, &rust_zero, |sc| {
-        let result = sc.init(managed_token_id!(PENGUIN_TOKEN_ID));
-        assert_eq!(result, SCResult::Ok(()));
+    blockchain_wrapper
+        .execute_tx(&owner_address, &cf_wrapper, &rust_zero, |sc| {
+            let result = sc.init(managed_token_id!(PENGUIN_TOKEN_ID));
+            assert_eq!(result, SCResult::Ok(()));
 
-        StateChange::Commit
-    });
+            StateChange::Commit
+        })
+        .assert_ok();
     blockchain_wrapper.add_mandos_set_account(cf_wrapper.address_ref());
 
     DebugApi::dummy();

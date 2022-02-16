@@ -21,7 +21,7 @@ fn test_register_item() {
 
         let b_wrapper = &mut setup.blockchain_wrapper;
 
-        let _ = b_wrapper
+        b_wrapper
             .execute_tx(
                 &setup.owner_address,
                 &setup.cf_wrapper,
@@ -59,7 +59,7 @@ fn register_another_item_on_slot() {
 
         let b_wrapper = &mut setup.blockchain_wrapper;
 
-        let _ = b_wrapper
+        b_wrapper
             .execute_query(&setup.cf_wrapper, |sc| {
                 let result = sc.items_slot(&managed_token_id!(HAT_TOKEN_ID)).get();
 
@@ -82,7 +82,7 @@ fn register_unmintable_item() {
 
         let b_wrapper = &mut setup.blockchain_wrapper;
 
-        let _ = b_wrapper
+        b_wrapper
             .execute_tx(
                 &setup.owner_address,
                 &setup.cf_wrapper,
@@ -116,7 +116,7 @@ fn register_unburnable_item() {
             &[EsdtLocalRole::NftAddQuantity],
         );
 
-        let _ = b_wrapper
+        b_wrapper
             .execute_tx(
                 &setup.owner_address,
                 &setup.cf_wrapper,
@@ -153,7 +153,7 @@ fn change_item_slot() {
 
         let b_wrapper = &mut setup.blockchain_wrapper;
 
-        let _ = b_wrapper
+        b_wrapper
             .execute_query(&setup.cf_wrapper, |sc| {
                 let result = sc.items_slot(&managed_token_id!(ITEM_ID)).get();
                 assert_eq!(&result, &new_slot.clone());
@@ -171,7 +171,7 @@ fn register_penguin_as_item_should_not_work() {
 
         let b_wrapper = &mut setup.blockchain_wrapper;
 
-        let _ = b_wrapper
+        b_wrapper
             .execute_tx(
                 &setup.owner_address,
                 &setup.cf_wrapper,
@@ -197,7 +197,7 @@ fn register_while_not_the_owner() {
 
         let b_wrapper = &mut setup.blockchain_wrapper;
 
-        let _ = b_wrapper
+        b_wrapper
             .execute_tx(
                 &setup.first_user_address,
                 &setup.cf_wrapper,

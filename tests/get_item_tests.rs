@@ -17,7 +17,7 @@ fn test_get_item() {
 
         let b_wrapper = &mut setup.blockchain_wrapper;
 
-        let _ = b_wrapper
+        b_wrapper
             .execute_query(&setup.cf_wrapper, |sc| {
                 let hat_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID);
 
@@ -40,7 +40,7 @@ fn return_none_if_no_token_id() {
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
-    let _ = b_wrapper
+    b_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             let not_existing_token =
                 TokenIdentifier::<DebugApi>::from_esdt_bytes("NOT_TOKEN_ID".as_bytes());

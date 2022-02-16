@@ -37,7 +37,7 @@ fn test_desequip() {
         );
 
         let transfers = create_esdt_transfers(&[(PENGUIN_TOKEN_ID, init_nonce)]);
-        let _ = b_wrapper
+        b_wrapper
             .execute_esdt_multi_transfer(
                 &setup.first_user_address,
                 &setup.cf_wrapper,

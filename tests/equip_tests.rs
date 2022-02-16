@@ -47,7 +47,7 @@ fn test_equip() {
             (ITEM_TO_EQUIP_ID, item_init_nonce),
         ]);
 
-        let _ = setup
+        setup
             .blockchain_wrapper
             .execute_esdt_multi_transfer(
                 &setup.first_user_address,
@@ -140,7 +140,7 @@ fn test_equip_while_overlap() {
             ),
         ]);
 
-        let _ = setup
+        setup
             .blockchain_wrapper
             .execute_esdt_multi_transfer(
                 &setup.first_user_address,
@@ -221,7 +221,7 @@ fn equip_penguin_without_items() {
         EsdtTokenType::NonFungible,
     )]);
 
-    let _ = b_wrapper
+    b_wrapper
         .execute_esdt_multi_transfer(
             &setup.first_user_address,
             &setup.cf_wrapper,
@@ -267,7 +267,7 @@ fn equip_while_nft_to_equip_is_not_a_penguin() {
 
     DebugApi::dummy();
 
-    let _ = b_wrapper
+    b_wrapper
         .execute_esdt_multi_transfer(
             &setup.first_user_address,
             &setup.cf_wrapper,
@@ -371,7 +371,7 @@ fn equip_while_item_is_not_an_item() {
 //                 &setup.cf_wrapper,
 //                 &transfers,
 //                 |sc| {
-//                     let _ = sc.equip(sc.call_value().all_esdt_transfers());
+//                     sc.equip(sc.call_value().all_esdt_transfers());
 //                     StateChange::Revert
 //                 },
 //             )

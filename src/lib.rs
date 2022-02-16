@@ -306,6 +306,13 @@ pub trait Equip {
         }
     }
 
+    #[view]
+    fn get_items_attributes(&self) -> ItemAttributes<Self::Api> {
+        return ItemAttributes {
+            item_id: ManagedBuffer::new_from_bytes(b"test"),
+        };
+    }
+
     #[endpoint(mintTestPenguin)]
     #[only_owner]
     fn mint_test_penguin(&self) -> SCResult<u64> {
@@ -314,7 +321,7 @@ pub trait Equip {
         let caller = self.blockchain().get_caller();
 
         let mut uris = ManagedVec::new();
-        uris.push(ManagedBuffer::new_from_bytes(b"https://www.google.com"));
+        uris.push(self.build_url(&PenguinAttributes::empty())?);
 
         // let mut serialized_attributes = Vec::new();
         // &new_attributes.top_encode(&mut serialized_attributes)?;
@@ -374,7 +381,7 @@ pub trait Equip {
         let caller = self.blockchain().get_caller();
 
         let mut uris = ManagedVec::new();
-        uris.push(ManagedBuffer::new_from_bytes(b"https://www.google.com"));
+        uris.push(self.build_url(&attributes)?);
 
         // let mut serialized_attributes = Vec::new();
         // &new_attributes.top_encode(&mut serialized_attributes)?;
@@ -452,7 +459,12 @@ pub trait Equip {
 
         match attributes {
             Result::Ok(attributes) => return SCResult::Ok(attributes),
-            Result::Err(_) => return SCResult::Err("Error while decoding item attributes".into()),
+            Result::Err(err) => {
+                sc_panic!(
+                    "Error while decoding item attributes: {}",
+                    err.message_str()
+                );
+            }
         }
     }
 

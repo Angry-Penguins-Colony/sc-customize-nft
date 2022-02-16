@@ -12,6 +12,7 @@ elrond_wasm_node::wasm_endpoints! {
         fill
         getItemType
         get_empty_attributes
+        get_items_attributes
         mintTestPenguin
         registerItem
     )

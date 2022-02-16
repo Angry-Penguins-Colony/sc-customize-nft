@@ -227,6 +227,11 @@ pub trait Equip {
         #[payment_nonce] _nonce: u64,
         #[payment_amount] _amount: BigUint,
     ) -> SCResult<()> {
+        require!(
+            self.blockchain().get_caller() == self.blockchain().get_owner_address(),
+            "Only the owner can call this method."
+        );
+
         // TODO: require! that the future balance will be equals to 1
         // TODO: require! to only send registered SFT
 

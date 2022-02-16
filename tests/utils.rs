@@ -120,6 +120,40 @@ where
     }
 
     #[allow(dead_code)]
+    pub fn create_penguin_with_registered_item(
+        &mut self,
+        penguin_nonce: u64,
+        item_identifier: &[u8],
+        item_nonce: u64,
+        slot: ItemSlot,
+        attributes: ItemAttributes<DebugApi>,
+    ) {
+        let _ = self.register_item(slot.clone(), item_identifier, &attributes);
+
+        self.blockchain_wrapper.set_nft_balance(
+            &self.cf_wrapper.address_ref(),
+            &item_identifier,
+            item_nonce,
+            &rust_biguint!(1u64),
+            &attributes,
+        );
+
+        self.blockchain_wrapper.set_nft_balance(
+            &self.first_user_address,
+            PENGUIN_TOKEN_ID,
+            penguin_nonce,
+            &rust_biguint!(1),
+            &PenguinAttributes::new(&[(
+                &slot,
+                Item {
+                    token: TokenIdentifier::<DebugApi>::from_esdt_bytes(item_identifier),
+                    nonce: item_nonce,
+                },
+            )]),
+        );
+    }
+
+    #[allow(dead_code)]
     pub fn desequip(
         &mut self,
         slot: ItemSlot,

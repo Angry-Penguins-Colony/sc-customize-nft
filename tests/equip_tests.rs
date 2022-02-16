@@ -63,6 +63,10 @@ fn test_equip() {
             )
             .assert_ok();
 
+        // the transfered penguin is burn
+        setup.assert_is_burn(&PENGUIN_TOKEN_ID, INIT_NONCE);
+        setup.assert_is_burn(&HAT_TOKEN_ID, item_init_nonce);
+
         // the NEW penguin has been received
         assert_eq!(
             setup.blockchain_wrapper.get_esdt_balance(
@@ -73,10 +77,7 @@ fn test_equip() {
             rust_biguint!(1)
         );
 
-        // the transfered penguin is burn
-        setup.assert_is_burn(&PENGUIN_TOKEN_ID, INIT_NONCE);
-        setup.assert_is_burn(&HAT_TOKEN_ID, item_init_nonce);
-
+        // the NEW penguin has the right attributes
         setup.blockchain_wrapper.check_nft_balance(
             &setup.first_user_address,
             PENGUIN_TOKEN_ID,
@@ -156,6 +157,9 @@ fn test_equip_while_overlap() {
             )
             .assert_ok();
 
+        // sent penguin is burned
+        setup.assert_is_burn(&PENGUIN_TOKEN_ID, INIT_NONCE);
+
         let b_wrapper = &mut setup.blockchain_wrapper;
 
         // sent removed equipment
@@ -164,7 +168,13 @@ fn test_equip_while_overlap() {
             rust_biguint!(1)
         );
 
-        // SHOULD sent generated penguin
+        // new penguin is received
+        assert_eq!(
+            b_wrapper.get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, 1),
+            rust_biguint!(1)
+        );
+
+        // NEW penguin has the right attributes
         b_wrapper.check_nft_balance(
             &setup.first_user_address,
             PENGUIN_TOKEN_ID,
@@ -177,18 +187,6 @@ fn test_equip_while_overlap() {
                     nonce: HAT_TO_EQUIP_NONCE,
                 },
             )]),
-        );
-
-        // sent penguin is burned
-        assert_eq!(
-            b_wrapper.get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, INIT_NONCE),
-            rust_biguint!(0)
-        );
-
-        // new penguin is received
-        assert_eq!(
-            b_wrapper.get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, 1),
-            rust_biguint!(1)
         );
 
         // previously hat is sent

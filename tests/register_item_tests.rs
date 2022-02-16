@@ -1,6 +1,7 @@
 use elrond_wasm::types::{EsdtLocalRole, ManagedVarArgs, ManagedVec, SCResult};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
+use equip_penguin::item_attributes::ItemAttributes;
 use equip_penguin::item_slot::ItemSlot;
 use equip_penguin::*;
 
@@ -16,7 +17,7 @@ fn test_register_item() {
 
         let mut setup = utils::setup(equip_penguin::contract_obj);
 
-        setup.register_item(slot.clone(), TOKEN_ID);
+        setup.register_item(slot.clone(), TOKEN_ID, &ItemAttributes::random());
 
         let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -49,8 +50,12 @@ fn register_another_item_on_slot() {
     utils::execute_for_all_slot(|slot| {
         let mut setup = utils::setup(equip_penguin::contract_obj);
 
-        setup.register_item(slot.clone(), HAT_TOKEN_ID);
-        setup.register_item(slot.clone(), ANOTHER_HAT_TOKEN_ID);
+        setup.register_item(slot.clone(), HAT_TOKEN_ID, &ItemAttributes::random());
+        setup.register_item(
+            slot.clone(),
+            ANOTHER_HAT_TOKEN_ID,
+            &ItemAttributes::random(),
+        );
 
         let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -143,8 +148,8 @@ fn change_item_slot() {
 
         let mut setup = utils::setup(equip_penguin::contract_obj);
 
-        setup.register_item(OLD_SLOT.clone(), ITEM_ID);
-        setup.register_item(new_slot.clone(), ITEM_ID);
+        setup.register_item(OLD_SLOT.clone(), ITEM_ID, &ItemAttributes::random());
+        setup.register_item(new_slot.clone(), ITEM_ID, &ItemAttributes::random());
 
         let b_wrapper = &mut setup.blockchain_wrapper;
 

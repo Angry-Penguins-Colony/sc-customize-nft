@@ -1,6 +1,5 @@
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm::types::TokenIdentifier;
-use elrond_wasm_debug::rust_biguint;
 use elrond_wasm_debug::DebugApi;
 use equip_penguin::item_slot::ItemSlot;
 use equip_penguin::Equip;
@@ -9,6 +8,8 @@ use equip_penguin::{
 };
 
 mod utils;
+
+use utils::INIT_NONCE;
 
 #[test]
 fn build_url_with_no_item() {
@@ -39,18 +40,13 @@ fn build_url_with_one_item() {
 
     const ITEM_IDENTIFIER: &[u8] = b"ITEM-a1a1a1";
     const ITEM_TYPE: &[u8] = b"my-item-id";
-    const NONCE: u64 = 6000;
 
     // create item
-    setup.register_item(slot.clone(), ITEM_IDENTIFIER);
-
-    setup.blockchain_wrapper.set_nft_balance(
-        setup.cf_wrapper.address_ref(),
+    let nonce = setup.register_item(
+        slot.clone(),
         ITEM_IDENTIFIER,
-        NONCE,
-        &rust_biguint!(1),
-        &ItemAttributes::<DebugApi> {
-            item_id: ManagedBuffer::<DebugApi>::new_from_bytes(ITEM_TYPE),
+        &ItemAttributes {
+            item_id: ManagedBuffer::new_from_bytes(ITEM_TYPE),
         },
     );
 
@@ -62,7 +58,7 @@ fn build_url_with_one_item() {
             let penguin_attributes = PenguinAttributes::<DebugApi> {
                 hat: Some(Item::<DebugApi> {
                     token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_IDENTIFIER),
-                    nonce: NONCE,
+                    nonce,
                 }),
                 ..PenguinAttributes::empty()
             };
@@ -89,7 +85,7 @@ fn build_url_with_two_item() {
 
     let mut setup = utils::setup(equip_penguin::contract_obj);
 
-    const NONCE: u64 = 6000;
+    const NONCE: u64 = INIT_NONCE;
 
     const SLOT_1: &ItemSlot = &ItemSlot::Hat;
     const ITEM_1_IDENTIFIER: &[u8] = b"ITEM-a1a1a1";
@@ -105,17 +101,15 @@ fn build_url_with_two_item() {
     ];
 
     for (id, typeee, slot) in items {
-        setup.register_item(slot.clone(), id);
-
-        setup.blockchain_wrapper.set_nft_balance(
-            setup.cf_wrapper.address_ref(),
+        let nonce = setup.register_item(
+            slot.clone(),
             id,
-            NONCE,
-            &rust_biguint!(1),
             &ItemAttributes::<DebugApi> {
                 item_id: ManagedBuffer::<DebugApi>::new_from_bytes(typeee),
             },
         );
+
+        assert_eq!(nonce, NONCE); // must be the same nonce for all items
     }
 
     let b_wrapper = &mut setup.blockchain_wrapper;

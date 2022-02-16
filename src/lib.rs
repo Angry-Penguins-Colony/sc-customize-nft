@@ -461,8 +461,11 @@ pub trait Equip {
             Result::Ok(attributes) => return SCResult::Ok(attributes),
             Result::Err(err) => {
                 sc_panic!(
-                    "Error while decoding item attributes: {}",
-                    err.message_str()
+                    "Error while decoding item {}{}{} attributes: {}",
+                    id,
+                    "-",
+                    nonce.to_string(),
+                    err.message_str(),
                 );
             }
         }

@@ -1,6 +1,7 @@
 use elrond_wasm::types::OptionalResult;
 use elrond_wasm_debug::testing_framework::*;
 use elrond_wasm_debug::DebugApi;
+use equip_penguin::item_attributes::ItemAttributes;
 use equip_penguin::*;
 
 mod utils;
@@ -12,7 +13,7 @@ fn test_get_item() {
     utils::execute_for_all_slot(|slot| {
         let mut setup = utils::setup(equip_penguin::contract_obj);
 
-        setup.register_item(slot.clone(), HAT_TOKEN_ID);
+        setup.register_item(slot.clone(), HAT_TOKEN_ID, &ItemAttributes::random());
 
         let b_wrapper = &mut setup.blockchain_wrapper;
 

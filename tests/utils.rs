@@ -23,6 +23,8 @@ pub const HAT_TOKEN_ID: &[u8] = b"HAT-a";
 #[allow(dead_code)]
 pub const HAT_2_TOKEN_ID: &[u8] = b"HAT-b";
 
+pub const INIT_NONCE: u64 = 65535u64;
+
 #[allow(dead_code)]
 pub struct EquipSetup<CrowdfundingObjBuilder>
 where
@@ -58,7 +60,12 @@ where
     }
 
     #[allow(dead_code)]
-    pub fn register_item(&mut self, item_type: ItemSlot, item_id: &[u8]) {
+    pub fn register_item(
+        &mut self,
+        item_type: ItemSlot,
+        item_id: &[u8],
+        attributes: &ItemAttributes<DebugApi>,
+    ) -> u64 {
         self.set_all_permissions_on_token(item_id);
 
         let _ = self.blockchain_wrapper.execute_tx(
@@ -89,10 +96,12 @@ where
         self.blockchain_wrapper.set_nft_balance(
             &self.cf_wrapper.address_ref(),
             &item_id,
-            65535u64,
+            INIT_NONCE,
             &rust_biguint!(1u64),
-            &{},
+            &attributes,
         );
+
+        return INIT_NONCE;
     }
 
     fn set_all_permissions_on_token(&mut self, token_id: &[u8]) {

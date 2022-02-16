@@ -10,3 +10,11 @@ elrond_wasm::derive_imports!();
 pub struct ItemAttributes<M: ManagedTypeApi> {
     pub item_id: ManagedBuffer<M>,
 }
+
+impl<M: ManagedTypeApi> ItemAttributes<M> {
+    pub fn random() -> Self {
+        ItemAttributes {
+            item_id: ManagedBuffer::new_random(4),
+        }
+    }
+}

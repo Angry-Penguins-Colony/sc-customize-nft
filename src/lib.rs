@@ -120,47 +120,6 @@ pub trait Equip {
         return self.update_penguin(&penguin_id, penguin_nonce, &attributes);
     }
 
-    #[payable("*")]
-    #[endpoint]
-    fn equip(
-        &self,
-        #[payment_multi] payments: ManagedVec<EsdtTokenPayment<Self::Api>>,
-    ) -> SCResult<u64> {
-        self.require_penguin_roles_set()?;
-        require!(
-            payments.len() >= 2,
-            "You must provide at least one penguin and one item."
-        );
-
-        let first_payment = payments.get(0);
-        let penguin_id = first_payment.token_identifier;
-        let penguin_nonce = first_payment.token_nonce;
-
-        require!(
-            &penguin_id == &self.penguins_identifier().get(),
-            "Please provide a penguin as the first payment"
-        );
-        require!(first_payment.amount == 1, "You must sent only one penguin.");
-
-        let mut attributes = self.parse_penguin_attributes(&penguin_id, penguin_nonce)?;
-
-        // let's equip each item
-        let items_token = payments.iter().skip(1);
-        for payment in items_token {
-            require!(payment.amount == 1, "You must sent only one item.");
-
-            let item = Item {
-                token: payment.token_identifier,
-                nonce: payment.token_nonce,
-            };
-
-            self.equip_slot(&mut attributes, &item)?;
-        }
-
-        // update penguin
-        return self.update_penguin(&penguin_id, penguin_nonce, &attributes);
-    }
-
     fn equip_slot(
         &self,
         attributes: &mut PenguinAttributes<Self::Api>,

@@ -7,6 +7,7 @@ mod utils;
 
 const PENGUIN_TOKEN_ID: &[u8] = utils::PENGUIN_TOKEN_ID;
 
+// exists in customize test; can be deleted
 #[test]
 fn test_desequip() {
     execute_for_all_slot(|slot| {

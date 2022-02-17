@@ -1,6 +1,5 @@
 use std::u8;
 
-use elrond_wasm::api::CallValueApiImpl;
 use elrond_wasm::contract_base::ContractBase;
 use elrond_wasm::types::{
     Address, EsdtLocalRole, EsdtTokenPayment, EsdtTokenType, ManagedMultiResultVec, ManagedVarArgs,
@@ -122,6 +121,17 @@ where
     }
 
     #[allow(dead_code)]
+    pub fn create_penguin_empty(&mut self, penguin_nonce: u64) {
+        self.blockchain_wrapper.set_nft_balance(
+            &self.first_user_address,
+            PENGUIN_TOKEN_ID,
+            penguin_nonce,
+            &rust_biguint!(1),
+            &PenguinAttributes::<DebugApi>::empty(),
+        );
+    }
+
+    #[allow(dead_code)]
     pub fn create_penguin_with_registered_item(
         &mut self,
         penguin_nonce: u64,
@@ -195,7 +205,7 @@ where
     }
 
     #[allow(dead_code)]
-    pub fn desequip_then_equip(
+    pub fn customize(
         &mut self,
         transfers: Vec<TxInputESDT>,
         slot: ItemSlot,

@@ -75,7 +75,7 @@ pub trait Equip {
     }
 
     #[payable("*")]
-    #[endpoint]
+    #[endpoint(customize)]
     fn customize(
         &self,
         #[payment_multi] payments: ManagedVec<EsdtTokenPayment<Self::Api>>,

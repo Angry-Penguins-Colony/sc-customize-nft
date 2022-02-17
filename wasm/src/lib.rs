@@ -8,7 +8,6 @@ elrond_wasm_node::wasm_endpoints! {
     equip_penguin
     (
         customize
-        equip
         fill
         getItemType
         get_empty_attributes

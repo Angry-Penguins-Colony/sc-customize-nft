@@ -107,6 +107,17 @@ where
         return INIT_NONCE;
     }
 
+    #[allow(dead_code)]
+    pub fn add_random_item_to_user(&mut self, token_id: &[u8], nonce: u64, quantity: u64) {
+        self.blockchain_wrapper.set_nft_balance(
+            &self.first_user_address,
+            token_id,
+            nonce,
+            &rust_biguint!(quantity),
+            &ItemAttributes::<DebugApi>::random(),
+        );
+    }
+
     fn set_all_permissions_on_token(&mut self, token_id: &[u8]) {
         let contract_roles = [
             EsdtLocalRole::NftCreate,

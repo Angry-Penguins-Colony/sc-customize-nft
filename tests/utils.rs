@@ -166,45 +166,6 @@ where
     }
 
     #[allow(dead_code)]
-    pub fn desequip(
-        &mut self,
-        slot: ItemSlot,
-        transfers: Vec<TxInputESDT>,
-        penguin_nonce: u64,
-    ) -> (SCResult<u64>, TxResult) {
-        let mut opt_sc_result: Option<SCResult<u64>> = Option::None;
-
-        let tx_result = self.blockchain_wrapper.execute_esdt_multi_transfer(
-            &self.first_user_address,
-            &self.cf_wrapper,
-            &transfers,
-            |sc| {
-                let mut managed_slots = ManagedVarArgs::<DebugApi, ItemSlot>::new();
-                managed_slots.push(slot.clone());
-
-                let result = sc.desequip(
-                    TokenIdentifier::<DebugApi>::from_esdt_bytes(PENGUIN_TOKEN_ID),
-                    penguin_nonce,
-                    BigUint::from(1u64),
-                    managed_slots,
-                );
-
-                opt_sc_result = Option::Some(result.clone());
-
-                match result {
-                    SCResult::Ok(_) => StateChange::Commit,
-                    SCResult::Err(_) => StateChange::Revert,
-                }
-            },
-        );
-
-        match opt_sc_result {
-            Option::Some(sc_result) => return (sc_result, tx_result),
-            Option::None => return (SCResult::Err("".into()), tx_result),
-        }
-    }
-
-    #[allow(dead_code)]
     pub fn customize(
         &mut self,
         transfers: Vec<TxInputESDT>,

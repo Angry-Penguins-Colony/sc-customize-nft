@@ -206,31 +206,6 @@ pub trait Equip {
         return SCResult::Ok(());
     }
 
-    #[payable("*")]
-    #[endpoint]
-    fn desequip(
-        &self,
-        #[payment_token] penguin_id: TokenIdentifier,
-        #[payment_nonce] penguin_nonce: u64,
-        #[payment_amount] amount: BigUint<Self::Api>,
-        #[var_args] slots: ManagedVarArgs<ItemSlot>,
-    ) -> SCResult<u64> {
-        require!(amount == 1, "You can desequip only one penguin at a time.");
-        require!(
-            penguin_id == self.penguins_identifier().get(),
-            "Sent token is not a penguin."
-        );
-
-        let mut attributes = self.parse_penguin_attributes(&penguin_id, penguin_nonce)?;
-
-        for slot in slots {
-            self.desequip_slot(&mut attributes, &slot)?;
-        }
-
-        // return items nonces
-        return self.update_penguin(&penguin_id, penguin_nonce, &attributes);
-    }
-
     fn require_item_roles_set(&self, token_id: &TokenIdentifier) -> SCResult<()> {
         let roles = self.blockchain().get_esdt_local_roles(token_id);
 

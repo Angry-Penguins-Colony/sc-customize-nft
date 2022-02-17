@@ -7,7 +7,7 @@
 elrond_wasm_node::wasm_endpoints! {
     equip_penguin
     (
-        desequip
+        customize
         equip
         fill
         getItemType

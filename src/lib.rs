@@ -83,6 +83,10 @@ pub trait Equip {
     ) -> SCResult<u64> {
         self.require_penguin_roles_set()?;
         require!(
+            payments.len() >= 1,
+            "You must provide at least one penguin."
+        );
+        require!(
             payments.len() >= 2 || to_desequip_slots.len() >= 1,
             "You must either provide at least one penguin and one item OR provide a slot to desequip."
         );

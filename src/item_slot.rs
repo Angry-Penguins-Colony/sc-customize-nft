@@ -12,7 +12,6 @@ pub enum ItemSlot {
     Hat,
     Background,
     Skin,
-    Chain,
     Beak,
     Weapon,
     Clothes,
@@ -20,11 +19,10 @@ pub enum ItemSlot {
 }
 
 impl ItemSlot {
-    pub const VALUES: [ItemSlot; 8] = [
+    pub const VALUES: [ItemSlot; 7] = [
         Self::Hat,
         Self::Background,
         Self::Skin,
-        Self::Chain,
         Self::Beak,
         Self::Weapon,
         Self::Clothes,
@@ -36,7 +34,6 @@ impl ItemSlot {
             Self::Hat => return b"hat",
             Self::Background => return b"background",
             Self::Skin => return b"skin",
-            Self::Chain => return b"chain",
             Self::Beak => return b"beak",
             Self::Weapon => return b"weapon",
             Self::Clothes => return b"clothes",

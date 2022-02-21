@@ -1,7 +1,7 @@
 use elrond_wasm::types::OptionalResult;
 use elrond_wasm_debug::testing_framework::*;
 use elrond_wasm_debug::DebugApi;
-use equip_penguin::item_attributes::ItemAttributes;
+use equip_penguin::structs::item_attributes::ItemAttributes;
 use equip_penguin::*;
 
 mod utils;

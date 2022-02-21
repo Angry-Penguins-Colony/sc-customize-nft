@@ -1,6 +1,6 @@
 use elrond_wasm::types::{ManagedBuffer, TokenIdentifier};
 use elrond_wasm_debug::DebugApi;
-use equip_penguin::{item::Item, penguin_attributes::PenguinAttributes};
+use equip_penguin::structs::{item::Item, penguin_attributes::PenguinAttributes};
 
 mod utils;
 

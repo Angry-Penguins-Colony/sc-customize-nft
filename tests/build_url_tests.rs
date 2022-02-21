@@ -1,14 +1,14 @@
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm::types::TokenIdentifier;
 use elrond_wasm_debug::DebugApi;
-use equip_penguin::item_slot::ItemSlot;
-use equip_penguin::Equip;
-use equip_penguin::{
-    item::Item, item_attributes::ItemAttributes, penguin_attributes::PenguinAttributes,
-};
-
 mod utils;
 
+use equip_penguin::libs::penguin_mint::MintPenguin;
+use equip_penguin::libs::storage::StorageModule;
+use equip_penguin::structs::item::Item;
+use equip_penguin::structs::item_attributes::ItemAttributes;
+use equip_penguin::structs::item_slot::ItemSlot;
+use equip_penguin::structs::penguin_attributes::PenguinAttributes;
 use utils::INIT_NONCE;
 
 #[test]

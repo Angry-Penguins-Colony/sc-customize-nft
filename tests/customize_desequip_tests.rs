@@ -1,6 +1,6 @@
 use elrond_wasm::types::SCResult;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
-use equip_penguin::{
+use equip_penguin::structs::{
     item_attributes::ItemAttributes, item_slot::ItemSlot, penguin_attributes::PenguinAttributes,
 };
 

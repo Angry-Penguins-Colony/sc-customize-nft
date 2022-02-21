@@ -1,8 +1,9 @@
 use elrond_wasm::types::{EsdtLocalRole, ManagedVarArgs, ManagedVec, SCResult};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
-use equip_penguin::item_attributes::ItemAttributes;
-use equip_penguin::item_slot::ItemSlot;
+use equip_penguin::libs::storage::StorageModule;
+use equip_penguin::structs::item_attributes::ItemAttributes;
+use equip_penguin::structs::item_slot::ItemSlot;
 use equip_penguin::*;
 
 mod utils;

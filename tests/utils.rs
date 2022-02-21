@@ -8,10 +8,10 @@ use elrond_wasm::types::{
 use elrond_wasm_debug::tx_mock::{TxContextRef, TxInputESDT, TxResult};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
-use equip_penguin::item::Item;
-use equip_penguin::item_attributes::ItemAttributes;
-use equip_penguin::item_slot::ItemSlot;
-use equip_penguin::penguin_attributes::PenguinAttributes;
+use equip_penguin::structs::item::Item;
+use equip_penguin::structs::item_attributes::ItemAttributes;
+use equip_penguin::structs::item_slot::ItemSlot;
+use equip_penguin::structs::penguin_attributes::PenguinAttributes;
 use equip_penguin::*;
 
 #[allow(dead_code)]

@@ -3,7 +3,7 @@
 #![allow(unused_attributes)]
 #![allow(unused_imports)]
 
-use crate::item_slot::ItemSlot;
+use super::item_slot::ItemSlot;
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();

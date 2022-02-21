@@ -310,21 +310,10 @@ pub trait Equip {
     #[endpoint(mintTestPenguin)]
     fn mint_test_penguin(&self) -> SCResult<u64> {
         let penguin_id = self.penguins_identifier().get();
-
         let caller = self.blockchain().get_caller();
 
-        let mut uris = ManagedVec::new();
-        uris.push(self.build_url(&PenguinAttributes::empty())?);
-
-        let token_nonce = self.send().esdt_nft_create::<PenguinAttributes<Self::Api>>(
-            &penguin_id,
-            &BigUint::from(1u32),
-            &self.build_penguin_name_buffer(),
-            &BigUint::zero(),
-            &ManagedBuffer::new(),
-            &PenguinAttributes::empty(),
-            &uris,
-        );
+        let token_nonce =
+            self.mint_penguin(&PenguinAttributes::empty(), &self.get_next_penguin_name())?;
 
         self.send()
             .direct(&caller, &penguin_id, token_nonce, &BigUint::from(1u32), &[]);
@@ -332,7 +321,30 @@ pub trait Equip {
         return Ok(token_nonce);
     }
 
-    fn build_penguin_name_buffer(&self) -> ManagedBuffer {
+    fn mint_penguin(
+        &self,
+        attributes: &PenguinAttributes<Self::Api>,
+        name: &ManagedBuffer,
+    ) -> SCResult<u64> {
+        let penguin_id = self.penguins_identifier().get();
+
+        let mut uris = ManagedVec::new();
+        uris.push(self.build_url(&attributes)?);
+
+        let token_nonce = self.send().esdt_nft_create::<PenguinAttributes<Self::Api>>(
+            &penguin_id,
+            &BigUint::from(1u32),
+            &name,
+            &BigUint::zero(),
+            &self.calculate_hash(&attributes)?,
+            &attributes,
+            &uris,
+        );
+
+        return Ok(token_nonce);
+    }
+
+    fn get_next_penguin_name(&self) -> ManagedBuffer {
         let penguin_id = self.penguins_identifier().get();
 
         let index = self
@@ -365,36 +377,32 @@ pub trait Equip {
     ) -> SCResult<u64> {
         let caller = self.blockchain().get_caller();
 
-        let mut uris = ManagedVec::new();
-        uris.push(self.build_url(&attributes)?);
+        // mint
+        let token_nonce = self.mint_penguin(attributes, &self.get_penguin_name(penguin_nonce))?;
 
+        // burn the old one
+        self.send()
+            .esdt_local_burn(&penguin_id, penguin_nonce, &BigUint::from(1u32));
+
+        // send the new one
+        self.send()
+            .direct(&caller, &penguin_id, token_nonce, &BigUint::from(1u32), &[]);
+
+        return Ok(token_nonce);
+    }
+
+    fn calculate_hash(&self, attributes: &PenguinAttributes<Self::Api>) -> SCResult<ManagedBuffer> {
         let mut serialized_attributes = ManagedBuffer::new();
         if let core::result::Result::Err(err) = attributes.top_encode(&mut serialized_attributes) {
             sc_panic!("Attributes encode error: {}", err.message_bytes());
         }
 
-        let attributes_hash: ManagedByteArray<Self::Api, 32> =
-            self.crypto().sha256(&serialized_attributes);
+        let attributes_hash: &ManagedByteArray<Self::Api, 32> =
+            &self.crypto().sha256(&serialized_attributes);
 
-        let name = self.get_penguin_name(penguin_nonce);
+        let managed_buffer = attributes_hash.as_managed_buffer();
 
-        self.send()
-            .esdt_local_burn(&penguin_id, penguin_nonce, &BigUint::from(1u32));
-
-        let token_nonce = self.send().esdt_nft_create::<PenguinAttributes<Self::Api>>(
-            &penguin_id,
-            &BigUint::from(1u32),
-            &name,
-            &BigUint::zero(),
-            &attributes_hash.as_managed_buffer(),
-            &attributes,
-            &uris,
-        );
-
-        self.send()
-            .direct(&caller, &penguin_id, token_nonce, &BigUint::from(1u32), &[]);
-
-        return Ok(token_nonce);
+        return SCResult::Ok(managed_buffer.clone());
     }
 
     fn build_url(

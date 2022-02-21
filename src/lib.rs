@@ -13,7 +13,7 @@ pub mod penguin_attributes;
 extern crate alloc;
 
 use alloc::string::ToString;
-use elrond_wasm::String;
+use elrond_wasm::{elrond_codec::TopEncode, String};
 use item::Item;
 use item_attributes::ItemAttributes;
 use item_slot::ItemSlot;
@@ -308,7 +308,6 @@ pub trait Equip {
     }
 
     #[endpoint(mintTestPenguin)]
-    #[only_owner]
     fn mint_test_penguin(&self) -> SCResult<u64> {
         let penguin_id = self.penguins_identifier().get();
 
@@ -316,14 +315,6 @@ pub trait Equip {
 
         let mut uris = ManagedVec::new();
         uris.push(self.build_url(&PenguinAttributes::empty())?);
-
-        // let mut serialized_attributes = Vec::new();
-        // &new_attributes.top_encode(&mut serialized_attributes)?;
-
-        // let attributes_hash = self.crypto().sha256(&serialized_attributes);
-        // let hash_buffer = ManagedBuffer::from(attributes_hash.as_bytes());
-
-        // self.send().esdt_nft_create::<PenguinAttributes<Self::Api>>(
 
         let token_nonce = self.send().esdt_nft_create::<PenguinAttributes<Self::Api>>(
             &penguin_id,
@@ -377,11 +368,13 @@ pub trait Equip {
         let mut uris = ManagedVec::new();
         uris.push(self.build_url(&attributes)?);
 
-        // let mut serialized_attributes = Vec::new();
-        // &new_attributes.top_encode(&mut serialized_attributes)?;
+        let mut serialized_attributes = ManagedBuffer::new();
+        if let core::result::Result::Err(err) = attributes.top_encode(&mut serialized_attributes) {
+            sc_panic!("Attributes encode error: {}", err.message_bytes());
+        }
 
-        // let attributes_hash = self.crypto().sha256(&serialized_attributes);
-        // let hash_buffer = ManagedBuffer::from(attributes_hash.as_bytes());
+        let attributes_hash: ManagedByteArray<Self::Api, 32> =
+            self.crypto().sha256(&serialized_attributes);
 
         let name = self.get_penguin_name(penguin_nonce);
 
@@ -393,7 +386,7 @@ pub trait Equip {
             &BigUint::from(1u32),
             &name,
             &BigUint::zero(),
-            &ManagedBuffer::new(),
+            &attributes_hash.as_managed_buffer(),
             &attributes,
             &uris,
         );

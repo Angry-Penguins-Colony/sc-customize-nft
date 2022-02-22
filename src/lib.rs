@@ -8,8 +8,8 @@ elrond_wasm::derive_imports!();
 
 extern crate alloc;
 
-pub mod libs;
-pub mod structs;
+pub(crate) mod libs;
+pub(crate) mod structs;
 
 use alloc::string::ToString;
 use elrond_wasm::{elrond_codec::TopEncode, String};

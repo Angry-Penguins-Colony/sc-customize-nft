@@ -12,6 +12,7 @@ use crate::structs::{item_slot::ItemSlot, penguin_attributes::PenguinAttributes}
 #[elrond_wasm::module]
 pub trait MintPenguin: super::storage::StorageModule + super::penguin_parse::ParsePenguin {
     #[endpoint(mintTestPenguin)]
+    #[only_owner]
     fn mint_test_penguin(&self) -> SCResult<u64> {
         let penguin_id = self.penguins_identifier().get();
         let caller = self.blockchain().get_caller();
@@ -86,12 +87,13 @@ pub trait MintPenguin: super::storage::StorageModule + super::penguin_parse::Par
             sc_panic!("Attributes encode error: {}", err.message_bytes());
         }
 
-        let attributes_hash: &ManagedByteArray<Self::Api, 32> =
-            &self.crypto().sha256(&serialized_attributes);
+        let attributes_hash: &H256 = &self
+            .crypto()
+            .sha256_legacy(serialized_attributes.to_boxed_bytes().as_slice());
 
-        let managed_buffer = attributes_hash.as_managed_buffer();
+        let managed_buffer = ManagedBuffer::new_from_bytes(attributes_hash.as_bytes());
 
-        return SCResult::Ok(managed_buffer.clone());
+        return SCResult::Ok(managed_buffer);
     }
 
     fn build_url(

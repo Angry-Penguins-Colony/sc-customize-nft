@@ -11,7 +11,7 @@ use super::{item::Item, item_slot::ItemSlot};
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-#[derive(TopDecode, PartialEq, TypeAbi, Debug)]
+#[derive(PartialEq, TypeAbi, Debug)]
 pub struct PenguinAttributes<M: ManagedTypeApi> {
     pub hat: Option<Item<M>>,
     pub background: Option<Item<M>>,
@@ -20,6 +20,15 @@ pub struct PenguinAttributes<M: ManagedTypeApi> {
     pub weapon: Option<Item<M>>,
     pub clothes: Option<Item<M>>,
     pub eye: Option<Item<M>>,
+}
+
+impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
+    const TYPE_INFO: elrond_codec::TypeInfo = elrond_codec::TypeInfo::Unknown;
+
+    fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
+        // json::parse()
+        todo!()
+    }
 }
 
 impl<M: ManagedTypeApi> TopEncode for PenguinAttributes<M> {
@@ -158,11 +167,11 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         };
 
         let mut managed_buffer = ManagedBuffer::<M>::new();
-        managed_buffer.append_bytes(b"{\"trait_type\":\"");
+        managed_buffer.append_bytes(br#"{"trait_type":""#);
         managed_buffer.append_bytes(slot_str);
-        managed_buffer.append_bytes(b"\",\"value\":\"");
+        managed_buffer.append_bytes(br#"","value":""#);
         managed_buffer.append_bytes(item_str.to_boxed_bytes().as_slice());
-        managed_buffer.append_bytes(b"\"}");
+        managed_buffer.append_bytes(br#""}"#);
 
         return managed_buffer;
     }

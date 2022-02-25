@@ -20,6 +20,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8da52d66c7071e2e3fa2a1e5c6d088fec47b593032b254f5e980de8ea54454d6"
 
 [[package]]
+name = "as-slice"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "45403b49e3954a4b8428a0ac21a4b7afadccf92bfd96273f1a58cd4812496ae0"
+dependencies = [
+ "generic-array 0.12.4",
+ "generic-array 0.13.3",
+ "generic-array 0.14.5",
+ "stable_deref_trait",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -38,7 +50,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4152116fd6e9dadb291ae18fc1ec3575ed6d84c29642d97890f4b4a3417297e4"
 dependencies = [
  "block-padding",
- "generic-array",
+ "generic-array 0.14.5",
 ]
 
 [[package]]
@@ -46,6 +58,12 @@ name = "block-padding"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8d696c370c750c948ada61c69a0ee2cbbb9c50b1019ddb86d9317157a99c2cae"
+
+[[package]]
+name = "byteorder"
+version = "1.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "14c189c53d098945499cdfa7ecc63567cf3886b3332b312a5b4585d8d3a6a610"
 
 [[package]]
 name = "cargo_toml"
@@ -85,7 +103,7 @@ version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d3dd60d1080a57a05ab032377049e0591415d2b31afd7028356dbf3cc6dcb066"
 dependencies = [
- "generic-array",
+ "generic-array 0.14.5",
 ]
 
 [[package]]
@@ -173,6 +191,8 @@ name = "equip_penguin"
 version = "0.0.0"
 dependencies = [
  "elrond-wasm",
+ "serde",
+ "serde-json-core",
 ]
 
 [[package]]
@@ -182,6 +202,24 @@ dependencies = [
  "elrond-wasm",
  "elrond-wasm-debug",
  "equip_penguin",
+]
+
+[[package]]
+name = "generic-array"
+version = "0.12.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ffdf9f34f1447443d37393cc6c2b8313aebddcd96906caf34e54c68d8e57d7bd"
+dependencies = [
+ "typenum",
+]
+
+[[package]]
+name = "generic-array"
+version = "0.13.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f797e67af32588215eaaab8327027ee8e71b9dd0b2b26996aedf20c030fce309"
+dependencies = [
+ "typenum",
 ]
 
 [[package]]
@@ -206,12 +244,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "hash32"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d4041af86e63ac4298ce40e5cca669066e75b6f1aa3390fe2561ffa5e1d9f4cc"
+dependencies = [
+ "byteorder",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ab5ef0d4909ef3724cc8cce6ccc8572c5c817592e9285f5464f8e86f8bd3726e"
 dependencies = [
  "ahash",
+]
+
+[[package]]
+name = "heapless"
+version = "0.5.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "74911a68a1658cfcfb61bc0ccfbd536e3b6e906f8c2f7883ee50157e3e2184f1"
+dependencies = [
+ "as-slice",
+ "generic-array 0.13.3",
+ "hash32",
+ "stable_deref_trait",
 ]
 
 [[package]]
@@ -447,6 +506,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde-json-core"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cbf406405ada9ef326ca78677324ac66994ff348fc48a16030be08caeed29825"
+dependencies = [
+ "heapless",
+ "serde",
+]
+
+[[package]]
 name = "serde_derive"
 version = "1.0.133"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -492,6 +561,12 @@ dependencies = [
  "keccak",
  "opaque-debug",
 ]
+
+[[package]]
+name = "stable_deref_trait"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 
 [[package]]
 name = "syn"

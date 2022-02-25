@@ -28,56 +28,54 @@ impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
     fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
         let mut penguin = Self::empty();
 
-        Ok(penguin)
+        let from_slice =
+            serde_json::from_slice::<PenguinAttributesJSON>(&input.into_boxed_slice_u8());
 
-        // let from_slice =
-        //     serde_json_core::from_slice::<PenguinAttributesJSON>(&input.into_boxed_slice_u8());
+        match from_slice {
+            Result::Ok(json) => {
+                for attribute in json.attributes {
+                    let item = match attribute.value.to_owned().as_str() {
+                        "unequipped" => None,
+                        _ => Option::Some(Item::<M> {
+                            token: TokenIdentifier::<M>::from_esdt_bytes(
+                                attribute.value.as_bytes(),
+                            ),
+                            nonce: 1,
+                        }),
+                    };
 
-        // match from_slice {
-        //     Result::Ok(json) => {
-        //         for attribute in json.attributes {
-        //             let item = match attribute.value.to_owned().as_str() {
-        //                 "unequipped" => None,
-        //                 _ => Option::Some(Item::<M> {
-        //                     token: TokenIdentifier::<M>::from_esdt_bytes(
-        //                         attribute.value.as_bytes(),
-        //                     ),
-        //                     nonce: 1,
-        //                 }),
-        //             };
+                    match attribute.trait_type.to_owned().as_str() {
+                        "hat" => {
+                            penguin.hat = item;
+                        }
+                        "background" => {
+                            penguin.background = item;
+                        }
+                        "skin" => {
+                            penguin.skin = item;
+                        }
+                        "beak" => {
+                            penguin.beak = item;
+                        }
+                        "weapon" => {
+                            penguin.weapon = item;
+                        }
+                        "clothes" => {
+                            penguin.clothes = item;
+                        }
+                        "eyes" => {
+                            penguin.eye = item;
+                        }
+                        _ => {
+                            return Result::Err(DecodeError::from("Unrecognized trait type"));
+                        }
+                    }
+                }
 
-        //             match attribute.trait_type.to_owned().as_str() {
-        //                 "hat" => {
-        //                     penguin.hat = item;
-        //                 }
-        //                 "background" => {
-        //                     penguin.background = item;
-        //                 }
-        //                 "skin" => {
-        //                     penguin.skin = item;
-        //                 }
-        //                 "beak" => {
-        //                     penguin.beak = item;
-        //                 }
-        //                 "weapon" => {
-        //                     penguin.weapon = item;
-        //                 }
-        //                 "clothes" => {
-        //                     penguin.clothes = item;
-        //                 }
-        //                 "eyes" => {
-        //                     penguin.eye = item;
-        //                 }
-        //                 _ => {
-        //                     return Result::Err(DecodeError::from("Unrecognized trait type"));
-        //                 }
-        //             }
-        //         }
-
-        //         Result::Ok(penguin)
-        //     }
-        //     Result::Err(_) => Result::Err(DecodeError::INVALID_VALUE),
-        //}
+                Result::Ok(penguin)
+            }
+            Result::Err(_) => Result::Err(DecodeError::INVALID_VALUE),
+        }
     }
 }
 

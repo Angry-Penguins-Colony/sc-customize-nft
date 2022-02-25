@@ -20,5 +20,5 @@ num-traits = "0.2"
 hex = "0.4"
 
 [dependencies]
-serde-json-core = "0.1.0"
 serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }

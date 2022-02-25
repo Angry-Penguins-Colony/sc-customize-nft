@@ -3,21 +3,49 @@
 #![allow(unused_attributes)]
 #![allow(unused_imports)]
 
+use alloc::{borrow::ToOwned, format};
+use elrond_wasm::elrond_codec::TopEncode;
+
 use super::{item::Item, item_slot::ItemSlot};
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, TypeAbi, Debug)]
+#[derive(TopDecode, PartialEq, TypeAbi, Debug)]
 pub struct PenguinAttributes<M: ManagedTypeApi> {
     pub hat: Option<Item<M>>,
     pub background: Option<Item<M>>,
     pub skin: Option<Item<M>>,
-    pub chain: Option<Item<M>>,
     pub beak: Option<Item<M>>,
     pub weapon: Option<Item<M>>,
     pub clothes: Option<Item<M>>,
     pub eye: Option<Item<M>>,
+}
+
+impl<M: ManagedTypeApi> TopEncode for PenguinAttributes<M> {
+    const TYPE_INFO: elrond_codec::TypeInfo = elrond_codec::TypeInfo::Unknown;
+
+    fn top_encode<O: elrond_codec::TopEncodeOutput>(
+        &self,
+        output: O,
+    ) -> Result<(), elrond_codec::EncodeError> {
+        let mut managed_buffer = ManagedBuffer::<M>::new();
+
+        managed_buffer.append_bytes(b"{\"attributes\":[");
+
+        for (i, slot) in ItemSlot::VALUES.iter().enumerate() {
+            managed_buffer.append_bytes(self.to_managed_buffer(slot).to_boxed_bytes().as_slice());
+
+            // add comma, except for the last line
+            if i < ItemSlot::VALUES.len() - 1 {
+                managed_buffer.append_bytes(b",");
+            }
+        }
+        managed_buffer.append_bytes(b"]}");
+
+        output.set_boxed_bytes(managed_buffer.to_boxed_bytes().into_box());
+        return Result::Ok(());
+    }
 }
 
 impl<M: ManagedTypeApi> PenguinAttributes<M> {
@@ -94,7 +122,6 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
             hat: Option::None,
             background: Option::None,
             skin: Option::None,
-            chain: Option::None,
             beak: Option::None,
             weapon: Option::None,
             clothes: Option::None,
@@ -121,5 +148,22 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         }
 
         Result::Ok(())
+    }
+
+    fn to_managed_buffer(&self, slot: &ItemSlot) -> ManagedBuffer<M> {
+        let slot_str = slot.to_bytes::<M>();
+        let item_str = match self.get_item(slot) {
+            Some(item) => item.token.as_managed_buffer().clone(),
+            None => ManagedBuffer::<M>::new_from_bytes(b"unequipped"),
+        };
+
+        let mut managed_buffer = ManagedBuffer::<M>::new();
+        managed_buffer.append_bytes(b"{\"trait_type\":\"");
+        managed_buffer.append_bytes(slot_str);
+        managed_buffer.append_bytes(b"\",\"value\":\"");
+        managed_buffer.append_bytes(item_str.to_boxed_bytes().as_slice());
+        managed_buffer.append_bytes(b"\"}");
+
+        return managed_buffer;
     }
 }

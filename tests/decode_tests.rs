@@ -11,7 +11,7 @@ use equip_penguin::structs::{
 fn decode_test() {
     DebugApi::dummy();
 
-    let input_data = br#"{"attributes":[{"trait_type":"hat","value":"HAT-a2b4e5"},{"trait_type":"background","value":"unequipped"},{"trait_type":"skin","value":"unequipped"},{"trait_type":"beak","value":"unequipped"},{"trait_type":"weapon","value":"unequipped"},{"trait_type":"clothes","value":"unequipped"},{"trait_type":"eyes","value":"unequipped"}]}"#;
+    let input_data=b"Hat:HAT-a2b4e5;Background:unequipped;Skin:unequipped;Beak:unequipped;Weapon:unequipped;Clothes:unequipped;Eyes:unequipped";
     let input_buffer = ManagedBuffer::<DebugApi>::new_from_bytes(input_data);
 
     let expected_output = PenguinAttributes::new(&[(

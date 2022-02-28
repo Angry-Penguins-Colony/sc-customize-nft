@@ -177,6 +177,7 @@ dependencies = [
  "hex",
  "num-bigint",
  "num-traits",
+ "to-str",
 ]
 
 [[package]]
@@ -498,6 +499,12 @@ dependencies = [
  "quote",
  "unicode-xid",
 ]
+
+[[package]]
+name = "to-str"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5160fb24d47824e3ad8387024c78584968aa47bf2f0c0ceb7d08962905872c86"
 
 [[package]]
 name = "toml"

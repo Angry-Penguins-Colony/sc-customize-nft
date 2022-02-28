@@ -5,7 +5,9 @@
 
 use alloc::{borrow::ToOwned, format};
 use elrond_wasm::{elrond_codec::TopEncode, String};
+use to_str::ToStr;
 
+extern crate to_str;
 use super::{item::Item, item_slot::ItemSlot};
 
 elrond_wasm::imports!();
@@ -89,7 +91,7 @@ impl<M: ManagedTypeApi> TopEncode for PenguinAttributes<M> {
         let mut managed_buffer = ManagedBuffer::<M>::new();
 
         for (i, slot) in ItemSlot::VALUES.iter().enumerate() {
-            managed_buffer.append_bytes(self.to_managed_buffer(slot).to_boxed_bytes().as_slice());
+            managed_buffer.append(&self.to_managed_buffer(slot));
 
             // add comma, except for the last line
             if i < ItemSlot::VALUES.len() - 1 {
@@ -208,16 +210,39 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         let mut slot_str = slot.to_bytes::<M>().to_owned();
         slot_str[0] = slot_str.to_ascii_uppercase()[0].to_owned();
 
-        let item_str = match self.get_item(slot) {
-            Some(item) => item.token.as_managed_buffer().clone(),
+        let item = match self.get_item(slot) {
+            Some(item) => {
+                let mut output = ManagedBuffer::new();
+                output.append(&item.token.as_managed_buffer().clone());
+                output.append_bytes(b"-");
+                output.append(&self.u64_to_hex(&item.nonce));
+
+                output
+            }
             None => ManagedBuffer::<M>::new_from_bytes(b"unequipped"),
         };
 
         let mut managed_buffer = ManagedBuffer::<M>::new();
         managed_buffer.append_bytes(slot_str.as_slice());
         managed_buffer.append_bytes(b":");
-        managed_buffer.append_bytes(item_str.to_boxed_bytes().as_slice());
+        managed_buffer.append_bytes(item.to_boxed_bytes().as_slice());
 
         return managed_buffer;
+    }
+
+    fn u64_to_hex(&self, val: &u64) -> ManagedBuffer<M> {
+        let hex_val = format!("{:x}", val);
+        let bytes = hex_val.as_bytes();
+
+        let mut o = ManagedBuffer::<M>::new();
+
+        // make hex odd
+        if &bytes.len() % 2 != 0 {
+            o.append_bytes(b"0");
+        }
+
+        o.append_bytes(bytes);
+
+        return o;
     }
 }

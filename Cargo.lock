@@ -177,8 +177,6 @@ dependencies = [
  "hex",
  "num-bigint",
  "num-traits",
- "serde",
- "serde_json",
 ]
 
 [[package]]

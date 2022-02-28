@@ -18,7 +18,3 @@ version = "0.27.4"
 num-bigint = "0.4.2"
 num-traits = "0.2"
 hex = "0.4"
-
-[dependencies]
-serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
-serde_json = { version = "1.0", default-features = false, features = ["alloc"] }

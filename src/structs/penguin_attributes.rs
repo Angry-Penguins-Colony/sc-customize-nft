@@ -6,7 +6,7 @@
 use alloc::{borrow::ToOwned, format};
 use elrond_wasm::{elrond_codec::TopEncode, String};
 
-use super::{item::Item, item_slot::ItemSlot, penguin_attributes_json::PenguinAttributesJSON};
+use super::{item::Item, item_slot::ItemSlot};
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
@@ -26,56 +26,56 @@ impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
     const TYPE_INFO: elrond_codec::TypeInfo = elrond_codec::TypeInfo::Unknown;
 
     fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
-        let mut penguin = Self::empty();
+        todo!()
+        // let mut penguin = Self::empty();
 
-        let from_slice =
-            serde_json::from_slice::<PenguinAttributesJSON>(&input.into_boxed_slice_u8());
+        // let from_slice = serde_json_core::from_slice::<Foo>(&input.into_boxed_slice_u8());
 
-        match from_slice {
-            Result::Ok(json) => {
-                for attribute in json.attributes {
-                    let item = match attribute.value.to_owned().as_str() {
-                        "unequipped" => None,
-                        _ => Option::Some(Item::<M> {
-                            token: TokenIdentifier::<M>::from_esdt_bytes(
-                                attribute.value.as_bytes(),
-                            ),
-                            nonce: 1,
-                        }),
-                    };
+        // match from_slice {
+        //     Result::Ok((json, size)) => {
+        //         for attribute in json.attributes {
+        //             let item = match attribute.value.to_owned().as_str() {
+        //                 "unequipped" => None,
+        //                 _ => Option::Some(Item::<M> {
+        //                     token: TokenIdentifier::<M>::from_esdt_bytes(
+        //                         attribute.value.as_bytes(),
+        //                     ),
+        //                     nonce: 1,
+        //                 }),
+        //             };
 
-                    match attribute.trait_type.to_owned().as_str() {
-                        "hat" => {
-                            penguin.hat = item;
-                        }
-                        "background" => {
-                            penguin.background = item;
-                        }
-                        "skin" => {
-                            penguin.skin = item;
-                        }
-                        "beak" => {
-                            penguin.beak = item;
-                        }
-                        "weapon" => {
-                            penguin.weapon = item;
-                        }
-                        "clothes" => {
-                            penguin.clothes = item;
-                        }
-                        "eyes" => {
-                            penguin.eye = item;
-                        }
-                        _ => {
-                            return Result::Err(DecodeError::from("Unrecognized trait type"));
-                        }
-                    }
-                }
+        //             match attribute.trait_type.to_owned().as_str() {
+        //                 "hat" => {
+        //                     penguin.hat = item;
+        //                 }
+        //                 "background" => {
+        //                     penguin.background = item;
+        //                 }
+        //                 "skin" => {
+        //                     penguin.skin = item;
+        //                 }
+        //                 "beak" => {
+        //                     penguin.beak = item;
+        //                 }
+        //                 "weapon" => {
+        //                     penguin.weapon = item;
+        //                 }
+        //                 "clothes" => {
+        //                     penguin.clothes = item;
+        //                 }
+        //                 "eyes" => {
+        //                     penguin.eye = item;
+        //                 }
+        //                 _ => {
+        //                     return Result::Err(DecodeError::from("Unrecognized trait type"));
+        //                 }
+        //             }
+        //         }
 
-                Result::Ok(penguin)
-            }
-            Result::Err(_) => Result::Err(DecodeError::INVALID_VALUE),
-        }
+        //         Result::Ok(penguin)
+        //     }
+        //     Result::Err(_) => Result::Err(DecodeError::INVALID_VALUE),
+        // }
     }
 }
 
@@ -88,17 +88,14 @@ impl<M: ManagedTypeApi> TopEncode for PenguinAttributes<M> {
     ) -> Result<(), elrond_codec::EncodeError> {
         let mut managed_buffer = ManagedBuffer::<M>::new();
 
-        managed_buffer.append_bytes(b"{\"attributes\":[");
-
         for (i, slot) in ItemSlot::VALUES.iter().enumerate() {
             managed_buffer.append_bytes(self.to_managed_buffer(slot).to_boxed_bytes().as_slice());
 
             // add comma, except for the last line
             if i < ItemSlot::VALUES.len() - 1 {
-                managed_buffer.append_bytes(b",");
+                managed_buffer.append_bytes(b";");
             }
         }
-        managed_buffer.append_bytes(b"]}");
 
         output.set_boxed_bytes(managed_buffer.to_boxed_bytes().into_box());
         return Result::Ok(());
@@ -208,18 +205,18 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
     }
 
     fn to_managed_buffer(&self, slot: &ItemSlot) -> ManagedBuffer<M> {
-        let slot_str = slot.to_bytes::<M>();
+        let mut slot_str = slot.to_bytes::<M>().to_owned();
+        slot_str[0] = slot_str.to_ascii_uppercase()[0].to_owned();
+
         let item_str = match self.get_item(slot) {
             Some(item) => item.token.as_managed_buffer().clone(),
             None => ManagedBuffer::<M>::new_from_bytes(b"unequipped"),
         };
 
         let mut managed_buffer = ManagedBuffer::<M>::new();
-        managed_buffer.append_bytes(br#"{"trait_type":""#);
-        managed_buffer.append_bytes(slot_str);
-        managed_buffer.append_bytes(br#"","value":""#);
+        managed_buffer.append_bytes(slot_str.as_slice());
+        managed_buffer.append_bytes(b":");
         managed_buffer.append_bytes(item_str.to_boxed_bytes().as_slice());
-        managed_buffer.append_bytes(br#""}"#);
 
         return managed_buffer;
     }

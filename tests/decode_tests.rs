@@ -11,7 +11,7 @@ use equip_penguin::structs::{
 fn decode_test() {
     DebugApi::dummy();
 
-    let input_data=b"Hat:HAT-a2b4e5;Background:unequipped;Skin:unequipped;Beak:unequipped;Weapon:unequipped;Clothes:unequipped;Eyes:unequipped";
+    let input_data=b"Hat:HAT-a2b4e5-01;Background:unequipped;Skin:unequipped;Beak:unequipped;Weapon:unequipped;Clothes:unequipped;Eyes:unequipped";
     let input_buffer = ManagedBuffer::<DebugApi>::new_from_bytes(input_data);
 
     let expected_output = PenguinAttributes::new(&[(
@@ -26,3 +26,5 @@ fn decode_test() {
 
     assert_eq!(expected_output, actual_output);
 }
+
+// todo decode w/ hex as nonce (e.g. "Hat:HAT-a2b4e5-0a")

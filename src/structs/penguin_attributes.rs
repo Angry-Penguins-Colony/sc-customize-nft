@@ -5,9 +5,7 @@
 
 use alloc::{borrow::ToOwned, format};
 use elrond_wasm::{elrond_codec::TopEncode, String};
-use to_str::ToStr;
 
-extern crate to_str;
 use super::{item::Item, item_slot::ItemSlot};
 
 elrond_wasm::imports!();
@@ -28,56 +26,35 @@ impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
     const TYPE_INFO: elrond_codec::TypeInfo = elrond_codec::TypeInfo::Unknown;
 
     fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
-        todo!()
-        // let mut penguin = Self::empty();
+        let mut penguin = PenguinAttributes::empty();
 
-        // let from_slice = serde_json_core::from_slice::<Foo>(&input.into_boxed_slice_u8());
+        let boxed_slice_u8 = input.into_boxed_slice_u8();
+        let x = boxed_slice_u8.split(|b| *b == b';');
 
-        // match from_slice {
-        //     Result::Ok((json, size)) => {
-        //         for attribute in json.attributes {
-        //             let item = match attribute.value.to_owned().as_str() {
-        //                 "unequipped" => None,
-        //                 _ => Option::Some(Item::<M> {
-        //                     token: TokenIdentifier::<M>::from_esdt_bytes(
-        //                         attribute.value.as_bytes(),
-        //                     ),
-        //                     nonce: 1,
-        //                 }),
-        //             };
+        for item_str in x {
+            let mut parts = item_str.split(|b| *b == b':');
 
-        //             match attribute.trait_type.to_owned().as_str() {
-        //                 "hat" => {
-        //                     penguin.hat = item;
-        //                 }
-        //                 "background" => {
-        //                     penguin.background = item;
-        //                 }
-        //                 "skin" => {
-        //                     penguin.skin = item;
-        //                 }
-        //                 "beak" => {
-        //                     penguin.beak = item;
-        //                 }
-        //                 "weapon" => {
-        //                     penguin.weapon = item;
-        //                 }
-        //                 "clothes" => {
-        //                     penguin.clothes = item;
-        //                 }
-        //                 "eyes" => {
-        //                     penguin.eye = item;
-        //                 }
-        //                 _ => {
-        //                     return Result::Err(DecodeError::from("Unrecognized trait type"));
-        //                 }
-        //             }
-        //         }
+            let slot = parts.next().unwrap().to_owned();
+            let item_str = parts.next().unwrap().to_owned();
 
-        //         Result::Ok(penguin)
-        //     }
-        //     Result::Err(_) => Result::Err(DecodeError::INVALID_VALUE),
-        // }
+            let item = match item_str == b"unequipped" {
+                true => None,
+                false => Some(Item::new(&item_str)),
+            };
+
+            match slot.to_owned().as_slice() {
+                b"Hat" => penguin.hat = item,
+                b"Background" => penguin.background = item,
+                b"Skin" => penguin.skin = item,
+                b"Beak" => penguin.beak = item,
+                b"Weapon" => penguin.weapon = item,
+                b"Clothes" => penguin.clothes = item,
+                b"Eyes" => penguin.eye = item,
+                _ => return Result::Err(DecodeError::UTF8_DECODE_ERROR),
+            };
+        }
+
+        return Result::Ok(penguin);
     }
 }
 

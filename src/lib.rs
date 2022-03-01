@@ -107,14 +107,26 @@ pub trait Equip:
             require!(payment.amount == 1, "You must sent only one item.");
 
             let item = Item {
-                token: payment.token_identifier,
+                token: payment.token_identifier.clone(),
                 nonce: payment.token_nonce,
+                name: self.get_token_name(&payment.token_identifier, payment.token_nonce)?,
             };
 
             self.equip_slot(&mut attributes, &item)?;
         }
 
         return self.update_penguin(&penguin_id, penguin_nonce, &attributes);
+    }
+
+    fn get_token_name(&self, item_id: &TokenIdentifier, nonce: u64) -> SCResult<ManagedBuffer> {
+        sc_print!("token {} nonce {:x}", item_id, nonce);
+
+        let item_name = self
+            .blockchain()
+            .get_esdt_token_data(&self.blockchain().get_sc_address(), item_id, nonce)
+            .name;
+
+        return Ok(item_name);
     }
 
     fn equip_slot(
@@ -144,13 +156,7 @@ pub trait Equip:
             self.desequip_slot(attributes, &item_slot)?;
         }
 
-        let result = attributes.set_item(
-            &item_slot,
-            Option::Some(Item {
-                token: item_id.clone(),
-                nonce: item_nonce.clone(),
-            }),
-        );
+        let result = attributes.set_item(&item_slot, Option::Some(item.clone()));
         require!(
             result == Result::Ok(()),
             "Cannot set item. Maybe the item is not considered like an item."

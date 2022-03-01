@@ -190,9 +190,14 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         let item = match self.get_item(slot) {
             Some(item) => {
                 let mut output = ManagedBuffer::new();
+
+                output.append(&item.name);
+                output.append_bytes(b" (");
+
                 output.append(&item.token.as_managed_buffer().clone());
                 output.append_bytes(b"-");
                 output.append(&self.u64_to_hex(&item.nonce));
+                output.append_bytes(b")");
 
                 output
             }

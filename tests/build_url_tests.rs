@@ -59,6 +59,7 @@ fn build_url_with_one_item() {
                 hat: Some(Item::<DebugApi> {
                     token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_IDENTIFIER),
                     nonce,
+                    name: ManagedBuffer::new_from_bytes(b"item name"),
                 }),
                 ..PenguinAttributes::empty()
             };
@@ -123,6 +124,7 @@ fn build_url_with_two_item() {
                     Item::<DebugApi> {
                         token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_1_IDENTIFIER),
                         nonce: NONCE,
+                        name: ManagedBuffer::new_from_bytes(b"Pirate hat"),
                     },
                 ),
                 (
@@ -130,6 +132,7 @@ fn build_url_with_two_item() {
                     Item::<DebugApi> {
                         token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_2_IDENTIFIER),
                         nonce: NONCE,
+                        name: ManagedBuffer::new_from_bytes(b"Albino"),
                     },
                 ),
             ]);

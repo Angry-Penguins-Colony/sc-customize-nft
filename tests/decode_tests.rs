@@ -2,7 +2,7 @@ use elrond_wasm::{
     elrond_codec::TopDecode,
     types::{ManagedBuffer, TokenIdentifier},
 };
-use elrond_wasm_debug::DebugApi;
+use elrond_wasm_debug::{managed_buffer, DebugApi};
 use equip_penguin::structs::{
     item::Item, item_slot::ItemSlot, penguin_attributes::PenguinAttributes,
 };
@@ -11,7 +11,7 @@ use equip_penguin::structs::{
 fn decode_test() {
     DebugApi::dummy();
 
-    let input_data=b"Hat:HAT-a2b4e5-01;Background:unequipped;Skin:unequipped;Beak:unequipped;Weapon:unequipped;Clothes:unequipped;Eyes:unequipped";
+    let input_data=b"Hat:Pirate Hat (HAT-a2b4e5-01);Background:unequipped;Skin:unequipped;Beak:unequipped;Weapon:unequipped;Clothes:unequipped;Eyes:unequipped";
     let input_buffer = ManagedBuffer::<DebugApi>::new_from_bytes(input_data);
 
     let expected_output = PenguinAttributes::new(&[(
@@ -19,6 +19,7 @@ fn decode_test() {
         Item::<DebugApi> {
             token: TokenIdentifier::from_esdt_bytes(b"HAT-a2b4e5"),
             nonce: 1,
+            name: managed_buffer!(b"Pirate Hat"),
         },
     )]);
 

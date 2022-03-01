@@ -16,24 +16,40 @@ elrond_wasm::derive_imports!();
 pub struct Item<M: ManagedTypeApi> {
     pub token: TokenIdentifier<M>,
     pub nonce: u64,
+    pub name: ManagedBuffer<M>,
 }
 
 impl<M: ManagedTypeApi> Item<M> {
     pub fn new(bytes: &[u8]) -> Self {
-        // get last index of "-" in bytes
-        let last_index = bytes.iter().rposition(|b| *b == b'-').unwrap();
+        // format is name (token-nonce)
 
-        // split str to last occurence of "-"
-        let parts = bytes.split_at(last_index);
+        let main_parts = Item::<M>::split_last_occurence(bytes, b' ');
 
-        let token = TokenIdentifier::from_esdt_bytes(parts.0);
+        // retrieve name
+        let name = main_parts.0;
 
-        // remove first character of parts.1
+        // retrivier token
+        let identifier = &main_parts.1[1..main_parts.1.len() - 1];
+        let parts = Item::<M>::split_last_occurence(identifier, b'-');
+
+        let token = TokenIdentifier::from_esdt_bytes(&parts.0[1..]);
+
+        // retrieve nonce
         let nonce_str = String::from_utf8_lossy(&parts.1[1..])
             .to_owned()
             .to_string();
         let nonce = u64::from_str_radix(&nonce_str, 16).unwrap();
 
-        Self { token, nonce }
+        Self {
+            token,
+            nonce,
+            name: ManagedBuffer::<M>::new_from_bytes(name),
+        }
+    }
+
+    fn split_last_occurence(bytes: &[u8], char: u8) -> (&[u8], &[u8]) {
+        let last_index = bytes.iter().rposition(|b| *b == char).unwrap();
+        let parts = bytes.clone().split_at(last_index);
+        return parts;
     }
 }

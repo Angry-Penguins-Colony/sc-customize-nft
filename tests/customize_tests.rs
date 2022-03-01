@@ -1,6 +1,6 @@
 use elrond_wasm::{
     contract_base::ContractBase,
-    types::{ManagedVarArgs, SCResult, TokenIdentifier},
+    types::{ManagedBuffer, ManagedVarArgs, SCResult, TokenIdentifier},
 };
 use elrond_wasm_debug::{rust_biguint, testing_framework::StateChange, DebugApi};
 use equip_penguin::{
@@ -20,6 +20,7 @@ fn customize_complete_flow() {
     utils::execute_for_all_slot(|slot| {
         const ITEM_TO_DESEQUIP_ID: &[u8] = b"ITEM-a1a1a1";
         const ITEM_TO_EQUIP: &[u8] = b"HAT-b2b2b2";
+        const ITEM_TO_EQUIP_NAME: &[u8] = b"new item";
         const NONCE: u64 = 30;
 
         // 1. ARRANGE
@@ -39,12 +40,17 @@ fn customize_complete_flow() {
             &ItemAttributes::random(),
         );
 
-        setup.blockchain_wrapper.set_nft_balance(
+        setup.blockchain_wrapper.set_nft_balance_all_properties(
             &setup.first_user_address,
             ITEM_TO_EQUIP,
             NONCE,
             &rust_biguint!(1),
             &ItemAttributes::<DebugApi>::random(),
+            0,
+            Option::None,
+            Option::Some(ITEM_TO_EQUIP_NAME),
+            Option::None,
+            Option::None,
         );
 
         let transfers =
@@ -92,6 +98,7 @@ fn customize_complete_flow() {
                 Item {
                     token: TokenIdentifier::from_esdt_bytes(ITEM_TO_EQUIP),
                     nonce: NONCE,
+                    name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
                 },
             )]),
         );

@@ -14,6 +14,7 @@ fn is_empty_while_not_empty() {
             Item {
                 token: TokenIdentifier::from_esdt_bytes(b"ITEM-a"),
                 nonce: 0,
+                name: ManagedBuffer::new_from_bytes(b"item name"),
             },
         )]);
 
@@ -48,6 +49,7 @@ fn set_item_on_empty_slot() {
             Option::Some(Item {
                 token: managed_token.clone(),
                 nonce: nonce,
+                name: ManagedBuffer::new_from_bytes(b"item name"),
             }),
         );
         assert_eq!(result, Result::Ok(()));
@@ -69,6 +71,7 @@ fn set_item_on_not_empty_slot() {
             Item {
                 token: TokenIdentifier::from_esdt_bytes(b"ITEM-a"),
                 nonce: 0,
+                name: ManagedBuffer::new_from_bytes(b"item name"),
             },
         )]);
 
@@ -81,6 +84,7 @@ fn set_item_on_not_empty_slot() {
             Option::Some(Item {
                 token: managed_token.clone(),
                 nonce: nonce,
+                name: ManagedBuffer::new_from_bytes(b"item name"),
             }),
         );
         assert_eq!(
@@ -102,6 +106,7 @@ fn empty_slot_while_slot_is_empty() {
             Item {
                 token: TokenIdentifier::from_esdt_bytes(b""),
                 nonce: 0,
+                name: ManagedBuffer::new_from_bytes(b"item name"),
             },
         )]);
 
@@ -120,6 +125,7 @@ fn empty_slot_while_slot_is_not_empty() {
             Item {
                 token: TokenIdentifier::from_esdt_bytes(b"HAT-aaaa"),
                 nonce: 0,
+                name: ManagedBuffer::new_from_bytes(b"item name"),
             },
         )]);
 

@@ -67,6 +67,30 @@ where
         item_id: &[u8],
         attributes: &ItemAttributes<DebugApi>,
     ) -> u64 {
+        return self.register_item_all_properties(
+            item_type,
+            item_id,
+            attributes,
+            0u64,
+            Option::None,
+            Option::None,
+            Option::None,
+            Option::None,
+        );
+    }
+
+    #[allow(dead_code)]
+    pub fn register_item_all_properties(
+        &mut self,
+        item_type: ItemSlot,
+        item_id: &[u8],
+        attributes: &ItemAttributes<DebugApi>,
+        royalties: u64,
+        creator: Option<&Address>,
+        name: Option<&[u8]>,
+        hash: Option<&[u8]>,
+        uri: Option<&[u8]>,
+    ) -> u64 {
         self.set_all_permissions_on_token(item_id);
 
         self.blockchain_wrapper
@@ -96,12 +120,17 @@ where
             )
             .assert_ok();
 
-        self.blockchain_wrapper.set_nft_balance(
+        self.blockchain_wrapper.set_nft_balance_all_properties(
             &self.cf_wrapper.address_ref(),
             &item_id,
             INIT_NONCE,
             &rust_biguint!(1u64),
             &attributes,
+            royalties,
+            creator,
+            name,
+            hash,
+            uri,
         );
 
         return INIT_NONCE;
@@ -171,6 +200,7 @@ where
                 Item {
                     token: TokenIdentifier::<DebugApi>::from_esdt_bytes(item_identifier),
                     nonce: item_nonce,
+                    name: ManagedBuffer::new_from_bytes(b"item name"),
                 },
             )]),
         );
@@ -359,6 +389,7 @@ pub fn give_one_penguin_with_hat(
             hat: Option::Some(Item {
                 token: TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
                 nonce: hat_nonce,
+                name: ManagedBuffer::new_from_bytes(b"item name"),
             }),
             ..PenguinAttributes::empty()
         },

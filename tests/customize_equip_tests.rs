@@ -1,10 +1,11 @@
 use elrond_wasm::types::{EsdtTokenType, SCResult};
 use elrond_wasm_debug::tx_mock::TxInputESDT;
-use elrond_wasm_debug::{managed_token_id, testing_framework::*};
+use elrond_wasm_debug::{managed_buffer, managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::structs::item::Item;
 use equip_penguin::structs::item_attributes::ItemAttributes;
 use equip_penguin::structs::penguin_attributes::PenguinAttributes;
+use equip_penguin::Equip;
 
 mod utils;
 
@@ -18,11 +19,21 @@ const INIT_NONCE: u64 = 65535;
 fn test_equip() {
     utils::execute_for_all_slot(|slot| {
         const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
+        const ITEM_TO_EQUIP_NAME: &[u8] = b"item name";
 
         let mut setup = utils::setup(equip_penguin::contract_obj);
 
         let item_attributes = ItemAttributes::random();
-        let item_init_nonce = setup.register_item(slot.clone(), ITEM_TO_EQUIP_ID, &item_attributes);
+        let item_init_nonce = setup.register_item_all_properties(
+            slot.clone(),
+            ITEM_TO_EQUIP_ID,
+            &item_attributes,
+            0,
+            Option::None,
+            Option::Some(ITEM_TO_EQUIP_NAME),
+            Option::None,
+            Option::None,
+        );
 
         // add empty pingouin to the USER
         setup.blockchain_wrapper.set_nft_balance(
@@ -76,6 +87,7 @@ fn test_equip() {
                 Item {
                     token: managed_token_id!(ITEM_TO_EQUIP_ID),
                     nonce: item_init_nonce,
+                    name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
                 },
             )]),
         );
@@ -87,12 +99,22 @@ fn test_equip_while_overlap() {
     utils::execute_for_all_slot(|slot| {
         const ITEM_TO_EQUIP: &[u8] = b"ITEM-a1a1a1";
         const HAT_TO_EQUIP_NONCE: u64 = 30;
+        const OLD_HAT_NAME: &[u8] = b"old hat";
+        const NEW_HAT_NAME: &[u8] = b"new hat";
 
         let mut setup = utils::setup(equip_penguin::contract_obj);
 
         // register hat to remove
-        let hat_to_remove_nonce =
-            setup.register_item(slot.clone(), ITEM_TO_EQUIP, &ItemAttributes::random());
+        let hat_to_remove_nonce = setup.register_item_all_properties(
+            slot.clone(),
+            ITEM_TO_EQUIP,
+            &ItemAttributes::random(),
+            0u64,
+            Option::None,
+            Option::Some(OLD_HAT_NAME),
+            Option::None,
+            Option::None,
+        );
 
         // user own a penguin equiped with an hat
         setup.blockchain_wrapper.set_nft_balance(
@@ -105,18 +127,37 @@ fn test_equip_while_overlap() {
                 Item {
                     token: managed_token_id!(ITEM_TO_EQUIP),
                     nonce: hat_to_remove_nonce,
+                    name: ManagedBuffer::new_from_bytes(NEW_HAT_NAME),
                 },
             )]),
         );
 
         // give the player a hat
         let attributes = ItemAttributes::<DebugApi>::random();
-        setup.blockchain_wrapper.set_nft_balance(
+        setup.blockchain_wrapper.set_nft_balance_all_properties(
             &setup.first_user_address,
             ITEM_TO_EQUIP,
             HAT_TO_EQUIP_NONCE,
             &rust_biguint!(1),
             &attributes,
+            0,
+            Option::Some(&setup.owner_address),
+            Option::Some(NEW_HAT_NAME),
+            Option::None,
+            Option::None,
+        );
+
+        setup.blockchain_wrapper.set_nft_balance_all_properties(
+            &setup.first_user_address,
+            ITEM_TO_EQUIP,
+            HAT_TO_EQUIP_NONCE,
+            &rust_biguint!(1),
+            &attributes,
+            0,
+            Option::Some(&setup.owner_address),
+            Option::Some(NEW_HAT_NAME),
+            Option::None,
+            Option::None,
         );
 
         let (esdt_transfers, _) = utils::create_paymens_and_esdt_transfers(&[
@@ -161,6 +202,7 @@ fn test_equip_while_overlap() {
                 Item {
                     token: managed_token_id!(ITEM_TO_EQUIP),
                     nonce: HAT_TO_EQUIP_NONCE,
+                    name: ManagedBuffer::new_from_bytes(b"new hat"),
                 },
             )]),
         );

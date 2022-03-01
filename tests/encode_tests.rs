@@ -1,5 +1,6 @@
+use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm::{elrond_codec::TopEncode, types::TokenIdentifier};
-use elrond_wasm_debug::DebugApi;
+use elrond_wasm_debug::{managed_buffer, DebugApi};
 use equip_penguin::structs::{
     item::Item, item_slot::ItemSlot, penguin_attributes::PenguinAttributes,
 };
@@ -13,10 +14,11 @@ fn should_top_encode() {
         Item::<DebugApi> {
             token: TokenIdentifier::from_esdt_bytes(b"HAT-a2b4e5"),
             nonce: 1,
+            name: managed_buffer!(b"Pirate Hat"),
         },
     )]);
 
-    let expected=b"Hat:HAT-a2b4e5-01;Background:unequipped;Skin:unequipped;Beak:unequipped;Weapon:unequipped;Clothes:unequipped;Eyes:unequipped";
+    let expected=b"Hat:Pirate Hat (HAT-a2b4e5-01);Background:unequipped;Skin:unequipped;Beak:unequipped;Weapon:unequipped;Clothes:unequipped;Eyes:unequipped";
 
     assert_encode_eq(penguin, expected);
 }
@@ -30,17 +32,18 @@ fn should_top_encode_with_nonce_equals_0a() {
         Item::<DebugApi> {
             token: TokenIdentifier::from_esdt_bytes(b"HAT-a2b4e5"),
             nonce: 10,
+            name: managed_buffer!(b"Pirate Hat"),
         },
     )]);
 
-    let expected=b"Hat:HAT-a2b4e5-0a;Background:unequipped;Skin:unequipped;Beak:unequipped;Weapon:unequipped;Clothes:unequipped;Eyes:unequipped";
+    let expected=b"Hat:Pirate Hat (HAT-a2b4e5-0a);Background:unequipped;Skin:unequipped;Beak:unequipped;Weapon:unequipped;Clothes:unequipped;Eyes:unequipped";
 
     assert_encode_eq(penguin, expected);
 }
 
 fn assert_encode_eq(
     penguin: PenguinAttributes<elrond_wasm_debug::tx_mock::TxContextRef>,
-    expected: &[u8; 124],
+    expected: &[u8],
 ) {
     let mut serialized_attributes = Vec::new();
     match penguin.top_encode(&mut serialized_attributes) {

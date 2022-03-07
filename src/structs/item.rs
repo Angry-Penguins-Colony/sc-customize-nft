@@ -4,7 +4,7 @@
 #![allow(unused_imports)]
 
 use alloc::{borrow::ToOwned, format, string::ToString};
-use elrond_wasm::String;
+use elrond_wasm::{elrond_codec::TopDecodeInput, String};
 
 use super::item_slot::ItemSlot;
 use core::str::FromStr;
@@ -63,12 +63,12 @@ impl<M: ManagedTypeApi> elrond_codec::TopEncode for Item<M> {
         managed_buffer.append(&self.name);
         managed_buffer.append_bytes(b" (");
 
-        managed_buffer.append(&self.token.as_managed_buffer().clone());
+        managed_buffer.append(&self.token.as_managed_buffer());
         managed_buffer.append_bytes(b"-");
         managed_buffer.append(&Item::u64_to_hex(&self.nonce));
         managed_buffer.append_bytes(b")");
 
-        output.set_boxed_bytes(managed_buffer.to_boxed_bytes().into_box());
+        output.set_boxed_bytes(managed_buffer.into_boxed_slice_u8());
         return Result::Ok(());
     }
 }
@@ -76,7 +76,7 @@ impl<M: ManagedTypeApi> elrond_codec::TopEncode for Item<M> {
 impl<M: ManagedTypeApi> Item<M> {
     fn split_last_occurence(bytes: &[u8], char: u8) -> (&[u8], &[u8]) {
         let last_index = bytes.iter().rposition(|b| *b == char).unwrap();
-        let parts = bytes.clone().split_at(last_index);
+        let parts = bytes.split_at(last_index);
         return parts;
     }
 

@@ -39,19 +39,10 @@ pub trait ParsePenguin {
         let attributes = self
             .blockchain()
             .get_esdt_token_data(&self.blockchain().get_sc_address(), &id, nonce)
-            .decode_attributes::<ItemAttributes<Self::Api>>();
+            .attributes;
 
-        match attributes {
-            Result::Ok(attributes) => return SCResult::Ok(attributes),
-            Result::Err(err) => {
-                sc_panic!(
-                    "Error while decoding item {}{}{} attributes: {}",
-                    id,
-                    "-",
-                    nonce.to_string(),
-                    err.message_str(),
-                );
-            }
-        }
+        return SCResult::Ok(ItemAttributes {
+            item_id: attributes,
+        });
     }
 }

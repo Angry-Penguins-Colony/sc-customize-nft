@@ -4,7 +4,10 @@
 #![allow(unused_imports)]
 
 use alloc::{borrow::ToOwned, format};
-use elrond_wasm::{elrond_codec::TopEncode, String};
+use elrond_wasm::{
+    elrond_codec::{TopDecodeInput, TopEncode},
+    String,
+};
 
 use super::{item::Item, item_slot::ItemSlot};
 
@@ -29,17 +32,17 @@ impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
         let mut penguin = PenguinAttributes::empty();
 
         let boxed_slice_u8 = input.into_boxed_slice_u8();
-        let x = boxed_slice_u8.split(|b| *b == b';');
+        let items_string = boxed_slice_u8.split(|b| *b == b';');
 
-        for item_str in x {
-            let mut parts = item_str.split(|b| *b == b':');
+        for item_string in items_string {
+            let mut parts = item_string.split(|b| *b == b':');
 
             let slot = parts.next().unwrap().to_owned();
-            let item_str = parts.next().unwrap().to_owned();
+            let value = parts.next().unwrap().to_owned();
 
-            let item = match item_str == b"unequipped" {
+            let item = match value == b"unequipped" {
                 true => None,
-                false => Some(Item::top_decode(item_str).unwrap()),
+                false => Some(Item::top_decode(value).unwrap()),
             };
 
             match slot.to_owned().as_slice() {
@@ -185,7 +188,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
 
     fn to_managed_buffer(&self, slot: &ItemSlot) -> ManagedBuffer<M> {
         let mut slot_str = slot.to_bytes::<M>().to_owned();
-        slot_str[0] = slot_str.to_ascii_uppercase()[0].to_owned();
+        PenguinAttributes::<M>::make_ascii_titlecase(&mut slot_str);
 
         let item = match self.get_item(slot) {
             Some(item) => {
@@ -199,10 +202,16 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         };
 
         let mut managed_buffer = ManagedBuffer::<M>::new();
-        managed_buffer.append_bytes(slot_str.as_slice());
+        managed_buffer.append_bytes(&slot_str);
         managed_buffer.append_bytes(b":");
-        managed_buffer.append_bytes(item.to_boxed_bytes().as_slice());
+        managed_buffer.append_bytes(&item.into_boxed_slice_u8());
 
         return managed_buffer;
+    }
+
+    fn make_ascii_titlecase(s: &mut [u8]) {
+        if let Some(r) = s.get_mut(0..1) {
+            r.make_ascii_uppercase();
+        }
     }
 }

@@ -133,8 +133,6 @@ pub trait Equip:
         item: &Item<Self::Api>,
     ) -> SCResult<()> {
         let item_id = &item.token;
-        let item_nonce = item.nonce;
-
         let item_slot = self.items_slot(&item_id).get();
 
         require!(
@@ -192,7 +190,6 @@ pub trait Equip:
             "Only the owner can call this method."
         );
 
-        // TODO: require! that the future balance will be equals to 1
         // TODO: require! to only send registered SFT
 
         return Ok(());
@@ -228,9 +225,9 @@ pub trait Equip:
                     "A item to desequip is not considered like an item. The item has maybe been removed. Please contact an administrator."
                 );
 
-                if self.blockchain().get_sc_balance(&item_id, item_nonce) == 0 {
+                if self.blockchain().get_sc_balance(&item_id, item_nonce) <= 1 {
                     sc_panic!(
-                        "To mint the token {} with nonce {:x}, the SC must owns at least one.",
+                        "No token {} with nonce {:x} on the SC. Please contact an administrator.",
                         item_id,
                         item_nonce,
                     );

@@ -98,7 +98,7 @@ fn register_unmintable_item() {
                     StateChange::Revert
                 },
             )
-            .assert_error(4, "Local add quantity role not set for an item");
+            .assert_ok();
     });
 }
 
@@ -127,17 +127,12 @@ fn register_unburnable_item() {
                         ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
                     managed_items_ids.push(managed_token_id!(UNBURNABLE));
 
-                    let result = sc.register_item(slot.clone(), managed_items_ids);
-
-                    assert_eq!(
-                        result,
-                        SCResult::Err(("Local burn role not set for an item").into())
-                    );
+                    let _ = sc.register_item(slot.clone(), managed_items_ids);
 
                     StateChange::Revert
                 },
             )
-            .assert_error(4, "Local burn role not set for an item");
+            .assert_ok();
     });
 }
 

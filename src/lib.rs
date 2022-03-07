@@ -51,8 +51,6 @@ pub trait Equip:
                 "You cannot register a penguin as an item."
             );
 
-            self.require_item_roles_set(&item_id)?;
-
             self.items_slot(&item_id.into()).set(&item_slot);
         }
 
@@ -149,8 +147,6 @@ pub trait Equip:
             "Cannot equip a penguin as an item."
         );
 
-        self.require_item_roles_set(&item_id)?;
-
         // desequip slot if any
         if attributes.is_slot_empty(&item_slot) == false {
             self.desequip_slot(attributes, &item_slot)?;
@@ -162,26 +158,7 @@ pub trait Equip:
             "Cannot set item. Maybe the item is not considered like an item."
         );
 
-        self.send()
-            .esdt_local_burn(&item_id, item_nonce, &BigUint::from(1u32));
-
         return SCResult::Ok(());
-    }
-
-    fn require_item_roles_set(&self, token_id: &TokenIdentifier) -> SCResult<()> {
-        let roles = self.blockchain().get_esdt_local_roles(token_id);
-
-        require!(
-            roles.has_role(&EsdtLocalRole::NftAddQuantity) == true,
-            "Local add quantity role not set for an item"
-        );
-
-        require!(
-            roles.has_role(&EsdtLocalRole::NftBurn) == true,
-            "Local burn role not set for an item"
-        );
-
-        Ok(())
     }
 
     fn require_penguin_roles_set(&self) -> SCResult<()> {
@@ -250,7 +227,6 @@ pub trait Equip:
                     self.get_item_slot(&item_id).into_option().is_some(),
                     "A item to desequip is not considered like an item. The item has maybe been removed. Please contact an administrator."
                 );
-                self.require_item_roles_set(&item_id)?;
 
                 if self.blockchain().get_sc_balance(&item_id, item_nonce) == 0 {
                     sc_panic!(
@@ -259,9 +235,6 @@ pub trait Equip:
                         item_nonce,
                     );
                 }
-
-                self.send()
-                    .esdt_local_mint(&item_id, item_nonce, &BigUint::from(1u32));
 
                 self.send()
                     .direct(&caller, &item_id, item_nonce, &BigUint::from(1u32), &[]);

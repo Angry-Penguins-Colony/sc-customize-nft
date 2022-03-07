@@ -63,9 +63,18 @@ fn customize_complete_flow() {
         tx_result.assert_ok();
         assert_eq!(sc_result, SCResult::Ok(1u64));
 
-        // penguin&items sent burned
+        // penguin sent burned
         setup.assert_is_burn(PENGUIN_TOKEN_ID, NONCE);
-        setup.assert_is_burn(ITEM_TO_EQUIP, NONCE);
+
+        // item equip on SC
+        assert_eq!(
+            setup.blockchain_wrapper.get_esdt_balance(
+                &setup.cf_wrapper.address_ref(),
+                ITEM_TO_EQUIP,
+                NONCE
+            ),
+            rust_biguint!(1)
+        );
 
         // item desequipped received
         assert_eq!(

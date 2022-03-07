@@ -27,7 +27,7 @@ pub trait Equip:
     fn init(&self, penguins_identifier: TokenIdentifier) -> SCResult<()> {
         self.penguins_identifier().set(&penguins_identifier);
         self.uri().set(ManagedBuffer::new_from_bytes(
-            b"https://intense-way-598.herokuapp.com/",
+            b"https://penguins-generator.herokuapp.com/",
         ));
 
         return Ok(());

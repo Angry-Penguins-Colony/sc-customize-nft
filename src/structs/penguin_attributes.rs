@@ -39,7 +39,7 @@ impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
 
             let item = match item_str == b"unequipped" {
                 true => None,
-                false => Some(Item::new(&item_str)),
+                false => Some(Item::top_decode(item_str).unwrap()),
             };
 
             match slot.to_owned().as_slice() {
@@ -191,13 +191,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
             Some(item) => {
                 let mut output = ManagedBuffer::new();
 
-                output.append(&item.name);
-                output.append_bytes(b" (");
-
-                output.append(&item.token.as_managed_buffer().clone());
-                output.append_bytes(b"-");
-                output.append(&self.u64_to_hex(&item.nonce));
-                output.append_bytes(b")");
+                item.top_encode(&mut output).unwrap();
 
                 output
             }
@@ -210,21 +204,5 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         managed_buffer.append_bytes(item.to_boxed_bytes().as_slice());
 
         return managed_buffer;
-    }
-
-    fn u64_to_hex(&self, val: &u64) -> ManagedBuffer<M> {
-        let hex_val = format!("{:x}", val);
-        let bytes = hex_val.as_bytes();
-
-        let mut o = ManagedBuffer::<M>::new();
-
-        // make hex odd
-        if &bytes.len() % 2 != 0 {
-            o.append_bytes(b"0");
-        }
-
-        o.append_bytes(bytes);
-
-        return o;
     }
 }

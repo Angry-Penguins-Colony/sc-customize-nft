@@ -6,6 +6,7 @@ Default
 With optimized split
     258,978,528 ($0.44) https://devnet-explorer.elrond.com/transactions/c2a88aa616ca29e91668eb1ab81f681cb988cd40508c12250a2da3d17a8d516f
     511,224,299 ($0.84) https://devnet-explorer.elrond.com/transactions/57e4d44a62ad37508c960478eb8bb56f16347a0e5c393fa3fa2500468256e91e
+    260,552,882 ($0.45) https://devnet-explorer.elrond.com/transactions/2d72b06a9afdc1c8dbabcb660acb7c411210fe4e50ad32c66619abed4c350dc1
 
 
 

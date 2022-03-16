@@ -38,7 +38,7 @@ pub trait Equip:
     fn register_item(
         &self,
         item_slot: ItemSlot,
-        #[var_args] items_id_to_add: ManagedVarArgs<TokenIdentifier>,
+        #[var_args] items_id_to_add: MultiValueEncoded<TokenIdentifier>,
     ) -> SCResult<()> {
         require!(
             self.blockchain().get_caller() == self.blockchain().get_owner_address(),
@@ -58,10 +58,10 @@ pub trait Equip:
     }
 
     #[view(getItemType)]
-    fn get_item_slot(&self, item_id: &TokenIdentifier) -> OptionalResult<ItemSlot> {
+    fn get_item_slot(&self, item_id: &TokenIdentifier) -> OptionalValue<ItemSlot> {
         match self.items_slot(item_id).get() {
-            ItemSlot::None => return OptionalResult::None,
-            slot => return OptionalResult::Some(slot),
+            ItemSlot::None => return OptionalValue::None,
+            slot => return OptionalValue::Some(slot),
         }
     }
 
@@ -70,7 +70,7 @@ pub trait Equip:
     fn customize(
         &self,
         #[payment_multi] payments: ManagedVec<EsdtTokenPayment<Self::Api>>,
-        #[var_args] to_desequip_slots: ManagedVarArgs<ItemSlot>,
+        #[var_args] to_desequip_slots: MultiValueEncoded<ItemSlot>,
     ) -> SCResult<u64> {
         self.require_penguin_roles_set()?;
         require!(
@@ -92,7 +92,7 @@ pub trait Equip:
         );
         require!(first_payment.amount == 1, "You must sent only one penguin.");
 
-        let mut attributes = self.parse_penguin_attributes(&penguin_id, penguin_nonce)?;
+        let mut attributes = self.parse_penguin_attributes(&penguin_id, penguin_nonce);
 
         // first desequip
         for slot in to_desequip_slots {

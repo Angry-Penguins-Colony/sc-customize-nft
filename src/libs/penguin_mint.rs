@@ -89,7 +89,7 @@ pub trait MintPenguin: super::storage::StorageModule + super::penguin_parse::Par
 
         for slot in ItemSlot::VALUES.iter() {
             if let Some(item) = attributes.get_item(slot) {
-                let token_data = self.parse_item_attributes(&item.token, item.nonce)?;
+                let token_data = self.parse_item_attributes(&item.token, item.nonce);
 
                 let slot_type = token_data.item_id;
                 let slot_id = slot.to_bytes::<Self::Api>();

@@ -23,9 +23,9 @@ impl<M: ManagedTypeApi> TopDecode for Item<M> {
     const TYPE_INFO: elrond_codec::TypeInfo = elrond_codec::TypeInfo::Unknown;
 
     fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
-        // format is name (token-nonce)
+        // format is "name (token-nonce)"
 
-        let bytes = input.into_boxed_slice_u8();
+        let bytes = input.into_boxed_slice_u8(); // TODO: avoid Box, use instead ManagedByteArray
         let main_parts = Item::<M>::split_last_occurence(&bytes, b' ');
 
         // retrieve name
@@ -38,6 +38,7 @@ impl<M: ManagedTypeApi> TopDecode for Item<M> {
         let token = TokenIdentifier::from_esdt_bytes(&parts.0[1..]);
 
         // retrieve nonce
+        // TODO: avoid using String to decode nonce
         let nonce_str = String::from_utf8_lossy(&parts.1[1..])
             .to_owned()
             .to_string();
@@ -75,24 +76,29 @@ impl<M: ManagedTypeApi> elrond_codec::TopEncode for Item<M> {
 
 impl<M: ManagedTypeApi> Item<M> {
     fn split_last_occurence(bytes: &[u8], char: u8) -> (&[u8], &[u8]) {
-        let last_index = bytes.iter().rposition(|b| *b == char).unwrap();
-        let parts = bytes.split_at(last_index);
-        return parts;
+        for i in (0..bytes.len() - 1).rev() {
+            if bytes[i] == char {
+                return bytes.split_at(i);
+            }
+        }
+
+        panic!("no occurence of char {} in bytes {:?}", char, bytes);
     }
 
     pub fn u64_to_hex(val: &u64) -> ManagedBuffer<M> {
         let hex_val = format!("{:x}", val);
         let bytes = hex_val.as_bytes();
 
-        let mut o = ManagedBuffer::<M>::new();
-
         // make hex odd
         if &bytes.len() % 2 != 0 {
+            let mut o = ManagedBuffer::<M>::new();
+
             o.append_bytes(b"0");
+            o.append_bytes(bytes);
+
+            return o;
+        } else {
+            return ManagedBuffer::<M>::new_from_bytes(bytes);
         }
-
-        o.append_bytes(bytes);
-
-        return o;
     }
 }

@@ -15,7 +15,7 @@ pub trait ParsePenguin {
         &self,
         penguin_id: &TokenIdentifier,
         penguin_nonce: u64,
-    ) -> SCResult<PenguinAttributes<Self::Api>> {
+    ) -> PenguinAttributes<Self::Api> {
         let attributes = self
             .blockchain()
             .get_esdt_token_data(
@@ -25,24 +25,17 @@ pub trait ParsePenguin {
             )
             .decode_attributes::<PenguinAttributes<Self::Api>>();
 
-        match attributes {
-            Result::Ok(attributes) => return SCResult::Ok(attributes),
-            Result::Err(_) => return SCResult::Err("Error while decoding attributes".into()),
-        }
+        return attributes;
     }
 
-    fn parse_item_attributes(
-        &self,
-        id: &TokenIdentifier,
-        nonce: u64,
-    ) -> SCResult<ItemAttributes<Self::Api>> {
+    fn parse_item_attributes(&self, id: &TokenIdentifier, nonce: u64) -> ItemAttributes<Self::Api> {
         let attributes = self
             .blockchain()
             .get_esdt_token_data(&self.blockchain().get_sc_address(), &id, nonce)
             .attributes;
 
-        return SCResult::Ok(ItemAttributes {
+        return ItemAttributes {
             item_id: attributes,
-        });
+        };
     }
 }

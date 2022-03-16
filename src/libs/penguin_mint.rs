@@ -11,21 +11,6 @@ use crate::structs::{item_slot::ItemSlot, penguin_attributes::PenguinAttributes}
 
 #[elrond_wasm::module]
 pub trait MintPenguin: super::storage::StorageModule + super::penguin_parse::ParsePenguin {
-    #[endpoint(mintTestPenguin)]
-    #[only_owner]
-    fn mint_test_penguin(&self) -> SCResult<u64> {
-        let penguin_id = self.penguins_identifier().get();
-        let caller = self.blockchain().get_caller();
-
-        let token_nonce =
-            self.mint_penguin(&PenguinAttributes::empty(), &self.get_next_penguin_name())?;
-
-        self.send()
-            .direct(&caller, &penguin_id, token_nonce, &BigUint::from(1u32), &[]);
-
-        return SCResult::Ok(token_nonce);
-    }
-
     fn update_penguin(
         &self,
         penguin_id: &TokenIdentifier,
@@ -81,19 +66,12 @@ pub trait MintPenguin: super::storage::StorageModule + super::penguin_parse::Par
         return SCResult::Ok(token_nonce);
     }
 
-    fn calculate_hash(&self, attributes: &PenguinAttributes<Self::Api>) -> SCResult<ManagedBuffer> {
-        let mut serialized_attributes = ManagedBuffer::new();
-        if let core::result::Result::Err(err) = attributes.top_encode(&mut serialized_attributes) {
-            sc_panic!("Attributes encode error: {}", err.message_bytes());
-        }
-
-        let attributes_hash: &H256 = &self
-            .crypto()
-            .sha256_legacy(serialized_attributes.to_boxed_bytes().as_slice());
-
-        let managed_buffer = ManagedBuffer::new_from_bytes(attributes_hash.as_bytes());
-
-        return SCResult::Ok(managed_buffer);
+    fn calculate_hash(
+        &self,
+        _attributes: &PenguinAttributes<Self::Api>,
+    ) -> SCResult<ManagedBuffer> {
+        // we disabled hash calculating for now
+        return SCResult::Ok(ManagedBuffer::new());
     }
 
     fn build_url(

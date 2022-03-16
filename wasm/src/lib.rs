@@ -10,7 +10,6 @@ elrond_wasm_node::wasm_endpoints! {
         customize
         fill
         getItemType
-        mintTestPenguin
         registerItem
     )
 }

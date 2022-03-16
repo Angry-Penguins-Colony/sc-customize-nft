@@ -25,6 +25,7 @@ impl<M: ManagedTypeApi> TopDecode for Item<M> {
     fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
         // format is "name (token-nonce)"
 
+        // TODO: avoid into call
         let bytes = input.into_boxed_slice_u8(); // TODO: avoid Box, use instead ManagedByteArray
         let main_parts = Item::<M>::split_last_occurence(&bytes, b' ');
 
@@ -69,6 +70,7 @@ impl<M: ManagedTypeApi> elrond_codec::TopEncode for Item<M> {
         managed_buffer.append(&Item::u64_to_hex(&self.nonce));
         managed_buffer.append_bytes(b")");
 
+        // TODO: avoid into methods call
         output.set_boxed_bytes(managed_buffer.into_boxed_slice_u8());
         return Result::Ok(());
     }

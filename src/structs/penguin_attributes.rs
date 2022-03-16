@@ -31,12 +31,15 @@ impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
     fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
         let mut penguin = PenguinAttributes::empty();
 
+        // TODO: avoid into boxed
         let boxed_slice_u8 = input.into_boxed_slice_u8();
         let items_string = boxed_slice_u8.split(|b| *b == b';');
 
         for item_string in items_string {
+            // TODO: inspect split perf impact
             let mut parts = item_string.split(|b| *b == b':');
 
+            // TODO: inspect unwrap + to_owned performance impact
             let slot = parts.next().unwrap().to_owned();
             let value = parts.next().unwrap().to_owned();
 
@@ -79,7 +82,8 @@ impl<M: ManagedTypeApi> TopEncode for PenguinAttributes<M> {
             }
         }
 
-        output.set_boxed_bytes(managed_buffer.to_boxed_bytes().into_box());
+        // TODO: avoid into boxed slice u8
+        output.set_boxed_bytes(managed_buffer.into_boxed_slice_u8());
         return Result::Ok(());
     }
 }
@@ -187,9 +191,6 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
     }
 
     fn to_managed_buffer(&self, slot: &ItemSlot) -> ManagedBuffer<M> {
-        let mut slot_str = slot.to_bytes::<M>().to_owned();
-        PenguinAttributes::<M>::make_ascii_titlecase(&mut slot_str);
-
         let item = match self.get_item(slot) {
             Some(item) => {
                 let mut output = ManagedBuffer::new();
@@ -202,16 +203,10 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         };
 
         let mut managed_buffer = ManagedBuffer::<M>::new();
-        managed_buffer.append_bytes(&slot_str);
+        managed_buffer.append_bytes(slot.to_title_bytes::<M>());
         managed_buffer.append_bytes(b":");
-        managed_buffer.append_bytes(&item.into_boxed_slice_u8());
+        managed_buffer.append(&item);
 
         return managed_buffer;
-    }
-
-    fn make_ascii_titlecase(s: &mut [u8]) {
-        if let Some(r) = s.get_mut(0..1) {
-            r.make_ascii_uppercase();
-        }
     }
 }

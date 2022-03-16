@@ -41,4 +41,18 @@ impl ItemSlot {
             Self::None => return b"none",
         }
     }
+
+    /// To_bytes but with caps to the first character
+    pub fn to_title_bytes<M: ManagedTypeApi>(&self) -> &[u8] {
+        match self {
+            Self::Hat => return b"Hat",
+            Self::Background => return b"Background",
+            Self::Skin => return b"Skin",
+            Self::Beak => return b"Beak",
+            Self::Weapon => return b"Weapon",
+            Self::Clothes => return b"Clothes",
+            Self::Eye => return b"Eyes",
+            Self::None => return b"None",
+        }
+    }
 }

@@ -1,1 +1,1 @@
-cargo test --package equip_penguin --test decode_tests
+cargo test --package equip_penguin --test *code_tests

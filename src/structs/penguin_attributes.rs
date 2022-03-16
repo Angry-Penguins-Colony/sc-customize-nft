@@ -36,12 +36,12 @@ impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
         let items_string = boxed_slice_u8.split(|b| *b == b';');
 
         for item_string in items_string {
-            // TODO: inspect split perf impact
+            // TODO: inspect split perf impact | split are surely unmanaged types
             let mut parts = item_string.split(|b| *b == b':');
 
             // TODO: inspect unwrap + to_owned performance impact
-            let slot = parts.next().unwrap().to_owned();
-            let value = parts.next().unwrap().to_owned();
+            let slot = parts.next().unwrap();
+            let value = parts.next().unwrap();
 
             let item = match value == b"unequipped" {
                 true => None,
@@ -195,6 +195,8 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
             Some(item) => {
                 let mut output = ManagedBuffer::new();
 
+                // TODO: optimize Item.top_encode
+                // TODO: we unwrap to trigger if top_encode fails, but there must be a better way
                 item.top_encode(&mut output).unwrap();
 
                 output

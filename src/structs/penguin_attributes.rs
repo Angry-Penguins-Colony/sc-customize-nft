@@ -26,13 +26,12 @@ pub struct PenguinAttributes<M: ManagedTypeApi> {
 }
 
 impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
-    const TYPE_INFO: elrond_codec::TypeInfo = elrond_codec::TypeInfo::Unknown;
-
     fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
         let mut penguin = PenguinAttributes::empty();
 
-        // TODO: avoid into boxed
-        let boxed_slice_u8 = input.into_boxed_slice_u8();
+        let boxed_slice_u8 = input.into_boxed_slice_u8(); // REMOVE: allocation
+
+        // TODO: check if there is not allocation after these line (once alloc is removed)
         let items_string = boxed_slice_u8.split(|b| *b == b';');
 
         for item_string in items_string {
@@ -65,8 +64,6 @@ impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
 }
 
 impl<M: ManagedTypeApi> TopEncode for PenguinAttributes<M> {
-    const TYPE_INFO: elrond_codec::TypeInfo = elrond_codec::TypeInfo::Unknown;
-
     fn top_encode<O: elrond_codec::TopEncodeOutput>(
         &self,
         output: O,
@@ -82,8 +79,7 @@ impl<M: ManagedTypeApi> TopEncode for PenguinAttributes<M> {
             }
         }
 
-        // TODO: avoid into boxed slice u8
-        output.set_boxed_bytes(managed_buffer.into_boxed_slice_u8());
+        output.set_boxed_bytes(managed_buffer.into_boxed_slice_u8()); // REMOVE: ALLOCATION
         return Result::Ok(());
     }
 }

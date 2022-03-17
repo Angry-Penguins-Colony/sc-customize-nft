@@ -25,8 +25,7 @@ impl<M: ManagedTypeApi> TopDecode for Item<M> {
     fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
         // format is "name (token-nonce)"
 
-        // TODO: avoid into call
-        let bytes = input.into_boxed_slice_u8(); // TODO: avoid Box, use instead ManagedByteArray
+        let bytes = input.into_boxed_slice_u8(); // REMOVE: alloc here
         let main_parts = Item::<M>::split_last_occurence(&bytes, b' ');
 
         // retrieve name
@@ -39,10 +38,9 @@ impl<M: ManagedTypeApi> TopDecode for Item<M> {
         let token = TokenIdentifier::from_esdt_bytes(&parts.0[1..]);
 
         // retrieve nonce
-        // TODO: avoid using String to decode nonce
-        let nonce_str = String::from_utf8_lossy(&parts.1[1..])
-            .to_owned()
-            .to_string();
+        // TODO: use Stackoverflow answer
+        let nonce_bytes = &parts.1[1..];
+        let nonce_str = String::from_utf8_lossy(nonce_bytes).to_owned().to_string();
         let nonce = u64::from_str_radix(&nonce_str, 16).unwrap();
 
         return Result::Ok(Self {
@@ -67,11 +65,10 @@ impl<M: ManagedTypeApi> elrond_codec::TopEncode for Item<M> {
 
         managed_buffer.append(&self.token.as_managed_buffer());
         managed_buffer.append_bytes(b"-");
-        managed_buffer.append(&Item::u64_to_hex(&self.nonce));
+        managed_buffer.append(&Item::u64_to_hex(&self.nonce)); // REMOVE: alloc+format here
         managed_buffer.append_bytes(b")");
 
-        // TODO: avoid into methods call
-        output.set_boxed_bytes(managed_buffer.into_boxed_slice_u8());
+        output.set_boxed_bytes(managed_buffer.into_boxed_slice_u8()); // REMOVE: ALLOC HERE
         return Result::Ok(());
     }
 }
@@ -88,7 +85,7 @@ impl<M: ManagedTypeApi> Item<M> {
     }
 
     pub fn u64_to_hex(val: &u64) -> ManagedBuffer<M> {
-        let hex_val = format!("{:x}", val);
+        let hex_val = format!("{:x}", val); // TODO: remove screen + format
         let bytes = hex_val.as_bytes();
 
         // make hex odd

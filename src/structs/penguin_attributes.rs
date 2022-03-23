@@ -3,13 +3,15 @@
 #![allow(unused_attributes)]
 #![allow(unused_imports)]
 
+use core::ops::Deref;
+
 use alloc::{borrow::ToOwned, format};
 use elrond_wasm::{
     elrond_codec::{TopDecodeInput, TopEncode},
     String,
 };
 
-use super::{item::Item, item_slot::ItemSlot};
+use super::{item::Item, item_slot::ItemSlot, utils::split_buffer};
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
@@ -27,34 +29,41 @@ pub struct PenguinAttributes<M: ManagedTypeApi> {
 
 impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
     fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
+        let hat_buffer = ManagedBuffer::<M>::new_from_bytes(b"Hat");
+        let background_buffer = ManagedBuffer::<M>::new_from_bytes(b"Background");
+        let skin_buffer = ManagedBuffer::<M>::new_from_bytes(b"Skin");
+        let beak_buffer = ManagedBuffer::<M>::new_from_bytes(b"Beak");
+        let weapon_buffer = ManagedBuffer::<M>::new_from_bytes(b"Weapon");
+        let clothes_buffer = ManagedBuffer::<M>::new_from_bytes(b"Clothes");
+        let eyes_buffer = ManagedBuffer::<M>::new_from_bytes(b"Eyes");
+        let unequipped_buffer = ManagedBuffer::<M>::new_from_bytes(b"unequipped");
+
         let mut penguin = PenguinAttributes::empty();
 
-        let boxed_slice_u8 = input.into_boxed_slice_u8(); // REMOVE: allocation
+        let buffer = <ManagedBuffer<M> as TopDecode>::top_decode(input).unwrap();
+        let items_raw = split_buffer(&buffer, b';');
 
-        // TODO: check if there is not allocation after these line (once alloc is removed)
-        let items_string = boxed_slice_u8.split(|b| *b == b';');
+        for item_raw in items_raw.iter() {
+            let parts = split_buffer(item_raw.deref(), b':');
 
-        for item_string in items_string {
-            // TODO: inspect split perf impact | split are surely unmanaged types
-            let mut parts = item_string.split(|b| *b == b':');
+            let slot = parts.get(0);
+            let value = parts.get(1);
 
-            // TODO: inspect unwrap + to_owned performance impact
-            let slot = parts.next().unwrap();
-            let value = parts.next().unwrap();
-
-            let item = match value == b"unequipped" {
-                true => None,
-                false => Some(Item::top_decode(value).unwrap()),
+            let item = if value.deref() == &unequipped_buffer {
+                None
+            } else {
+                Some(Item::top_decode(value.deref()).unwrap())
             };
 
-            match slot.to_owned().as_slice() {
-                b"Hat" => penguin.hat = item,
-                b"Background" => penguin.background = item,
-                b"Skin" => penguin.skin = item,
-                b"Beak" => penguin.beak = item,
-                b"Weapon" => penguin.weapon = item,
-                b"Clothes" => penguin.clothes = item,
-                b"Eyes" => penguin.eye = item,
+            // TODO: slot is not comparing to the upper variables, while it should be
+            match slot {
+                hat_buffer => penguin.hat = item,
+                background_buffer => penguin.background = item,
+                skin_buffer => penguin.skin = item,
+                beak_buffer => penguin.beak = item,
+                weapon_buffer => penguin.weapon = item,
+                clothes_buffer => penguin.clothes = item,
+                eyes_buffer => penguin.eye = item,
                 _ => return Result::Err(DecodeError::UTF8_DECODE_ERROR),
             };
         }
@@ -68,18 +77,18 @@ impl<M: ManagedTypeApi> TopEncode for PenguinAttributes<M> {
         &self,
         output: O,
     ) -> Result<(), elrond_codec::EncodeError> {
-        let mut managed_buffer = ManagedBuffer::<M>::new();
+        // let mut managed_buffer = ManagedBuffer::<M>::new();
 
-        for (i, slot) in ItemSlot::VALUES.iter().enumerate() {
-            managed_buffer.append(&self.to_managed_buffer(slot));
+        // for (i, slot) in ItemSlot::VALUES.iter().enumerate() {
+        //     managed_buffer.append(&self.to_managed_buffer(slot));
 
-            // add comma, except for the last line
-            if i < ItemSlot::VALUES.len() - 1 {
-                managed_buffer.append_bytes(b";");
-            }
-        }
+        //     // add comma, except for the last line
+        //     if i < ItemSlot::VALUES.len() - 1 {
+        //         managed_buffer.append_bytes(b";");
+        //     }
+        // }
 
-        output.set_boxed_bytes(managed_buffer.into_boxed_slice_u8()); // REMOVE: ALLOCATION
+        // output.set_boxed_bytes(managed_buffer.into_boxed_slice_u8()); // REMOVE: ALLOCATION
         return Result::Ok(());
     }
 }

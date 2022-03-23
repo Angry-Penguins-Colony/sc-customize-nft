@@ -1,4 +1,4 @@
-use elrond_wasm::types::{EsdtTokenType, SCResult};
+use elrond_wasm::types::{EsdtTokenType, ManagedBuffer, SCResult};
 use elrond_wasm_debug::tx_mock::TxInputESDT;
 use elrond_wasm_debug::{managed_buffer, managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
@@ -7,21 +7,21 @@ use equip_penguin::structs::item_attributes::ItemAttributes;
 use equip_penguin::structs::penguin_attributes::PenguinAttributes;
 use equip_penguin::Equip;
 
-mod utils;
+mod testing_utils;
 
-const PENGUIN_TOKEN_ID: &[u8] = utils::PENGUIN_TOKEN_ID;
-const HAT_TOKEN_ID: &[u8] = utils::HAT_TOKEN_ID;
+const PENGUIN_TOKEN_ID: &[u8] = testing_utils::PENGUIN_TOKEN_ID;
+const HAT_TOKEN_ID: &[u8] = testing_utils::HAT_TOKEN_ID;
 const NOT_PENGUIN_TOKEN_ID: &[u8] = b"QUACK-a456e";
 const INIT_NONCE: u64 = 65535;
 
 // create NFT on blockchain wrapper
 #[test]
 fn test_equip() {
-    utils::execute_for_all_slot(|slot| {
+    testing_utils::execute_for_all_slot(|slot| {
         const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
         const ITEM_TO_EQUIP_NAME: &[u8] = b"item name";
 
-        let mut setup = utils::setup(equip_penguin::contract_obj);
+        let mut setup = testing_utils::setup(equip_penguin::contract_obj);
 
         let item_attributes = ItemAttributes::random();
         let item_init_nonce = setup.register_item_all_properties(
@@ -52,7 +52,7 @@ fn test_equip() {
             &item_attributes,
         );
 
-        let transfers = utils::create_esdt_transfers(&[
+        let transfers = testing_utils::create_esdt_transfers(&[
             (PENGUIN_TOKEN_ID, INIT_NONCE),
             (ITEM_TO_EQUIP_ID, item_init_nonce),
         ]);
@@ -96,13 +96,13 @@ fn test_equip() {
 
 #[test]
 fn test_equip_while_overlap() {
-    utils::execute_for_all_slot(|slot| {
+    testing_utils::execute_for_all_slot(|slot| {
         const ITEM_TO_EQUIP: &[u8] = b"ITEM-a1a1a1";
         const HAT_TO_EQUIP_NONCE: u64 = 30;
         const OLD_HAT_NAME: &[u8] = b"old hat";
         const NEW_HAT_NAME: &[u8] = b"new hat";
 
-        let mut setup = utils::setup(equip_penguin::contract_obj);
+        let mut setup = testing_utils::setup(equip_penguin::contract_obj);
 
         // register hat to remove
         let hat_to_remove_nonce = setup.register_item_all_properties(
@@ -144,7 +144,7 @@ fn test_equip_while_overlap() {
             Option::Some(&setup.owner_address),
             Option::Some(NEW_HAT_NAME),
             Option::None,
-            Option::None,
+            &[],
         );
 
         setup.blockchain_wrapper.set_nft_balance_all_properties(
@@ -157,10 +157,10 @@ fn test_equip_while_overlap() {
             Option::Some(&setup.owner_address),
             Option::Some(NEW_HAT_NAME),
             Option::None,
-            Option::None,
+            &[],
         );
 
-        let (esdt_transfers, _) = utils::create_paymens_and_esdt_transfers(&[
+        let (esdt_transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[
             (PENGUIN_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
             (
                 ITEM_TO_EQUIP,
@@ -221,7 +221,7 @@ fn test_equip_while_overlap() {
 
 #[test]
 fn equip_penguin_without_items() {
-    let mut setup = utils::setup(equip_penguin::contract_obj);
+    let mut setup = testing_utils::setup(equip_penguin::contract_obj);
 
     let b_wrapper = &mut setup.blockchain_wrapper;
     // user own a penguin equiped with an hat
@@ -233,7 +233,7 @@ fn equip_penguin_without_items() {
         &PenguinAttributes::<DebugApi>::empty(),
     );
 
-    let (esdt_transfers, _) = utils::create_paymens_and_esdt_transfers(&[(
+    let (esdt_transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[(
         PENGUIN_TOKEN_ID,
         INIT_NONCE,
         EsdtTokenType::NonFungible,
@@ -248,7 +248,7 @@ fn equip_penguin_without_items() {
 
 #[test]
 fn equip_while_nft_to_equip_is_not_a_penguin() {
-    let mut setup = utils::setup(equip_penguin::contract_obj);
+    let mut setup = testing_utils::setup(equip_penguin::contract_obj);
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -271,7 +271,7 @@ fn equip_while_nft_to_equip_is_not_a_penguin() {
         },
     );
 
-    let (esdt_transfers, _) = utils::create_paymens_and_esdt_transfers(&[
+    let (esdt_transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[
         (NOT_PENGUIN_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
         (HAT_TOKEN_ID, INIT_NONCE, EsdtTokenType::SemiFungible),
     ]);
@@ -287,7 +287,7 @@ fn equip_while_nft_to_equip_is_not_a_penguin() {
 fn equip_while_item_is_not_an_item() {
     const ITEM_TO_EQUIP_ID: &[u8] = b"NOT-AN-ITEM-a";
 
-    let mut setup = utils::setup(equip_penguin::contract_obj);
+    let mut setup = testing_utils::setup(equip_penguin::contract_obj);
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -311,7 +311,7 @@ fn equip_while_item_is_not_an_item() {
         },
     );
 
-    let (transfers, _) = utils::create_paymens_and_esdt_transfers(&[
+    let (transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[
         (PENGUIN_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
         (ITEM_TO_EQUIP_ID, INIT_NONCE, EsdtTokenType::SemiFungible),
     ]);
@@ -326,11 +326,11 @@ fn equip_while_item_is_not_an_item() {
 
 #[test]
 fn test_equip_while_sending_two_as_value_of_sft() {
-    utils::execute_for_all_slot(|slot| {
+    testing_utils::execute_for_all_slot(|slot| {
         const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
         const NONCE: u64 = 30;
 
-        let mut setup = utils::setup(equip_penguin::contract_obj);
+        let mut setup = testing_utils::setup(equip_penguin::contract_obj);
 
         setup.register_item(slot.clone(), ITEM_TO_EQUIP_ID, &ItemAttributes::random());
 

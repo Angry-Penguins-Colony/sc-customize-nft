@@ -1,7 +1,7 @@
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm::types::TokenIdentifier;
 use elrond_wasm_debug::DebugApi;
-mod utils;
+mod testing_utils;
 
 use equip_penguin::libs::penguin_mint::MintPenguin;
 use equip_penguin::libs::storage::StorageModule;
@@ -9,11 +9,11 @@ use equip_penguin::structs::item::Item;
 use equip_penguin::structs::item_attributes::ItemAttributes;
 use equip_penguin::structs::item_slot::ItemSlot;
 use equip_penguin::structs::penguin_attributes::PenguinAttributes;
-use utils::INIT_NONCE;
+use testing_utils::INIT_NONCE;
 
 #[test]
 fn build_url_with_no_item() {
-    let mut setup = utils::setup(equip_penguin::contract_obj);
+    let mut setup = testing_utils::setup(equip_penguin::contract_obj);
 
     setup
         .blockchain_wrapper
@@ -33,10 +33,10 @@ fn build_url_with_no_item() {
 
 #[test]
 fn build_url_with_one_item() {
-    // utils::execute_for_all_slot(|mut slot| {
+    // testing_utils::execute_for_all_slot(|mut slot| {
     let slot = &ItemSlot::Hat;
 
-    let mut setup = utils::setup(equip_penguin::contract_obj);
+    let mut setup = testing_utils::setup(equip_penguin::contract_obj);
 
     const ITEM_IDENTIFIER: &[u8] = b"ITEM-a1a1a1";
     const ITEM_TYPE: &[u8] = b"my-item-id";
@@ -82,9 +82,9 @@ fn build_url_with_one_item() {
 
 #[test]
 fn build_url_with_two_item() {
-    // utils::execute_for_all_slot(|mut slot| {
+    // testing_utils::execute_for_all_slot(|mut slot| {
 
-    let mut setup = utils::setup(equip_penguin::contract_obj);
+    let mut setup = testing_utils::setup(equip_penguin::contract_obj);
 
     const NONCE: u64 = INIT_NONCE;
 

@@ -1,17 +1,18 @@
 use elrond_wasm::types::OptionalResult;
+use elrond_wasm::types::TokenIdentifier;
 use elrond_wasm_debug::testing_framework::*;
 use elrond_wasm_debug::DebugApi;
 use equip_penguin::structs::item_attributes::ItemAttributes;
 use equip_penguin::*;
 
-mod utils;
+mod testing_utils;
 
-const HAT_TOKEN_ID: &[u8] = utils::HAT_TOKEN_ID;
+const HAT_TOKEN_ID: &[u8] = testing_utils::HAT_TOKEN_ID;
 
 #[test]
 fn test_get_item() {
-    utils::execute_for_all_slot(|slot| {
-        let mut setup = utils::setup(equip_penguin::contract_obj);
+    testing_utils::execute_for_all_slot(|slot| {
+        let mut setup = testing_utils::setup(equip_penguin::contract_obj);
 
         setup.register_item(slot.clone(), HAT_TOKEN_ID, &ItemAttributes::random());
 
@@ -36,7 +37,7 @@ fn test_get_item() {
 
 #[test]
 fn return_none_if_no_token_id() {
-    let mut setup = utils::setup(equip_penguin::contract_obj);
+    let mut setup = testing_utils::setup(equip_penguin::contract_obj);
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 

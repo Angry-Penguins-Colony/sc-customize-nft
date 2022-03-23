@@ -4,18 +4,18 @@ use equip_penguin::structs::{
     item_attributes::ItemAttributes, item_slot::ItemSlot, penguin_attributes::PenguinAttributes,
 };
 
-mod utils;
+mod testing_utils;
 
-const PENGUIN_TOKEN_ID: &[u8] = utils::PENGUIN_TOKEN_ID;
+const PENGUIN_TOKEN_ID: &[u8] = testing_utils::PENGUIN_TOKEN_ID;
 
 #[test]
 fn customize_only_desequip() {
-    utils::execute_for_all_slot(|slot| {
+    testing_utils::execute_for_all_slot(|slot| {
         const ITEM_TO_DESEQUIP_ID: &[u8] = b"ITEM-a1a1a1";
         const NONCE: u64 = 30;
 
         // 1. ARRANGE
-        let mut setup = utils::setup(equip_penguin::contract_obj);
+        let mut setup = testing_utils::setup(equip_penguin::contract_obj);
 
         setup.create_penguin_with_registered_item(
             NONCE,
@@ -25,7 +25,7 @@ fn customize_only_desequip() {
             ItemAttributes::random(),
         );
 
-        let transfers = utils::create_esdt_transfers(&[(PENGUIN_TOKEN_ID, NONCE)]);
+        let transfers = testing_utils::create_esdt_transfers(&[(PENGUIN_TOKEN_ID, NONCE)]);
 
         // 2. ACT
         let (sc_result, tx_result) = setup.customize(transfers, slot.clone());
@@ -75,7 +75,7 @@ fn test_desequip_with_slot_none() {
     const NONCE: u64 = 30;
 
     // 1. ARRANGE
-    let mut setup = utils::setup(equip_penguin::contract_obj);
+    let mut setup = testing_utils::setup(equip_penguin::contract_obj);
 
     setup.create_penguin_with_registered_item(
         NONCE,
@@ -85,7 +85,7 @@ fn test_desequip_with_slot_none() {
         ItemAttributes::random(),
     );
 
-    let transfers = utils::create_esdt_transfers(&[(PENGUIN_TOKEN_ID, NONCE)]);
+    let transfers = testing_utils::create_esdt_transfers(&[(PENGUIN_TOKEN_ID, NONCE)]);
 
     // 2. ACT
     let (_, tx_result) = setup.customize(transfers, SLOT.clone());

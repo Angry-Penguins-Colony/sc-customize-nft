@@ -2,7 +2,7 @@ use elrond_wasm::{
     contract_base::ContractBase,
     types::{ManagedBuffer, ManagedVarArgs, SCResult, TokenIdentifier},
 };
-use elrond_wasm_debug::{rust_biguint, testing_framework::StateChange, DebugApi};
+use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::{
     structs::{
         item::Item, item_attributes::ItemAttributes, item_slot::ItemSlot,
@@ -11,20 +11,20 @@ use equip_penguin::{
     Equip,
 };
 
-mod utils;
+mod testing_utils;
 
-const PENGUIN_TOKEN_ID: &[u8] = utils::PENGUIN_TOKEN_ID;
+const PENGUIN_TOKEN_ID: &[u8] = testing_utils::PENGUIN_TOKEN_ID;
 
 #[test]
 fn customize_complete_flow() {
-    utils::execute_for_all_slot(|slot| {
+    testing_utils::execute_for_all_slot(|slot| {
         const ITEM_TO_DESEQUIP_ID: &[u8] = b"ITEM-a1a1a1";
         const ITEM_TO_EQUIP: &[u8] = b"HAT-b2b2b2";
         const ITEM_TO_EQUIP_NAME: &[u8] = b"new item";
         const NONCE: u64 = 30;
 
         // 1. ARRANGE
-        let mut setup = utils::setup(equip_penguin::contract_obj);
+        let mut setup = testing_utils::setup(equip_penguin::contract_obj);
 
         setup.create_penguin_with_registered_item(
             NONCE,
@@ -50,11 +50,13 @@ fn customize_complete_flow() {
             Option::None,
             Option::Some(ITEM_TO_EQUIP_NAME),
             Option::None,
-            Option::None,
+            &[],
         );
 
-        let transfers =
-            utils::create_esdt_transfers(&[(PENGUIN_TOKEN_ID, NONCE), (ITEM_TO_EQUIP, NONCE)]);
+        let transfers = testing_utils::create_esdt_transfers(&[
+            (PENGUIN_TOKEN_ID, NONCE),
+            (ITEM_TO_EQUIP, NONCE),
+        ]);
 
         // 2. ACT
         let (sc_result, tx_result) = setup.customize(transfers, slot.clone());
@@ -119,11 +121,11 @@ fn customize_nothing_to_desequip_and_equip() {
     const NONCE: u64 = 30;
 
     // 1. ARRANGE
-    let mut setup = utils::setup(equip_penguin::contract_obj);
+    let mut setup = testing_utils::setup(equip_penguin::contract_obj);
 
     setup.create_penguin_empty(NONCE);
 
-    let transfers = utils::create_esdt_transfers(&[(PENGUIN_TOKEN_ID, NONCE)]);
+    let transfers = testing_utils::create_esdt_transfers(&[(PENGUIN_TOKEN_ID, NONCE)]);
 
     // 2. ACT
     let tx_result = setup.blockchain_wrapper.execute_esdt_multi_transfer(
@@ -133,12 +135,7 @@ fn customize_nothing_to_desequip_and_equip() {
         |sc| {
             let managed_slots = ManagedVarArgs::<DebugApi, ItemSlot>::new();
 
-            let result = sc.customize(sc.call_value().all_esdt_transfers(), managed_slots);
-
-            match result {
-                SCResult::Ok(_) => StateChange::Commit,
-                SCResult::Err(_) => StateChange::Revert,
-            }
+            let _ = sc.customize(sc.call_value().all_esdt_transfers(), managed_slots);
         },
     );
 

@@ -6,8 +6,15 @@
 use alloc::{borrow::ToOwned, format, string::ToString};
 use elrond_wasm::{elrond_codec::TopDecodeInput, String};
 
-use super::item_slot::ItemSlot;
-use core::str::FromStr;
+use crate::structs::utils::{remove_first_and_last_char, split_last_occurence};
+
+use super::{
+    item_slot::ItemSlot,
+    utils::{hex_to_u64, remove_first_char},
+};
+use core::{ops::Deref, str::FromStr};
+
+use super::utils::split_buffer;
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
@@ -17,38 +24,6 @@ pub struct Item<M: ManagedTypeApi> {
     pub token: TokenIdentifier<M>,
     pub nonce: u64,
     pub name: ManagedBuffer<M>,
-}
-
-impl<M: ManagedTypeApi> TopDecode for Item<M> {
-    const TYPE_INFO: elrond_codec::TypeInfo = elrond_codec::TypeInfo::Unknown;
-
-    fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
-        // format is "name (token-nonce)"
-
-        let bytes = input.into_boxed_slice_u8(); // REMOVE: alloc here
-        let main_parts = Item::<M>::split_last_occurence(&bytes, b' ');
-
-        // retrieve name
-        let name = main_parts.0;
-
-        // retrivier token
-        let identifier = &main_parts.1[1..main_parts.1.len() - 1];
-        let parts = Item::<M>::split_last_occurence(identifier, b'-');
-
-        let token = TokenIdentifier::from_esdt_bytes(&parts.0[1..]);
-
-        // retrieve nonce
-        // TODO: use Stackoverflow answer
-        let nonce_bytes = &parts.1[1..];
-        let nonce_str = String::from_utf8_lossy(nonce_bytes).to_owned().to_string();
-        let nonce = u64::from_str_radix(&nonce_str, 16).unwrap();
-
-        return Result::Ok(Self {
-            token,
-            nonce,
-            name: ManagedBuffer::<M>::new_from_bytes(name),
-        });
-    }
 }
 
 impl<M: ManagedTypeApi> elrond_codec::TopEncode for Item<M> {
@@ -74,6 +49,23 @@ impl<M: ManagedTypeApi> elrond_codec::TopEncode for Item<M> {
 }
 
 impl<M: ManagedTypeApi> Item<M> {
+    pub fn top_decode(input: &ManagedBuffer<M>) -> Result<Self, DecodeError> {
+        let splited = split_last_occurence(&input, b' ');
+
+        // part 1 build name
+        let name = splited.0;
+
+        // part 2: build identifier
+        let identifier = remove_first_and_last_char(&splited.1); // remove parenthesis
+        let (token, nonce) = split_last_occurence(&identifier, b'-');
+
+        return Result::Ok(Self {
+            token: TokenIdentifier::from_esdt_bytes(token),
+            nonce: hex_to_u64(&nonce).unwrap(),
+            name: name,
+        });
+    }
+
     fn split_last_occurence(bytes: &[u8], char: u8) -> (&[u8], &[u8]) {
         for i in (0..bytes.len() - 1).rev() {
             if bytes[i] == char {

@@ -66,18 +66,21 @@ impl<M: ManagedTypeApi> TopEncode for PenguinAttributes<M> {
         &self,
         output: O,
     ) -> Result<(), elrond_codec::EncodeError> {
-        // let mut managed_buffer = ManagedBuffer::<M>::new();
+        let mut managed_buffer = ManagedBuffer::<M>::new();
 
-        // for (i, slot) in ItemSlot::VALUES.iter().enumerate() {
-        //     managed_buffer.append(&self.to_managed_buffer(slot));
+        for (i, slot) in ItemSlot::VALUES.iter().enumerate() {
+            managed_buffer.append(&self.to_managed_buffer(slot));
 
-        //     // add comma, except for the last line
-        //     if i < ItemSlot::VALUES.len() - 1 {
-        //         managed_buffer.append_bytes(b";");
-        //     }
-        // }
+            // add comma, except for the last line
+            if i < ItemSlot::VALUES.len() - 1 {
+                managed_buffer.append_bytes(b";");
+            }
+        }
 
-        // output.set_boxed_bytes(managed_buffer.into_boxed_slice_u8()); // REMOVE: ALLOCATION
+        let mut bytes: [u8; 256] = [0; 256];
+        managed_buffer.load_to_byte_array(&mut bytes);
+        output.set_slice_u8(&bytes[..managed_buffer.len()]);
+
         return Result::Ok(());
     }
 }

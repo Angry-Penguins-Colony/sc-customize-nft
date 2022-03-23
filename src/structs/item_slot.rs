@@ -55,4 +55,25 @@ impl ItemSlot {
             Self::None => return b"None",
         }
     }
+
+    pub fn from<M: ManagedTypeApi>(buffer: ManagedBuffer<M>) -> Self {
+        // match pattern didn't worked, so we are using the old way
+        if buffer == ManagedBuffer::<M>::new_from_bytes(b"Hat") {
+            return Self::Hat;
+        } else if buffer == ManagedBuffer::<M>::new_from_bytes(b"Background") {
+            return Self::Background;
+        } else if buffer == ManagedBuffer::<M>::new_from_bytes(b"Skin") {
+            return Self::Skin;
+        } else if buffer == ManagedBuffer::<M>::new_from_bytes(b"Beak") {
+            return Self::Beak;
+        } else if buffer == ManagedBuffer::<M>::new_from_bytes(b"Weapon") {
+            return Self::Weapon;
+        } else if buffer == ManagedBuffer::<M>::new_from_bytes(b"Clothes") {
+            return Self::Clothes;
+        } else if buffer == ManagedBuffer::<M>::new_from_bytes(b"Eyes") {
+            return Self::Eye;
+        }
+
+        Self::None
+    }
 }

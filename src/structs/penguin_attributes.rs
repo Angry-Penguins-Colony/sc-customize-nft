@@ -29,13 +29,6 @@ pub struct PenguinAttributes<M: ManagedTypeApi> {
 
 impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
     fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
-        let hat_buffer = ManagedBuffer::<M>::new_from_bytes(b"Hat");
-        let background_buffer = ManagedBuffer::<M>::new_from_bytes(b"Background");
-        let skin_buffer = ManagedBuffer::<M>::new_from_bytes(b"Skin");
-        let beak_buffer = ManagedBuffer::<M>::new_from_bytes(b"Beak");
-        let weapon_buffer = ManagedBuffer::<M>::new_from_bytes(b"Weapon");
-        let clothes_buffer = ManagedBuffer::<M>::new_from_bytes(b"Clothes");
-        let eyes_buffer = ManagedBuffer::<M>::new_from_bytes(b"Eyes");
         let unequipped_buffer = ManagedBuffer::<M>::new_from_bytes(b"unequipped");
 
         let mut penguin = PenguinAttributes::empty();
@@ -46,26 +39,22 @@ impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
         for item_raw in items_raw.iter() {
             let parts = split_buffer(item_raw.deref(), b':');
 
-            let slot = parts.get(0);
-            let value = parts.get(1);
+            let slot_buffer = parts.get(0).deref().to_owned();
+            let item_buffer = parts.get(1);
 
-            let item = if value.deref() == &unequipped_buffer {
+            let item = if item_buffer.deref() == &unequipped_buffer {
                 None
             } else {
-                Some(Item::top_decode(value.deref()).unwrap())
+                Some(Item::top_decode(item_buffer.deref()).unwrap())
             };
 
-            // TODO: slot is not comparing to the upper variables, while it should be
-            match slot {
-                hat_buffer => penguin.hat = item,
-                background_buffer => penguin.background = item,
-                skin_buffer => penguin.skin = item,
-                beak_buffer => penguin.beak = item,
-                weapon_buffer => penguin.weapon = item,
-                clothes_buffer => penguin.clothes = item,
-                eyes_buffer => penguin.eye = item,
-                _ => return Result::Err(DecodeError::UTF8_DECODE_ERROR),
-            };
+            let slot = ItemSlot::from(slot_buffer);
+
+            if slot == ItemSlot::None {
+                return Result::Err(DecodeError::UTF8_DECODE_ERROR);
+            }
+
+            let _ = penguin.set_item(&slot, item);
         }
 
         return Result::Ok(penguin);

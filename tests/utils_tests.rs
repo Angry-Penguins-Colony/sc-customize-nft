@@ -80,3 +80,23 @@ fn test_to_u64() {
         None
     );
 }
+
+#[test]
+fn test_u64_to_hex() {
+    DebugApi::dummy();
+
+    assert_eq!(
+        utils::u64_to_hex::<DebugApi>(&10),
+        ManagedBuffer::new_from_bytes(b"0a")
+    );
+
+    assert_eq!(
+        utils::u64_to_hex::<DebugApi>(&1),
+        ManagedBuffer::new_from_bytes(b"01")
+    );
+
+    assert_eq!(
+        utils::u64_to_hex::<DebugApi>(&0),
+        ManagedBuffer::new_from_bytes(b"00")
+    );
+}

@@ -10,7 +10,7 @@ use crate::structs::utils::{remove_first_and_last_char, split_last_occurence};
 
 use super::{
     item_slot::ItemSlot,
-    utils::{hex_to_u64, remove_first_char},
+    utils::{hex_to_u64, remove_first_char, u64_to_hex},
 };
 use core::{ops::Deref, str::FromStr};
 
@@ -33,19 +33,23 @@ impl<M: ManagedTypeApi> elrond_codec::TopEncode for Item<M> {
         &self,
         output: O,
     ) -> Result<(), elrond_codec::EncodeError> {
-        panic!("not implemented");
-        // let mut managed_buffer = ManagedBuffer::<M>::new();
+        let mut managed_buffer = ManagedBuffer::<M>::new();
 
-        // managed_buffer.append(&self.name);
-        // managed_buffer.append_bytes(b" (");
+        // build buffer
+        managed_buffer.append(&self.name);
+        managed_buffer.append_bytes(b" (");
 
-        // managed_buffer.append(&self.token.as_managed_buffer());
-        // managed_buffer.append_bytes(b"-");
-        // managed_buffer.append(&Item::u64_to_hex(&self.nonce)); // REMOVE: alloc+format here
-        // managed_buffer.append_bytes(b")");
+        managed_buffer.append(&self.token.as_managed_buffer());
+        managed_buffer.append_bytes(b"-");
+        managed_buffer.append(&u64_to_hex(&self.nonce));
+        managed_buffer.append_bytes(b")");
 
-        // output.set_boxed_bytes(managed_buffer.into_boxed_slice_u8()); // REMOVE: ALLOC HERE
-        // return Result::Ok(());
+        // set buffer to output
+        let mut bytes: [u8; 256] = [0; 256];
+        managed_buffer.load_to_byte_array(&mut bytes);
+        output.set_slice_u8(&bytes[..managed_buffer.len()]);
+
+        return Result::Ok(());
     }
 }
 

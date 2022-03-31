@@ -89,6 +89,25 @@ pub fn hex_to_u64<M: ManagedTypeApi>(buffer: &ManagedBuffer<M>) -> Option<u64> {
     Some(result)
 }
 
+pub fn ascii_to_u64<M: ManagedTypeApi>(buffer: &ManagedBuffer<M>) -> Option<u64> {
+    let mut bytes: [u8; 256] = [0; 256];
+
+    buffer.load_to_byte_array(&mut bytes);
+
+    let mut result: u64 = 0;
+
+    for i in bytes {
+        if i == 0 {
+            break;
+        }
+
+        result *= 10;
+        result += (i as char).to_digit(16)? as u64;
+    }
+
+    Some(result)
+}
+
 pub fn u64_to_hex<M: ManagedTypeApi>(val: &u64) -> ManagedBuffer<M> {
     let mut reversed_digits = ManagedVec::<M, u8>::new();
     let mut result = val.clone();
@@ -135,4 +154,11 @@ pub fn u64_to_hex<M: ManagedTypeApi>(val: &u64) -> ManagedBuffer<M> {
     }
 
     return o;
+}
+
+pub fn get_number_from_penguin_name<M: ManagedTypeApi>(name: &ManagedBuffer<M>) -> Option<u64> {
+    let buffers = split_last_occurence(name, b'#');
+    let number_buffer = &buffers.1;
+
+    return ascii_to_u64(&number_buffer);
 }

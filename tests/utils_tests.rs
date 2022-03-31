@@ -2,7 +2,7 @@
 
 use core::ops::Deref;
 
-use elrond_wasm::types::ManagedBuffer;
+use elrond_wasm::types::{ManagedAddress, ManagedBuffer};
 use elrond_wasm_debug::DebugApi;
 use equip_penguin::structs::utils;
 
@@ -82,6 +82,32 @@ fn test_to_u64() {
 }
 
 #[test]
+fn test_ascii_to_u64() {
+    DebugApi::dummy();
+
+    assert_eq!(
+        utils::ascii_to_u64::<DebugApi>(&ManagedBuffer::new_from_bytes(b"010")),
+        Some(10)
+    );
+    assert_eq!(
+        utils::ascii_to_u64::<DebugApi>(&ManagedBuffer::new_from_bytes(b"00")),
+        Some(0)
+    );
+    assert_eq!(
+        utils::ascii_to_u64::<DebugApi>(&ManagedBuffer::new_from_bytes(b"01")),
+        Some(1)
+    );
+    assert_eq!(
+        utils::ascii_to_u64::<DebugApi>(&ManagedBuffer::new_from_bytes(b"lol")),
+        None
+    );
+    assert_eq!(
+        utils::ascii_to_u64::<DebugApi>(&ManagedBuffer::new_from_bytes(b"-1")),
+        None
+    );
+}
+
+#[test]
 fn test_u64_to_hex() {
     DebugApi::dummy();
 
@@ -98,5 +124,24 @@ fn test_u64_to_hex() {
     assert_eq!(
         utils::u64_to_hex::<DebugApi>(&0),
         ManagedBuffer::new_from_bytes(b"00")
+    );
+}
+
+#[test]
+fn test_get_number_from_penguin_name() {
+    DebugApi::dummy();
+
+    assert_eq!(
+        utils::get_number_from_penguin_name(&ManagedBuffer::<DebugApi>::new_from_bytes(
+            b"Penguin #1"
+        )),
+        Some(1)
+    );
+
+    assert_eq!(
+        utils::get_number_from_penguin_name(&ManagedBuffer::<DebugApi>::new_from_bytes(
+            b"Penguin #15"
+        )),
+        Some(15)
     );
 }

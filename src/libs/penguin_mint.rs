@@ -51,7 +51,7 @@ pub trait MintPenguin: super::storage::StorageModule + super::penguin_parse::Par
         let penguin_id = self.penguins_identifier().get();
 
         let mut uris = ManagedVec::new();
-        uris.push(self.build_url(&attributes)?);
+        uris.push(self.build_url(&attributes, &name));
 
         let token_nonce = self.send().esdt_nft_create::<PenguinAttributes<Self::Api>>(
             &penguin_id,
@@ -77,11 +77,8 @@ pub trait MintPenguin: super::storage::StorageModule + super::penguin_parse::Par
     fn build_url(
         &self,
         attributes: &PenguinAttributes<Self::Api>,
-    ) -> SCResult<ManagedBuffer<Self::Api>> {
-        if attributes.get_fill_count() == 0 {
-            return SCResult::Ok(self.get_full_unequiped_penguin_uri());
-        }
-
+        name: &ManagedBuffer,
+    ) -> ManagedBuffer<Self::Api> {
         let mut expected = ManagedBuffer::new();
         expected.append(&self.uri().get());
 
@@ -106,18 +103,13 @@ pub trait MintPenguin: super::storage::StorageModule + super::penguin_parse::Par
             }
         }
 
-        expected.append_bytes(b"/image.png");
+        expected.append_bytes(b"badge_");
+        // TODO: append badge number
 
-        return SCResult::Ok(expected);
-    }
+        expected.append_bytes(b"/image");
+        panic!("not impletmented");
 
-    fn get_full_unequiped_penguin_uri(&self) -> ManagedBuffer<Self::Api> {
-        let mut uri = ManagedBuffer::new();
-
-        uri.append(&self.uri().get());
-        uri.append_bytes(b"empty/image.png");
-
-        return uri;
+        return expected;
     }
 
     fn get_next_penguin_name(&self) -> ManagedBuffer {

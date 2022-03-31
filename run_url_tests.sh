@@ -1,0 +1,1 @@
+cargo test --package equip_penguin --test build_url_tests

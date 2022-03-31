@@ -18,15 +18,16 @@ fn build_url_with_no_item() {
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
-            let actual = sc.build_url(&PenguinAttributes::empty());
-
-            assert!(actual.is_ok());
+            let actual = sc.build_url(
+                &PenguinAttributes::empty(),
+                &ManagedBuffer::<DebugApi>::new_from_bytes(b"Penguin #1"),
+            );
 
             let mut expected = ManagedBuffer::new();
             expected.append(&sc.uri().get());
             expected.append_bytes(b"empty/image.png");
 
-            assert_eq!(actual.unwrap(), expected);
+            assert_eq!(actual, expected);
         })
         .assert_ok();
 }
@@ -64,9 +65,10 @@ fn build_url_with_one_item() {
                 ..PenguinAttributes::empty()
             };
 
-            let actual = sc.build_url(&penguin_attributes);
-
-            assert!(actual.is_ok());
+            let actual = sc.build_url(
+                &penguin_attributes,
+                &ManagedBuffer::<DebugApi>::new_from_bytes(b"Penguin #1"),
+            );
 
             let mut expected = ManagedBuffer::new();
             expected.append(&sc.uri().get());
@@ -75,7 +77,7 @@ fn build_url_with_one_item() {
             expected.append(&ManagedBuffer::new_from_bytes(ITEM_TYPE)); // slot value eg. albino
             expected.append_bytes(b"/image.png");
 
-            assert_eq!(actual.unwrap(), expected);
+            assert_eq!(actual, expected);
         })
         .assert_ok();
 }
@@ -137,9 +139,10 @@ fn build_url_with_two_item() {
                 ),
             ]);
 
-            let actual = sc.build_url(&penguin_attributes);
-
-            assert!(actual.is_ok());
+            let actual = sc.build_url(
+                &penguin_attributes,
+                &ManagedBuffer::<DebugApi>::new_from_bytes(b"Penguin #1"),
+            );
 
             let mut expected = ManagedBuffer::new();
             expected.append(&sc.uri().get());
@@ -159,7 +162,7 @@ fn build_url_with_two_item() {
 
             expected.append_bytes(b"/image.png");
 
-            assert_eq!(actual.unwrap(), expected);
+            assert_eq!(actual, expected);
         })
         .assert_ok();
 }

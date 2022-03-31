@@ -25,7 +25,7 @@ fn build_url_with_no_item() {
 
             let mut expected = ManagedBuffer::new();
             expected.append(&sc.uri().get());
-            expected.append_bytes(b"empty/image.png");
+            expected.append_bytes(b"badge_1/image");
 
             assert_eq!(actual, expected);
         })
@@ -75,7 +75,7 @@ fn build_url_with_one_item() {
             expected.append(&ManagedBuffer::new_from_bytes(slot.to_bytes::<DebugApi>())); // slot to string eg. skin
             expected.append_bytes(b"_");
             expected.append(&ManagedBuffer::new_from_bytes(ITEM_TYPE)); // slot value eg. albino
-            expected.append_bytes(b"/image.png");
+            expected.append_bytes(b"+badge_1/image");
 
             assert_eq!(actual, expected);
         })
@@ -160,7 +160,7 @@ fn build_url_with_two_item() {
             expected.append_bytes(b"_");
             expected.append(&ManagedBuffer::new_from_bytes(ITEM_2_TYPE)); // slot value eg. albino
 
-            expected.append_bytes(b"/image.png");
+            expected.append_bytes(b"+badge_1/image");
 
             assert_eq!(actual, expected);
         })

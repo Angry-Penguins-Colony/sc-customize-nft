@@ -7,7 +7,7 @@ use elrond_wasm::{
     types::{ManagedBuffer, ManagedByteArray, ManagedVec, SCResult},
 };
 
-use crate::structs::{item_slot::ItemSlot, penguin_attributes::PenguinAttributes};
+use crate::structs::{item_slot::ItemSlot, penguin_attributes::PenguinAttributes, utils};
 
 #[elrond_wasm::module]
 pub trait MintPenguin: super::storage::StorageModule + super::penguin_parse::ParsePenguin {
@@ -82,8 +82,6 @@ pub trait MintPenguin: super::storage::StorageModule + super::penguin_parse::Par
         let mut expected = ManagedBuffer::new();
         expected.append(&self.uri().get());
 
-        let mut is_first_item = true;
-
         for slot in ItemSlot::VALUES.iter() {
             if let Some(item) = attributes.get_item(slot) {
                 let token_data = self.parse_item_attributes(&item.token, item.nonce);
@@ -91,23 +89,20 @@ pub trait MintPenguin: super::storage::StorageModule + super::penguin_parse::Par
                 let slot_type = token_data.item_id;
                 let slot_id = slot.to_bytes::<Self::Api>();
 
-                if is_first_item == false {
-                    expected.append_bytes(b"+");
-                }
+                sc_print!("{:x}", &slot_type);
 
                 expected.append(&ManagedBuffer::new_from_bytes(slot_id));
                 expected.append_bytes(b"_");
                 expected.append(&slot_type);
-
-                is_first_item = false;
+                expected.append_bytes(b"+");
             }
         }
 
+        let badge_number = utils::get_number_from_penguin_name(&name).unwrap();
         expected.append_bytes(b"badge_");
-        // TODO: append badge number
+        expected.append(&utils::u64_to_ascii(&badge_number));
 
         expected.append_bytes(b"/image");
-        panic!("not impletmented");
 
         return expected;
     }

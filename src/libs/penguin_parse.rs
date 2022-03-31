@@ -32,10 +32,8 @@ pub trait ParsePenguin {
         let attributes = self
             .blockchain()
             .get_esdt_token_data(&self.blockchain().get_sc_address(), &id, nonce)
-            .attributes;
+            .decode_attributes::<ItemAttributes<Self::Api>>();
 
-        return ItemAttributes {
-            item_id: attributes,
-        };
+        attributes
     }
 }

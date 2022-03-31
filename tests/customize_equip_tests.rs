@@ -1,11 +1,10 @@
 use elrond_wasm::types::{EsdtTokenType, ManagedBuffer, SCResult};
+use elrond_wasm_debug::managed_token_id;
 use elrond_wasm_debug::tx_mock::TxInputESDT;
-use elrond_wasm_debug::{managed_buffer, managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::structs::item::Item;
 use equip_penguin::structs::item_attributes::ItemAttributes;
 use equip_penguin::structs::penguin_attributes::PenguinAttributes;
-use equip_penguin::Equip;
 
 mod testing_utils;
 
@@ -32,7 +31,7 @@ fn test_equip() {
             Option::None,
             Option::Some(ITEM_TO_EQUIP_NAME),
             Option::None,
-            Option::None,
+            &[],
         );
 
         // add empty pingouin to the USER
@@ -113,7 +112,7 @@ fn test_equip_while_overlap() {
             Option::None,
             Option::Some(OLD_HAT_NAME),
             Option::None,
-            Option::None,
+            &[],
         );
 
         // user own a penguin equiped with an hat

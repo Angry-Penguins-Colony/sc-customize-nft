@@ -2,7 +2,7 @@
 
 use core::ops::Deref;
 
-use elrond_wasm::types::{ManagedAddress, ManagedBuffer};
+use elrond_wasm::types::{ManagedBuffer};
 use elrond_wasm_debug::DebugApi;
 use equip_penguin::structs::utils;
 

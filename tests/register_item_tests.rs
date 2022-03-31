@@ -1,5 +1,5 @@
-use elrond_wasm::types::{EsdtLocalRole, ManagedVarArgs, ManagedVec, TokenIdentifier};
-use elrond_wasm_debug::{managed_token_id, testing_framework::*};
+use elrond_wasm::types::{EsdtLocalRole, ManagedVec, MultiValueEncoded, TokenIdentifier};
+use elrond_wasm_debug::managed_token_id;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::libs::storage::StorageModule;
 use equip_penguin::structs::item_attributes::ItemAttributes;
@@ -88,7 +88,7 @@ fn register_unmintable_item() {
                 &rust_biguint!(0),
                 |sc| {
                     let mut managed_items_ids =
-                        ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                        MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                     managed_items_ids.push(managed_token_id!(b"a token without minting rights"));
 
                     let _ = sc.register_item(slot.clone(), managed_items_ids);
@@ -120,7 +120,7 @@ fn register_unburnable_item() {
                 &rust_biguint!(0),
                 |sc| {
                     let mut managed_items_ids =
-                        ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                        MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                     managed_items_ids.push(managed_token_id!(UNBURNABLE));
 
                     let _ = sc.register_item(slot.clone(), managed_items_ids);
@@ -168,7 +168,7 @@ fn register_penguin_as_item_should_not_work() {
                 &rust_biguint!(0u64),
                 |sc| {
                     let mut managed_items_ids =
-                        ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                        MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                     managed_items_ids.push(managed_token_id!(PENGUIN_TOKEN_ID));
 
                     let _ = sc.register_item(slot.clone(), managed_items_ids);
@@ -192,7 +192,7 @@ fn register_while_not_the_owner() {
                 &rust_biguint!(0u64),
                 |sc| {
                     let mut managed_items_ids =
-                        ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                        MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                     managed_items_ids.push(managed_token_id!(HAT_TOKEN_ID));
 
                     let _ = sc.register_item(slot.clone(), managed_items_ids);

@@ -1,6 +1,6 @@
 use elrond_wasm::{
     elrond_codec::TopDecode,
-    types::{ManagedBuffer, ManagedRef, TokenIdentifier},
+    types::{ManagedBuffer, TokenIdentifier},
 };
 use elrond_wasm_debug::{managed_buffer, DebugApi};
 use equip_penguin::structs::{

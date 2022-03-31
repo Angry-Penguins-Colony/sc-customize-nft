@@ -1,6 +1,6 @@
 use elrond_wasm::{
     contract_base::ContractBase,
-    types::{ManagedBuffer, ManagedVarArgs, SCResult, TokenIdentifier},
+    types::{ManagedBuffer, MultiValueEncoded, SCResult, TokenIdentifier},
 };
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 use equip_penguin::{
@@ -133,7 +133,7 @@ fn customize_nothing_to_desequip_and_equip() {
         &setup.cf_wrapper,
         &transfers,
         |sc| {
-            let managed_slots = ManagedVarArgs::<DebugApi, ItemSlot>::new();
+            let managed_slots = MultiValueEncoded::<DebugApi, ItemSlot>::new();
 
             let _ = sc.customize(sc.call_value().all_esdt_transfers(), managed_slots);
         },

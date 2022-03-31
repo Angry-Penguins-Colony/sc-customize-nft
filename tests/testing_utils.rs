@@ -3,9 +3,8 @@ use std::u8;
 use elrond_wasm::contract_base::ContractBase;
 use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::{
-    Address, BigUint, EsdtLocalRole, EsdtTokenPayment, EsdtTokenType, ManagedBuffer,
-    ManagedMultiResultVec, ManagedVarArgs, ManagedVec, MultiArg2, MultiValueEncoded, SCResult,
-    TokenIdentifier,
+    Address, BigUint, EsdtLocalRole, EsdtTokenPayment, EsdtTokenType, ManagedBuffer, ManagedVec,
+    MultiValueEncoded, SCResult, TokenIdentifier,
 };
 use elrond_wasm_debug::tx_mock::{TxContextRef, TxInputESDT, TxResult};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};

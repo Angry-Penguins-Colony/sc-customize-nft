@@ -1,5 +1,5 @@
 use elrond_wasm::{
-    elrond_codec::{TopDecode, TopEncode},
+    elrond_codec::TopEncode,
     types::{ManagedBuffer, TokenIdentifier},
 };
 use elrond_wasm_debug::{managed_buffer, DebugApi};
@@ -17,7 +17,7 @@ fn test_new() {
 
     let input_str = b"item name (HAT-a2b4e5-01)";
     let input_buffer: ManagedBuffer<DebugApi> = managed_buffer!(input_str);
-    let actual = Item::<DebugApi>::top_decode(input_buffer).unwrap();
+    let actual = Item::<DebugApi>::top_decode(&input_buffer).unwrap();
 
     assert_eq!(expected, actual);
 }
@@ -34,7 +34,7 @@ fn test_decode_with_nonce_10() {
 
     let input_str = b"item name (HAT-a2b4e5-0a)";
     let input_buffer: ManagedBuffer<DebugApi> = managed_buffer!(input_str);
-    let actual = Item::<DebugApi>::top_decode(input_buffer).unwrap();
+    let actual = Item::<DebugApi>::top_decode(&input_buffer).unwrap();
 
     assert_eq!(expected, actual);
 }
@@ -75,12 +75,4 @@ fn test_encode_with_nonce_10() {
 
     assert_eq!(result.is_ok(), true);
     assert_eq!(expected, actual);
-}
-
-#[test]
-fn test_u64_to_hex() {
-    DebugApi::dummy();
-
-    assert_eq!(Item::<DebugApi>::u64_to_hex(&1), managed_buffer!(b"01"));
-    assert_eq!(Item::<DebugApi>::u64_to_hex(&10), managed_buffer!(b"0a"));
 }

@@ -1,4 +1,3 @@
-use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm::{elrond_codec::TopEncode, types::TokenIdentifier};
 use elrond_wasm_debug::{managed_buffer, DebugApi};
 use equip_penguin::structs::{

@@ -1,6 +1,5 @@
-use elrond_wasm::types::OptionalResult;
+use elrond_wasm::elrond_codec::multi_types::OptionalValue;
 use elrond_wasm::types::TokenIdentifier;
-use elrond_wasm_debug::testing_framework::*;
 use elrond_wasm_debug::DebugApi;
 use equip_penguin::structs::item_attributes::ItemAttributes;
 use equip_penguin::*;
@@ -23,10 +22,10 @@ fn test_get_item() {
                 let hat_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID);
 
                 match sc.get_item_slot(&hat_token) {
-                    OptionalResult::Some(item_type) => {
+                    OptionalValue::Some(item_type) => {
                         assert_eq!(item_type, slot.clone());
                     }
-                    OptionalResult::None => {
+                    OptionalValue::None => {
                         panic!("The item is not registed, while it should be.");
                     }
                 }
@@ -47,8 +46,8 @@ fn return_none_if_no_token_id() {
                 TokenIdentifier::<DebugApi>::from_esdt_bytes("NOT_TOKEN_ID".as_bytes());
 
             match sc.get_item_slot(&not_existing_token) {
-                OptionalResult::Some(_) => panic!("item_type found"),
-                OptionalResult::None => {}
+                OptionalValue::Some(_) => panic!("item_type found"),
+                OptionalValue::None => {}
             }
         })
         .assert_ok();

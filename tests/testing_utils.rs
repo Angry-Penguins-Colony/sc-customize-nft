@@ -1,9 +1,11 @@
 use std::u8;
 
 use elrond_wasm::contract_base::ContractBase;
+use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::{
-    Address, EsdtLocalRole, EsdtTokenPayment, EsdtTokenType, ManagedMultiResultVec, ManagedVarArgs,
-    ManagedVec, MultiArg2, SCResult,
+    Address, BigUint, EsdtLocalRole, EsdtTokenPayment, EsdtTokenType, ManagedBuffer,
+    ManagedMultiResultVec, ManagedVarArgs, ManagedVec, MultiArg2, MultiValueEncoded, SCResult,
+    TokenIdentifier,
 };
 use elrond_wasm_debug::tx_mock::{TxContextRef, TxInputESDT, TxResult};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
@@ -75,7 +77,7 @@ where
             Option::None,
             Option::None,
             Option::None,
-            Option::None,
+            &[],
         );
     }
 
@@ -89,7 +91,7 @@ where
         creator: Option<&Address>,
         name: Option<&[u8]>,
         hash: Option<&[u8]>,
-        uri: Option<&[u8]>,
+        uri: &[Vec<u8>],
     ) -> u64 {
         self.set_all_permissions_on_token(item_id);
 
@@ -100,7 +102,7 @@ where
                 &rust_biguint!(0u64),
                 |sc| {
                     let mut managed_items_ids =
-                        ManagedVarArgs::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                        MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                     managed_items_ids.push(managed_token_id!(item_id));
 
                     let result = sc.register_item(item_type, managed_items_ids);
@@ -114,8 +116,6 @@ where
                     }
 
                     assert_eq!(result, SCResult::Ok(()));
-
-                    StateChange::Commit
                 },
             )
             .assert_ok();
@@ -219,17 +219,12 @@ where
             &self.cf_wrapper,
             &transfers,
             |sc| {
-                let mut managed_slots = ManagedVarArgs::<DebugApi, ItemSlot>::new();
+                let mut managed_slots = MultiValueEncoded::<DebugApi, ItemSlot>::new();
                 managed_slots.push(slot.clone());
 
                 let result = sc.customize(sc.call_value().all_esdt_transfers(), managed_slots);
 
                 opt_sc_result = Option::Some(result.clone());
-
-                match result {
-                    SCResult::Ok(_) => StateChange::Commit,
-                    SCResult::Err(_) => StateChange::Revert,
-                }
             },
         );
 
@@ -280,15 +275,10 @@ where
             |sc| {
                 let result = sc.customize(
                     sc.call_value().all_esdt_transfers(),
-                    ManagedVarArgs::<DebugApi, ItemSlot>::new(),
+                    MultiValueEncoded::<DebugApi, ItemSlot>::new(),
                 );
 
                 opt_sc_result = Option::Some(result.clone());
-
-                match result {
-                    SCResult::Ok(_) => StateChange::Commit,
-                    SCResult::Err(_) => StateChange::Revert,
-                }
             },
         );
 
@@ -321,8 +311,6 @@ where
         .execute_tx(&owner_address, &cf_wrapper, &rust_zero, |sc| {
             let result = sc.init(managed_token_id!(PENGUIN_TOKEN_ID));
             assert_eq!(result, SCResult::Ok(()));
-
-            StateChange::Commit
         })
         .assert_ok();
     blockchain_wrapper.add_mandos_set_account(cf_wrapper.address_ref());
@@ -356,15 +344,15 @@ pub fn verbose_log_if_error<T>(result: &SCResult<T>, message: String) {
 #[allow(dead_code)]
 pub fn create_managed_items_to_equip(
     tokens: &[(&[u8], u64)],
-) -> ManagedMultiResultVec<
+) -> MultiValueEncoded<
     TxContextRef,
-    MultiArg2<elrond_wasm::types::TokenIdentifier<TxContextRef>, u64>,
+    MultiValue2<elrond_wasm::types::TokenIdentifier<TxContextRef>, u64>,
 > {
     let mut managed_items_to_equip =
-        ManagedVarArgs::<DebugApi, MultiArg2<TokenIdentifier<DebugApi>, u64>>::new();
+        MultiValueEncoded::<DebugApi, MultiValue2<TokenIdentifier<DebugApi>, u64>>::new();
 
     for (token_id, nonce) in tokens {
-        managed_items_to_equip.push(MultiArg2((
+        managed_items_to_equip.push(MultiValue2((
             TokenIdentifier::<DebugApi>::from_esdt_bytes(token_id.clone()),
             nonce.clone(),
         )));

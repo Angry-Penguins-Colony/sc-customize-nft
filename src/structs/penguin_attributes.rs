@@ -51,7 +51,7 @@ impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
             let slot = ItemSlot::from(slot_buffer);
 
             if slot == ItemSlot::None {
-                return Result::Err(DecodeError::UTF8_DECODE_ERROR);
+                return Result::Err(DecodeError::from(&b"Unable to parse a slot"[..]));
             }
 
             let _ = penguin.set_item(&slot, item);
@@ -77,7 +77,7 @@ impl<M: ManagedTypeApi> TopEncode for PenguinAttributes<M> {
             }
         }
 
-        let mut bytes: [u8; 256] = [0; 256];
+        let mut bytes: [u8; 512] = [0; 512];
         managed_buffer.load_to_byte_array(&mut bytes);
         output.set_slice_u8(&bytes[..managed_buffer.len()]);
 

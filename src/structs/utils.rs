@@ -9,7 +9,7 @@ pub fn split_buffer<M: ManagedTypeApi>(
     buffer: &ManagedBuffer<M>,
     char: u8,
 ) -> ManagedVec<M, ManagedBuffer<M>> {
-    let mut bytes: [u8; 256] = [0; 256];
+    let mut bytes: [u8; 512] = [0; 512];
 
     buffer.load_to_byte_array(&mut bytes);
 
@@ -36,7 +36,7 @@ pub fn split_last_occurence<M: ManagedTypeApi>(
     buffer: &ManagedBuffer<M>,
     char: u8,
 ) -> (ManagedBuffer<M>, ManagedBuffer<M>) {
-    let mut bytes: [u8; 256] = [0; 256];
+    let mut bytes: [u8; 512] = [0; 512];
 
     buffer.load_to_byte_array(&mut bytes);
 
@@ -53,7 +53,7 @@ pub fn split_last_occurence<M: ManagedTypeApi>(
 }
 
 pub fn remove_first_char<M: ManagedTypeApi>(buffer: &ManagedBuffer<M>) -> ManagedBuffer<M> {
-    let mut bytes: [u8; 256] = [0; 256];
+    let mut bytes: [u8; 512] = [0; 512];
 
     buffer.load_to_byte_array(&mut bytes);
 
@@ -63,7 +63,7 @@ pub fn remove_first_char<M: ManagedTypeApi>(buffer: &ManagedBuffer<M>) -> Manage
 pub fn remove_first_and_last_char<M: ManagedTypeApi>(
     buffer: &ManagedBuffer<M>,
 ) -> ManagedBuffer<M> {
-    let mut bytes: [u8; 256] = [0; 256];
+    let mut bytes: [u8; 512] = [0; 512];
 
     buffer.load_to_byte_array(&mut bytes);
 
@@ -71,7 +71,7 @@ pub fn remove_first_and_last_char<M: ManagedTypeApi>(
 }
 
 pub fn hex_to_u64<M: ManagedTypeApi>(buffer: &ManagedBuffer<M>) -> Option<u64> {
-    let mut bytes: [u8; 256] = [0; 256];
+    let mut bytes: [u8; 512] = [0; 512];
 
     buffer.load_to_byte_array(&mut bytes);
 
@@ -90,7 +90,7 @@ pub fn hex_to_u64<M: ManagedTypeApi>(buffer: &ManagedBuffer<M>) -> Option<u64> {
 }
 
 pub fn ascii_to_u64<M: ManagedTypeApi>(buffer: &ManagedBuffer<M>) -> Option<u64> {
-    let mut bytes: [u8; 256] = [0; 256];
+    let mut bytes: [u8; 512] = [0; 512];
 
     buffer.load_to_byte_array(&mut bytes);
 

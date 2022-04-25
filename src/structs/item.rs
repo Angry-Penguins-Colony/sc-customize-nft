@@ -45,7 +45,7 @@ impl<M: ManagedTypeApi> elrond_codec::TopEncode for Item<M> {
         managed_buffer.append_bytes(b")");
 
         // set buffer to output
-        let mut bytes: [u8; 256] = [0; 256];
+        let mut bytes: [u8; 512] = [0; 512];
         managed_buffer.load_to_byte_array(&mut bytes);
         output.set_slice_u8(&bytes[..managed_buffer.len()]);
 

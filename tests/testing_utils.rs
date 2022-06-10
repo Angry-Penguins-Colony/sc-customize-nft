@@ -16,7 +16,7 @@ use equip_penguin::structs::penguin_attributes::PenguinAttributes;
 use equip_penguin::*;
 
 #[allow(dead_code)]
-const WASM_PATH: &'static str = "sc-equip-penguin/output/equip_penguin.wasm";
+const WASM_PATH: &'static str = "sc-customize-nft/output/equip_penguin.wasm";
 
 #[allow(dead_code)]
 pub const PENGUIN_TOKEN_ID: &[u8] = b"PENG-ae5a";

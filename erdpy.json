@@ -4,7 +4,7 @@
             "proxy": "https://devnet-gateway.elrond.com",
             "chain": "D",
             "verbose": true,
-            "bytecode": "output/equip_penguin.wasm",
+            "bytecode": "output/customize_nft.wasm",
             "recall-nonce": true,
             "keyfile": "wallets/hjq.json",
             "passfile": "wallets/hjq.pwd",

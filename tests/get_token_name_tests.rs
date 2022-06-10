@@ -1,7 +1,7 @@
 use elrond_wasm::types::TokenIdentifier;
 use elrond_wasm_debug::DebugApi;
 use elrond_wasm_debug::{managed_buffer, rust_biguint};
-use equip_penguin::Equip;
+use customize_nft::Equip;
 
 mod testing_utils;
 
@@ -13,7 +13,7 @@ fn get_token_name_test() {
     const NONCE: u64 = 1u64;
     const NAME: &[u8] = b"name";
 
-    let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     setup.blockchain_wrapper.set_nft_balance_all_properties(
         &setup.cf_wrapper.address_ref(),

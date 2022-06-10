@@ -1,6 +1,6 @@
 use elrond_wasm::types::SCResult;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
-use equip_penguin::structs::{
+use customize_nft::structs::{
     item_attributes::ItemAttributes, item_slot::ItemSlot, penguin_attributes::PenguinAttributes,
 };
 
@@ -15,7 +15,7 @@ fn customize_only_desequip() {
         const NONCE: u64 = 30;
 
         // 1. ARRANGE
-        let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+        let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
         setup.create_penguin_with_registered_item(
             NONCE,
@@ -75,7 +75,7 @@ fn test_desequip_with_slot_none() {
     const NONCE: u64 = 30;
 
     // 1. ARRANGE
-    let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     setup.create_penguin_with_registered_item(
         NONCE,

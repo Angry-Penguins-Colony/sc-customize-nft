@@ -2,9 +2,9 @@ use elrond_wasm::types::{EsdtTokenType, ManagedBuffer, SCResult};
 use elrond_wasm_debug::managed_token_id;
 use elrond_wasm_debug::tx_mock::TxInputESDT;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
-use equip_penguin::structs::item::Item;
-use equip_penguin::structs::item_attributes::ItemAttributes;
-use equip_penguin::structs::penguin_attributes::PenguinAttributes;
+use customize_nft::structs::item::Item;
+use customize_nft::structs::item_attributes::ItemAttributes;
+use customize_nft::structs::penguin_attributes::PenguinAttributes;
 
 mod testing_utils;
 
@@ -20,7 +20,7 @@ fn test_equip() {
         const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
         const ITEM_TO_EQUIP_NAME: &[u8] = b"item name";
 
-        let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+        let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
         let item_attributes = ItemAttributes::random();
         let item_init_nonce = setup.register_item_all_properties(
@@ -101,7 +101,7 @@ fn test_equip_while_overlap() {
         const OLD_HAT_NAME: &[u8] = b"old hat";
         const NEW_HAT_NAME: &[u8] = b"new hat";
 
-        let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+        let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
         // register hat to remove
         let hat_to_remove_nonce = setup.register_item_all_properties(
@@ -219,8 +219,8 @@ fn test_equip_while_overlap() {
 }
 
 #[test]
-fn equip_penguin_without_items() {
-    let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+fn customize_nft_without_items() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     let b_wrapper = &mut setup.blockchain_wrapper;
     // user own a penguin equiped with an hat
@@ -247,7 +247,7 @@ fn equip_penguin_without_items() {
 
 #[test]
 fn equip_while_nft_to_equip_is_not_a_penguin() {
-    let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -286,7 +286,7 @@ fn equip_while_nft_to_equip_is_not_a_penguin() {
 fn equip_while_item_is_not_an_item() {
     const ITEM_TO_EQUIP_ID: &[u8] = b"NOT-AN-ITEM-a";
 
-    let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -329,7 +329,7 @@ fn test_equip_while_sending_two_as_value_of_sft() {
         const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
         const NONCE: u64 = 30;
 
-        let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+        let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
         setup.register_item(slot.clone(), ITEM_TO_EQUIP_ID, &ItemAttributes::random());
 

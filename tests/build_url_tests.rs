@@ -3,17 +3,17 @@ use elrond_wasm::types::TokenIdentifier;
 use elrond_wasm_debug::DebugApi;
 mod testing_utils;
 
-use equip_penguin::libs::penguin_mint::MintPenguin;
-use equip_penguin::libs::storage::StorageModule;
-use equip_penguin::structs::item::Item;
-use equip_penguin::structs::item_attributes::ItemAttributes;
-use equip_penguin::structs::item_slot::ItemSlot;
-use equip_penguin::structs::penguin_attributes::PenguinAttributes;
+use customize_nft::libs::penguin_mint::MintPenguin;
+use customize_nft::libs::storage::StorageModule;
+use customize_nft::structs::item::Item;
+use customize_nft::structs::item_attributes::ItemAttributes;
+use customize_nft::structs::item_slot::ItemSlot;
+use customize_nft::structs::penguin_attributes::PenguinAttributes;
 use testing_utils::INIT_NONCE;
 
 #[test]
 fn build_url_with_no_item() {
-    let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     setup
         .blockchain_wrapper
@@ -37,7 +37,7 @@ fn build_url_with_one_item() {
     // testing_utils::execute_for_all_slot(|mut slot| {
     let slot = &ItemSlot::Hat;
 
-    let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     const ITEM_IDENTIFIER: &[u8] = b"ITEM-a1a1a1";
     const ITEM_TYPE: &[u8] = b"my-item-id";
@@ -86,7 +86,7 @@ fn build_url_with_one_item() {
 fn build_url_with_two_item() {
     // testing_utils::execute_for_all_slot(|mut slot| {
 
-    let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     const NONCE: u64 = INIT_NONCE;
 

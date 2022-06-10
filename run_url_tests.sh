@@ -1,1 +1,1 @@
-cargo test --package equip_penguin --test build_url_tests
+cargo test --package customize_nft --test build_url_tests

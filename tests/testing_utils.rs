@@ -9,14 +9,14 @@ use elrond_wasm::types::{
 use elrond_wasm_debug::tx_mock::{TxContextRef, TxInputESDT, TxResult};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
-use equip_penguin::structs::item::Item;
-use equip_penguin::structs::item_attributes::ItemAttributes;
-use equip_penguin::structs::item_slot::ItemSlot;
-use equip_penguin::structs::penguin_attributes::PenguinAttributes;
-use equip_penguin::*;
+use customize_nft::structs::item::Item;
+use customize_nft::structs::item_attributes::ItemAttributes;
+use customize_nft::structs::item_slot::ItemSlot;
+use customize_nft::structs::penguin_attributes::PenguinAttributes;
+use customize_nft::*;
 
 #[allow(dead_code)]
-const WASM_PATH: &'static str = "sc-customize-nft/output/equip_penguin.wasm";
+const WASM_PATH: &'static str = "sc-customize-nft/output/customize_nft.wasm";
 
 #[allow(dead_code)]
 pub const PENGUIN_TOKEN_ID: &[u8] = b"PENG-ae5a";
@@ -30,19 +30,19 @@ pub const INIT_NONCE: u64 = 65535u64;
 #[allow(dead_code)]
 pub struct EquipSetup<CrowdfundingObjBuilder>
 where
-    CrowdfundingObjBuilder: 'static + Copy + Fn() -> equip_penguin::ContractObj<DebugApi>,
+    CrowdfundingObjBuilder: 'static + Copy + Fn() -> customize_nft::ContractObj<DebugApi>,
 {
     pub blockchain_wrapper: BlockchainStateWrapper,
     pub owner_address: Address,
     pub first_user_address: Address,
     pub second_user_address: Address,
     pub cf_wrapper:
-        ContractObjWrapper<equip_penguin::ContractObj<DebugApi>, CrowdfundingObjBuilder>,
+        ContractObjWrapper<customize_nft::ContractObj<DebugApi>, CrowdfundingObjBuilder>,
 }
 
 impl<CrowdfundingObjBuilder> EquipSetup<CrowdfundingObjBuilder>
 where
-    CrowdfundingObjBuilder: 'static + Copy + Fn() -> equip_penguin::ContractObj<DebugApi>,
+    CrowdfundingObjBuilder: 'static + Copy + Fn() -> customize_nft::ContractObj<DebugApi>,
 {
     #[allow(dead_code)]
     pub fn add_item(
@@ -291,7 +291,7 @@ where
 #[allow(dead_code)]
 pub fn setup<TObjBuilder>(cf_builder: TObjBuilder) -> EquipSetup<TObjBuilder>
 where
-    TObjBuilder: 'static + Copy + Fn() -> equip_penguin::ContractObj<DebugApi>,
+    TObjBuilder: 'static + Copy + Fn() -> customize_nft::ContractObj<DebugApi>,
 {
     let rust_zero = rust_biguint!(0u64);
     let mut blockchain_wrapper = BlockchainStateWrapper::new();

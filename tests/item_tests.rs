@@ -3,7 +3,7 @@ use elrond_wasm::{
     types::{ManagedBuffer, TokenIdentifier},
 };
 use elrond_wasm_debug::{managed_buffer, DebugApi};
-use equip_penguin::structs::item::Item;
+use customize_nft::structs::item::Item;
 
 #[test]
 fn test_new() {

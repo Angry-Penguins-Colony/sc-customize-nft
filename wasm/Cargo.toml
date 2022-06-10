@@ -1,5 +1,5 @@
 [package]
-name = "equip_penguin-wasm"
+name = "customize_nft-wasm"
 version = "0.0.0"
 authors = [ "you",]
 edition = "2018"
@@ -20,7 +20,7 @@ lto = true
 debug = false
 panic = "abort"
 
-[dependencies.equip_penguin]
+[dependencies.customize_nft]
 path = ".."
 
 [dependencies.elrond-wasm-node]

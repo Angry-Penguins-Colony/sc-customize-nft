@@ -1,5 +1,5 @@
 {
-    "name": "equip_penguin",
+    "name": "customize_nft",
     "comment": "add then check",
     "gasSchedule": "v3",
     "steps": [
@@ -60,7 +60,7 @@
                     "storage": {
                         "str:sum": "8"
                     },
-                    "code": "file:../output/equip_penguin.wasm"
+                    "code": "file:../output/customize_nft.wasm"
                 }
             }
         }

@@ -1,10 +1,10 @@
 use elrond_wasm::types::{EsdtLocalRole, ManagedVec, MultiValueEncoded, TokenIdentifier};
 use elrond_wasm_debug::managed_token_id;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
-use equip_penguin::libs::storage::StorageModule;
-use equip_penguin::structs::item_attributes::ItemAttributes;
-use equip_penguin::structs::item_slot::ItemSlot;
-use equip_penguin::*;
+use customize_nft::libs::storage::StorageModule;
+use customize_nft::structs::item_attributes::ItemAttributes;
+use customize_nft::structs::item_slot::ItemSlot;
+use customize_nft::*;
 
 mod testing_utils;
 
@@ -16,7 +16,7 @@ fn test_register_item() {
     testing_utils::execute_for_all_slot(|slot| {
         const TOKEN_ID: &[u8] = b"ITEM-a1a1a1";
 
-        let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+        let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
         setup.register_item(slot.clone(), TOKEN_ID, &ItemAttributes::random());
 
@@ -47,7 +47,7 @@ fn test_register_item() {
 #[test]
 fn register_another_item_on_slot() {
     testing_utils::execute_for_all_slot(|slot| {
-        let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+        let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
         setup.register_item(slot.clone(), HAT_TOKEN_ID, &ItemAttributes::random());
         setup.register_item(
@@ -77,7 +77,7 @@ fn register_another_item_on_slot() {
 #[test]
 fn register_unmintable_item() {
     testing_utils::execute_for_all_slot(|slot| {
-        let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+        let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
         let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -103,7 +103,7 @@ fn register_unburnable_item() {
     testing_utils::execute_for_all_slot(|slot| {
         const UNBURNABLE: &[u8] = b"a token without minting rights";
 
-        let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+        let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
         let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -136,7 +136,7 @@ fn change_item_slot() {
         const ITEM_ID: &[u8] = HAT_TOKEN_ID;
         const OLD_SLOT: ItemSlot = ItemSlot::Hat;
 
-        let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+        let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
         setup.register_item(OLD_SLOT.clone(), ITEM_ID, &ItemAttributes::random());
         setup.register_item(new_slot.clone(), ITEM_ID, &ItemAttributes::random());
@@ -155,7 +155,7 @@ fn change_item_slot() {
 #[test]
 fn register_penguin_as_item_should_not_work() {
     testing_utils::execute_for_all_slot(|slot| {
-        let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+        let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
         const PENGUIN_TOKEN_ID: &[u8] = testing_utils::PENGUIN_TOKEN_ID;
 
@@ -181,7 +181,7 @@ fn register_penguin_as_item_should_not_work() {
 #[test]
 fn register_while_not_the_owner() {
     testing_utils::execute_for_all_slot(|slot| {
-        let mut setup = testing_utils::setup(equip_penguin::contract_obj);
+        let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
         let b_wrapper = &mut setup.blockchain_wrapper;
 

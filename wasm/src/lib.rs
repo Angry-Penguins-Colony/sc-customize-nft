@@ -5,7 +5,7 @@
 #![no_std]
 
 elrond_wasm_node::wasm_endpoints! {
-    equip_penguin
+    customize_nft
     (
         customize
         fill

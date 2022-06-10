@@ -1,5 +1,5 @@
 [package]
-name = "equip_penguin-meta"
+name = "customize_nft-meta"
 version = "0.0.0"
 edition = "2018"
 publish = false
@@ -7,7 +7,7 @@ authors = [ "you",]
 
 [dev-dependencies]
 
-[dependencies.equip_penguin]
+[dependencies.customize_nft]
 path = ".."
 
 [dependencies.elrond-wasm]

@@ -7,10 +7,15 @@ use elrond_wasm::{
     types::{ManagedBuffer, ManagedByteArray, ManagedVec, SCResult},
 };
 
+use crate::constants::ERR_NO_CID_URL;
 use crate::structs::{item_slot::ItemSlot, penguin_attributes::PenguinAttributes, utils};
 
 #[elrond_wasm::module]
-pub trait MintPenguin: super::storage::StorageModule + super::penguin_parse::ParsePenguin {
+pub trait MintPenguin:
+    super::storage::StorageModule
+    + super::penguin_parse::ParsePenguin
+    + super::penguin_url_builder::PenguinURLBuilder
+{
     fn update_penguin(
         &self,
         penguin_id: &TokenIdentifier,
@@ -51,7 +56,7 @@ pub trait MintPenguin: super::storage::StorageModule + super::penguin_parse::Par
         let penguin_id = self.penguins_identifier().get();
 
         let mut uris = ManagedVec::new();
-        uris.push(self.build_url(&attributes, &name));
+        uris.push(self.build_url(&attributes));
 
         let token_nonce = self.send().esdt_nft_create::<PenguinAttributes<Self::Api>>(
             &penguin_id,
@@ -72,39 +77,6 @@ pub trait MintPenguin: super::storage::StorageModule + super::penguin_parse::Par
     ) -> SCResult<ManagedBuffer> {
         // we disabled hash calculating for now
         return SCResult::Ok(ManagedBuffer::new());
-    }
-
-    fn build_url(
-        &self,
-        attributes: &PenguinAttributes<Self::Api>,
-        name: &ManagedBuffer,
-    ) -> ManagedBuffer<Self::Api> {
-        let mut expected = ManagedBuffer::new();
-        expected.append(&self.uri().get());
-
-        for slot in ItemSlot::VALUES.iter() {
-            if let Some(item) = attributes.get_item(slot) {
-                let token_data = self.parse_item_attributes(&item.token, item.nonce);
-
-                let slot_type = token_data.item_id;
-                let slot_id = slot.to_bytes::<Self::Api>();
-
-                sc_print!("{:x}", &slot_type);
-
-                expected.append(&ManagedBuffer::new_from_bytes(slot_id));
-                expected.append_bytes(b"_");
-                expected.append(&slot_type);
-                expected.append_bytes(b"+");
-            }
-        }
-
-        let badge_number = utils::get_number_from_penguin_name(&name).unwrap();
-        expected.append_bytes(b"badge_");
-        expected.append(&utils::u64_to_ascii(&badge_number));
-
-        expected.append_bytes(b"/image");
-
-        return expected;
     }
 
     fn get_next_penguin_name(&self) -> ManagedBuffer {

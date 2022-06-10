@@ -8,6 +8,7 @@ elrond_wasm::derive_imports!();
 
 extern crate alloc;
 
+pub mod constants;
 pub mod libs;
 pub mod structs;
 
@@ -21,12 +22,15 @@ use structs::{
 
 #[elrond_wasm::derive::contract]
 pub trait Equip:
-    penguin_mint::MintPenguin + penguin_parse::ParsePenguin + storage::StorageModule
+    penguin_mint::MintPenguin
+    + penguin_parse::ParsePenguin
+    + storage::StorageModule
+    + penguin_url_builder::PenguinURLBuilder
 {
     #[init]
     fn init(&self, penguins_identifier: TokenIdentifier) -> SCResult<()> {
         self.penguins_identifier().set(&penguins_identifier);
-        self.uri().set(ManagedBuffer::new_from_bytes(
+        self.ipfs_gateway().set(ManagedBuffer::new_from_bytes(
             b"https://penguins-generator.herokuapp.com/",
         ));
 

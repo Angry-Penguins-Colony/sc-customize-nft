@@ -16,7 +16,7 @@ use super::{item::Item, item_slot::ItemSlot, utils::split_buffer};
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-#[derive(PartialEq, TypeAbi, Debug)]
+#[derive(NestedEncode, NestedDecode, PartialEq, TypeAbi, Debug)]
 pub struct PenguinAttributes<M: ManagedTypeApi> {
     pub hat: Option<Item<M>>,
     pub background: Option<Item<M>>,

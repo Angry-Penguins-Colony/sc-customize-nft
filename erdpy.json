@@ -6,8 +6,7 @@
             "verbose": true,
             "bytecode": "output/customize_nft.wasm",
             "recall-nonce": true,
-            "keyfile": "wallets/hjq.json",
-            "passfile": "wallets/hjq.pwd",
+            "pem": "wallets/gh8.pem",
             "gas-limit": 600000000,
             "arguments": [
                 "0x43454C2D316133643631"

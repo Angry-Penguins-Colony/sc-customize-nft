@@ -32,20 +32,20 @@ fn customize_only_desequip() {
         ItemAttributes::random(),
     );
 
-    let attributes = PenguinAttributes::new(&[(
-        &slot,
-        Item {
-            token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_DESEQUIP_ID),
-            nonce: NONCE,
-            name: ManagedBuffer::new_from_bytes(b"item name"),
-        },
-    )]);
-
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             sc.ipfs_gateway()
                 .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/"));
+
+            let attributes = PenguinAttributes::new(&[(
+                &slot,
+                Item {
+                    token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_DESEQUIP_ID),
+                    nonce: NONCE,
+                    name: ManagedBuffer::new_from_bytes(b"item name"),
+                },
+            )]);
 
             sc.set_thumbnail_cid(
                 &attributes,

@@ -123,7 +123,7 @@ where
             &self.cf_wrapper.address_ref(),
             &item_id,
             INIT_NONCE,
-            &rust_biguint!(1u64),
+            &rust_biguint!(2u64),
             &attributes,
             royalties,
             creator,
@@ -178,7 +178,7 @@ where
         item_nonce: u64,
         slot: ItemSlot,
         attributes: ItemAttributes<DebugApi>,
-    )  {
+    ) {
         let _ = self.register_item(slot.clone(), item_identifier, &attributes);
 
         self.blockchain_wrapper.set_nft_balance(

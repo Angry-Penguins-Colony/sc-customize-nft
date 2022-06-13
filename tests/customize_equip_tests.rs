@@ -1,10 +1,11 @@
+use customize_nft::structs::item::Item;
+use customize_nft::structs::item_attributes::ItemAttributes;
+use customize_nft::structs::item_slot::ItemSlot;
+use customize_nft::structs::penguin_attributes::PenguinAttributes;
 use elrond_wasm::types::{EsdtTokenType, ManagedBuffer, SCResult};
 use elrond_wasm_debug::managed_token_id;
 use elrond_wasm_debug::tx_mock::TxInputESDT;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
-use customize_nft::structs::item::Item;
-use customize_nft::structs::item_attributes::ItemAttributes;
-use customize_nft::structs::penguin_attributes::PenguinAttributes;
 
 mod testing_utils;
 
@@ -95,127 +96,113 @@ fn test_equip() {
 
 #[test]
 fn test_equip_while_overlap() {
-    testing_utils::execute_for_all_slot(|slot| {
-        const ITEM_TO_EQUIP: &[u8] = b"ITEM-a1a1a1";
-        const HAT_TO_EQUIP_NONCE: u64 = 30;
-        const OLD_HAT_NAME: &[u8] = b"old hat";
-        const NEW_HAT_NAME: &[u8] = b"new hat";
+    let slot = &ItemSlot::Hat;
+    const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
+    const ITEM_TO_EQUIP_NONCE: u64 = 30;
+    const OLD_HAT_NAME: &[u8] = b"old hat";
+    const NEW_HAT_NAME: &[u8] = b"new hat";
 
-        let mut setup = testing_utils::setup(customize_nft::contract_obj);
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-        // register hat to remove
-        let hat_to_remove_nonce = setup.register_item_all_properties(
-            slot.clone(),
-            ITEM_TO_EQUIP,
-            &ItemAttributes::random(),
-            0u64,
-            Option::None,
-            Option::Some(OLD_HAT_NAME),
-            Option::None,
-            &[],
-        );
+    // register hat to remove
+    let hat_to_remove_nonce = setup.register_item_all_properties(
+        slot.clone(),
+        ITEM_TO_EQUIP_ID,
+        &ItemAttributes::random(),
+        0u64,
+        Option::None,
+        Option::Some(OLD_HAT_NAME),
+        Option::None,
+        &[],
+    );
 
-        // user own a penguin equiped with an hat
-        setup.blockchain_wrapper.set_nft_balance(
+    // user own a penguin equiped with an hat
+    setup.blockchain_wrapper.set_nft_balance(
+        &setup.first_user_address,
+        PENGUIN_TOKEN_ID,
+        INIT_NONCE,
+        &rust_biguint!(1),
+        &PenguinAttributes::<DebugApi>::new(&[(
+            slot,
+            Item {
+                token: managed_token_id!(ITEM_TO_EQUIP_ID),
+                nonce: hat_to_remove_nonce,
+                name: ManagedBuffer::new_from_bytes(NEW_HAT_NAME),
+            },
+        )]),
+    );
+
+    // give the player a hat
+    let attributes = ItemAttributes::<DebugApi>::random();
+    setup.blockchain_wrapper.set_nft_balance_all_properties(
+        &setup.first_user_address,
+        ITEM_TO_EQUIP_ID,
+        ITEM_TO_EQUIP_NONCE,
+        &rust_biguint!(1),
+        &attributes,
+        0,
+        Option::Some(&setup.owner_address),
+        Option::Some(NEW_HAT_NAME),
+        Option::None,
+        &[],
+    );
+
+    let (esdt_transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[
+        (PENGUIN_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
+        (
+            ITEM_TO_EQUIP_ID,
+            ITEM_TO_EQUIP_NONCE,
+            EsdtTokenType::SemiFungible,
+        ),
+    ]);
+
+    let (sc_result, tx_result) = setup.equip(esdt_transfers);
+
+    tx_result.assert_ok();
+    assert_eq!(sc_result, SCResult::Ok(1u64));
+
+    // sent penguin is burned
+    setup.assert_is_burn(&PENGUIN_TOKEN_ID, INIT_NONCE);
+
+    let b_wrapper = &mut setup.blockchain_wrapper;
+
+    // sent removed equipment
+    assert_eq!(
+        b_wrapper.get_esdt_balance(&setup.first_user_address, ITEM_TO_EQUIP_ID, INIT_NONCE),
+        rust_biguint!(1)
+    );
+
+    // new penguin is received
+    assert_eq!(
+        b_wrapper.get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, 1),
+        rust_biguint!(1)
+    );
+
+    // NEW penguin has the right attributes
+    b_wrapper.check_nft_balance(
+        &setup.first_user_address,
+        PENGUIN_TOKEN_ID,
+        1,
+        &rust_biguint!(1),
+        &PenguinAttributes::<DebugApi>::new(&[(
+            slot,
+            Item {
+                token: managed_token_id!(ITEM_TO_EQUIP_ID),
+                nonce: ITEM_TO_EQUIP_NONCE,
+                name: ManagedBuffer::new_from_bytes(b"new hat"),
+            },
+        )]),
+    );
+
+    // previously hat is sent
+    assert_eq!(
+        b_wrapper.get_esdt_balance(
             &setup.first_user_address,
-            PENGUIN_TOKEN_ID,
-            INIT_NONCE,
-            &rust_biguint!(1),
-            &PenguinAttributes::<DebugApi>::new(&[(
-                slot,
-                Item {
-                    token: managed_token_id!(ITEM_TO_EQUIP),
-                    nonce: hat_to_remove_nonce,
-                    name: ManagedBuffer::new_from_bytes(NEW_HAT_NAME),
-                },
-            )]),
-        );
-
-        // give the player a hat
-        let attributes = ItemAttributes::<DebugApi>::random();
-        setup.blockchain_wrapper.set_nft_balance_all_properties(
-            &setup.first_user_address,
-            ITEM_TO_EQUIP,
-            HAT_TO_EQUIP_NONCE,
-            &rust_biguint!(1),
-            &attributes,
-            0,
-            Option::Some(&setup.owner_address),
-            Option::Some(NEW_HAT_NAME),
-            Option::None,
-            &[],
-        );
-
-        setup.blockchain_wrapper.set_nft_balance_all_properties(
-            &setup.first_user_address,
-            ITEM_TO_EQUIP,
-            HAT_TO_EQUIP_NONCE,
-            &rust_biguint!(1),
-            &attributes,
-            0,
-            Option::Some(&setup.owner_address),
-            Option::Some(NEW_HAT_NAME),
-            Option::None,
-            &[],
-        );
-
-        let (esdt_transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[
-            (PENGUIN_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
-            (
-                ITEM_TO_EQUIP,
-                HAT_TO_EQUIP_NONCE,
-                EsdtTokenType::SemiFungible,
-            ),
-        ]);
-
-        let (sc_result, tx_result) = setup.equip(esdt_transfers);
-
-        tx_result.assert_ok();
-        assert_eq!(sc_result, SCResult::Ok(1u64));
-
-        // sent penguin is burned
-        setup.assert_is_burn(&PENGUIN_TOKEN_ID, INIT_NONCE);
-
-        let b_wrapper = &mut setup.blockchain_wrapper;
-
-        // sent removed equipment
-        assert_eq!(
-            b_wrapper.get_esdt_balance(&setup.first_user_address, ITEM_TO_EQUIP, INIT_NONCE),
-            rust_biguint!(1)
-        );
-
-        // new penguin is received
-        assert_eq!(
-            b_wrapper.get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, 1),
-            rust_biguint!(1)
-        );
-
-        // NEW penguin has the right attributes
-        b_wrapper.check_nft_balance(
-            &setup.first_user_address,
-            PENGUIN_TOKEN_ID,
-            1,
-            &rust_biguint!(1),
-            &PenguinAttributes::<DebugApi>::new(&[(
-                slot,
-                Item {
-                    token: managed_token_id!(ITEM_TO_EQUIP),
-                    nonce: HAT_TO_EQUIP_NONCE,
-                    name: ManagedBuffer::new_from_bytes(b"new hat"),
-                },
-            )]),
-        );
-
-        // previously hat is sent
-        assert_eq!(
-            b_wrapper.get_esdt_balance(
-                &setup.first_user_address,
-                ITEM_TO_EQUIP,
-                hat_to_remove_nonce
-            ),
-            rust_biguint!(1)
-        );
-    });
+            ITEM_TO_EQUIP_ID,
+            hat_to_remove_nonce
+        ),
+        rust_biguint!(1)
+    );
 }
 
 #[test]

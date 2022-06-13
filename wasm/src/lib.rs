@@ -11,7 +11,7 @@ elrond_wasm_node::wasm_endpoints! {
         fill
         getItemType
         registerItem
-        set_cid
+        set_thumbnail_cid
     )
 }
 

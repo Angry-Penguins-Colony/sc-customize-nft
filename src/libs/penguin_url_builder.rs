@@ -12,14 +12,17 @@ use crate::structs::{item_attributes::ItemAttributes, penguin_attributes::Pengui
 
 #[elrond_wasm::module]
 pub trait PenguinURLBuilder: super::storage::StorageModule {
-    fn build_url(&self, attributes: &PenguinAttributes<Self::Api>) -> ManagedBuffer<Self::Api> {
-        let cid = self.penguin_cid_by_attributes(attributes);
+    fn build_thumbnail_url(
+        &self,
+        attributes: &PenguinAttributes<Self::Api>,
+    ) -> SCResult<ManagedBuffer<Self::Api>> {
+        let cid = self.thumbnail_cid(attributes);
 
         require!(cid.is_empty() == false, ERR_NO_CID_URL);
 
         let mut url = self.ipfs_gateway().get();
         url.append(&cid.get());
 
-        return url;
+        return Ok(url);
     }
 }

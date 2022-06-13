@@ -178,7 +178,7 @@ where
         item_nonce: u64,
         slot: ItemSlot,
         attributes: ItemAttributes<DebugApi>,
-    ) {
+    )  {
         let _ = self.register_item(slot.clone(), item_identifier, &attributes);
 
         self.blockchain_wrapper.set_nft_balance(
@@ -189,19 +189,21 @@ where
             &attributes,
         );
 
+        let attributes = PenguinAttributes::new(&[(
+            &slot,
+            Item {
+                token: TokenIdentifier::<DebugApi>::from_esdt_bytes(item_identifier),
+                nonce: item_nonce,
+                name: ManagedBuffer::new_from_bytes(b"item name"),
+            },
+        )]);
+
         self.blockchain_wrapper.set_nft_balance(
             &self.first_user_address,
             PENGUIN_TOKEN_ID,
             penguin_nonce,
             &rust_biguint!(1),
-            &PenguinAttributes::new(&[(
-                &slot,
-                Item {
-                    token: TokenIdentifier::<DebugApi>::from_esdt_bytes(item_identifier),
-                    nonce: item_nonce,
-                    name: ManagedBuffer::new_from_bytes(b"item name"),
-                },
-            )]),
+            &attributes,
         );
     }
 

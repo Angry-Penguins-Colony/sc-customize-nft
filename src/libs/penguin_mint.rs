@@ -56,7 +56,8 @@ pub trait MintPenguin:
         let penguin_id = self.penguins_identifier().get();
 
         let mut uris = ManagedVec::new();
-        uris.push(self.build_url(&attributes));
+        let thumbnail = self.build_thumbnail_url(&attributes)?;
+        uris.push(thumbnail);
 
         let token_nonce = self.send().esdt_nft_create::<PenguinAttributes<Self::Api>>(
             &penguin_id,

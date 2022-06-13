@@ -2,6 +2,7 @@ use customize_nft::constants::ERR_NO_CID_URL;
 use customize_nft::libs::penguin_url_builder::PenguinURLBuilder;
 use customize_nft::libs::storage::StorageModule;
 use elrond_wasm::types::ManagedBuffer;
+use elrond_wasm::types::SCResult;
 use elrond_wasm::types::TokenIdentifier;
 use elrond_wasm_debug::DebugApi;
 mod testing_utils;
@@ -28,7 +29,7 @@ fn build_url_with_no_associated_cid() {
                 ..PenguinAttributes::empty()
             };
 
-            sc.build_url(&penguin_attributes);
+            let _ = sc.build_thumbnail_url(&penguin_attributes);
         })
         .assert_user_error(ERR_NO_CID_URL);
 }
@@ -52,7 +53,7 @@ fn build_url_with_associated_cid() {
                 ..PenguinAttributes::empty()
             };
 
-            sc.set_cid(
+            sc.set_thumbnail_cid(
                 &penguin_attributes,
                 ManagedBuffer::new_from_bytes(b"this is a CID"),
             );
@@ -60,11 +61,11 @@ fn build_url_with_associated_cid() {
             sc.ipfs_gateway()
                 .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/"));
 
-            let url = sc.build_url(&penguin_attributes);
+            let url = sc.build_thumbnail_url(&penguin_attributes);
 
             assert_eq!(
                 url,
-                ManagedBuffer::from(b"https://ipfs.io/ipfs/this is a CID")
+                SCResult::Ok(ManagedBuffer::from(b"https://ipfs.io/ipfs/this is a CID"))
             )
         })
         .assert_ok();

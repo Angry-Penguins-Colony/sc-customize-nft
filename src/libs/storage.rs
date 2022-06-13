@@ -15,7 +15,7 @@ pub trait StorageModule {
     fn ipfs_gateway(&self) -> SingleValueMapper<ManagedBuffer<Self::Api>>;
 
     #[storage_mapper("penguin_cid_by_attributes")]
-    fn penguin_cid_by_attributes(
+    fn thumbnail_cid(
         &self,
         attributes: &PenguinAttributes<Self::Api>,
     ) -> SingleValueMapper<ManagedBuffer>;
@@ -24,7 +24,11 @@ pub trait StorageModule {
 
     #[endpoint]
     #[only_owner]
-    fn set_cid(&self, attributes: &PenguinAttributes<Self::Api>, cid: ManagedBuffer<Self::Api>) {
-        self.penguin_cid_by_attributes(attributes).set(cid);
+    fn set_thumbnail_cid(
+        &self,
+        attributes: &PenguinAttributes<Self::Api>,
+        cid: ManagedBuffer<Self::Api>,
+    ) {
+        self.thumbnail_cid(attributes).set(cid);
     }
 }

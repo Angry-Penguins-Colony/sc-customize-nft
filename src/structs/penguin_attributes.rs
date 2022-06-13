@@ -16,7 +16,7 @@ use super::{item::Item, item_slot::ItemSlot, utils::split_buffer};
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-#[derive(NestedEncode, NestedDecode, PartialEq, TypeAbi, Debug)]
+#[derive(TopEncode, TopDecode,NestedEncode, NestedDecode, PartialEq, TypeAbi, Debug)]
 pub struct PenguinAttributes<M: ManagedTypeApi> {
     pub hat: Option<Item<M>>,
     pub background: Option<Item<M>>,
@@ -27,63 +27,63 @@ pub struct PenguinAttributes<M: ManagedTypeApi> {
     pub eye: Option<Item<M>>,
 }
 
-impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
-    fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
-        let unequipped_buffer = ManagedBuffer::<M>::new_from_bytes(b"unequipped");
+// impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
+//     fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
+//         let unequipped_buffer = ManagedBuffer::<M>::new_from_bytes(b"unequipped");
 
-        let mut penguin = PenguinAttributes::empty();
+//         let mut penguin = PenguinAttributes::empty();
 
-        let buffer = <ManagedBuffer<M> as TopDecode>::top_decode(input).unwrap();
-        let items_raw = split_buffer(&buffer, b';');
+//         let buffer = <ManagedBuffer<M> as TopDecode>::top_decode(input).unwrap();
+//         let items_raw = split_buffer(&buffer, b';');
 
-        for item_raw in items_raw.iter() {
-            let parts = split_buffer(item_raw.deref(), b':');
+//         for item_raw in items_raw.iter() {
+//             let parts = split_buffer(item_raw.deref(), b':');
 
-            let slot_buffer = parts.get(0).deref().to_owned();
-            let item_buffer = parts.get(1);
+//             let slot_buffer = parts.get(0).deref().to_owned();
+//             let item_buffer = parts.get(1);
 
-            let item = if item_buffer.deref() == &unequipped_buffer {
-                None
-            } else {
-                Some(Item::top_decode(item_buffer.deref()).unwrap())
-            };
+//             let item = if item_buffer.deref() == &unequipped_buffer {
+//                 None
+//             } else {
+//                 Some(Item::top_decode(item_buffer.deref()).unwrap())
+//             };
 
-            let slot = ItemSlot::from(slot_buffer);
+//             let slot = ItemSlot::from(slot_buffer);
 
-            if slot == ItemSlot::None {
-                return Result::Err(DecodeError::from(&b"Unable to parse a slot"[..]));
-            }
+//             if slot == ItemSlot::None {
+//                 return Result::Err(DecodeError::from(&b"Unable to parse a slot"[..]));
+//             }
 
-            let _ = penguin.set_item(&slot, item);
-        }
+//             let _ = penguin.set_item(&slot, item);
+//         }
 
-        return Result::Ok(penguin);
-    }
-}
+//         return Result::Ok(penguin);
+//     }
+// }
 
-impl<M: ManagedTypeApi> TopEncode for PenguinAttributes<M> {
-    fn top_encode<O: elrond_codec::TopEncodeOutput>(
-        &self,
-        output: O,
-    ) -> Result<(), elrond_codec::EncodeError> {
-        let mut managed_buffer = ManagedBuffer::<M>::new();
+// impl<M: ManagedTypeApi> TopEncode for PenguinAttributes<M> {
+//     fn top_encode<O: elrond_codec::TopEncodeOutput>(
+//         &self,
+//         output: O,
+//     ) -> Result<(), elrond_codec::EncodeError> {
+//         let mut managed_buffer = ManagedBuffer::<M>::new();
 
-        for (i, slot) in ItemSlot::VALUES.iter().enumerate() {
-            managed_buffer.append(&self.to_managed_buffer(slot));
+//         for (i, slot) in ItemSlot::VALUES.iter().enumerate() {
+//             managed_buffer.append(&self.to_managed_buffer(slot));
 
-            // add comma, except for the last line
-            if i < ItemSlot::VALUES.len() - 1 {
-                managed_buffer.append_bytes(b";");
-            }
-        }
+//             // add comma, except for the last line
+//             if i < ItemSlot::VALUES.len() - 1 {
+//                 managed_buffer.append_bytes(b";");
+//             }
+//         }
 
-        let mut bytes: [u8; 512] = [0; 512];
-        managed_buffer.load_to_byte_array(&mut bytes);
-        output.set_slice_u8(&bytes[..managed_buffer.len()]);
+//         let mut bytes: [u8; 512] = [0; 512];
+//         managed_buffer.load_to_byte_array(&mut bytes);
+//         output.set_slice_u8(&bytes[..managed_buffer.len()]);
 
-        return Result::Ok(());
-    }
-}
+//         return Result::Ok(());
+//     }
+// }
 
 impl<M: ManagedTypeApi> PenguinAttributes<M> {
     pub fn new(args: &[(&ItemSlot, Item<M>)]) -> Self {

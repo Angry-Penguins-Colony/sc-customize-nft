@@ -1,8 +1,8 @@
-use elrond_wasm::types::SCResult;
-use elrond_wasm_debug::{rust_biguint, DebugApi};
 use customize_nft::structs::{
     item_attributes::ItemAttributes, item_slot::ItemSlot, penguin_attributes::PenguinAttributes,
 };
+use elrond_wasm::types::SCResult;
+use elrond_wasm_debug::{rust_biguint, DebugApi};
 
 mod testing_utils;
 

@@ -1,5 +1,10 @@
 use std::u8;
 
+use customize_nft::structs::item::Item;
+use customize_nft::structs::item_attributes::ItemAttributes;
+use customize_nft::structs::item_slot::ItemSlot;
+use customize_nft::structs::penguin_attributes::PenguinAttributes;
+use customize_nft::*;
 use elrond_wasm::contract_base::ContractBase;
 use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::{
@@ -9,11 +14,6 @@ use elrond_wasm::types::{
 use elrond_wasm_debug::tx_mock::{TxContextRef, TxInputESDT, TxResult};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
-use customize_nft::structs::item::Item;
-use customize_nft::structs::item_attributes::ItemAttributes;
-use customize_nft::structs::item_slot::ItemSlot;
-use customize_nft::structs::penguin_attributes::PenguinAttributes;
-use customize_nft::*;
 
 #[allow(dead_code)]
 const WASM_PATH: &'static str = "sc-customize-nft/output/customize_nft.wasm";
@@ -185,7 +185,7 @@ where
             &self.cf_wrapper.address_ref(),
             &item_identifier,
             item_nonce,
-            &rust_biguint!(1u64),
+            &rust_biguint!(2u64),
             &attributes,
         );
 

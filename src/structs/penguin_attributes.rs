@@ -23,36 +23,29 @@ pub struct PenguinAttributes<M: ManagedTypeApi> {
 
 impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
     fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
-        panic!("Not implemented");
-        // let unequipped_buffer = ManagedBuffer::<M>::new_from_bytes(b"unequipped");
+        let unequipped_buffer = ManagedBuffer::<M>::new_from_bytes(b"unequipped");
 
-        // let mut penguin = PenguinAttributes::empty();
+        let mut penguin = PenguinAttributes::empty();
 
-        // let buffer = <ManagedBuffer<M> as TopDecode>::top_decode(input).unwrap();
-        // let items_raw = split_buffer(&buffer, b';');
+        let buffer = <ManagedBuffer<M> as TopDecode>::top_decode(input).unwrap();
+        let items_raw = split_buffer(&buffer, b';');
 
-        // for item_raw in items_raw.iter() {
-        //     let parts = split_buffer(item_raw.deref(), b':');
+        for item_raw in items_raw.iter() {
+            let parts = split_buffer(item_raw.deref(), b':');
 
-        //     let slot_buffer = parts.get(0).deref().to_owned();
-        //     let item_buffer = parts.get(1);
+            let slot = parts.get(0).deref().to_owned();
+            let item_buffer = parts.get(1);
 
-        //     let item = if item_buffer.deref() == &unequipped_buffer {
-        //         None
-        //     } else {
-        //         Some(Item::top_decode(item_buffer.deref()).unwrap())
-        //     };
+            let item = if item_buffer.deref() == &unequipped_buffer {
+                None
+            } else {
+                Some(Item::top_decode(item_buffer.deref()).unwrap())
+            };
 
-        //     let slot = ItemSlot::from(slot_buffer);
+            let _ = penguin.set_item(&slot, item);
+        }
 
-        //     if slot == ItemSlot::None {
-        //         return Result::Err(DecodeError::from(&b"Unable to parse a slot"[..]));
-        //     }
-
-        //     let _ = penguin.set_item(&slot, item);
-        // }
-
-        // return Result::Ok(penguin);
+        return Result::Ok(penguin);
     }
 }
 

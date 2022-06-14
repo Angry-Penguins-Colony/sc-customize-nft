@@ -9,11 +9,11 @@ use elrond_wasm_debug::{managed_buffer, DebugApi};
 fn decode_penguin() {
     DebugApi::dummy();
 
-    let input_data=b"Hat:Pirate Hat (HAT-a2b4e5-01);Background:unequipped;Skin:unequipped;Beak:unequipped;Weapon:unequipped;Clothes:unequipped;Eyes:unequipped";
+    let input_data = b"Hat:Pirate Hat (HAT-a2b4e5-01)";
     let input_buffer = ManagedBuffer::<DebugApi>::new_from_bytes(input_data);
 
     let expected_output = PenguinAttributes::new(&[(
-        &ManagedBuffer::new_from_bytes(b"hat"),
+        &ManagedBuffer::new_from_bytes(b"Hat"),
         Item::<DebugApi> {
             token: TokenIdentifier::from_esdt_bytes(b"HAT-a2b4e5"),
             nonce: 1,

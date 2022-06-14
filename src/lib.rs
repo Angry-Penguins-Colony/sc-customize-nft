@@ -162,11 +162,7 @@ pub trait Equip:
             self.desequip_slot(attributes, &item_slot)?;
         }
 
-        let result = attributes.set_item(&item_slot, Option::Some(item.clone()));
-        require!(
-            result == Result::Ok(()),
-            "Cannot set item. Maybe the item is not considered like an item."
-        );
+        attributes.set_item(&item_slot, Option::Some(item.clone()));
 
         return SCResult::Ok(());
     }
@@ -247,10 +243,7 @@ pub trait Equip:
                 self.send()
                     .direct_esdt(&caller, &item_id, item_nonce, &BigUint::from(1u32), &[]);
 
-                let result = attributes.empty_slot(&slot);
-
-                require!(result.is_err() == false, "Error while emptying slot");
-
+                attributes.empty_slot(&slot);
                 return SCResult::Ok(());
             }
 

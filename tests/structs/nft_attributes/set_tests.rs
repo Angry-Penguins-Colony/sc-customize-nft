@@ -4,8 +4,9 @@ use elrond_wasm_debug::DebugApi;
 
 #[test]
 fn set_item_on_empty_slot() {
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
     DebugApi::dummy();
+
+    let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
     let mut penguin = PenguinAttributes::<DebugApi>::empty();
 
@@ -13,7 +14,7 @@ fn set_item_on_empty_slot() {
     let managed_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(token);
     let nonce = 1;
 
-    let result = penguin.set_item(
+    penguin.set_item(
         &slot,
         Option::Some(Item {
             token: managed_token.clone(),
@@ -21,7 +22,6 @@ fn set_item_on_empty_slot() {
             name: ManagedBuffer::new_from_bytes(b"item name"),
         }),
     );
-    assert_eq!(result, Result::Ok(()));
 
     let item = penguin.get_item(slot).unwrap();
 
@@ -30,9 +30,11 @@ fn set_item_on_empty_slot() {
 }
 
 #[test]
+#[should_panic]
 fn set_item_on_not_empty_slot() {
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
     DebugApi::dummy();
+
+    let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
     let mut penguin = PenguinAttributes::<DebugApi>::new(&[(
         slot,
@@ -47,18 +49,13 @@ fn set_item_on_not_empty_slot() {
     let managed_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(token);
     let nonce = 1;
 
-    let result = penguin.set_item(
+    // expect panic
+    penguin.set_item(
         &slot,
         Option::Some(Item {
             token: managed_token.clone(),
             nonce: nonce,
             name: ManagedBuffer::new_from_bytes(b"item name"),
         }),
-    );
-    assert_eq!(
-        result,
-        Result::Err(ManagedBuffer::new_from_bytes(
-            b"The slot is not empty. Please free it, before setting an item.",
-        ))
     );
 }

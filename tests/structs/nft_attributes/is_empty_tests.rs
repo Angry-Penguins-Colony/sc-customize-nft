@@ -4,8 +4,8 @@ use elrond_wasm_debug::DebugApi;
 
 #[test]
 fn is_empty_while_not_empty() {
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
     DebugApi::dummy();
+    let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
     let penguin = PenguinAttributes::<DebugApi>::new(&[(
         slot,
@@ -21,8 +21,8 @@ fn is_empty_while_not_empty() {
 
 #[test]
 fn is_empty_while_empty() {
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
     DebugApi::dummy();
+    let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
     let penguin = PenguinAttributes::<DebugApi>::empty();
 

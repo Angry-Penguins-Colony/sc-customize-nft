@@ -4,8 +4,9 @@ use elrond_wasm_debug::DebugApi;
 
 #[test]
 fn empty_slot_while_slot_is_empty() {
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
     DebugApi::dummy();
+
+    let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
     let mut penguin = PenguinAttributes::<DebugApi>::new(&[(
         slot,
@@ -16,14 +17,16 @@ fn empty_slot_while_slot_is_empty() {
         },
     )]);
 
-    let result = penguin.empty_slot(&slot);
-    assert_eq!(result, Result::Ok(()));
+    penguin.empty_slot(&slot);
+
+    assert_eq!(penguin.is_slot_empty(&slot), true);
 }
 
 #[test]
 fn empty_slot_while_slot_is_not_empty() {
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
     DebugApi::dummy();
+
+    let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
     let mut penguin = PenguinAttributes::<DebugApi>::new(&[(
         slot,
@@ -34,6 +37,6 @@ fn empty_slot_while_slot_is_not_empty() {
         },
     )]);
 
-    let result = penguin.empty_slot(&slot);
-    assert_eq!(result, Result::Ok(()));
+    penguin.empty_slot(&slot);
+    assert_eq!(penguin.is_slot_empty(&slot), true);
 }

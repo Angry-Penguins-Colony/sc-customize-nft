@@ -2,6 +2,7 @@
 #![no_main]
 #![allow(unused_attributes)]
 #![allow(unused_imports)]
+#![feature(generic_associated_types)]
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
@@ -15,10 +16,7 @@ pub mod structs;
 use alloc::string::ToString;
 use elrond_wasm::elrond_codec::TopEncode;
 use libs::*;
-use structs::{
-    item::Item, item_attributes::ItemAttributes, item_slot::*,
-    penguin_attributes::PenguinAttributes,
-};
+use structs::{item::Item, item_attributes::ItemAttributes, penguin_attributes::PenguinAttributes};
 
 #[elrond_wasm::derive::contract]
 pub trait Equip:
@@ -41,7 +39,7 @@ pub trait Equip:
     #[only_owner]
     fn register_item(
         &self,
-        item_slot: ItemSlot,
+        item_slot: ManagedBuffer,
         items_id_to_add: MultiValueEncoded<TokenIdentifier>,
     ) -> SCResult<()> {
         require!(
@@ -55,18 +53,19 @@ pub trait Equip:
                 "You cannot register a penguin as an item."
             );
 
-            self.items_slot(&item_id.into()).set(&item_slot);
+            self.slot_of(&item_id.into()).set(&item_slot);
         }
 
         return Ok(());
     }
 
     #[view(getItemType)]
-    fn get_item_slot(&self, item_id: &TokenIdentifier) -> OptionalValue<ItemSlot> {
-        match self.items_slot(item_id).get() {
-            ItemSlot::None => return OptionalValue::None,
-            slot => return OptionalValue::Some(slot),
-        }
+    fn get_item_slot(&self, item_id: &TokenIdentifier) -> OptionalValue<ManagedBuffer> {
+        panic!("Not implemented");
+        // match self.slot_of(item_id).get() {
+        //     ItemSlot::None => return OptionalValue::None,
+        //     slot => return OptionalValue::Some(slot),
+        // }
     }
 
     #[payable("*")]
@@ -74,7 +73,7 @@ pub trait Equip:
     fn customize(
         &self,
         #[payment_multi] payments: ManagedVec<EsdtTokenPayment<Self::Api>>,
-        to_desequip_slots: MultiValueEncoded<ItemSlot>,
+        to_desequip_slots: MultiValueEncoded<ManagedBuffer>,
     ) -> SCResult<u64> {
         self.require_penguin_roles_set()?;
         require!(
@@ -144,10 +143,9 @@ pub trait Equip:
         item: &Item<Self::Api>,
     ) -> SCResult<()> {
         let item_id = &item.token;
-        let item_slot = self.items_slot(&item_id).get();
 
         require!(
-            item_slot != ItemSlot::None,
+            self.has_slot(&item_id) == true,
             "You are trying to equip a token that is not considered as an item"
         );
 
@@ -155,6 +153,8 @@ pub trait Equip:
             item_id != &self.penguins_identifier().get(),
             "Cannot equip a penguin as an item."
         );
+
+        let item_slot = self.slot_of(&item_id).get();
 
         // desequip slot if any
         if attributes.is_slot_empty(&item_slot) == false {
@@ -210,14 +210,9 @@ pub trait Equip:
     fn desequip_slot(
         &self,
         attributes: &mut PenguinAttributes<Self::Api>,
-        slot: &ItemSlot,
+        slot: &ManagedBuffer,
     ) -> SCResult<()> {
         let caller = self.blockchain().get_caller();
-
-        require!(
-            slot != &ItemSlot::None,
-            "Slot value must be different to ItemSlot::None."
-        );
 
         require!(
             attributes.is_slot_empty(&slot) == false,
@@ -251,7 +246,7 @@ pub trait Equip:
                 self.send()
                     .direct_esdt(&caller, &item_id, item_nonce, &BigUint::from(1u32), &[]);
 
-                let result = attributes.set_empty_slot(&slot);
+                let result = attributes.empty_slot(&slot);
 
                 require!(result.is_err() == false, "Error while emptying slot");
 

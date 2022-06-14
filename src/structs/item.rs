@@ -8,10 +8,7 @@ use elrond_wasm::elrond_codec::TopDecodeInput;
 
 use crate::structs::utils::{remove_first_and_last_char, split_last_occurence};
 
-use super::{
-    item_slot::ItemSlot,
-    utils::{hex_to_u64, remove_first_char, u64_to_hex},
-};
+use super::utils::{hex_to_u64, remove_first_char, u64_to_hex};
 use core::{ops::Deref, str::FromStr};
 
 use super::utils::split_buffer;
@@ -19,7 +16,7 @@ use super::utils::split_buffer;
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-#[derive(NestedEncode, NestedDecode, TypeAbi, Clone, PartialEq, Debug)]
+#[derive(ManagedVecItem, NestedEncode, NestedDecode, TypeAbi, Clone, PartialEq, Debug)]
 pub struct Item<M: ManagedTypeApi> {
     pub token: TokenIdentifier<M>,
     pub nonce: u64,

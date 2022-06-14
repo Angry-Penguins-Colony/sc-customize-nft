@@ -2,7 +2,6 @@ use std::u8;
 
 use customize_nft::structs::item::Item;
 use customize_nft::structs::item_attributes::ItemAttributes;
-use customize_nft::structs::item_slot::ItemSlot;
 use customize_nft::structs::penguin_attributes::PenguinAttributes;
 use customize_nft::*;
 use elrond_wasm::contract_base::ContractBase;
@@ -64,7 +63,7 @@ where
     #[allow(dead_code)]
     pub fn register_item(
         &mut self,
-        item_type: ItemSlot,
+        item_type: ManagedBuffer<DebugApi>,
         item_id: &[u8],
         attributes: &ItemAttributes<DebugApi>,
     ) -> u64 {
@@ -83,7 +82,7 @@ where
     #[allow(dead_code)]
     pub fn register_item_all_properties(
         &mut self,
-        item_type: ItemSlot,
+        item_type: ManagedBuffer<DebugApi>,
         item_id: &[u8],
         attributes: &ItemAttributes<DebugApi>,
         royalties: u64,
@@ -189,7 +188,7 @@ where
         penguin_nonce: u64,
         item_identifier: &[u8],
         item_nonce: u64,
-        slot: ItemSlot,
+        slot: ManagedBuffer<DebugApi>,
         attributes: ItemAttributes<DebugApi>,
     ) {
         let _ = self.register_item(slot.clone(), item_identifier, &attributes);
@@ -224,7 +223,7 @@ where
     pub fn customize(
         &mut self,
         transfers: Vec<TxInputESDT>,
-        slot: ItemSlot,
+        slot: ManagedBuffer<DebugApi>,
     ) -> (SCResult<u64>, TxResult) {
         let mut opt_sc_result: Option<SCResult<u64>> = Option::None;
 
@@ -233,7 +232,8 @@ where
             &self.cf_wrapper,
             &transfers,
             |sc| {
-                let mut managed_slots = MultiValueEncoded::<DebugApi, ItemSlot>::new();
+                let mut managed_slots =
+                    MultiValueEncoded::<DebugApi, ManagedBuffer<DebugApi>>::new();
                 managed_slots.push(slot.clone());
 
                 let result = sc.customize(sc.call_value().all_esdt_transfers(), managed_slots);
@@ -289,7 +289,7 @@ where
             |sc| {
                 let result = sc.customize(
                     sc.call_value().all_esdt_transfers(),
-                    MultiValueEncoded::<DebugApi, ItemSlot>::new(),
+                    MultiValueEncoded::<DebugApi, ManagedBuffer<DebugApi>>::new(),
                 );
 
                 opt_sc_result = Option::Some(result.clone());
@@ -373,37 +373,6 @@ pub fn create_managed_items_to_equip(
     }
 
     return managed_items_to_equip;
-}
-
-#[allow(dead_code)]
-pub fn give_one_penguin_with_hat(
-    blockchain_wrapper: &mut BlockchainStateWrapper,
-    user_address: &Address,
-    penguin_nonce: u64,
-    hat_nonce: u64,
-) {
-    blockchain_wrapper.set_nft_balance(
-        &user_address,
-        PENGUIN_TOKEN_ID,
-        penguin_nonce,
-        &rust_biguint!(1),
-        &PenguinAttributes {
-            hat: Option::Some(Item {
-                token: TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID),
-                nonce: hat_nonce,
-                name: ManagedBuffer::new_from_bytes(b"item name"),
-            }),
-            ..PenguinAttributes::empty()
-        },
-    );
-}
-
-#[allow(dead_code)]
-pub fn execute_for_all_slot(execute: fn(&ItemSlot) -> ()) {
-    // execute(&ItemSlot::Hat);
-    for slot in ItemSlot::VALUES.iter() {
-        execute(slot);
-    }
 }
 
 #[allow(dead_code)]

@@ -1,15 +1,16 @@
-use elrond_wasm::{elrond_codec::TopEncode, types::TokenIdentifier};
-use elrond_wasm_debug::{managed_buffer, DebugApi};
-use customize_nft::structs::{
-    item::Item, item_slot::ItemSlot, penguin_attributes::PenguinAttributes,
+use customize_nft::structs::{item::Item, penguin_attributes::PenguinAttributes};
+use elrond_wasm::{
+    elrond_codec::TopEncode,
+    types::{ManagedBuffer, TokenIdentifier},
 };
+use elrond_wasm_debug::{managed_buffer, DebugApi};
 
 #[test]
 fn should_top_encode() {
     DebugApi::dummy();
 
     let penguin = PenguinAttributes::new(&[(
-        &ItemSlot::Hat,
+        &ManagedBuffer::new_from_bytes(b"hat"),
         Item::<DebugApi> {
             token: TokenIdentifier::from_esdt_bytes(b"HAT-a2b4e5"),
             nonce: 1,
@@ -27,7 +28,7 @@ fn should_top_encode_with_nonce_equals_0a() {
     DebugApi::dummy();
 
     let penguin = PenguinAttributes::new(&[(
-        &ItemSlot::Hat,
+        &ManagedBuffer::new_from_bytes(b"hat"),
         Item::<DebugApi> {
             token: TokenIdentifier::from_esdt_bytes(b"HAT-a2b4e5"),
             nonce: 10,

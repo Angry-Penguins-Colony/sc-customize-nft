@@ -8,7 +8,7 @@ use elrond_wasm::{
 };
 
 use crate::constants::ERR_NO_CID_URL;
-use crate::structs::{item_slot::ItemSlot, penguin_attributes::PenguinAttributes, utils};
+use crate::structs::{penguin_attributes::PenguinAttributes, utils};
 
 #[elrond_wasm::module]
 pub trait MintPenguin:

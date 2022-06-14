@@ -1,11 +1,9 @@
+use customize_nft::structs::{item::Item, penguin_attributes::PenguinAttributes};
 use elrond_wasm::{
     elrond_codec::TopDecode,
     types::{ManagedBuffer, TokenIdentifier},
 };
 use elrond_wasm_debug::{managed_buffer, DebugApi};
-use customize_nft::structs::{
-    item::Item, item_slot::ItemSlot, penguin_attributes::PenguinAttributes,
-};
 
 #[test]
 fn decode_penguin() {
@@ -15,7 +13,7 @@ fn decode_penguin() {
     let input_buffer = ManagedBuffer::<DebugApi>::new_from_bytes(input_data);
 
     let expected_output = PenguinAttributes::new(&[(
-        &ItemSlot::Hat,
+        &ManagedBuffer::new_from_bytes(b"hat"),
         Item::<DebugApi> {
             token: TokenIdentifier::from_esdt_bytes(b"HAT-a2b4e5"),
             nonce: 1,
@@ -45,42 +43,4 @@ fn decode_item() {
     let actual_output = Item::top_decode(&input_buffer).unwrap();
 
     assert_eq!(expected_output, actual_output);
-}
-
-#[test]
-fn decode_slot() {
-    DebugApi::dummy();
-
-    assert_eq!(
-        ItemSlot::from(ManagedBuffer::<DebugApi>::new_from_bytes(b"Hat")),
-        ItemSlot::Hat
-    );
-    assert_eq!(
-        ItemSlot::from(ManagedBuffer::<DebugApi>::new_from_bytes(b"Beak")),
-        ItemSlot::Beak
-    );
-    assert_eq!(
-        ItemSlot::from(ManagedBuffer::<DebugApi>::new_from_bytes(b"Clothes")),
-        ItemSlot::Clothes
-    );
-    assert_eq!(
-        ItemSlot::from(ManagedBuffer::<DebugApi>::new_from_bytes(b"Eyes")),
-        ItemSlot::Eye
-    );
-    assert_eq!(
-        ItemSlot::from(ManagedBuffer::<DebugApi>::new_from_bytes(b"Weapon")),
-        ItemSlot::Weapon
-    );
-    assert_eq!(
-        ItemSlot::from(ManagedBuffer::<DebugApi>::new_from_bytes(b"Skin")),
-        ItemSlot::Skin
-    );
-    assert_eq!(
-        ItemSlot::from(ManagedBuffer::<DebugApi>::new_from_bytes(b"Background")),
-        ItemSlot::Background
-    );
-    assert_eq!(
-        ItemSlot::from(ManagedBuffer::<DebugApi>::new_from_bytes(b"azeazzeaea")),
-        ItemSlot::None
-    );
 }

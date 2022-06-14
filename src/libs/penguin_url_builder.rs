@@ -16,7 +16,7 @@ pub trait PenguinURLBuilder: super::storage::StorageModule {
         &self,
         attributes: &PenguinAttributes<Self::Api>,
     ) -> SCResult<ManagedBuffer<Self::Api>> {
-        let cid = self.thumbnail_cid(attributes);
+        let cid = self.thumbnail_cid_of(attributes);
 
         require!(cid.is_empty() == false, ERR_NO_CID_URL);
 

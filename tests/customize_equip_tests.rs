@@ -1,6 +1,5 @@
 use customize_nft::structs::item::Item;
 use customize_nft::structs::item_attributes::ItemAttributes;
-use customize_nft::structs::item_slot::ItemSlot;
 use customize_nft::structs::penguin_attributes::PenguinAttributes;
 use elrond_wasm::contract_base::ContractBase;
 use elrond_wasm::types::{EsdtTokenType, ManagedBuffer, SCResult, TokenIdentifier};
@@ -18,7 +17,7 @@ const INIT_NONCE: u64 = 65535;
 // create NFT on blockchain wrapper
 #[test]
 fn test_equip() {
-    let slot = &ItemSlot::Background;
+    let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
     const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
     const ITEM_TO_EQUIP_NAME: &[u8] = b"item name";
@@ -110,7 +109,7 @@ fn test_equip() {
 
 #[test]
 fn test_equip_while_overlap() {
-    let slot = &ItemSlot::Hat;
+    let slot = &ManagedBuffer::new_from_bytes(b"hat");
     const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
     const ITEM_TO_EQUIP_NONCE: u64 = 30;
     const OLD_HAT_NAME: &[u8] = b"old hat";
@@ -326,39 +325,38 @@ fn equip_while_item_is_not_an_item() {
 
 #[test]
 fn test_equip_while_sending_two_as_value_of_sft() {
-    testing_utils::execute_for_all_slot(|slot| {
-        const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
-        const NONCE: u64 = 30;
+    let slot = &ManagedBuffer::new_from_bytes(b"hat");
+    const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
+    const NONCE: u64 = 30;
 
-        let mut setup = testing_utils::setup(customize_nft::contract_obj);
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-        setup.register_item(slot.clone(), ITEM_TO_EQUIP_ID, &ItemAttributes::random());
+    setup.register_item(slot.clone(), ITEM_TO_EQUIP_ID, &ItemAttributes::random());
 
-        // add empty pingouin to the USER
-        setup.blockchain_wrapper.set_nft_balance(
-            &setup.first_user_address,
-            PENGUIN_TOKEN_ID,
-            NONCE,
-            &rust_biguint!(1),
-            &PenguinAttributes::<DebugApi>::empty(),
-        );
+    // add empty pingouin to the USER
+    setup.blockchain_wrapper.set_nft_balance(
+        &setup.first_user_address,
+        PENGUIN_TOKEN_ID,
+        NONCE,
+        &rust_biguint!(1),
+        &PenguinAttributes::<DebugApi>::empty(),
+    );
 
-        setup.add_random_item_to_user(ITEM_TO_EQUIP_ID, NONCE, 3);
+    setup.add_random_item_to_user(ITEM_TO_EQUIP_ID, NONCE, 3);
 
-        let transfers = vec![
-            TxInputESDT {
-                token_identifier: PENGUIN_TOKEN_ID.to_vec(),
-                nonce: NONCE,
-                value: rust_biguint!(1),
-            },
-            TxInputESDT {
-                token_identifier: ITEM_TO_EQUIP_ID.to_vec(),
-                nonce: NONCE,
-                value: rust_biguint!(2),
-            },
-        ];
-        let (_, tx_result) = setup.equip(transfers);
+    let transfers = vec![
+        TxInputESDT {
+            token_identifier: PENGUIN_TOKEN_ID.to_vec(),
+            nonce: NONCE,
+            value: rust_biguint!(1),
+        },
+        TxInputESDT {
+            token_identifier: ITEM_TO_EQUIP_ID.to_vec(),
+            nonce: NONCE,
+            value: rust_biguint!(2),
+        },
+    ];
+    let (_, tx_result) = setup.equip(transfers);
 
-        tx_result.assert_user_error("You must sent only one item.");
-    });
+    tx_result.assert_user_error("You must sent only one item.");
 }

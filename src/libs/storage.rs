@@ -1,21 +1,21 @@
-use crate::structs::{item_slot::ItemSlot, penguin_attributes::PenguinAttributes};
+use crate::structs::penguin_attributes::PenguinAttributes;
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
 #[elrond_wasm::module]
 pub trait StorageModule {
-    #[storage_mapper("items_types")]
-    fn items_slot(&self, token: &TokenIdentifier) -> SingleValueMapper<ItemSlot>;
-
     #[storage_mapper("penguins_identifier")]
     fn penguins_identifier(&self) -> SingleValueMapper<TokenIdentifier>;
 
     #[storage_mapper("ipfsGateway")]
     fn ipfs_gateway(&self) -> SingleValueMapper<ManagedBuffer<Self::Api>>;
 
+    #[storage_mapper("items_types")]
+    fn slot_of(&self, token: &TokenIdentifier) -> SingleValueMapper<ManagedBuffer>;
+
     #[storage_mapper("penguin_cid_by_attributes")]
-    fn thumbnail_cid(
+    fn thumbnail_cid_of(
         &self,
         attributes: &PenguinAttributes<Self::Api>,
     ) -> SingleValueMapper<ManagedBuffer>;
@@ -29,6 +29,10 @@ pub trait StorageModule {
         attributes: &PenguinAttributes<Self::Api>,
         cid: ManagedBuffer<Self::Api>,
     ) {
-        self.thumbnail_cid(attributes).set(cid);
+        self.thumbnail_cid_of(attributes).set(cid);
+    }
+
+    fn has_slot(&self, token: &TokenIdentifier) -> bool {
+        panic!("Not implemented");
     }
 }

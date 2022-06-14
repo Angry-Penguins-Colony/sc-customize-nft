@@ -1,3 +1,5 @@
 mod decode_tests;
+mod empty_slot_tests;
 mod encode_tests;
-mod penguins_attributes_tests;
+mod is_empty_tests;
+mod set_tests;

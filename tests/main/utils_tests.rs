@@ -163,3 +163,23 @@ fn test_get_number_from_penguin_name() {
         Some(15)
     );
 }
+
+#[test]
+fn capitalize() {
+    DebugApi::dummy();
+
+    assert_eq!(
+        utils::capitalize::<DebugApi>(&ManagedBuffer::new_from_bytes(b"hello world")),
+        ManagedBuffer::new_from_bytes(b"Hello world")
+    );
+}
+
+#[test]
+fn capitalize_already_capitalized() {
+    DebugApi::dummy();
+
+    assert_eq!(
+        utils::capitalize::<DebugApi>(&ManagedBuffer::new_from_bytes(b"Hello world")),
+        ManagedBuffer::new_from_bytes(b"Hello world")
+    );
+}

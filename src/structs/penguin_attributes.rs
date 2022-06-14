@@ -8,7 +8,7 @@ use core::ops::Deref;
 use alloc::{borrow::ToOwned, format};
 use elrond_wasm::elrond_codec::{TopDecodeInput, TopEncode};
 
-use crate::utils::split_buffer;
+use crate::utils::{self, split_buffer};
 
 use super::item::Item;
 
@@ -61,23 +61,22 @@ impl<M: ManagedTypeApi> TopEncode for PenguinAttributes<M> {
         &self,
         output: O,
     ) -> Result<(), elrond_codec::EncodeError> {
-        panic!("Not implemented");
-        // let mut managed_buffer = ManagedBuffer::<M>::new();
+        let mut managed_buffer = ManagedBuffer::<M>::new();
 
-        // for (i, slot) in ItemSlot::VALUES.iter().enumerate() {
-        //     managed_buffer.append(&self.to_managed_buffer(slot));
+        for (i, slot) in self.slots.iter().enumerate() {
+            managed_buffer.append(&self.to_kvp_buffer(slot.deref()));
 
-        //     // add comma, except for the last line
-        //     if i < ItemSlot::VALUES.len() - 1 {
-        //         managed_buffer.append_bytes(b";");
-        //     }
-        // }
+            // add comma, except for the last line
+            if i < self.items.len() - 1 {
+                managed_buffer.append_bytes(b";");
+            }
+        }
 
-        // let mut bytes: [u8; 512] = [0; 512];
-        // managed_buffer.load_to_byte_array(&mut bytes);
-        // output.set_slice_u8(&bytes[..managed_buffer.len()]);
+        let mut bytes: [u8; 512] = [0; 512];
+        managed_buffer.load_to_byte_array(&mut bytes);
+        output.set_slice_u8(&bytes[..managed_buffer.len()]);
 
-        // return Result::Ok(());
+        return Result::Ok(());
     }
 }
 
@@ -131,6 +130,28 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         };
     }
 
+    pub fn to_kvp_buffer(&self, slot: &ManagedBuffer<M>) -> ManagedBuffer<M> {
+        let item = match self.get_item(slot) {
+            Some(item) => {
+                let mut output = ManagedBuffer::new();
+
+                // TODO: optimize Item.top_encode
+                // TODO: we unwrap to trigger if top_encode fails, but there must be a better way
+                item.top_encode(&mut output).unwrap();
+
+                output
+            }
+            None => ManagedBuffer::<M>::new_from_bytes(b"unequipped"),
+        };
+
+        let mut managed_buffer = ManagedBuffer::<M>::new();
+        managed_buffer.append(&utils::capitalize(slot));
+        managed_buffer.append_bytes(b":");
+        managed_buffer.append(&item);
+
+        return managed_buffer;
+    }
+
     fn __get_index(&self, slot: &ManagedBuffer<M>) -> Option<usize> {
         return self.slots.iter().position(|s| s.deref() == slot);
     }
@@ -160,28 +181,4 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
             },
         }
     }
-
-    // fn to_managed_buffer(&self, slot: &ManagedBuffer<M>) -> ManagedBuffer<M> {
-    //     panic!("Not implemented");
-
-    //     // let item = match self.get_item(slot) {
-    //     //     Some(item) => {
-    //     //         let mut output = ManagedBuffer::new();
-
-    //     //         // TODO: optimize Item.top_encode
-    //     //         // TODO: we unwrap to trigger if top_encode fails, but there must be a better way
-    //     //         item.top_encode(&mut output).unwrap();
-
-    //     //         output
-    //     //     }
-    //     //     None => ManagedBuffer::<M>::new_from_bytes(b"unequipped"),
-    //     // };
-
-    //     // let mut managed_buffer = ManagedBuffer::<M>::new();
-    //     // managed_buffer.append_bytes(slot.to_title_bytes::<M>());
-    //     // managed_buffer.append_bytes(b":");
-    //     // managed_buffer.append(&item);
-
-    //     // return managed_buffer;
-    // }
 }

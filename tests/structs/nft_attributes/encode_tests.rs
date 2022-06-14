@@ -18,7 +18,7 @@ fn should_top_encode() {
         },
     )]);
 
-    let expected=b"Hat:Pirate Hat (HAT-a2b4e5-01);Background:unequipped;Skin:unequipped;Beak:unequipped;Weapon:unequipped;Clothes:unequipped;Eyes:unequipped";
+    let expected = b"Hat:Pirate Hat (HAT-a2b4e5-01)";
 
     assert_penguin_encode_eq(penguin, expected);
 }
@@ -36,7 +36,7 @@ fn should_top_encode_with_nonce_equals_0a() {
         },
     )]);
 
-    let expected=b"Hat:Pirate Hat (HAT-a2b4e5-0a);Background:unequipped;Skin:unequipped;Beak:unequipped;Weapon:unequipped;Clothes:unequipped;Eyes:unequipped";
+    let expected = b"Hat:Pirate Hat (HAT-a2b4e5-0a)";
 
     assert_penguin_encode_eq(penguin, expected);
 }

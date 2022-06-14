@@ -200,3 +200,17 @@ pub fn get_number_from_penguin_name<M: ManagedTypeApi>(name: &ManagedBuffer<M>) 
 
     return ascii_to_u64(&number_buffer);
 }
+
+pub fn capitalize<M: ManagedTypeApi>(buffer: &ManagedBuffer<M>) -> ManagedBuffer<M> {
+    let mut bytes: [u8; 512] = [0; 512];
+
+    buffer.load_to_byte_array(&mut bytes);
+
+    let mut o = ManagedBuffer::<M>::new();
+
+    // uppercase first letter
+    o.append_bytes(&[bytes[0].to_ascii_uppercase()]);
+    o.append_bytes(&bytes[1..buffer.len()]);
+
+    return o;
+}

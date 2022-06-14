@@ -12,6 +12,7 @@ extern crate alloc;
 pub mod constants;
 pub mod libs;
 pub mod structs;
+pub mod utils;
 
 use alloc::string::ToString;
 use elrond_wasm::elrond_codec::TopEncode;

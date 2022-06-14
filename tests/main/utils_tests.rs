@@ -1,6 +1,6 @@
 use core::ops::Deref;
 
-use customize_nft::structs::utils;
+use customize_nft::utils;
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm_debug::DebugApi;
 

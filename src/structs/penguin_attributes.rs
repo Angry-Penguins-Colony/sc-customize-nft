@@ -8,7 +8,7 @@ use core::ops::Deref;
 use alloc::{borrow::ToOwned, format};
 use elrond_wasm::elrond_codec::{TopDecodeInput, TopEncode};
 
-use super::{item::Item, utils::split_buffer};
+use super::item::Item;
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();

@@ -4,3 +4,4 @@ mod customize_equip_tests;
 mod customize_tests;
 mod fill_tests;
 mod register_item_tests;
+mod utils_tests;

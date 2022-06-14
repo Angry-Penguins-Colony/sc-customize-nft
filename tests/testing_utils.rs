@@ -92,6 +92,19 @@ where
         hash: Option<&[u8]>,
         uri: &[Vec<u8>],
     ) -> u64 {
+        self.blockchain_wrapper.set_nft_balance_all_properties(
+            &self.cf_wrapper.address_ref(),
+            &item_id,
+            INIT_NONCE,
+            &rust_biguint!(2u64),
+            &attributes,
+            royalties,
+            creator,
+            name,
+            hash,
+            uri,
+        );
+
         self.set_all_permissions_on_token(item_id);
 
         self.blockchain_wrapper
@@ -100,6 +113,14 @@ where
                 &self.cf_wrapper,
                 &rust_biguint!(0u64),
                 |sc| {
+                    let data = sc.blockchain().get_esdt_token_data(
+                        &sc.blockchain().get_sc_address(),
+                        &TokenIdentifier::from_esdt_bytes(item_id),
+                        INIT_NONCE,
+                    );
+
+                    println!("Name is {:?}", data.name);
+
                     let mut managed_items_ids =
                         MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                     managed_items_ids.push(managed_token_id!(item_id));
@@ -119,17 +140,9 @@ where
             )
             .assert_ok();
 
-        self.blockchain_wrapper.set_nft_balance_all_properties(
-            &self.cf_wrapper.address_ref(),
-            &item_id,
-            INIT_NONCE,
-            &rust_biguint!(2u64),
-            &attributes,
-            royalties,
-            creator,
-            name,
-            hash,
-            uri,
+        println!(
+            "Item {:?} created and register with nonce {:x}",
+            name, INIT_NONCE
         );
 
         return INIT_NONCE;

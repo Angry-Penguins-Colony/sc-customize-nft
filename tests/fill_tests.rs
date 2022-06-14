@@ -1,6 +1,6 @@
-use elrond_wasm::contract_base::ContractBase;
-use elrond_wasm_debug::rust_biguint;
 use customize_nft::Equip;
+use elrond_wasm::{contract_base::ContractBase, types::EgldOrEsdtTokenIdentifier};
+use elrond_wasm_debug::rust_biguint;
 mod testing_utils;
 
 #[test]
@@ -15,7 +15,7 @@ fn not_the_owner() {
         &TOKEN_ID,
         TOKEN_NONCE,
         &rust_biguint!(1u64),
-        &{},
+        &Option::Some({}),
     );
 
     let b_wrapper = &mut setup.blockchain_wrapper;
@@ -28,10 +28,12 @@ fn not_the_owner() {
             TOKEN_NONCE,
             &rust_biguint!(1),
             |sc| {
+                let payment = sc.call_value().single_esdt();
+
                 let _ = sc.fill(
-                    sc.call_value().token(),
-                    sc.call_value().esdt_token_nonce(),
-                    sc.call_value().esdt_value(),
+                    EgldOrEsdtTokenIdentifier::esdt(payment.token_identifier),
+                    payment.token_nonce,
+                    payment.amount,
                 );
             },
         )
@@ -50,7 +52,7 @@ fn the_owner() {
         &TOKEN_ID,
         TOKEN_NONCE,
         &rust_biguint!(1u64),
-        &{},
+        &Option::Some({}),
     );
 
     let b_wrapper = &mut setup.blockchain_wrapper;
@@ -63,10 +65,12 @@ fn the_owner() {
             TOKEN_NONCE,
             &rust_biguint!(1),
             |sc| {
+                let payment = sc.call_value().single_esdt();
+
                 let _ = sc.fill(
-                    sc.call_value().token(),
-                    sc.call_value().esdt_token_nonce(),
-                    sc.call_value().esdt_value(),
+                    EgldOrEsdtTokenIdentifier::esdt(payment.token_identifier),
+                    payment.token_nonce,
+                    payment.amount,
                 );
             },
         )

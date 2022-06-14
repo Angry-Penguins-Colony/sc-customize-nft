@@ -6,10 +6,7 @@
 use core::ops::Deref;
 
 use alloc::{borrow::ToOwned, format};
-use elrond_wasm::{
-    elrond_codec::{TopDecodeInput, TopEncode},
-    String,
-};
+use elrond_wasm::elrond_codec::{TopDecodeInput, TopEncode};
 
 use super::{item::Item, item_slot::ItemSlot, utils::split_buffer};
 

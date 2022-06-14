@@ -92,7 +92,7 @@ fn customize_only_desequip() {
         PENGUIN_TOKEN_ID,
         1,
         &rust_biguint!(1),
-        &PenguinAttributes::<DebugApi>::empty(),
+        Option::Some(&PenguinAttributes::<DebugApi>::empty()),
     );
 }
 

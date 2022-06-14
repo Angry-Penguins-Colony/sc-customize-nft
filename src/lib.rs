@@ -13,7 +13,7 @@ pub mod libs;
 pub mod structs;
 
 use alloc::string::ToString;
-use elrond_wasm::{elrond_codec::TopEncode, String};
+use elrond_wasm::elrond_codec::TopEncode;
 use libs::*;
 use structs::{
     item::Item, item_attributes::ItemAttributes, item_slot::*,
@@ -42,7 +42,7 @@ pub trait Equip:
     fn register_item(
         &self,
         item_slot: ItemSlot,
-        #[var_args] items_id_to_add: MultiValueEncoded<TokenIdentifier>,
+        items_id_to_add: MultiValueEncoded<TokenIdentifier>,
     ) -> SCResult<()> {
         require!(
             self.blockchain().get_caller() == self.blockchain().get_owner_address(),
@@ -74,7 +74,7 @@ pub trait Equip:
     fn customize(
         &self,
         #[payment_multi] payments: ManagedVec<EsdtTokenPayment<Self::Api>>,
-        #[var_args] to_desequip_slots: MultiValueEncoded<ItemSlot>,
+        to_desequip_slots: MultiValueEncoded<ItemSlot>,
     ) -> SCResult<u64> {
         self.require_penguin_roles_set()?;
         require!(
@@ -94,7 +94,11 @@ pub trait Equip:
             &penguin_id == &self.penguins_identifier().get(),
             "Please provide a penguin as the first payment"
         );
-        require!(first_payment.amount == 1, "You must sent only one penguin.");
+
+        require!(
+            first_payment.amount == BigUint::from(1u64),
+            "You must sent only one penguin."
+        );
 
         let mut attributes = self.parse_penguin_attributes(&penguin_id, penguin_nonce);
 
@@ -106,7 +110,10 @@ pub trait Equip:
         // then, equip
         let items_token = payments.iter().skip(1);
         for payment in items_token {
-            require!(payment.amount == 1, "You must sent only one item.");
+            require!(
+                payment.amount == BigUint::from(1u64),
+                "You must sent only one item."
+            );
 
             let item = Item {
                 token: payment.token_identifier.clone(),
@@ -121,12 +128,12 @@ pub trait Equip:
     }
 
     fn get_token_name(&self, item_id: &TokenIdentifier, nonce: u64) -> SCResult<ManagedBuffer> {
-        sc_print!("token {} nonce {:x}", item_id, nonce);
-
         let item_name = self
             .blockchain()
             .get_esdt_token_data(&self.blockchain().get_sc_address(), item_id, nonce)
             .name;
+
+        sc_print!("token {} nonce {:x} has name {}", item_id, nonce, item_name);
 
         return Ok(item_name);
     }
@@ -185,7 +192,7 @@ pub trait Equip:
     #[only_owner]
     fn fill(
         &self,
-        #[payment_token] _token: TokenIdentifier<Self::Api>,
+        #[payment_token] _token: EgldOrEsdtTokenIdentifier<Self::Api>,
         #[payment_nonce] _nonce: u64,
         #[payment_amount] _amount: BigUint,
     ) -> SCResult<()> {
@@ -229,7 +236,11 @@ pub trait Equip:
                     "A item to desequip is not considered like an item. The item has maybe been removed. Please contact an administrator."
                 );
 
-                if self.blockchain().get_sc_balance(&item_id, item_nonce) <= 1 {
+                if self.blockchain().get_sc_balance(
+                    &EgldOrEsdtTokenIdentifier::esdt(item_id.clone()),
+                    item_nonce,
+                ) <= BigUint::from(1u64)
+                {
                     sc_panic!(
                         "No token {} with nonce {:x} on the SC. Please contact an administrator.",
                         item_id,
@@ -238,7 +249,7 @@ pub trait Equip:
                 }
 
                 self.send()
-                    .direct(&caller, &item_id, item_nonce, &BigUint::from(1u32), &[]);
+                    .direct_esdt(&caller, &item_id, item_nonce, &BigUint::from(1u32), &[]);
 
                 let result = attributes.set_empty_slot(&slot);
 

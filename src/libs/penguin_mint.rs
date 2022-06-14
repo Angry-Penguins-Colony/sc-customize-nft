@@ -33,7 +33,7 @@ pub trait MintPenguin:
 
         // send the new one
         self.send()
-            .direct(&caller, &penguin_id, token_nonce, &BigUint::from(1u32), &[]);
+            .direct_esdt(&caller, &penguin_id, token_nonce, &BigUint::from(1u32), &[]);
 
         return SCResult::Ok(token_nonce);
     }

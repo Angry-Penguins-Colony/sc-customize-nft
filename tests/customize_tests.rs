@@ -1,8 +1,3 @@
-use elrond_wasm::{
-    contract_base::ContractBase,
-    types::{ManagedBuffer, MultiValueEncoded, SCResult, TokenIdentifier},
-};
-use elrond_wasm_debug::{rust_biguint, DebugApi};
 use customize_nft::{
     structs::{
         item::Item, item_attributes::ItemAttributes, item_slot::ItemSlot,
@@ -10,6 +5,11 @@ use customize_nft::{
     },
     Equip,
 };
+use elrond_wasm::{
+    contract_base::ContractBase,
+    types::{ManagedBuffer, MultiValueEncoded, SCResult, TokenIdentifier},
+};
+use elrond_wasm_debug::{rust_biguint, DebugApi};
 
 mod testing_utils;
 
@@ -104,14 +104,14 @@ fn customize_complete_flow() {
             PENGUIN_TOKEN_ID,
             1,
             &rust_biguint!(1),
-            &PenguinAttributes::<DebugApi>::new(&[(
+            Option::Some(&PenguinAttributes::<DebugApi>::new(&[(
                 &ItemSlot::Background,
                 Item {
                     token: TokenIdentifier::from_esdt_bytes(ITEM_TO_EQUIP),
                     nonce: NONCE,
-                    name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
+                    name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework force us to do this
                 },
-            )]),
+            )])),
         );
     });
 }

@@ -7,7 +7,7 @@ use elrond_wasm::types::{
 use elrond_wasm_debug::managed_token_id;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
-mod testing_utils;
+use crate::testing_utils;
 
 const HAT_TOKEN_ID: &[u8] = testing_utils::HAT_TOKEN_ID;
 const ANOTHER_HAT_TOKEN_ID: &[u8] = testing_utils::HAT_2_TOKEN_ID;

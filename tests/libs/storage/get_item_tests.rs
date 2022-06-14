@@ -4,7 +4,7 @@ use elrond_wasm::elrond_codec::multi_types::OptionalValue;
 use elrond_wasm::types::{ManagedBuffer, TokenIdentifier};
 use elrond_wasm_debug::DebugApi;
 
-mod testing_utils;
+use crate::testing_utils;
 
 const HAT_TOKEN_ID: &[u8] = testing_utils::HAT_TOKEN_ID;
 

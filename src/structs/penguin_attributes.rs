@@ -135,7 +135,10 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
     }
 
     pub fn empty() -> Self {
-        return Self::new(&[]);
+        return PenguinAttributes {
+            itemsBySlots: ManagedVec::new(),
+            itemsX: ManagedVec::new(),
+        };
     }
 
     /// Set an item on a slot, without checking if the slot is empty.

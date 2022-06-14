@@ -1,7 +1,7 @@
+use crate::testing_utils;
 use customize_nft::Equip;
 use elrond_wasm::{contract_base::ContractBase, types::EgldOrEsdtTokenIdentifier};
 use elrond_wasm_debug::rust_biguint;
-mod testing_utils;
 
 #[test]
 fn not_the_owner() {

@@ -2,8 +2,6 @@ use customize_nft::structs::{item::Item, penguin_attributes::PenguinAttributes};
 use elrond_wasm::types::{ManagedBuffer, TokenIdentifier};
 use elrond_wasm_debug::DebugApi;
 
-mod testing_utils;
-
 #[test]
 fn is_empty_while_not_empty() {
     let slot = &ManagedBuffer::new_from_bytes(b"hat");

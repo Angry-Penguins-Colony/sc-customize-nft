@@ -5,28 +5,24 @@ use customize_nft::structs::item_attributes::ItemAttributes;
 use customize_nft::structs::penguin_attributes::PenguinAttributes;
 use customize_nft::*;
 use elrond_wasm::contract_base::ContractBase;
-use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::{
     Address, BigUint, EsdtLocalRole, EsdtTokenPayment, EsdtTokenType, ManagedBuffer, ManagedVec,
     MultiValueEncoded, SCResult, TokenIdentifier,
 };
-use elrond_wasm_debug::tx_mock::{TxContextRef, TxInputESDT, TxResult};
+use elrond_wasm_debug::tx_mock::{TxInputESDT, TxResult};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
-#[allow(dead_code)]
 const WASM_PATH: &'static str = "sc-customize-nft/output/customize_nft.wasm";
 
-#[allow(dead_code)]
 pub const PENGUIN_TOKEN_ID: &[u8] = b"PENG-ae5a";
-#[allow(dead_code)]
+
 pub const HAT_TOKEN_ID: &[u8] = b"HAT-a";
-#[allow(dead_code)]
+
 pub const HAT_2_TOKEN_ID: &[u8] = b"HAT-b";
 
 pub const INIT_NONCE: u64 = 65535u64;
 
-#[allow(dead_code)]
 pub struct EquipSetup<CrowdfundingObjBuilder>
 where
     CrowdfundingObjBuilder: 'static + Copy + Fn() -> customize_nft::ContractObj<DebugApi>,
@@ -43,24 +39,6 @@ impl<CrowdfundingObjBuilder> EquipSetup<CrowdfundingObjBuilder>
 where
     CrowdfundingObjBuilder: 'static + Copy + Fn() -> customize_nft::ContractObj<DebugApi>,
 {
-    #[allow(dead_code)]
-    pub fn add_item(
-        &mut self,
-        token: &[u8],
-        nonce: u64,
-        quantity: u64,
-        attributes: &ItemAttributes<DebugApi>,
-    ) {
-        self.blockchain_wrapper.set_nft_balance(
-            &self.first_user_address,
-            token,
-            nonce,
-            &rust_biguint!(quantity),
-            attributes,
-        );
-    }
-
-    #[allow(dead_code)]
     pub fn register_item(
         &mut self,
         item_type: ManagedBuffer<DebugApi>,
@@ -79,7 +57,6 @@ where
         );
     }
 
-    #[allow(dead_code)]
     pub fn register_item_all_properties(
         &mut self,
         item_type: ManagedBuffer<DebugApi>,
@@ -147,7 +124,6 @@ where
         return INIT_NONCE;
     }
 
-    #[allow(dead_code)]
     pub fn add_random_item_to_user(&mut self, token_id: &[u8], nonce: u64, quantity: u64) {
         self.blockchain_wrapper.set_nft_balance(
             &self.first_user_address,
@@ -171,7 +147,6 @@ where
         );
     }
 
-    #[allow(dead_code)]
     pub fn create_penguin_empty(&mut self, penguin_nonce: u64) {
         self.blockchain_wrapper.set_nft_balance(
             &self.first_user_address,
@@ -182,7 +157,6 @@ where
         );
     }
 
-    #[allow(dead_code)]
     pub fn create_penguin_with_registered_item(
         &mut self,
         penguin_nonce: u64,
@@ -219,7 +193,6 @@ where
         );
     }
 
-    #[allow(dead_code)]
     pub fn customize(
         &mut self,
         transfers: Vec<TxInputESDT>,
@@ -248,7 +221,6 @@ where
         }
     }
 
-    #[allow(dead_code)]
     pub fn assert_is_burn(&mut self, token_id: &[u8], token_nonce: u64) {
         assert_eq!(
             self.blockchain_wrapper.get_esdt_balance(
@@ -278,7 +250,6 @@ where
         );
     }
 
-    #[allow(dead_code)]
     pub fn equip(&mut self, transfers: Vec<TxInputESDT>) -> (SCResult<u64>, TxResult) {
         let mut opt_sc_result: Option<SCResult<u64>> = Option::None;
 
@@ -303,7 +274,6 @@ where
     }
 }
 
-#[allow(dead_code)]
 pub fn setup<TObjBuilder>(cf_builder: TObjBuilder) -> EquipSetup<TObjBuilder>
 where
     TObjBuilder: 'static + Copy + Fn() -> customize_nft::ContractObj<DebugApi>,
@@ -344,38 +314,6 @@ where
     return equip_setup;
 }
 
-#[allow(dead_code)]
-pub fn verbose_log_if_error<T>(result: &SCResult<T>, message: String) {
-    if let SCResult::Err(err) = &*result {
-        panic!(
-            "{} | failed {:?}",
-            message,
-            std::str::from_utf8(&err.as_bytes()).unwrap(),
-        );
-    }
-}
-
-#[allow(dead_code)]
-pub fn create_managed_items_to_equip(
-    tokens: &[(&[u8], u64)],
-) -> MultiValueEncoded<
-    TxContextRef,
-    MultiValue2<elrond_wasm::types::TokenIdentifier<TxContextRef>, u64>,
-> {
-    let mut managed_items_to_equip =
-        MultiValueEncoded::<DebugApi, MultiValue2<TokenIdentifier<DebugApi>, u64>>::new();
-
-    for (token_id, nonce) in tokens {
-        managed_items_to_equip.push(MultiValue2((
-            TokenIdentifier::<DebugApi>::from_esdt_bytes(token_id.clone()),
-            nonce.clone(),
-        )));
-    }
-
-    return managed_items_to_equip;
-}
-
-#[allow(dead_code)]
 pub fn create_paymens_and_esdt_transfers(
     tokens: &[(&[u8], u64, EsdtTokenType)],
 ) -> (
@@ -394,7 +332,6 @@ pub fn create_paymens_and_esdt_transfers(
     );
 }
 
-#[allow(dead_code)]
 pub fn create_esdt_transfers(tokens: &[(&[u8], u64)]) -> Vec<TxInputESDT> {
     let mut transfers = Vec::new();
 
@@ -409,7 +346,6 @@ pub fn create_esdt_transfers(tokens: &[(&[u8], u64)]) -> Vec<TxInputESDT> {
     return transfers;
 }
 
-#[allow(dead_code)]
 pub fn create_payments(
     tokens: &[(&[u8], u64, EsdtTokenType)],
 ) -> ManagedVec<DebugApi, EsdtTokenPayment<DebugApi>> {

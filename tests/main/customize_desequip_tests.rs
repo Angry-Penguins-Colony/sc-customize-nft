@@ -5,7 +5,7 @@ use customize_nft::{
 use elrond_wasm::types::{ManagedBuffer, SCResult, TokenIdentifier};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
-mod testing_utils;
+use crate::testing_utils;
 
 const PENGUIN_TOKEN_ID: &[u8] = testing_utils::PENGUIN_TOKEN_ID;
 

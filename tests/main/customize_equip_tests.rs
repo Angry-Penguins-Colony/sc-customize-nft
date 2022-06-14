@@ -7,7 +7,7 @@ use elrond_wasm_debug::managed_token_id;
 use elrond_wasm_debug::tx_mock::TxInputESDT;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
-mod testing_utils;
+use crate::testing_utils;
 
 const PENGUIN_TOKEN_ID: &[u8] = testing_utils::PENGUIN_TOKEN_ID;
 const HAT_TOKEN_ID: &[u8] = testing_utils::HAT_TOKEN_ID;

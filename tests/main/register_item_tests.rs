@@ -33,18 +33,25 @@ fn test_register_item() {
 fn register_another_item_on_slot() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    const FIRST_TOKEN_ID: &[u8] = b"FIRST-a1a1a1";
-    const SECOND_TOKEN_ID: &[u8] = b"SECOND-b2b2b2";
+    const FIRST_TOKEN_ID: &[u8] = b"a";
+    const SECOND_TOKEN_ID: &[u8] = b"A";
 
     let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
     setup.register_item(slot.clone(), FIRST_TOKEN_ID, &ItemAttributes::random());
     setup.register_item(slot.clone(), SECOND_TOKEN_ID, &ItemAttributes::random());
 
+    // We splitted check in two execute_query to avoid triggering a bug in Elrond's mocking system
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             assert_eq!(&sc.slot_of(&managed_token_id!(FIRST_TOKEN_ID)).get(), slot);
+        })
+        .assert_ok();
+
+    setup
+        .blockchain_wrapper
+        .execute_query(&setup.cf_wrapper, |sc| {
             assert_eq!(&sc.slot_of(&managed_token_id!(SECOND_TOKEN_ID)).get(), slot);
         })
         .assert_ok();

@@ -41,12 +41,12 @@ where
 {
     pub fn register_item(
         &mut self,
-        item_type: ManagedBuffer<DebugApi>,
+        slot: ManagedBuffer<DebugApi>,
         item_id: &[u8],
         attributes: &ItemAttributes<DebugApi>,
     ) -> u64 {
         return self.register_item_all_properties(
-            item_type,
+            slot,
             item_id,
             attributes,
             0u64,
@@ -59,7 +59,7 @@ where
 
     pub fn register_item_all_properties(
         &mut self,
-        item_type: ManagedBuffer<DebugApi>,
+        slot: ManagedBuffer<DebugApi>,
         item_id: &[u8],
         attributes: &ItemAttributes<DebugApi>,
         royalties: u64,
@@ -89,36 +89,21 @@ where
                 &self.cf_wrapper,
                 &rust_biguint!(0u64),
                 |sc| {
-                    let data = sc.blockchain().get_esdt_token_data(
-                        &sc.blockchain().get_sc_address(),
-                        &TokenIdentifier::from_esdt_bytes(item_id),
-                        INIT_NONCE,
-                    );
-
-                    println!("Name is {:?}", data.name);
-
                     let mut managed_items_ids =
                         MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                     managed_items_ids.push(managed_token_id!(item_id));
 
-                    let result = sc.register_item(item_type, managed_items_ids);
+                    let result = sc.register_item(slot, managed_items_ids);
 
-                    if let SCResult::Err(err) = result {
-                        panic!(
-                            "register_item {:?} failed: {:?}",
-                            std::str::from_utf8(&item_id).unwrap(),
-                            std::str::from_utf8(&err.as_bytes()).unwrap(),
-                        );
-                    }
-
-                    assert_eq!(result, SCResult::Ok(()));
+                    assert_eq!(result.is_ok(), true);
                 },
             )
             .assert_ok();
 
         println!(
             "Item {:?} created and register with nonce {:x}",
-            name, INIT_NONCE
+            std::str::from_utf8(item_id).unwrap(),
+            INIT_NONCE
         );
 
         return INIT_NONCE;

@@ -7,9 +7,6 @@ use elrond_wasm_debug::{rust_biguint, DebugApi};
 
 use crate::testing_utils;
 
-const HAT_TOKEN_ID: &[u8] = testing_utils::HAT_TOKEN_ID;
-const ANOTHER_HAT_TOKEN_ID: &[u8] = testing_utils::HAT_2_TOKEN_ID;
-
 #[test]
 fn test_register_item() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
@@ -36,26 +33,19 @@ fn test_register_item() {
 fn register_another_item_on_slot() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
+    const FIRST_TOKEN_ID: &[u8] = b"FIRST-a1a1a1";
+    const SECOND_TOKEN_ID: &[u8] = b"SECOND-b2b2b2";
+
     let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
-    setup.register_item(slot.clone(), HAT_TOKEN_ID, &ItemAttributes::random());
-    setup.register_item(
-        slot.clone(),
-        ANOTHER_HAT_TOKEN_ID,
-        &ItemAttributes::random(),
-    );
+    setup.register_item(slot.clone(), FIRST_TOKEN_ID, &ItemAttributes::random());
+    setup.register_item(slot.clone(), SECOND_TOKEN_ID, &ItemAttributes::random());
 
-    let b_wrapper = &mut setup.blockchain_wrapper;
-
-    b_wrapper
+    setup
+        .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
-            let result = sc.slot_of(&managed_token_id!(HAT_TOKEN_ID)).get();
-
-            assert_eq!(&result, slot);
-
-            let result2 = sc.slot_of(&managed_token_id!(ANOTHER_HAT_TOKEN_ID)).get();
-
-            assert_eq!(&result2, slot);
+            assert_eq!(&sc.slot_of(&managed_token_id!(FIRST_TOKEN_ID)).get(), slot);
+            assert_eq!(&sc.slot_of(&managed_token_id!(SECOND_TOKEN_ID)).get(), slot);
         })
         .assert_ok();
 }
@@ -120,7 +110,7 @@ fn change_item_slot() {
 
     let new_slot = &ManagedBuffer::new_from_bytes(b"hat");
     let old_slot = &ManagedBuffer::new_from_bytes(b"background");
-    const ITEM_ID: &[u8] = HAT_TOKEN_ID;
+    const ITEM_ID: &[u8] = b"ITEM-a1a1a1";
 
     setup.register_item(old_slot.clone(), ITEM_ID, &ItemAttributes::random());
     setup.register_item(new_slot.clone(), ITEM_ID, &ItemAttributes::random());
@@ -174,7 +164,7 @@ fn register_while_not_the_owner() {
             |sc| {
                 let mut managed_items_ids =
                     MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
-                managed_items_ids.push(managed_token_id!(HAT_TOKEN_ID));
+                managed_items_ids.push(managed_token_id!(b"ITEM-a1a1a1"));
 
                 let _ = sc.register_item(slot.clone(), managed_items_ids);
             },

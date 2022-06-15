@@ -9,10 +9,9 @@ const HAT_TOKEN_ID: &[u8] = testing_utils::HAT_TOKEN_ID;
 
 #[test]
 fn get_item() {
-    DebugApi::dummy();
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     let slot = &ManagedBuffer::new_from_bytes(b"hat");
-    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     setup.register_item(slot.clone(), HAT_TOKEN_ID, &ItemAttributes::random());
 

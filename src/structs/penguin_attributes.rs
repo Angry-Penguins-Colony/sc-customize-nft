@@ -78,7 +78,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         let mut attributes = Self::empty();
 
         for (slot, item) in items_by_slot {
-            attributes.set_item(&utils::to_lowercase(slot), Option::Some(item.clone()));
+            attributes.set_item(&slot, Option::Some(item.clone()));
         }
 
         return attributes;
@@ -96,7 +96,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
             panic!("The slot is not empty. Please free it, before setting an item.");
         }
 
-        return self.__set_item_no_check(&utils::to_lowercase(&slot), item);
+        return self.__set_item_no_check(slot, item);
     }
 
     pub fn get_count(&self) -> usize {
@@ -171,7 +171,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
             }
             None => match item {
                 Some(item) => {
-                    self.slots.push(slot.clone());
+                    self.slots.push(utils::to_lowercase(slot));
                     self.items.push(item);
                 }
                 None => {

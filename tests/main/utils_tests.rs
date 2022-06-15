@@ -23,6 +23,16 @@ fn test_split() {
 }
 
 #[test]
+fn test_split_while_empty() {
+    DebugApi::dummy();
+
+    let input = b"";
+    let output = utils::split_buffer::<DebugApi>(&ManagedBuffer::new_from_bytes(input), b' ');
+
+    assert_eq!(output.len(), 0);
+}
+
+#[test]
 fn test_split_last_occurence() {
     DebugApi::dummy();
 

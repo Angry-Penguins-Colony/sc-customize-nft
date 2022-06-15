@@ -22,7 +22,7 @@ fn customize_only_desequip() {
         NONCE,
         ITEM_TO_DESEQUIP_ID,
         NONCE,
-        slot.clone(),
+        ManagedBuffer::new_from_bytes(b"Background"),
         ItemAttributes::random(),
     );
 

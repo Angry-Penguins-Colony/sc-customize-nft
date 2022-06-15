@@ -207,7 +207,7 @@ where
             |sc| {
                 let mut managed_slots =
                     MultiValueEncoded::<DebugApi, ManagedBuffer<DebugApi>>::new();
-                managed_slots.push(slot.clone());
+                managed_slots.push(slot);
 
                 let result = sc.customize(sc.call_value().all_esdt_transfers(), managed_slots);
 

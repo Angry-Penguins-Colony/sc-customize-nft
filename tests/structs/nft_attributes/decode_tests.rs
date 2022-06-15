@@ -25,3 +25,13 @@ fn decode_penguin() {
 
     assert_eq!(expected_output, actual_output);
 }
+
+#[test]
+fn decode_penguin_empty() {
+    DebugApi::dummy();
+
+    let attributes_buffer = ManagedBuffer::<DebugApi>::new_from_bytes(b"");
+    let actual_output = PenguinAttributes::<DebugApi>::top_decode(attributes_buffer).unwrap();
+
+    assert_eq!(PenguinAttributes::empty(), actual_output);
+}

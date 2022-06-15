@@ -283,15 +283,13 @@ fn equip_while_nft_to_equip_is_not_a_penguin() {
 
 #[test]
 fn equip_while_item_is_not_an_item() {
-    const ITEM_TO_EQUIP_ID: &[u8] = b"NOT-AN-ITEM-a";
-
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let b_wrapper = &mut setup.blockchain_wrapper;
+    const ITEM_TO_EQUIP_ID: &[u8] = b"NOT-AN-ITEM-a";
 
     let penguin_attributes = PenguinAttributes::<DebugApi>::empty();
 
-    b_wrapper.set_nft_balance(
+    setup.blockchain_wrapper.set_nft_balance(
         &setup.first_user_address,
         PENGUIN_TOKEN_ID,
         INIT_NONCE,
@@ -299,7 +297,7 @@ fn equip_while_item_is_not_an_item() {
         &penguin_attributes,
     );
 
-    b_wrapper.set_nft_balance(
+    setup.blockchain_wrapper.set_nft_balance(
         &setup.first_user_address,
         ITEM_TO_EQUIP_ID,
         INIT_NONCE,

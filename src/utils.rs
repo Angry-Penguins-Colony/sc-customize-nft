@@ -9,6 +9,10 @@ pub fn split_buffer<M: ManagedTypeApi>(
     buffer: &ManagedBuffer<M>,
     char: u8,
 ) -> ManagedVec<M, ManagedBuffer<M>> {
+    if buffer.len() == 0 {
+        return ManagedVec::new();
+    }
+
     let mut bytes: [u8; 512] = [0; 512];
 
     buffer.load_to_byte_array(&mut bytes);

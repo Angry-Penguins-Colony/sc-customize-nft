@@ -13,6 +13,7 @@ fn get_item() {
 
     let slot = b"hat";
 
+    DebugApi::dummy();
     setup.register_item(slot, HAT_TOKEN_ID, &ItemAttributes::random());
 
     setup

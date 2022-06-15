@@ -19,8 +19,6 @@ pub const PENGUIN_TOKEN_ID: &[u8] = b"PENG-ae5a";
 
 pub const HAT_TOKEN_ID: &[u8] = b"HAT-a";
 
-pub const HAT_2_TOKEN_ID: &[u8] = b"HAT-b";
-
 pub const INIT_NONCE: u64 = 65535u64;
 
 pub struct EquipSetup<CrowdfundingObjBuilder>
@@ -284,8 +282,6 @@ where
         })
         .assert_ok();
     blockchain_wrapper.add_mandos_set_account(cf_wrapper.address_ref());
-
-    DebugApi::dummy();
 
     let mut equip_setup = EquipSetup {
         blockchain_wrapper,

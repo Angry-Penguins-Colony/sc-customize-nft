@@ -14,7 +14,9 @@ fn test_register_item() {
     const TOKEN_ID: &[u8] = b"ITEM-a1a1a1";
     let slot = b"hat";
 
-    setup.register_item(slot, TOKEN_ID, &ItemAttributes::random());
+    DebugApi::dummy();
+
+    setup.register_item(slot, TOKEN_ID, &ItemAttributes::<DebugApi>::random());
 
     setup
         .blockchain_wrapper
@@ -38,6 +40,7 @@ fn register_another_item_on_slot() {
 
     let slot = b"slot";
 
+    DebugApi::dummy();
     setup.register_item(slot, FIRST_TOKEN_ID, &ItemAttributes::random());
     setup.register_item(slot, SECOND_TOKEN_ID, &ItemAttributes::random());
 
@@ -59,21 +62,20 @@ fn register_another_item_on_slot() {
 #[test]
 fn register_unmintable_item() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
-
-    let b_wrapper = &mut setup.blockchain_wrapper;
-
-    b_wrapper
+    setup
+        .blockchain_wrapper
         .execute_tx(
             &setup.owner_address,
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
+                let slot = ManagedBuffer::new_from_bytes(b"hat");
+
                 let mut managed_items_ids =
                     MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                 managed_items_ids.push(managed_token_id!(b"a token without minting rights"));
 
-                let _ = sc.register_item(slot.clone(), managed_items_ids);
+                let _ = sc.register_item(slot, managed_items_ids);
             },
         )
         .assert_ok();
@@ -83,7 +85,7 @@ fn register_unmintable_item() {
 fn register_unburnable_item() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
+    let slot = b"hat";
     const UNBURNABLE: &[u8] = b"a token without minting rights";
 
     let b_wrapper = &mut setup.blockchain_wrapper;
@@ -104,7 +106,7 @@ fn register_unburnable_item() {
                     MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                 managed_items_ids.push(managed_token_id!(UNBURNABLE));
 
-                let _ = sc.register_item(slot.clone(), managed_items_ids);
+                let _ = sc.register_item(ManagedBuffer::new_from_bytes(slot), managed_items_ids);
             },
         )
         .assert_ok();
@@ -118,6 +120,7 @@ fn change_item_slot() {
     let old_slot = b"background";
     const ITEM_ID: &[u8] = b"ITEM-a1a1a1";
 
+    DebugApi::dummy();
     setup.register_item(old_slot, ITEM_ID, &ItemAttributes::random());
     setup.register_item(new_slot, ITEM_ID, &ItemAttributes::random());
 
@@ -135,7 +138,7 @@ fn change_item_slot() {
 fn register_penguin_as_item_should_not_work() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
+    let slot = b"hat";
     const PENGUIN_TOKEN_ID: &[u8] = testing_utils::PENGUIN_TOKEN_ID;
 
     setup
@@ -149,7 +152,7 @@ fn register_penguin_as_item_should_not_work() {
                     MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                 managed_items_ids.push(managed_token_id!(PENGUIN_TOKEN_ID));
 
-                let _ = sc.register_item(slot.clone(), managed_items_ids);
+                let _ = sc.register_item(ManagedBuffer::new_from_bytes(slot), managed_items_ids);
             },
         )
         .assert_error(4, "You cannot register a penguin as an item.");
@@ -159,7 +162,7 @@ fn register_penguin_as_item_should_not_work() {
 fn register_while_not_the_owner() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
+    let slot = b"hat";
 
     setup
         .blockchain_wrapper
@@ -172,7 +175,7 @@ fn register_while_not_the_owner() {
                     MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                 managed_items_ids.push(managed_token_id!(b"ITEM-a1a1a1"));
 
-                let _ = sc.register_item(slot.clone(), managed_items_ids);
+                let _ = sc.register_item(ManagedBuffer::new_from_bytes(slot), managed_items_ids);
             },
         )
         .assert_error(4, "Only the owner can call this method.");

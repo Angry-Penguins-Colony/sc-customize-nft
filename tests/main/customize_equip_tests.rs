@@ -19,6 +19,8 @@ const INIT_NONCE: u64 = 65535;
 fn test_equip() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
+    DebugApi::dummy();
+
     let slot = b"hat";
     const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
     const ITEM_TO_EQUIP_NAME: &[u8] = b"item name";
@@ -109,6 +111,8 @@ fn test_equip() {
 #[test]
 fn equip_item_while_another_item_equipped_on_slot() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    DebugApi::dummy();
 
     const ITEM_ID: &[u8] = b"ITEM-a1a1a1";
 
@@ -216,6 +220,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
 fn customize_nft_without_items() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
+    DebugApi::dummy();
     let b_wrapper = &mut setup.blockchain_wrapper;
     // user own a penguin equiped with an hat
     b_wrapper.set_nft_balance(
@@ -243,6 +248,7 @@ fn customize_nft_without_items() {
 fn equip_while_nft_to_equip_is_not_a_penguin() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
+    DebugApi::dummy();
     let b_wrapper = &mut setup.blockchain_wrapper;
 
     // not a penguin
@@ -282,6 +288,7 @@ fn equip_while_item_is_not_an_item() {
 
     const ITEM_TO_EQUIP_ID: &[u8] = b"NOT-AN-ITEM-a";
 
+    DebugApi::dummy();
     let penguin_attributes = PenguinAttributes::<DebugApi>::empty();
 
     setup.blockchain_wrapper.set_nft_balance(
@@ -323,6 +330,7 @@ fn test_equip_while_sending_two_as_value_of_sft() {
     const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
     const NONCE: u64 = 30;
 
+    DebugApi::dummy();
     setup.register_item(slot, ITEM_TO_EQUIP_ID, &ItemAttributes::random());
 
     // add empty pingouin to the USER

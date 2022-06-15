@@ -18,6 +18,8 @@ fn customize_only_desequip() {
     const ITEM_TO_DESEQUIP_ID: &[u8] = b"BG-a1a1a1";
     const NONCE: u64 = 30;
 
+    DebugApi::dummy();
+
     setup.create_penguin_with_registered_item(
         NONCE,
         ITEM_TO_DESEQUIP_ID,

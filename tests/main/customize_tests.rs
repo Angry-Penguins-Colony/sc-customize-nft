@@ -25,6 +25,7 @@ fn customize_complete_flow() {
     const ITEM_TO_EQUIP_NAME: &[u8] = b"new item";
     const NONCE: u64 = 30;
 
+    DebugApi::dummy();
     setup.create_penguin_with_registered_item(
         NONCE,
         ITEM_TO_DESEQUIP_ID,
@@ -119,6 +120,7 @@ fn customize_nothing_to_desequip_and_equip() {
     // 1. ARRANGE
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
+    DebugApi::dummy();
     setup.create_penguin_empty(NONCE);
 
     let transfers = testing_utils::create_esdt_transfers(&[(PENGUIN_TOKEN_ID, NONCE)]);

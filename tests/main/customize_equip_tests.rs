@@ -107,28 +107,31 @@ fn test_equip() {
 }
 
 #[test]
-fn test_equip_while_overlap() {
+fn equip_item_while_another_item_equipped_on_slot() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     let slot = &ManagedBuffer::new_from_bytes(b"hat");
-    const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
-    const ITEM_TO_EQUIP_NONCE: u64 = 30;
-    const OLD_HAT_NAME: &[u8] = b"old hat";
-    const NEW_HAT_NAME: &[u8] = b"new hat";
 
-    // register hat to remove
-    let hat_to_remove_nonce = setup.register_item_all_properties(
+    const ITEM_ID: &[u8] = b"ITEM-a1a1a1";
+
+    const ITEM_TO_EQUIP_NONCE: u64 = 30;
+    const ITEM_TO_EQUIP_NAME: &[u8] = b"pirate hat";
+
+    const ITEM_TO_DESEQUIP_NAME: &[u8] = b"cap";
+
+    // Register hat to remove
+    let item_to_desequip_nonce = setup.register_item_all_properties(
         slot.clone(),
-        ITEM_TO_EQUIP_ID,
+        ITEM_ID,
         &ItemAttributes::random(),
         0u64,
         Option::None,
-        Option::Some(OLD_HAT_NAME),
+        Option::Some(ITEM_TO_DESEQUIP_NAME),
         Option::None,
         &[],
     );
 
-    // user own a penguin equiped with an hat
+    // Add to user a penguin equiped with the hat to remove
     setup.blockchain_wrapper.set_nft_balance(
         &setup.first_user_address,
         PENGUIN_TOKEN_ID,
@@ -137,35 +140,31 @@ fn test_equip_while_overlap() {
         &PenguinAttributes::<DebugApi>::new(&[(
             slot,
             Item {
-                token: managed_token_id!(ITEM_TO_EQUIP_ID),
-                nonce: hat_to_remove_nonce,
-                name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework force us to do this
+                token: managed_token_id!(ITEM_ID),
+                nonce: item_to_desequip_nonce,
+                name: ManagedBuffer::new_from_bytes(ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in Elrond mocking force us to do this
             },
         )]),
     );
 
-    // give the player a hat
+    // Give the user a hat to equip
     let attributes = ItemAttributes::<DebugApi>::random();
     setup.blockchain_wrapper.set_nft_balance_all_properties(
         &setup.first_user_address,
-        ITEM_TO_EQUIP_ID,
+        ITEM_ID,
         ITEM_TO_EQUIP_NONCE,
         &rust_biguint!(1),
         &attributes,
         0,
         Option::Some(&setup.owner_address),
-        Option::Some(NEW_HAT_NAME),
+        Option::Some(ITEM_TO_EQUIP_NAME),
         Option::None,
         &[],
     );
 
     let (esdt_transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[
         (PENGUIN_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
-        (
-            ITEM_TO_EQUIP_ID,
-            ITEM_TO_EQUIP_NONCE,
-            EsdtTokenType::SemiFungible,
-        ),
+        (ITEM_ID, ITEM_TO_EQUIP_NONCE, EsdtTokenType::SemiFungible),
     ]);
 
     let (sc_result, tx_result) = setup.equip(esdt_transfers);
@@ -173,24 +172,30 @@ fn test_equip_while_overlap() {
     tx_result.assert_ok();
     assert_eq!(sc_result, SCResult::Ok(1u64));
 
-    // sent penguin is burned
+    // Sent penguin is burned
     setup.assert_is_burn(&PENGUIN_TOKEN_ID, INIT_NONCE);
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
-    // sent removed equipment
     assert_eq!(
-        b_wrapper.get_esdt_balance(&setup.first_user_address, ITEM_TO_EQUIP_ID, INIT_NONCE),
-        rust_biguint!(1)
+        b_wrapper.get_esdt_balance(&setup.first_user_address, ITEM_ID, ITEM_TO_EQUIP_NONCE),
+        rust_biguint!(0),
+        "User should not have the hat he sended"
     );
 
-    // new penguin is received
+    assert_eq!(
+        b_wrapper.get_esdt_balance(&setup.first_user_address, ITEM_ID, item_to_desequip_nonce),
+        rust_biguint!(1),
+        "User should have received the hat he desequipped.",
+    );
+
     assert_eq!(
         b_wrapper.get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, 1),
-        rust_biguint!(1)
+        rust_biguint!(1),
+        "User should have received its new penguin"
     );
 
-    // NEW penguin has the right attributes
+    // Received penguin has the right attributes
     b_wrapper.check_nft_balance(
         &setup.first_user_address,
         PENGUIN_TOKEN_ID,
@@ -199,21 +204,11 @@ fn test_equip_while_overlap() {
         Option::Some(&PenguinAttributes::<DebugApi>::new(&[(
             slot,
             Item {
-                token: managed_token_id!(ITEM_TO_EQUIP_ID),
+                token: managed_token_id!(ITEM_ID),
                 nonce: ITEM_TO_EQUIP_NONCE,
-                name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework force us to do this
+                name: ManagedBuffer::new_from_bytes(ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework force us to do this
             },
         )])),
-    );
-
-    // previously hat is sent
-    assert_eq!(
-        b_wrapper.get_esdt_balance(
-            &setup.first_user_address,
-            ITEM_TO_EQUIP_ID,
-            hat_to_remove_nonce
-        ),
-        rust_biguint!(1)
     );
 }
 

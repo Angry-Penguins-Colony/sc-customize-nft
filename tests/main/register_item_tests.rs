@@ -41,7 +41,6 @@ fn register_another_item_on_slot() {
     setup.register_item(slot, FIRST_TOKEN_ID, &ItemAttributes::random());
     setup.register_item(slot, SECOND_TOKEN_ID, &ItemAttributes::random());
 
-    // We splitted check in two execute_query to avoid triggering a bug in Elrond's mocking system
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
@@ -49,12 +48,6 @@ fn register_another_item_on_slot() {
                 sc.slot_of(&managed_token_id!(FIRST_TOKEN_ID)).get(),
                 ManagedBuffer::new_from_bytes(slot)
             );
-        })
-        .assert_ok();
-
-    setup
-        .blockchain_wrapper
-        .execute_query(&setup.cf_wrapper, |sc| {
             assert_eq!(
                 sc.slot_of(&managed_token_id!(SECOND_TOKEN_ID)).get(),
                 ManagedBuffer::new_from_bytes(slot)

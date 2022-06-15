@@ -41,7 +41,7 @@ where
 {
     pub fn register_item(
         &mut self,
-        slot: ManagedBuffer<DebugApi>,
+        slot: &[u8],
         item_id: &[u8],
         attributes: &ItemAttributes<DebugApi>,
     ) -> u64 {
@@ -59,7 +59,7 @@ where
 
     pub fn register_item_all_properties(
         &mut self,
-        slot: ManagedBuffer<DebugApi>,
+        slot: &[u8],
         item_id: &[u8],
         attributes: &ItemAttributes<DebugApi>,
         royalties: u64,
@@ -93,7 +93,8 @@ where
                         MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                     managed_items_ids.push(managed_token_id!(item_id));
 
-                    let result = sc.register_item(slot, managed_items_ids);
+                    let result =
+                        sc.register_item(ManagedBuffer::new_from_bytes(slot), managed_items_ids);
 
                     assert_eq!(result.is_ok(), true);
                 },
@@ -147,10 +148,10 @@ where
         penguin_nonce: u64,
         item_identifier: &[u8],
         item_nonce: u64,
-        slot: ManagedBuffer<DebugApi>,
+        slot: &[u8],
         attributes: ItemAttributes<DebugApi>,
     ) {
-        let _ = self.register_item(slot.clone(), item_identifier, &attributes);
+        let _ = self.register_item(slot, item_identifier, &attributes);
 
         self.blockchain_wrapper.set_nft_balance(
             &self.cf_wrapper.address_ref(),
@@ -161,7 +162,7 @@ where
         );
 
         let attributes = PenguinAttributes::new(&[(
-            &slot,
+            &ManagedBuffer::new_from_bytes(slot),
             Item {
                 token: TokenIdentifier::<DebugApi>::from_esdt_bytes(item_identifier),
                 nonce: item_nonce,

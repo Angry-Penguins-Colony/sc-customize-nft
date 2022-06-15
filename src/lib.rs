@@ -156,9 +156,18 @@ pub trait Equip:
 
         let item_slot = self.slot_of(&item_id).get();
 
+        sc_print!("Equipping {} in slot {}", item_id, item_slot);
+
         // desequip slot if any
+        // TODO: check if the if condition  is really desequipped with a // sc_print!("Desequip item {} in slot {}", item_id, item_slot);
         if attributes.is_slot_empty(&item_slot) == false {
+            sc_print!("Desequip_slot called {:x}", attributes.get_count());
             self.desequip_slot(attributes, &item_slot)?;
+        } else {
+            sc_print!(
+                "Desequip_slot NOT called; count in attrubtes = {}",
+                attributes.get_count()
+            );
         }
 
         attributes.set_item(&item_slot, Option::Some(item.clone()));

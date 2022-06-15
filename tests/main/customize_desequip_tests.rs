@@ -3,7 +3,7 @@ use customize_nft::{
     structs::{item::Item, item_attributes::ItemAttributes, penguin_attributes::PenguinAttributes},
 };
 use elrond_wasm::types::{ManagedBuffer, SCResult, TokenIdentifier};
-use elrond_wasm_debug::{rust_biguint, DebugApi};
+use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
 use crate::testing_utils;
 
@@ -14,7 +14,7 @@ fn customize_only_desequip() {
     // 1. ARRANGE
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let slot = ManagedBuffer::new_from_bytes(b"Background");
+    let slot = b"Background";
     const ITEM_TO_DESEQUIP_ID: &[u8] = b"BG-a1a1a1";
     const NONCE: u64 = 30;
 
@@ -22,7 +22,7 @@ fn customize_only_desequip() {
         NONCE,
         ITEM_TO_DESEQUIP_ID,
         NONCE,
-        ManagedBuffer::new_from_bytes(b"Background"),
+        slot,
         ItemAttributes::random(),
     );
 
@@ -33,7 +33,7 @@ fn customize_only_desequip() {
                 .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/"));
 
             let attributes = PenguinAttributes::new(&[(
-                &slot,
+                &ManagedBuffer::new_from_bytes(slot),
                 Item {
                     token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_DESEQUIP_ID),
                     nonce: NONCE,
@@ -51,7 +51,7 @@ fn customize_only_desequip() {
     let transfers = testing_utils::create_esdt_transfers(&[(PENGUIN_TOKEN_ID, NONCE)]);
 
     // 2. ACT
-    let (sc_result, tx_result) = setup.customize(transfers, slot.clone());
+    let (sc_result, tx_result) = setup.customize(transfers, managed_buffer!(slot));
 
     // 3. ASSERT
     tx_result.assert_ok();

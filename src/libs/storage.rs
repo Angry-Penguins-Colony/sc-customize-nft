@@ -11,7 +11,7 @@ pub trait StorageModule {
     #[storage_mapper("ipfsGateway")]
     fn ipfs_gateway(&self) -> SingleValueMapper<ManagedBuffer<Self::Api>>;
 
-    #[storage_mapper("items_types")]
+    #[storage_mapper("slot_of_items")]
     fn slot_of(&self, token: &TokenIdentifier) -> SingleValueMapper<ManagedBuffer>;
 
     #[storage_mapper("penguin_cid_by_attributes")]

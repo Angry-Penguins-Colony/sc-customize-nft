@@ -1,7 +1,7 @@
 use customize_nft::structs::item_attributes::ItemAttributes;
 use customize_nft::*;
-use elrond_wasm::types::{ManagedBuffer, TokenIdentifier};
-use elrond_wasm_debug::DebugApi;
+use elrond_wasm::types::TokenIdentifier;
+use elrond_wasm_debug::{managed_buffer, DebugApi};
 
 use crate::testing_utils;
 
@@ -11,9 +11,9 @@ const HAT_TOKEN_ID: &[u8] = testing_utils::HAT_TOKEN_ID;
 fn get_item() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
+    let slot = b"hat";
 
-    setup.register_item(slot.clone(), HAT_TOKEN_ID, &ItemAttributes::random());
+    setup.register_item(slot, HAT_TOKEN_ID, &ItemAttributes::random());
 
     setup
         .blockchain_wrapper
@@ -23,7 +23,7 @@ fn get_item() {
             let opt_actual_slot = sc.get_item_slot(&hat_token).into_option();
 
             assert_eq!(opt_actual_slot.is_some(), true);
-            assert_eq!(&opt_actual_slot.unwrap(), slot);
+            assert_eq!(opt_actual_slot.unwrap(), managed_buffer!(slot));
         })
         .assert_ok();
 }

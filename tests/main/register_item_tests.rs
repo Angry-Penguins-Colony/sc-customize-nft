@@ -2,7 +2,7 @@ use customize_nft::libs::storage::StorageModule;
 use customize_nft::structs::item_attributes::ItemAttributes;
 use customize_nft::*;
 use elrond_wasm::types::{EsdtLocalRole, ManagedBuffer, MultiValueEncoded, TokenIdentifier};
-use elrond_wasm_debug::managed_token_id;
+use elrond_wasm_debug::{managed_buffer, managed_token_id};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
 use crate::testing_utils;
@@ -12,9 +12,9 @@ fn test_register_item() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     const TOKEN_ID: &[u8] = b"ITEM-a1a1a1";
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
+    let slot = b"hat";
 
-    setup.register_item(slot.clone(), TOKEN_ID, &ItemAttributes::random());
+    setup.register_item(slot, TOKEN_ID, &ItemAttributes::random());
 
     setup
         .blockchain_wrapper
@@ -23,7 +23,7 @@ fn test_register_item() {
                 .slot_of(&TokenIdentifier::from_esdt_bytes(TOKEN_ID))
                 .get();
 
-            assert_eq!(&result, slot);
+            assert_eq!(result, managed_buffer!(slot));
         })
         .assert_ok();
 }
@@ -36,23 +36,29 @@ fn register_another_item_on_slot() {
     const FIRST_TOKEN_ID: &[u8] = b"a";
     const SECOND_TOKEN_ID: &[u8] = b"A";
 
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
+    let slot = b"slot";
 
-    setup.register_item(slot.clone(), FIRST_TOKEN_ID, &ItemAttributes::random());
-    setup.register_item(slot.clone(), SECOND_TOKEN_ID, &ItemAttributes::random());
+    setup.register_item(slot, FIRST_TOKEN_ID, &ItemAttributes::random());
+    setup.register_item(slot, SECOND_TOKEN_ID, &ItemAttributes::random());
 
     // We splitted check in two execute_query to avoid triggering a bug in Elrond's mocking system
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
-            assert_eq!(&sc.slot_of(&managed_token_id!(FIRST_TOKEN_ID)).get(), slot);
+            assert_eq!(
+                sc.slot_of(&managed_token_id!(FIRST_TOKEN_ID)).get(),
+                ManagedBuffer::new_from_bytes(slot)
+            );
         })
         .assert_ok();
 
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
-            assert_eq!(&sc.slot_of(&managed_token_id!(SECOND_TOKEN_ID)).get(), slot);
+            assert_eq!(
+                sc.slot_of(&managed_token_id!(SECOND_TOKEN_ID)).get(),
+                ManagedBuffer::new_from_bytes(slot)
+            );
         })
         .assert_ok();
 }
@@ -115,19 +121,19 @@ fn register_unburnable_item() {
 fn change_item_slot() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let new_slot = &ManagedBuffer::new_from_bytes(b"hat");
-    let old_slot = &ManagedBuffer::new_from_bytes(b"background");
+    let new_slot = b"hat";
+    let old_slot = b"background";
     const ITEM_ID: &[u8] = b"ITEM-a1a1a1";
 
-    setup.register_item(old_slot.clone(), ITEM_ID, &ItemAttributes::random());
-    setup.register_item(new_slot.clone(), ITEM_ID, &ItemAttributes::random());
+    setup.register_item(old_slot, ITEM_ID, &ItemAttributes::random());
+    setup.register_item(new_slot, ITEM_ID, &ItemAttributes::random());
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
     b_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             let result = sc.slot_of(&managed_token_id!(ITEM_ID)).get();
-            assert_eq!(&result, &new_slot.clone());
+            assert_eq!(result, managed_buffer!(new_slot));
         })
         .assert_ok();
 }

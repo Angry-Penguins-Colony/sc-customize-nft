@@ -6,7 +6,7 @@ use elrond_wasm::{
     contract_base::ContractBase,
     types::{ManagedBuffer, MultiValueEncoded, SCResult, TokenIdentifier},
 };
-use elrond_wasm_debug::{rust_biguint, DebugApi};
+use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
 use crate::testing_utils;
 
@@ -17,10 +17,10 @@ fn customize_complete_flow() {
     // 1. ARRANGE
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let item_to_desequip_slot = ManagedBuffer::new_from_bytes(b"background");
+    let item_to_desequip_slot = b"background";
     const ITEM_TO_DESEQUIP_ID: &[u8] = b"ITEM-a1a1a1";
 
-    let item_to_equip_slot = &ManagedBuffer::new_from_bytes(b"hat");
+    let item_to_equip_slot = b"hat";
     const ITEM_TO_EQUIP: &[u8] = b"HAT-b2b2b2";
     const ITEM_TO_EQUIP_NAME: &[u8] = b"new item";
     const NONCE: u64 = 30;
@@ -29,12 +29,12 @@ fn customize_complete_flow() {
         NONCE,
         ITEM_TO_DESEQUIP_ID,
         NONCE,
-        item_to_equip_slot.clone(),
+        item_to_equip_slot,
         ItemAttributes::random(),
     );
 
     setup.register_item(
-        item_to_desequip_slot.clone(),
+        item_to_desequip_slot,
         ITEM_TO_EQUIP,
         &ItemAttributes::random(),
     );
@@ -56,7 +56,7 @@ fn customize_complete_flow() {
         testing_utils::create_esdt_transfers(&[(PENGUIN_TOKEN_ID, NONCE), (ITEM_TO_EQUIP, NONCE)]);
 
     // 2. ACT
-    let (sc_result, tx_result) = setup.customize(transfers, item_to_equip_slot.clone());
+    let (sc_result, tx_result) = setup.customize(transfers, managed_buffer!(item_to_equip_slot));
 
     // 3. ASSERT
     tx_result.assert_ok();
@@ -102,7 +102,7 @@ fn customize_complete_flow() {
         1,
         &rust_biguint!(1),
         Option::Some(&PenguinAttributes::<DebugApi>::new(&[(
-            &item_to_desequip_slot,
+            &managed_buffer!(item_to_desequip_slot),
             Item {
                 token: TokenIdentifier::from_esdt_bytes(ITEM_TO_EQUIP),
                 nonce: NONCE,

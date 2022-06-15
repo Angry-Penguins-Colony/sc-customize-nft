@@ -3,8 +3,8 @@ use customize_nft::structs::item_attributes::ItemAttributes;
 use customize_nft::structs::penguin_attributes::PenguinAttributes;
 use elrond_wasm::contract_base::ContractBase;
 use elrond_wasm::types::{EsdtTokenType, ManagedBuffer, SCResult, TokenIdentifier};
-use elrond_wasm_debug::managed_token_id;
 use elrond_wasm_debug::tx_mock::TxInputESDT;
+use elrond_wasm_debug::{managed_buffer, managed_token_id};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
 use crate::testing_utils;
@@ -19,13 +19,13 @@ const INIT_NONCE: u64 = 65535;
 fn test_equip() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
+    let slot = b"hat";
     const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
     const ITEM_TO_EQUIP_NAME: &[u8] = b"item name";
 
     let item_attributes = ItemAttributes::random();
     let item_nonce = setup.register_item_all_properties(
-        slot.clone(),
+        slot,
         ITEM_TO_EQUIP_ID,
         &item_attributes,
         0,
@@ -96,7 +96,7 @@ fn test_equip() {
         1u64,
         &rust_biguint!(1),
         Option::Some(&PenguinAttributes::<DebugApi>::new(&[(
-            slot,
+            &managed_buffer!(slot),
             Item {
                 token: managed_token_id!(ITEM_TO_EQUIP_ID),
                 nonce: item_nonce,
@@ -110,8 +110,6 @@ fn test_equip() {
 fn equip_item_while_another_item_equipped_on_slot() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
-
     const ITEM_ID: &[u8] = b"ITEM-a1a1a1";
 
     const ITEM_TO_EQUIP_NONCE: u64 = 30;
@@ -119,9 +117,11 @@ fn equip_item_while_another_item_equipped_on_slot() {
 
     const ITEM_TO_DESEQUIP_NAME: &[u8] = b"cap";
 
+    let slot = b"hat";
+
     // Register hat to remove
     let item_to_desequip_nonce = setup.register_item_all_properties(
-        slot.clone(),
+        slot,
         ITEM_ID,
         &ItemAttributes::random(),
         0u64,
@@ -138,7 +138,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
         INIT_NONCE,
         &rust_biguint!(1),
         &PenguinAttributes::<DebugApi>::new(&[(
-            slot,
+            &managed_buffer!(slot),
             Item {
                 token: managed_token_id!(ITEM_ID),
                 nonce: item_to_desequip_nonce,
@@ -202,7 +202,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
         1,
         &rust_biguint!(1),
         Option::Some(&PenguinAttributes::<DebugApi>::new(&[(
-            slot,
+            &managed_buffer!(slot),
             Item {
                 token: managed_token_id!(ITEM_ID),
                 nonce: ITEM_TO_EQUIP_NONCE,
@@ -319,11 +319,11 @@ fn equip_while_item_is_not_an_item() {
 fn test_equip_while_sending_two_as_value_of_sft() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
+    let slot = b"hat";
     const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
     const NONCE: u64 = 30;
 
-    setup.register_item(slot.clone(), ITEM_TO_EQUIP_ID, &ItemAttributes::random());
+    setup.register_item(slot, ITEM_TO_EQUIP_ID, &ItemAttributes::random());
 
     // add empty pingouin to the USER
     setup.blockchain_wrapper.set_nft_balance(

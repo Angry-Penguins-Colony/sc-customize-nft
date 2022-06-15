@@ -21,18 +21,13 @@ fn test_register_item() {
 
     setup
         .blockchain_wrapper
-        .execute_tx(
-            &setup.owner_address,
-            &setup.cf_wrapper,
-            &rust_biguint!(0u64),
-            |sc| {
-                let result = sc
-                    .slot_of(&TokenIdentifier::from_esdt_bytes(TOKEN_ID))
-                    .get();
+        .execute_query(&setup.cf_wrapper, |sc| {
+            let result = sc
+                .slot_of(&TokenIdentifier::from_esdt_bytes(TOKEN_ID))
+                .get();
 
-                assert_eq!(&result, slot);
-            },
-        )
+            assert_eq!(&result, slot);
+        })
         .assert_ok();
 }
 

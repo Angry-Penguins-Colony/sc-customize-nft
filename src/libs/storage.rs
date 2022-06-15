@@ -32,7 +32,7 @@ pub trait StorageModule {
         self.thumbnail_cid_of(attributes).set(cid);
     }
 
-    fn has_slot(&self, _token: &TokenIdentifier) -> bool {
-        panic!("Not implemented");
+    fn has_slot(&self, token: &TokenIdentifier) -> bool {
+        return self.slot_of(token).is_empty() == false;
     }
 }

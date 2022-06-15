@@ -17,12 +17,11 @@ const INIT_NONCE: u64 = 65535;
 // create NFT on blockchain wrapper
 #[test]
 fn test_equip() {
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
+    let slot = &ManagedBuffer::new_from_bytes(b"hat");
     const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
     const ITEM_TO_EQUIP_NAME: &[u8] = b"item name";
-
-    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     let item_attributes = ItemAttributes::random();
     let item_nonce = setup.register_item_all_properties(
@@ -109,13 +108,13 @@ fn test_equip() {
 
 #[test]
 fn test_equip_while_overlap() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
     let slot = &ManagedBuffer::new_from_bytes(b"hat");
     const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
     const ITEM_TO_EQUIP_NONCE: u64 = 30;
     const OLD_HAT_NAME: &[u8] = b"old hat";
     const NEW_HAT_NAME: &[u8] = b"new hat";
-
-    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     // register hat to remove
     let hat_to_remove_nonce = setup.register_item_all_properties(
@@ -325,11 +324,11 @@ fn equip_while_item_is_not_an_item() {
 
 #[test]
 fn test_equip_while_sending_two_as_value_of_sft() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
     let slot = &ManagedBuffer::new_from_bytes(b"hat");
     const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
     const NONCE: u64 = 30;
-
-    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     setup.register_item(slot.clone(), ITEM_TO_EQUIP_ID, &ItemAttributes::random());
 

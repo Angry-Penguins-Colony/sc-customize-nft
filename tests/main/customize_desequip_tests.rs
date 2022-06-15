@@ -11,15 +11,12 @@ const PENGUIN_TOKEN_ID: &[u8] = testing_utils::PENGUIN_TOKEN_ID;
 
 #[test]
 fn customize_only_desequip() {
-    DebugApi::dummy();
-
-    let slot = ManagedBuffer::new_from_bytes(b"Background");
-
-    const ITEM_TO_DESEQUIP_ID: &[u8] = b"BG-a1a1a1";
-    const NONCE: u64 = 30;
-
     // 1. ARRANGE
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    let slot = ManagedBuffer::new_from_bytes(b"Background");
+    const ITEM_TO_DESEQUIP_ID: &[u8] = b"BG-a1a1a1";
+    const NONCE: u64 = 30;
 
     setup.create_penguin_with_registered_item(
         NONCE,

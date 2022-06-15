@@ -14,6 +14,9 @@ const PENGUIN_TOKEN_ID: &[u8] = testing_utils::PENGUIN_TOKEN_ID;
 
 #[test]
 fn customize_complete_flow() {
+    // 1. ARRANGE
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
     let item_to_desequip_slot = ManagedBuffer::new_from_bytes(b"background");
     const ITEM_TO_DESEQUIP_ID: &[u8] = b"ITEM-a1a1a1";
 
@@ -21,9 +24,6 @@ fn customize_complete_flow() {
     const ITEM_TO_EQUIP: &[u8] = b"HAT-b2b2b2";
     const ITEM_TO_EQUIP_NAME: &[u8] = b"new item";
     const NONCE: u64 = 30;
-
-    // 1. ARRANGE
-    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     setup.create_penguin_with_registered_item(
         NONCE,

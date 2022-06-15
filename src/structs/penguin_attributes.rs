@@ -154,15 +154,18 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         let index = self.__get_index(slot);
 
         match index {
-            Some(index) => match item {
-                Some(item) => {
-                    self.items.set(index, &item);
-                }
-                None => {
+            Some(index) => {
+                if let Some(item) = item {
+                    let result = self.items.set(index, &item);
+
+                    if result.is_err() {
+                        panic!("Failed to set item: {:?}", result.err());
+                    }
+                } else {
                     self.items.remove(index);
                     self.slots.remove(index);
                 }
-            },
+            }
             None => match item {
                 Some(item) => {
                     self.slots.push(slot.clone());

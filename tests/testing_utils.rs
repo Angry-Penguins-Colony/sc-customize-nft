@@ -7,7 +7,7 @@ use customize_nft::*;
 use elrond_wasm::contract_base::ContractBase;
 use elrond_wasm::types::{
     Address, BigUint, EsdtLocalRole, EsdtTokenPayment, EsdtTokenType, ManagedBuffer, ManagedVec,
-    MultiValueEncoded, SCResult, TokenIdentifier,
+    MultiValueEncoded, TokenIdentifier,
 };
 use elrond_wasm_debug::tx_mock::{TxInputESDT, TxResult};
 use elrond_wasm_debug::{managed_token_id, testing_framework::*};
@@ -91,10 +91,7 @@ where
                         MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                     managed_items_ids.push(managed_token_id!(item_id));
 
-                    let result =
-                        sc.register_item(ManagedBuffer::new_from_bytes(slot), managed_items_ids);
-
-                    assert_eq!(result.is_ok(), true);
+                    sc.register_item(ManagedBuffer::new_from_bytes(slot), managed_items_ids);
                 },
             )
             .assert_ok();
@@ -181,8 +178,8 @@ where
         &mut self,
         transfers: Vec<TxInputESDT>,
         slot: ManagedBuffer<DebugApi>,
-    ) -> (SCResult<u64>, TxResult) {
-        let mut opt_sc_result: Option<SCResult<u64>> = Option::None;
+    ) -> (Option<u64>, TxResult) {
+        let mut opt_sc_result: Option<u64> = Option::None;
 
         let tx_result = self.blockchain_wrapper.execute_esdt_multi_transfer(
             &self.first_user_address,
@@ -199,10 +196,7 @@ where
             },
         );
 
-        match opt_sc_result {
-            Option::Some(sc_result) => return (sc_result, tx_result),
-            Option::None => return (SCResult::Err("".into()), tx_result),
-        }
+        return (opt_sc_result, tx_result);
     }
 
     pub fn assert_is_burn(&mut self, token_id: &[u8], token_nonce: u64) {
@@ -234,8 +228,8 @@ where
         );
     }
 
-    pub fn equip(&mut self, transfers: Vec<TxInputESDT>) -> (SCResult<u64>, TxResult) {
-        let mut opt_sc_result: Option<SCResult<u64>> = Option::None;
+    pub fn equip(&mut self, transfers: Vec<TxInputESDT>) -> (Option<u64>, TxResult) {
+        let mut opt_sc_result: Option<u64> = Option::None;
 
         let tx_result = self.blockchain_wrapper.execute_esdt_multi_transfer(
             &self.first_user_address,
@@ -247,14 +241,11 @@ where
                     MultiValueEncoded::<DebugApi, ManagedBuffer<DebugApi>>::new(),
                 );
 
-                opt_sc_result = Option::Some(result.clone());
+                opt_sc_result = Option::Some(result);
             },
         );
 
-        match opt_sc_result {
-            Option::Some(sc_result) => return (sc_result, tx_result),
-            Option::None => return (SCResult::Err("".into()), tx_result),
-        }
+        return (opt_sc_result, tx_result);
     }
 }
 
@@ -277,8 +268,7 @@ where
     // deploy contract
     blockchain_wrapper
         .execute_tx(&owner_address, &cf_wrapper, &rust_zero, |sc| {
-            let result = sc.init(managed_token_id!(PENGUIN_TOKEN_ID));
-            assert_eq!(result, SCResult::Ok(()));
+            sc.init(managed_token_id!(PENGUIN_TOKEN_ID));
         })
         .assert_ok();
     blockchain_wrapper.add_mandos_set_account(cf_wrapper.address_ref());

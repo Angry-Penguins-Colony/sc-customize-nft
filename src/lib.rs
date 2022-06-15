@@ -27,13 +27,11 @@ pub trait Equip:
     + penguin_url_builder::PenguinURLBuilder
 {
     #[init]
-    fn init(&self, penguins_identifier: TokenIdentifier) -> SCResult<()> {
+    fn init(&self, penguins_identifier: TokenIdentifier) {
         self.penguins_identifier().set(&penguins_identifier);
         self.ipfs_gateway().set(ManagedBuffer::new_from_bytes(
             b"https://penguins-generator.herokuapp.com/",
         ));
-
-        return Ok(());
     }
 
     #[endpoint(registerItem)]
@@ -42,7 +40,7 @@ pub trait Equip:
         &self,
         item_slot: ManagedBuffer,
         items_id_to_add: MultiValueEncoded<TokenIdentifier>,
-    ) -> SCResult<()> {
+    ) {
         require!(
             self.blockchain().get_caller() == self.blockchain().get_owner_address(),
             "Only the owner can call this method."
@@ -56,8 +54,6 @@ pub trait Equip:
 
             self.slot_of(&item_id).set(&item_slot);
         }
-
-        return Ok(());
     }
 
     #[view(getItemType)]
@@ -75,8 +71,8 @@ pub trait Equip:
         &self,
         #[payment_multi] payments: ManagedVec<EsdtTokenPayment<Self::Api>>,
         to_desequip_slots: MultiValueEncoded<ManagedBuffer>,
-    ) -> SCResult<u64> {
-        self.require_penguin_roles_set()?;
+    ) -> u64 {
+        self.require_penguin_roles_set();
         require!(
             payments.len() >= 1,
             "You must provide at least one penguin."
@@ -104,7 +100,7 @@ pub trait Equip:
 
         // first desequip
         for slot in to_desequip_slots {
-            self.desequip_slot(&mut attributes, &slot)?;
+            self.desequip_slot(&mut attributes, &slot);
         }
 
         // then, equip
@@ -118,29 +114,25 @@ pub trait Equip:
             let item = Item {
                 token: payment.token_identifier.clone(),
                 nonce: payment.token_nonce,
-                name: self.get_token_name(&payment.token_identifier, payment.token_nonce)?,
+                name: self.get_token_name(&payment.token_identifier, payment.token_nonce),
             };
 
-            self.equip_slot(&mut attributes, &item)?;
+            self.equip_slot(&mut attributes, &item);
         }
 
         return self.update_penguin(&penguin_id, penguin_nonce, &attributes);
     }
 
-    fn get_token_name(&self, item_id: &TokenIdentifier, nonce: u64) -> SCResult<ManagedBuffer> {
+    fn get_token_name(&self, item_id: &TokenIdentifier, nonce: u64) -> ManagedBuffer {
         let item_name = self
             .blockchain()
             .get_esdt_token_data(&self.blockchain().get_sc_address(), item_id, nonce)
             .name;
 
-        return Ok(item_name);
+        return item_name;
     }
 
-    fn equip_slot(
-        &self,
-        attributes: &mut PenguinAttributes<Self::Api>,
-        item: &Item<Self::Api>,
-    ) -> SCResult<()> {
+    fn equip_slot(&self, attributes: &mut PenguinAttributes<Self::Api>, item: &Item<Self::Api>) {
         let item_id = &item.token;
 
         require!(
@@ -162,7 +154,7 @@ pub trait Equip:
         // TODO: check if the if condition  is really desequipped with a // sc_print!("Desequip item {} in slot {}", item_id, item_slot);
         if attributes.is_slot_empty(&item_slot) == false {
             sc_print!("Desequip_slot called {:x}", attributes.get_count());
-            self.desequip_slot(attributes, &item_slot)?;
+            self.desequip_slot(attributes, &item_slot);
         } else {
             sc_print!(
                 "Desequip_slot NOT called; count in attrubtes = {}",
@@ -171,11 +163,9 @@ pub trait Equip:
         }
 
         attributes.set_item(&item_slot, Option::Some(item.clone()));
-
-        return SCResult::Ok(());
     }
 
-    fn require_penguin_roles_set(&self) -> SCResult<()> {
+    fn require_penguin_roles_set(&self) {
         let penguin_id = self.penguins_identifier().get();
         let roles = self.blockchain().get_esdt_local_roles(&penguin_id);
 
@@ -188,8 +178,6 @@ pub trait Equip:
             roles.has_role(&EsdtLocalRole::NftBurn) == true,
             "Local burn role not set  for penguin"
         );
-
-        Ok(())
     }
 
     #[payable("*")]
@@ -200,23 +188,17 @@ pub trait Equip:
         #[payment_token] _token: EgldOrEsdtTokenIdentifier<Self::Api>,
         #[payment_nonce] _nonce: u64,
         #[payment_amount] _amount: BigUint,
-    ) -> SCResult<()> {
+    ) {
         require!(
             self.blockchain().get_caller() == self.blockchain().get_owner_address(),
             "Only the owner can call this method."
         );
 
         // TODO: require! to only send registered SFT
-
-        return Ok(());
     }
 
     /// Empty the item at the slot provided and sent it to the caller.
-    fn desequip_slot(
-        &self,
-        attributes: &mut PenguinAttributes<Self::Api>,
-        slot: &ManagedBuffer,
-    ) -> SCResult<()> {
+    fn desequip_slot(&self, attributes: &mut PenguinAttributes<Self::Api>, slot: &ManagedBuffer) {
         let caller = self.blockchain().get_caller();
 
         require!(
@@ -252,11 +234,10 @@ pub trait Equip:
                     .direct_esdt(&caller, &item_id, item_nonce, &BigUint::from(1u32), &[]);
 
                 attributes.empty_slot(&slot);
-                return SCResult::Ok(());
             }
 
             None => {
-                return SCResult::Err("Slot is empty, we can't sent item to it".into());
+                sc_panic!("Slot is empty, we can't sent item to it");
             }
         }
     }

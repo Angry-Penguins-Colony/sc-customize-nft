@@ -4,7 +4,7 @@ use customize_nft::{
 };
 use elrond_wasm::{
     contract_base::ContractBase,
-    types::{ManagedBuffer, MultiValueEncoded, SCResult, TokenIdentifier},
+    types::{ManagedBuffer, MultiValueEncoded, TokenIdentifier},
 };
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
@@ -61,7 +61,7 @@ fn customize_complete_flow() {
 
     // 3. ASSERT
     tx_result.assert_ok();
-    assert_eq!(sc_result, SCResult::Ok(1u64));
+    assert_eq!(sc_result.unwrap(), 1u64);
 
     // penguin sent burned
     setup.assert_is_burn(PENGUIN_TOKEN_ID, NONCE);

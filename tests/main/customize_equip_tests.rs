@@ -2,7 +2,7 @@ use customize_nft::structs::item::Item;
 use customize_nft::structs::item_attributes::ItemAttributes;
 use customize_nft::structs::penguin_attributes::PenguinAttributes;
 use elrond_wasm::contract_base::ContractBase;
-use elrond_wasm::types::{EsdtTokenType, ManagedBuffer, SCResult, TokenIdentifier};
+use elrond_wasm::types::{EsdtTokenType, ManagedBuffer, TokenIdentifier};
 use elrond_wasm_debug::tx_mock::TxInputESDT;
 use elrond_wasm_debug::{managed_buffer, managed_token_id};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
@@ -77,7 +77,7 @@ fn test_equip() {
     let (sc_result, tx_result) = setup.equip(transfers);
 
     tx_result.assert_ok();
-    assert_eq!(sc_result, SCResult::Ok(1u64));
+    assert_eq!(sc_result.unwrap(), 1u64);
 
     // the transfered penguin is burn
     setup.assert_is_burn(&PENGUIN_TOKEN_ID, INIT_NONCE);
@@ -174,7 +174,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
     let (sc_result, tx_result) = setup.equip(esdt_transfers);
 
     tx_result.assert_ok();
-    assert_eq!(sc_result, SCResult::Ok(1u64));
+    assert_eq!(sc_result.unwrap(), 1u64);
 
     // Sent penguin is burned
     setup.assert_is_burn(&PENGUIN_TOKEN_ID, INIT_NONCE);

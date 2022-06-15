@@ -4,7 +4,7 @@ elrond_wasm::derive_imports!();
 use alloc::string::ToString;
 use elrond_wasm::{
     elrond_codec::TopEncode,
-    types::{ManagedBuffer, ManagedByteArray, ManagedVec, SCResult},
+    types::{ManagedBuffer, ManagedByteArray, ManagedVec},
 };
 
 use crate::constants::ERR_NO_CID_URL;
@@ -15,7 +15,7 @@ pub trait PenguinURLBuilder: super::storage::StorageModule {
     fn build_thumbnail_url(
         &self,
         attributes: &PenguinAttributes<Self::Api>,
-    ) -> SCResult<ManagedBuffer<Self::Api>> {
+    ) -> ManagedBuffer<Self::Api> {
         let cid = self.thumbnail_cid_of(attributes);
 
         require!(cid.is_empty() == false, ERR_NO_CID_URL);
@@ -23,6 +23,6 @@ pub trait PenguinURLBuilder: super::storage::StorageModule {
         let mut url = self.ipfs_gateway().get();
         url.append(&cid.get());
 
-        return Ok(url);
+        return url;
     }
 }

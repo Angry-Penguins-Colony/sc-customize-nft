@@ -4,7 +4,7 @@ elrond_wasm::derive_imports!();
 use alloc::string::ToString;
 use elrond_wasm::{
     elrond_codec::TopEncode,
-    types::{ManagedBuffer, ManagedByteArray, ManagedVec, SCResult},
+    types::{ManagedBuffer, ManagedByteArray, ManagedVec},
 };
 
 use crate::constants::ERR_NO_CID_URL;
@@ -21,11 +21,11 @@ pub trait MintPenguin:
         penguin_id: &TokenIdentifier,
         penguin_nonce: u64,
         attributes: &PenguinAttributes<Self::Api>,
-    ) -> SCResult<u64> {
+    ) -> u64 {
         let caller = self.blockchain().get_caller();
 
         // mint
-        let token_nonce = self.mint_penguin(attributes, &self.get_penguin_name(penguin_nonce))?;
+        let token_nonce = self.mint_penguin(attributes, &self.get_penguin_name(penguin_nonce));
 
         // burn the old one
         self.send()
@@ -35,7 +35,7 @@ pub trait MintPenguin:
         self.send()
             .direct_esdt(&caller, &penguin_id, token_nonce, &BigUint::from(1u32), &[]);
 
-        return SCResult::Ok(token_nonce);
+        return token_nonce;
     }
 
     fn get_penguin_name(&self, penguin_nonce: u64) -> ManagedBuffer<Self::Api> {
@@ -48,11 +48,7 @@ pub trait MintPenguin:
         return nft_data.name;
     }
 
-    fn mint_penguin(
-        &self,
-        attributes: &PenguinAttributes<Self::Api>,
-        name: &ManagedBuffer,
-    ) -> SCResult<u64> {
+    fn mint_penguin(&self, attributes: &PenguinAttributes<Self::Api>, name: &ManagedBuffer) -> u64 {
         let penguin_id = self.penguins_identifier().get();
 
         let mut uris = ManagedVec::new();
@@ -64,20 +60,17 @@ pub trait MintPenguin:
             &BigUint::from(1u32),
             &name,
             &BigUint::zero(),
-            &self.calculate_hash(&attributes)?,
+            &self.calculate_hash(&attributes),
             &attributes,
             &uris,
         );
 
-        return SCResult::Ok(token_nonce);
+        return token_nonce;
     }
 
-    fn calculate_hash(
-        &self,
-        _attributes: &PenguinAttributes<Self::Api>,
-    ) -> SCResult<ManagedBuffer> {
+    fn calculate_hash(&self, _attributes: &PenguinAttributes<Self::Api>) -> ManagedBuffer {
         // we disabled hash calculating for now
-        return SCResult::Ok(ManagedBuffer::new());
+        return ManagedBuffer::new();
     }
 
     fn get_next_penguin_name(&self) -> ManagedBuffer {

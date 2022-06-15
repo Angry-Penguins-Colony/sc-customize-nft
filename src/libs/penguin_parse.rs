@@ -4,7 +4,7 @@ elrond_wasm::derive_imports!();
 use alloc::string::ToString;
 use elrond_wasm::{
     elrond_codec::TopEncode,
-    types::{ManagedBuffer, ManagedByteArray, ManagedVec, SCResult},
+    types::{ManagedBuffer, ManagedByteArray, ManagedVec},
 };
 
 use crate::structs::{item_attributes::ItemAttributes, penguin_attributes::PenguinAttributes};

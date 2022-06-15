@@ -91,7 +91,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         }
     }
 
-    pub fn set_item(&mut self, slot: &ManagedBuffer<M>, item: Option<Item<M>>) -> () {
+    pub fn set_item(&mut self, slot: &ManagedBuffer<M>, item: Option<Item<M>>) {
         if self.is_slot_empty(slot) == false {
             panic!("The slot is not empty. Please free it, before setting an item.");
         }
@@ -112,7 +112,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         }
     }
 
-    pub fn empty_slot(&mut self, slot: &ManagedBuffer<M>) -> () {
+    pub fn empty_slot(&mut self, slot: &ManagedBuffer<M>) {
         return self.__set_item_no_check(slot, Option::None);
     }
 
@@ -150,7 +150,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
     }
 
     /// Set an item on a slot, without checking if the slot is empty.
-    fn __set_item_no_check(&mut self, slot: &ManagedBuffer<M>, item: Option<Item<M>>) -> () {
+    fn __set_item_no_check(&mut self, slot: &ManagedBuffer<M>, item: Option<Item<M>>) {
         let index = self.__get_index(slot);
 
         match index {

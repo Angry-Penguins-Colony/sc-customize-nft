@@ -316,7 +316,7 @@ fn equip_while_item_is_not_an_item() {
 
     tx_result.assert_error(
         4,
-        "You are trying to equip a token that is not considered as an item",
+        "Trying to equip NOT-AN-ITEM-a but is not considered as an item",
     );
 }
 

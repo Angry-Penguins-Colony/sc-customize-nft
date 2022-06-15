@@ -133,8 +133,6 @@ pub trait Equip:
             .get_esdt_token_data(&self.blockchain().get_sc_address(), item_id, nonce)
             .name;
 
-        sc_print!("token {} nonce {:x} has name {}", item_id, nonce, item_name);
-
         return Ok(item_name);
     }
 
@@ -147,7 +145,8 @@ pub trait Equip:
 
         require!(
             self.has_slot(&item_id) == true,
-            "You are trying to equip a token that is not considered as an item"
+            "Trying to equip {} but is not considered as an item",
+            item_id
         );
 
         require!(

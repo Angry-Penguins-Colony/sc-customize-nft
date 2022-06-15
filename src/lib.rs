@@ -162,6 +162,10 @@ pub trait Equip:
             );
         }
 
+        for slot in &attributes.slots {
+            sc_print!("Slot {}", slot);
+        }
+
         attributes.set_item(&item_slot, Option::Some(item.clone()));
     }
 

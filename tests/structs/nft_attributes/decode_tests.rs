@@ -13,7 +13,7 @@ fn decode_penguin() {
     let input_buffer = ManagedBuffer::<DebugApi>::new_from_bytes(input_data);
 
     let expected_output = PenguinAttributes::new(&[(
-        &ManagedBuffer::new_from_bytes(b"Hat"),
+        &ManagedBuffer::new_from_bytes(b"hat"),
         Item::<DebugApi> {
             token: TokenIdentifier::from_esdt_bytes(b"HAT-a2b4e5"),
             nonce: 1,

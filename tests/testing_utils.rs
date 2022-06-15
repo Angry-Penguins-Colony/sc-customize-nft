@@ -177,7 +177,7 @@ where
     pub fn customize(
         &mut self,
         transfers: Vec<TxInputESDT>,
-        slot: ManagedBuffer<DebugApi>,
+        to_desequip_slot: ManagedBuffer<DebugApi>,
     ) -> (Option<u64>, TxResult) {
         let mut opt_sc_result: Option<u64> = Option::None;
 
@@ -186,11 +186,11 @@ where
             &self.cf_wrapper,
             &transfers,
             |sc| {
-                let mut managed_slots =
+                let mut to_desequip_slots =
                     MultiValueEncoded::<DebugApi, ManagedBuffer<DebugApi>>::new();
-                managed_slots.push(slot);
+                to_desequip_slots.push(to_desequip_slot);
 
-                let result = sc.customize(sc.call_value().all_esdt_transfers(), managed_slots);
+                let result = sc.customize(sc.call_value().all_esdt_transfers(), to_desequip_slots);
 
                 opt_sc_result = Option::Some(result.clone());
             },

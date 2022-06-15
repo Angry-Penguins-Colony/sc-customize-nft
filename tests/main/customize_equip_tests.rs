@@ -127,7 +127,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
     let item_to_desequip_nonce = setup.register_item_all_properties(
         slot,
         ITEM_ID,
-        &ItemAttributes::random(),
+        &ItemAttributes::<DebugApi>::random(),
         0u64,
         Option::None,
         Option::Some(ITEM_TO_DESEQUIP_NAME),
@@ -135,7 +135,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
         &[],
     );
 
-    // Add to user a penguin equiped with the hat to remove
+    // Give the user a penguin equiped with the hat to remove
     setup.blockchain_wrapper.set_nft_balance(
         &setup.first_user_address,
         PENGUIN_TOKEN_ID,
@@ -152,13 +152,12 @@ fn equip_item_while_another_item_equipped_on_slot() {
     );
 
     // Give the user a hat to equip
-    let attributes = ItemAttributes::<DebugApi>::random();
     setup.blockchain_wrapper.set_nft_balance_all_properties(
         &setup.first_user_address,
         ITEM_ID,
         ITEM_TO_EQUIP_NONCE,
         &rust_biguint!(1),
-        &attributes,
+        &ItemAttributes::<DebugApi>::random(),
         0,
         Option::Some(&setup.owner_address),
         Option::Some(ITEM_TO_EQUIP_NAME),
@@ -210,7 +209,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
             Item {
                 token: managed_token_id!(ITEM_ID),
                 nonce: ITEM_TO_EQUIP_NONCE,
-                name: ManagedBuffer::new_from_bytes(ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework force us to do this
+                name: ManagedBuffer::new_from_bytes(ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
             },
         )])),
     );

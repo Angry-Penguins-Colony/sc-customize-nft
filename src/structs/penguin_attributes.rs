@@ -17,7 +17,7 @@ elrond_wasm::derive_imports!();
 
 #[derive(NestedEncode, NestedDecode, PartialEq, TypeAbi, Debug)]
 pub struct PenguinAttributes<M: ManagedTypeApi> {
-    slots: ManagedVec<M, ManagedBuffer<M>>,
+    pub slots: ManagedVec<M, ManagedBuffer<M>>,
     items: ManagedVec<M, Item<M>>,
 }
 
@@ -78,7 +78,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         let mut attributes = Self::empty();
 
         for (slot, item) in items_by_slot {
-            attributes.set_item(slot, Option::Some(item.clone()));
+            attributes.set_item(&utils::to_lowercase(slot), Option::Some(item.clone()));
         }
 
         return attributes;
@@ -96,7 +96,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
             panic!("The slot is not empty. Please free it, before setting an item.");
         }
 
-        return self.__set_item_no_check(slot, item);
+        return self.__set_item_no_check(&utils::to_lowercase(&slot), item);
     }
 
     pub fn get_count(&self) -> usize {
@@ -145,8 +145,11 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
         return managed_buffer;
     }
 
-    fn __get_index(&self, slot: &ManagedBuffer<M>) -> Option<usize> {
-        return self.slots.iter().position(|s| s.deref() == slot);
+    fn __get_index(&self, target_slot: &ManagedBuffer<M>) -> Option<usize> {
+        return self
+            .slots
+            .iter()
+            .position(|current_slot| utils::equals_ignore_case(current_slot.deref(), target_slot));
     }
 
     /// Set an item on a slot, without checking if the slot is empty.

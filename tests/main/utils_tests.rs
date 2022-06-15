@@ -193,3 +193,54 @@ fn capitalize_already_capitalized() {
         ManagedBuffer::new_from_bytes(b"Hello world")
     );
 }
+
+#[test]
+fn equals_ignore_case() {
+    DebugApi::dummy();
+
+    // equals, even if case is the same
+    assert_eq!(
+        utils::equals_ignore_case::<DebugApi>(
+            &ManagedBuffer::new_from_bytes(b"Hello World"),
+            &ManagedBuffer::new_from_bytes(b"Hello World")
+        ),
+        true
+    );
+
+    // case different
+    assert_eq!(
+        utils::equals_ignore_case::<DebugApi>(
+            &ManagedBuffer::new_from_bytes(b"Hello World"),
+            &ManagedBuffer::new_from_bytes(b"hello world")
+        ),
+        true
+    );
+
+    // case different
+    assert_eq!(
+        utils::equals_ignore_case::<DebugApi>(
+            &ManagedBuffer::new_from_bytes(b"Hello World"),
+            &ManagedBuffer::new_from_bytes(b"See ya World")
+        ),
+        false
+    );
+
+    // same size
+    assert_eq!(
+        utils::equals_ignore_case::<DebugApi>(
+            &ManagedBuffer::new_from_bytes(b"Hello World"),
+            &ManagedBuffer::new_from_bytes(b"World Hello")
+        ),
+        false
+    );
+}
+
+#[test]
+fn to_lowercase() {
+    DebugApi::dummy();
+
+    assert_eq!(
+        utils::to_lowercase(&ManagedBuffer::<DebugApi>::new_from_bytes(b"Hello World")),
+        ManagedBuffer::new_from_bytes(b"hello world")
+    );
+}

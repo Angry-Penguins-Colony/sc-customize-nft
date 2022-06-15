@@ -5,6 +5,33 @@ use elrond_wasm::{
     types::{ManagedBuffer, ManagedRef, ManagedVec},
 };
 
+pub fn equals_ignore_case<M: ManagedTypeApi>(
+    buffer_a: &ManagedBuffer<M>,
+    buffer_b: &ManagedBuffer<M>,
+) -> bool {
+    if buffer_a.len() != buffer_b.len() {
+        return false;
+    }
+
+    let mut bytes_a: [u8; 512] = [0; 512];
+    let mut bytes_b: [u8; 512] = [0; 512];
+
+    buffer_a.load_to_byte_array(&mut bytes_a);
+    buffer_b.load_to_byte_array(&mut bytes_b);
+
+    for (i, byte) in bytes_a.iter().enumerate() {
+        if i >= buffer_a.len() {
+            break;
+        };
+
+        if byte.to_ascii_lowercase() != bytes_b[i].to_ascii_lowercase() {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 pub fn split_buffer<M: ManagedTypeApi>(
     buffer: &ManagedBuffer<M>,
     char: u8,
@@ -215,6 +242,24 @@ pub fn capitalize<M: ManagedTypeApi>(buffer: &ManagedBuffer<M>) -> ManagedBuffer
     // uppercase first letter
     o.append_bytes(&[bytes[0].to_ascii_uppercase()]);
     o.append_bytes(&bytes[1..buffer.len()]);
+
+    return o;
+}
+
+pub fn to_lowercase<M: ManagedTypeApi>(buffer: &ManagedBuffer<M>) -> ManagedBuffer<M> {
+    let mut bytes: [u8; 512] = [0; 512];
+
+    buffer.load_to_byte_array(&mut bytes);
+
+    let mut o = ManagedBuffer::<M>::new();
+
+    for (index, byte) in bytes.iter().enumerate() {
+        if index >= buffer.len() {
+            break;
+        }
+
+        o.append_bytes(&[byte.to_ascii_lowercase()]);
+    }
 
     return o;
 }

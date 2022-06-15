@@ -1,9 +1,7 @@
 use customize_nft::libs::storage::StorageModule;
 use customize_nft::structs::item_attributes::ItemAttributes;
 use customize_nft::*;
-use elrond_wasm::types::{
-    EsdtLocalRole, ManagedBuffer, ManagedVec, MultiValueEncoded, TokenIdentifier,
-};
+use elrond_wasm::types::{EsdtLocalRole, ManagedBuffer, MultiValueEncoded, TokenIdentifier};
 use elrond_wasm_debug::managed_token_id;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
@@ -14,27 +12,23 @@ const ANOTHER_HAT_TOKEN_ID: &[u8] = testing_utils::HAT_2_TOKEN_ID;
 
 #[test]
 fn test_register_item() {
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
-    const TOKEN_ID: &[u8] = b"ITEM-a1a1a1";
-
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    const TOKEN_ID: &[u8] = b"ITEM-a1a1a1";
+    let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
     setup.register_item(slot.clone(), TOKEN_ID, &ItemAttributes::random());
 
-    let b_wrapper = &mut setup.blockchain_wrapper;
-
-    b_wrapper
+    setup
+        .blockchain_wrapper
         .execute_tx(
             &setup.owner_address,
             &setup.cf_wrapper,
             &rust_biguint!(0u64),
             |sc| {
-                let managed_token_id = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID);
-                let mut managed_items_ids =
-                    ManagedVec::<DebugApi, TokenIdentifier<DebugApi>>::new();
-                managed_items_ids.push(managed_token_id.clone());
-
-                let result = sc.slot_of(&managed_token_id!(TOKEN_ID)).get();
+                let result = sc
+                    .slot_of(&TokenIdentifier::from_esdt_bytes(TOKEN_ID))
+                    .get();
 
                 assert_eq!(&result, slot);
             },
@@ -45,8 +39,9 @@ fn test_register_item() {
 /// Ce test vérifie que si on associe 2 items au même slot, tout fonctionne bien
 #[test]
 fn register_another_item_on_slot() {
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
     setup.register_item(slot.clone(), HAT_TOKEN_ID, &ItemAttributes::random());
     setup.register_item(
@@ -72,8 +67,8 @@ fn register_another_item_on_slot() {
 
 #[test]
 fn register_unmintable_item() {
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
+    let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -95,10 +90,10 @@ fn register_unmintable_item() {
 
 #[test]
 fn register_unburnable_item() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
     let slot = &ManagedBuffer::new_from_bytes(b"hat");
     const UNBURNABLE: &[u8] = b"a token without minting rights";
-
-    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -126,11 +121,11 @@ fn register_unburnable_item() {
 
 #[test]
 fn change_item_slot() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
     let new_slot = &ManagedBuffer::new_from_bytes(b"hat");
     let old_slot = &ManagedBuffer::new_from_bytes(b"background");
     const ITEM_ID: &[u8] = HAT_TOKEN_ID;
-
-    let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     setup.register_item(old_slot.clone(), ITEM_ID, &ItemAttributes::random());
     setup.register_item(new_slot.clone(), ITEM_ID, &ItemAttributes::random());
@@ -147,14 +142,13 @@ fn change_item_slot() {
 
 #[test]
 fn register_penguin_as_item_should_not_work() {
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
+    let slot = &ManagedBuffer::new_from_bytes(b"hat");
     const PENGUIN_TOKEN_ID: &[u8] = testing_utils::PENGUIN_TOKEN_ID;
 
-    let b_wrapper = &mut setup.blockchain_wrapper;
-
-    b_wrapper
+    setup
+        .blockchain_wrapper
         .execute_tx(
             &setup.owner_address,
             &setup.cf_wrapper,
@@ -172,12 +166,12 @@ fn register_penguin_as_item_should_not_work() {
 
 #[test]
 fn register_while_not_the_owner() {
-    let slot = &ManagedBuffer::new_from_bytes(b"hat");
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let b_wrapper = &mut setup.blockchain_wrapper;
+    let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
-    b_wrapper
+    setup
+        .blockchain_wrapper
         .execute_tx(
             &setup.first_user_address,
             &setup.cf_wrapper,

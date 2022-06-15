@@ -54,7 +54,7 @@ pub trait Equip:
                 "You cannot register a penguin as an item."
             );
 
-            self.slot_of(&item_id.into()).set(&item_slot);
+            self.slot_of(&item_id).set(&item_slot);
         }
 
         return Ok(());
@@ -62,11 +62,11 @@ pub trait Equip:
 
     #[view(getItemType)]
     fn get_item_slot(&self, item_id: &TokenIdentifier) -> OptionalValue<ManagedBuffer> {
-        panic!("Not implemented");
-        // match self.slot_of(item_id).get() {
-        //     ItemSlot::None => return OptionalValue::None,
-        //     slot => return OptionalValue::Some(slot),
-        // }
+        if self.slot_of(item_id).is_empty() {
+            return OptionalValue::None;
+        } else {
+            return OptionalValue::Some(self.slot_of(item_id).get());
+        }
     }
 
     #[payable("*")]

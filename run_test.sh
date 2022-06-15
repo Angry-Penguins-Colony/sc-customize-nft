@@ -1,1 +1,1 @@
-cargo test --package customize_nft --test *_tests
+cargo test -p customize_nft --test lib

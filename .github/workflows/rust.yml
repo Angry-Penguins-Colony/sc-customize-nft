@@ -23,9 +23,15 @@ jobs:
     - name: Run tests
       run: cargo test -p customize_nft --test lib --verbose
     - name: Install requirements for code coverage
-      run: rustup component add llvm-tools-preview
-    - name: Measure codecoverage
-      run: RUSTFLAGS="-Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests" RUSTDOCFLAGS="-Cpanic=abort" grcov ./target/debug/ -s . -t xml --llvm --branch -o ./target/debug/coverage/ --ignore-not-existing --ignore *abi/src* --ignore ./tests/
+      run: rustup component add llvm-tools-preview    
+    - uses: actions-rs/cargo@v1
+      with:
+        command: test
+      env:
+        RUSTFLAGS: '-Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests'
+        RUSTDOCFLAGS: '-Cpanic=abort'
+    - id: coverage  
+      uses: actions-rs/grcov@v0.1
     - uses: codecov/codecov-action@v2
       with:
         token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos

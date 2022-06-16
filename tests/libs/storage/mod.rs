@@ -1,2 +1,2 @@
-mod get_item_tests;
+mod get_item_slot;
 mod has_slot;

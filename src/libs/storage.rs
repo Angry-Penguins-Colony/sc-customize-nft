@@ -26,7 +26,17 @@ pub trait StorageModule {
         self.cid_of(attributes).set(cid);
     }
 
+    #[view(hasSlot)]
     fn has_slot(&self, token: &TokenIdentifier) -> bool {
         return self.slot_of(token).is_empty() == false;
+    }
+
+    #[view(getItemType)]
+    fn get_slot_of(&self, item_id: &TokenIdentifier) -> OptionalValue<ManagedBuffer> {
+        if self.has_slot(item_id) {
+            return OptionalValue::None;
+        } else {
+            return OptionalValue::Some(self.slot_of(item_id).get());
+        }
     }
 }

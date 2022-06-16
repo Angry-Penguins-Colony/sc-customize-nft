@@ -56,15 +56,6 @@ pub trait Equip:
         }
     }
 
-    #[view(getItemType)]
-    fn get_item_slot(&self, item_id: &TokenIdentifier) -> OptionalValue<ManagedBuffer> {
-        if self.slot_of(item_id).is_empty() {
-            return OptionalValue::None;
-        } else {
-            return OptionalValue::Some(self.slot_of(item_id).get());
-        }
-    }
-
     #[payable("*")]
     #[endpoint(customize)]
     fn customize(
@@ -207,7 +198,7 @@ pub trait Equip:
                 let item_nonce = item.nonce;
 
                 require!(
-                    self.get_item_slot(&item_id).into_option().is_some(),
+                    self.get_slot_of(&item_id).into_option().is_some(),
                     "A item to desequip is not considered like an item. The item has maybe been removed. Please contact an administrator."
                 );
 

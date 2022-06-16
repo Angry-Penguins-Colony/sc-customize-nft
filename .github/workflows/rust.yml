@@ -28,6 +28,7 @@ jobs:
       with:
         command: test
       env:
+        CARGO_INCREMENTAL: '0'
         RUSTFLAGS: '-Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests'
         RUSTDOCFLAGS: '-Cpanic=abort'
     - id: coverage  
@@ -35,5 +36,5 @@ jobs:
     - uses: codecov/codecov-action@v2
       with:
         token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-        files: "./target/debug/coverage/coverage.json"
+        files: ${{ steps.coverage.outputs.report }}
         verbose: true # optional (default = false)

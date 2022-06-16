@@ -22,7 +22,7 @@ fn test_register_item() {
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             let result = sc
-                .slot_of(&TokenIdentifier::from_esdt_bytes(TOKEN_ID))
+                .__slot_of(&TokenIdentifier::from_esdt_bytes(TOKEN_ID))
                 .get();
 
             assert_eq!(result, managed_buffer!(slot));
@@ -48,11 +48,11 @@ fn register_another_item_on_slot() {
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             assert_eq!(
-                sc.slot_of(&managed_token_id!(FIRST_TOKEN_ID)).get(),
+                sc.__slot_of(&managed_token_id!(FIRST_TOKEN_ID)).get(),
                 ManagedBuffer::new_from_bytes(slot)
             );
             assert_eq!(
-                sc.slot_of(&managed_token_id!(SECOND_TOKEN_ID)).get(),
+                sc.__slot_of(&managed_token_id!(SECOND_TOKEN_ID)).get(),
                 ManagedBuffer::new_from_bytes(slot)
             );
         })
@@ -128,7 +128,7 @@ fn change_item_slot() {
 
     b_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
-            let result = sc.slot_of(&managed_token_id!(ITEM_ID)).get();
+            let result = sc.__slot_of(&managed_token_id!(ITEM_ID)).get();
             assert_eq!(result, managed_buffer!(new_slot));
         })
         .assert_ok();
@@ -179,4 +179,48 @@ fn register_while_not_the_owner() {
             },
         )
         .assert_error(4, "Only the owner can call this method.");
+}
+
+#[test]
+fn register_to_slot_with_different_case() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    let first_slot = b"hat";
+    let first_slot_item = b"pirate hat";
+
+    let second_slot = b"Hat";
+    let second_slot_item = b"Cap";
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                let mut first_slot_items =
+                    MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                first_slot_items.push(managed_token_id!(first_slot_item));
+
+                sc.register_item(ManagedBuffer::new_from_bytes(first_slot), first_slot_items);
+
+                let mut second_slot_items =
+                    MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                second_slot_items.push(managed_token_id!(second_slot_item));
+                sc.register_item(
+                    ManagedBuffer::new_from_bytes(second_slot),
+                    second_slot_items,
+                );
+
+                assert_eq!(
+                    sc.get_slot_of(&managed_token_id!(second_slot_item)),
+                    managed_buffer!(&second_slot.to_ascii_lowercase())
+                );
+                assert_eq!(
+                    sc.get_slot_of(&managed_token_id!(first_slot_item)),
+                    managed_buffer!(&first_slot.to_ascii_lowercase())
+                );
+            },
+        )
+        .assert_ok();
 }

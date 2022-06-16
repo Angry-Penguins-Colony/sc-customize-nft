@@ -20,10 +20,8 @@ fn should_returns_some() {
         .execute_query(&setup.cf_wrapper, |sc| {
             let hat_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID);
 
-            let opt_actual_slot = sc.get_slot_of(&hat_token).into_option();
-
-            assert_eq!(opt_actual_slot.is_some(), true);
-            assert_eq!(opt_actual_slot.unwrap(), managed_buffer!(slot));
+            let actual_slot = sc.get_slot_of(&hat_token);
+            assert_eq!(actual_slot, managed_buffer!(slot));
         })
         .assert_ok();
 }
@@ -38,9 +36,7 @@ fn should_returns_none() {
         .execute_query(&setup.cf_wrapper, |sc| {
             let not_existing_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(b"NOT_TOKEN_ID");
 
-            let opt_slot = sc.get_slot_of(&not_existing_token).into_option();
-
-            assert_eq!(opt_slot.is_none(), true);
+            let _ = sc.get_slot_of(&not_existing_token);
         })
-        .assert_ok();
+        .assert_user_error("Item NOT_TOKEN_ID not found.");
 }

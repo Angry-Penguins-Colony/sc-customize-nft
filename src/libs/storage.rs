@@ -1,4 +1,4 @@
-use crate::structs::penguin_attributes::PenguinAttributes;
+use crate::{structs::penguin_attributes::PenguinAttributes, utils};
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
@@ -12,7 +12,7 @@ pub trait StorageModule {
     fn ipfs_gateway(&self) -> SingleValueMapper<ManagedBuffer<Self::Api>>;
 
     #[storage_mapper("slot_of_items")]
-    fn slot_of(&self, token: &TokenIdentifier) -> SingleValueMapper<ManagedBuffer>;
+    fn __slot_of(&self, token: &TokenIdentifier) -> SingleValueMapper<ManagedBuffer>;
 
     #[storage_mapper("penguin_cid_by_attributes")]
     fn cid_of(&self, attributes: &PenguinAttributes<Self::Api>)
@@ -26,17 +26,21 @@ pub trait StorageModule {
         self.cid_of(attributes).set(cid);
     }
 
+    fn set_slot_of(&self, token: &TokenIdentifier, slot: ManagedBuffer) {
+        self.__slot_of(token).set(utils::to_lowercase(&slot));
+    }
+
     #[view(hasSlot)]
     fn has_slot(&self, token: &TokenIdentifier) -> bool {
-        return self.slot_of(token).is_empty() == false;
+        return self.__slot_of(token).is_empty() == false;
     }
 
     #[view(getItemType)]
-    fn get_slot_of(&self, item_id: &TokenIdentifier) -> OptionalValue<ManagedBuffer> {
+    fn get_slot_of(&self, item_id: &TokenIdentifier) -> ManagedBuffer {
         if self.has_slot(item_id) {
-            return OptionalValue::None;
+            return self.__slot_of(item_id).get();
         } else {
-            return OptionalValue::Some(self.slot_of(item_id).get());
+            sc_panic!("Item {} not found.", item_id);
         }
     }
 }

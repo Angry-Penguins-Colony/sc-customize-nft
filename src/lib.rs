@@ -52,7 +52,7 @@ pub trait Equip:
                 "You cannot register a penguin as an item."
             );
 
-            self.slot_of(&item_id).set(&item_slot);
+            self.set_slot_of(&item_id, item_slot.clone());
         }
     }
 
@@ -137,7 +137,7 @@ pub trait Equip:
             "Cannot equip a penguin as an item."
         );
 
-        let item_slot = self.slot_of(&item_id).get();
+        let item_slot = self.get_slot_of(&item_id);
 
         sc_print!("Equipping {} in slot {}", item_id, item_slot);
 
@@ -198,7 +198,7 @@ pub trait Equip:
                 let item_nonce = item.nonce;
 
                 require!(
-                    self.get_slot_of(&item_id).into_option().is_some(),
+                    self.has_slot(&item_id) == true,
                     "A item to desequip is not considered like an item. The item has maybe been removed. Please contact an administrator."
                 );
 

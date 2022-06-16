@@ -13,7 +13,7 @@ use elrond_wasm_debug::tx_mock::{TxInputESDT, TxResult};
 use elrond_wasm_debug::{managed_buffer, managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
-const WASM_PATH: &'static str = "sc-customize-nft/output/customize_nft.wasm";
+pub const WASM_PATH: &'static str = "sc-customize-nft/output/customize_nft.wasm";
 
 pub const PENGUIN_TOKEN_ID: &[u8] = b"PENG-ae5a";
 

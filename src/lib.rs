@@ -26,7 +26,10 @@ pub trait Equip:
     #[init]
     fn init(&self, penguins_identifier: TokenIdentifier, gateway: ManagedBuffer) {
         self.penguins_identifier().set(&penguins_identifier);
-        self.ipfs_gateway().set(gateway);
+
+        // if the user forgot the backslash, we add it silently
+        let valid_gateway = utils::append_trailing_character_if_missing(&gateway, b'/');
+        self.ipfs_gateway().set(valid_gateway);
     }
 
     #[endpoint(registerItem)]

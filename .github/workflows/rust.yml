@@ -30,14 +30,13 @@ jobs:
         CARGO_INCREMENTAL: '0'
         RUSTFLAGS: '-Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests'
         RUSTDOCFLAGS: '-Cpanic=abort'
-    - name: Measure code coverage
-      run: |
-        chmod +x coverage.sh
-        ./coverage.sh
+    - uses: actions-rs/grcov@v0.1
+      with:
+        config: configs/grcov.yml
     - uses: codecov/codecov-action@v2
       with:
         token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-        files: "./target/debug/coverage"
+        files: ${{ steps.coverage.outputs.report }}
         verbose: true # optional (default = false)
     - name: Build
       run: cargo build --verbose

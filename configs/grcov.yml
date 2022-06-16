@@ -1,6 +1,10 @@
+llvm: true
 branch: true
 ignore-not-existing: true
-llvm: true
 ignore:
   - "*abi/src*"
   - "./tests*"
+output-type: lcov
+output-path: ./lcov.info
+input-path: ./target.info
+source-dir: "."

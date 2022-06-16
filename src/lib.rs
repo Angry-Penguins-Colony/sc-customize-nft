@@ -27,11 +27,9 @@ pub trait Equip:
     + penguin_url_builder::PenguinURLBuilder
 {
     #[init]
-    fn init(&self, penguins_identifier: TokenIdentifier) {
+    fn init(&self, penguins_identifier: TokenIdentifier, gateway: ManagedBuffer) {
         self.penguins_identifier().set(&penguins_identifier);
-        self.ipfs_gateway().set(ManagedBuffer::new_from_bytes(
-            b"https://penguins-generator.herokuapp.com/",
-        ));
+        self.ipfs_gateway().set(gateway);
     }
 
     #[endpoint(registerItem)]

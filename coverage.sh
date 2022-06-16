@@ -7,9 +7,17 @@ export RUSTDOCFLAGS="-Cpanic=abort"
 cargo build
 cargo test -p customize_nft --test lib
 
-echo "Generating report of type "$1
 
-grcov ./target/debug/ -s . -t $1 --llvm --branch -o ./target/debug/coverage.lcov \
+if [ $1 = "lcov" ]; then
+	output="./target/debug/coverage.lcov"
+else
+	output="./target/debug/coverage/"
+fi
+
+echo "Generating report of type $1."
+echo "Writing output to $output."
+
+grcov ./target/debug/ -s . -t $1 --llvm --branch -o $output \
 	--ignore-not-existing \
 	--ignore *abi/src* \
 	--ignore "*tests*"

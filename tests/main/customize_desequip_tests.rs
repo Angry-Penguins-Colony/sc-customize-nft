@@ -48,12 +48,12 @@ fn customize_only_desequip() {
                     },
                 )]);
 
-                sc.set_cid(
+                sc.set_cid_of(
                     &attributes_before_custom,
                     ManagedBuffer::<DebugApi>::new_from_bytes(b"this is a cid"),
                 );
 
-                sc.set_cid(
+                sc.set_cid_of(
                     &PenguinAttributes::<DebugApi>::empty(),
                     ManagedBuffer::new_from_bytes(b"empty"),
                 );

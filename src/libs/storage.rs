@@ -22,7 +22,7 @@ pub trait StorageModule {
 
     #[endpoint]
     #[only_owner]
-    fn set_cid(&self, attributes: &PenguinAttributes<Self::Api>, cid: ManagedBuffer<Self::Api>) {
+    fn set_cid_of(&self, attributes: &PenguinAttributes<Self::Api>, cid: ManagedBuffer<Self::Api>) {
         self.cid_of(attributes).set(cid);
     }
 

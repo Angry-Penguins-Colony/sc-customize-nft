@@ -79,12 +79,12 @@ fn customize_complete_flow() {
                     },
                 )]);
 
-                sc.set_cid(
+                sc.set_cid_of(
                     &attributes_before_custom,
                     ManagedBuffer::new_from_bytes(b"cid before custom"),
                 );
 
-                sc.set_cid(
+                sc.set_cid_of(
                     &attributes_after_custom,
                     ManagedBuffer::new_from_bytes(b"cid after custom"),
                 );

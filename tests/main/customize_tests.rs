@@ -57,7 +57,7 @@ fn customize_complete_flow() {
         testing_utils::create_esdt_transfers(&[(PENGUIN_TOKEN_ID, NONCE), (ITEM_TO_EQUIP, NONCE)]);
 
     // 2. ACT
-    let (sc_result, tx_result) = setup.customize(transfers, managed_buffer!(item_to_equip_slot));
+    let (sc_result, tx_result) = setup.customize(transfers, item_to_equip_slot);
 
     // 3. ASSERT
     tx_result.assert_ok();

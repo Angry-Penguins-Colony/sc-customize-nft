@@ -10,7 +10,7 @@ use elrond_wasm::types::{
     MultiValueEncoded, TokenIdentifier,
 };
 use elrond_wasm_debug::tx_mock::{TxInputESDT, TxResult};
-use elrond_wasm_debug::{managed_token_id, testing_framework::*};
+use elrond_wasm_debug::{managed_buffer, managed_token_id, testing_framework::*};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
 const WASM_PATH: &'static str = "sc-customize-nft/output/customize_nft.wasm";
@@ -177,7 +177,7 @@ where
     pub fn customize(
         &mut self,
         transfers: Vec<TxInputESDT>,
-        to_desequip_slot: ManagedBuffer<DebugApi>,
+        to_desequip_slot: &[u8],
     ) -> (Option<u64>, TxResult) {
         let mut opt_sc_result: Option<u64> = Option::None;
 
@@ -188,7 +188,7 @@ where
             |sc| {
                 let mut to_desequip_slots =
                     MultiValueEncoded::<DebugApi, ManagedBuffer<DebugApi>>::new();
-                to_desequip_slots.push(to_desequip_slot);
+                to_desequip_slots.push(managed_buffer!(to_desequip_slot));
 
                 let result = sc.customize(sc.call_value().all_esdt_transfers(), to_desequip_slots);
 

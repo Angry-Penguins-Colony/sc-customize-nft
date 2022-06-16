@@ -3,7 +3,7 @@ use customize_nft::{
     structs::{item::Item, item_attributes::ItemAttributes, penguin_attributes::PenguinAttributes},
 };
 use elrond_wasm::types::{ManagedBuffer, TokenIdentifier};
-use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
+use elrond_wasm_debug::{rust_biguint, DebugApi};
 
 use crate::testing_utils;
 
@@ -59,7 +59,7 @@ fn customize_only_desequip() {
     let transfers = testing_utils::create_esdt_transfers(&[(PENGUIN_TOKEN_ID, NONCE)]);
 
     // 2. ACT
-    let (sc_result, tx_result) = setup.customize(transfers, managed_buffer!(slot));
+    let (sc_result, tx_result) = setup.customize(transfers, slot);
 
     // 3. ASSERT
     tx_result.assert_ok();

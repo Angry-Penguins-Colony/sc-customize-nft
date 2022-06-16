@@ -1,14 +1,13 @@
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-use alloc::string::ToString;
 use elrond_wasm::{
     elrond_codec::TopEncode,
     types::{ManagedBuffer, ManagedByteArray, ManagedVec},
 };
 
-use crate::constants::ERR_NO_CID_URL;
 use crate::structs::penguin_attributes::PenguinAttributes;
+use crate::{constants::ERR_NO_CID_URL, utils};
 
 #[elrond_wasm::module]
 pub trait MintPenguin:
@@ -84,7 +83,7 @@ pub trait MintPenguin:
         let mut full_token_name = ManagedBuffer::new();
         let token_name_from_storage = ManagedBuffer::new_from_bytes(b"Penguin");
         let hash_sign = ManagedBuffer::new_from_bytes(" #".as_bytes());
-        let token_index = ManagedBuffer::new_from_bytes(index.to_string().as_bytes());
+        let token_index = utils::u64_to_ascii(&index);
 
         full_token_name.append(&token_name_from_storage);
         full_token_name.append(&hash_sign);

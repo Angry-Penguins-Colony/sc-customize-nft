@@ -1,7 +1,6 @@
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-use alloc::string::ToString;
 use elrond_wasm::{
     elrond_codec::TopEncode,
     types::{ManagedBuffer, ManagedByteArray, ManagedVec},

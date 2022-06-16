@@ -5,7 +5,6 @@
 
 use core::ops::Deref;
 
-use alloc::{borrow::ToOwned, format};
 use elrond_wasm::elrond_codec::{TopDecodeInput, TopEncode};
 
 use crate::utils::{self, split_buffer};
@@ -33,7 +32,7 @@ impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
         for item_raw in items_raw.iter() {
             let parts = split_buffer(item_raw.deref(), b':');
 
-            let slot = parts.get(0).deref().to_owned();
+            let slot = parts.get(0).deref().clone();
             let item_buffer = parts.get(1);
 
             let item = if item_buffer.deref() == &unequipped_buffer {

@@ -7,14 +7,11 @@
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-extern crate alloc;
-
 pub mod constants;
 pub mod libs;
 pub mod structs;
 pub mod utils;
 
-use alloc::string::ToString;
 use elrond_wasm::elrond_codec::TopEncode;
 use libs::*;
 use structs::{item::Item, item_attributes::ItemAttributes, penguin_attributes::PenguinAttributes};

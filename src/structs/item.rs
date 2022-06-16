@@ -3,7 +3,6 @@
 #![allow(unused_attributes)]
 #![allow(unused_imports)]
 
-use alloc::{borrow::ToOwned, format, string::ToString};
 use elrond_wasm::elrond_codec::TopDecodeInput;
 
 use crate::utils::{remove_first_and_last_char, split_last_occurence};

@@ -1,3 +1,4 @@
+mod append_trailing_character_if_missing;
 mod ascii_to_u64;
 mod capitalize;
 mod equals_ignore_case;

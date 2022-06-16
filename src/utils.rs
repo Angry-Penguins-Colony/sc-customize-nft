@@ -263,3 +263,22 @@ pub fn to_lowercase<M: ManagedTypeApi>(buffer: &ManagedBuffer<M>) -> ManagedBuff
 
     return o;
 }
+
+pub fn append_trailing_character_if_missing<M: ManagedTypeApi>(
+    buffer: &ManagedBuffer<M>,
+    character: u8,
+) -> ManagedBuffer<M> {
+    let mut bytes: [u8; 512] = [0; 512];
+
+    buffer.load_to_byte_array(&mut bytes);
+
+    let mut o = ManagedBuffer::<M>::new();
+
+    o.append_bytes(&bytes[0..buffer.len()]);
+
+    if bytes[buffer.len() - 1] != character {
+        o.append_bytes(&[character]);
+    }
+
+    return o;
+}

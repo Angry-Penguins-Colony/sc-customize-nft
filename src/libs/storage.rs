@@ -15,21 +15,15 @@ pub trait StorageModule {
     fn slot_of(&self, token: &TokenIdentifier) -> SingleValueMapper<ManagedBuffer>;
 
     #[storage_mapper("penguin_cid_by_attributes")]
-    fn thumbnail_cid_of(
-        &self,
-        attributes: &PenguinAttributes<Self::Api>,
-    ) -> SingleValueMapper<ManagedBuffer>;
+    fn cid_of(&self, attributes: &PenguinAttributes<Self::Api>)
+        -> SingleValueMapper<ManagedBuffer>;
 
     // STORAGE MODIFIERS
 
     #[endpoint]
     #[only_owner]
-    fn set_thumbnail_cid(
-        &self,
-        attributes: &PenguinAttributes<Self::Api>,
-        cid: ManagedBuffer<Self::Api>,
-    ) {
-        self.thumbnail_cid_of(attributes).set(cid);
+    fn set_cid(&self, attributes: &PenguinAttributes<Self::Api>, cid: ManagedBuffer<Self::Api>) {
+        self.cid_of(attributes).set(cid);
     }
 
     fn has_slot(&self, token: &TokenIdentifier) -> bool {

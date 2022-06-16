@@ -146,7 +146,7 @@ where
         slot: &[u8],
         attributes: ItemAttributes<DebugApi>,
     ) {
-        let _ = self.register_item(slot, item_identifier, &attributes);
+        self.register_item(slot, item_identifier, &attributes);
 
         self.blockchain_wrapper.set_nft_balance(
             &self.cf_wrapper.address_ref(),

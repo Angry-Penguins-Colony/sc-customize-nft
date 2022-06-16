@@ -1,3 +1,4 @@
+use customize_nft::libs::storage::StorageModule;
 use customize_nft::structs::item::Item;
 use customize_nft::structs::item_attributes::ItemAttributes;
 use customize_nft::structs::penguin_attributes::PenguinAttributes;
@@ -68,6 +69,38 @@ fn test_equip() {
         &rust_biguint!(1),
         &item_attributes,
     );
+
+    // set cid
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                let attributes_before_custom = PenguinAttributes::<DebugApi>::empty();
+
+                let attributes_after_custom = PenguinAttributes::<DebugApi>::new(&[(
+                    &managed_buffer!(slot),
+                    Item {
+                        token: managed_token_id!(ITEM_TO_EQUIP_ID),
+                        nonce: item_nonce,
+                        name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework force us to do this
+                    },
+                )]);
+
+                sc.set_cid(
+                    &attributes_before_custom,
+                    ManagedBuffer::new_from_bytes(b"cid before custom"),
+                );
+
+                sc.set_cid(
+                    &attributes_after_custom,
+                    ManagedBuffer::new_from_bytes(b"after custom"),
+                );
+            },
+        )
+        .assert_ok();
 
     let transfers = testing_utils::create_esdt_transfers(&[
         (PENGUIN_TOKEN_ID, INIT_NONCE),
@@ -164,6 +197,45 @@ fn equip_item_while_another_item_equipped_on_slot() {
         Option::None,
         &[],
     );
+
+    // set CID
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                let attributes_before_custom = PenguinAttributes::<DebugApi>::new(&[(
+                    &managed_buffer!(slot),
+                    Item {
+                        token: managed_token_id!(ITEM_ID),
+                        nonce: item_to_desequip_nonce,
+                        name: ManagedBuffer::new_from_bytes(ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in Elrond mocking force us to do this
+                    },
+                )]);
+
+                let attributes_after_custom = PenguinAttributes::<DebugApi>::new(&[(
+                    &managed_buffer!(slot),
+                    Item {
+                        token: managed_token_id!(ITEM_ID),
+                        nonce: ITEM_TO_EQUIP_NONCE,
+                        name: ManagedBuffer::new_from_bytes(ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
+                    },
+                )]);
+
+                sc.set_cid(
+                    &attributes_before_custom,
+                    ManagedBuffer::new_from_bytes(b"cid before custom"),
+                );
+
+                sc.set_cid(
+                    &attributes_after_custom,
+                    ManagedBuffer::new_from_bytes(b"cid after custom"),
+                );
+            },
+        )
+        .assert_ok();
 
     let (esdt_transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[
         (PENGUIN_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),

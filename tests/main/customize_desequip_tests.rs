@@ -39,7 +39,7 @@ fn customize_only_desequip() {
                 sc.ipfs_gateway()
                     .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/"));
 
-                let attributes = PenguinAttributes::new(&[(
+                let attributes_before_custom = PenguinAttributes::new(&[(
                     &ManagedBuffer::new_from_bytes(slot),
                     Item {
                         token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_DESEQUIP_ID),
@@ -48,9 +48,14 @@ fn customize_only_desequip() {
                     },
                 )]);
 
-                sc.set_thumbnail_cid(
-                    &attributes,
+                sc.set_cid(
+                    &attributes_before_custom,
                     ManagedBuffer::<DebugApi>::new_from_bytes(b"this is a cid"),
+                );
+
+                sc.set_cid(
+                    &PenguinAttributes::<DebugApi>::empty(),
+                    ManagedBuffer::new_from_bytes(b"empty"),
                 );
             },
         )

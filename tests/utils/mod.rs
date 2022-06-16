@@ -1,0 +1,12 @@
+mod ascii_to_u64;
+mod capitalize;
+mod equals_ignore_case;
+mod get_number_from_penguin_name;
+mod hex_to_u64;
+mod remove_first_and_last_char;
+mod remove_first_char;
+mod split_buffer;
+mod split_last_occurence;
+mod to_lowercase;
+mod u64_to_ascii;
+mod u64_to_hex;

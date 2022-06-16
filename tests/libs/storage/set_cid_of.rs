@@ -1,5 +1,8 @@
-use customize_nft::{libs::storage::StorageModule, structs::penguin_attributes::PenguinAttributes};
-use elrond_wasm_debug::{managed_buffer, DebugApi};
+use customize_nft::{
+    libs::storage::{EndpointWrappers, StorageModule},
+    structs::penguin_attributes::PenguinAttributes,
+};
+use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
 use crate::testing_utils;
 
@@ -11,12 +14,17 @@ fn should_set_if_empty() {
 
     setup
         .blockchain_wrapper
-        .execute_query(&setup.cf_wrapper, |sc| {
-            let attributes = PenguinAttributes::<DebugApi>::empty();
-            sc.set_cid_of(&attributes, managed_buffer!(cid_bytes));
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                let attributes = PenguinAttributes::<DebugApi>::empty();
+                sc.set_cid_of(&attributes, managed_buffer!(cid_bytes));
 
-            assert_eq!(sc.cid_of(&attributes).get(), managed_buffer!(cid_bytes));
-        })
+                assert_eq!(sc.cid_of(&attributes).get(), managed_buffer!(cid_bytes));
+            },
+        )
         .assert_ok();
 }
 
@@ -29,21 +37,43 @@ fn should_set_if_not_emtpy() {
 
     setup
         .blockchain_wrapper
-        .execute_query(&setup.cf_wrapper, |sc| {
-            let attributes = PenguinAttributes::<DebugApi>::empty();
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                let attributes = PenguinAttributes::<DebugApi>::empty();
 
-            sc.set_cid_of(&attributes, managed_buffer!(first_cid_bytes));
-            assert_eq!(
-                sc.cid_of(&attributes).get(),
-                managed_buffer!(first_cid_bytes)
-            );
+                sc.set_cid_of(&attributes, managed_buffer!(first_cid_bytes));
+                assert_eq!(
+                    sc.cid_of(&attributes).get(),
+                    managed_buffer!(first_cid_bytes)
+                );
 
-            sc.set_cid_of(&attributes, managed_buffer!(second_cid_bytes));
-            assert_eq!(
-                sc.cid_of(&attributes).get(),
-                managed_buffer!(second_cid_bytes),
-                "first_cid_bytes should be overwrited by second_cid_bytes"
-            );
-        })
+                sc.set_cid_of(&attributes, managed_buffer!(second_cid_bytes));
+                assert_eq!(
+                    sc.cid_of(&attributes).get(),
+                    managed_buffer!(second_cid_bytes),
+                    "first_cid_bytes should be overwrited by second_cid_bytes"
+                );
+            },
+        )
         .assert_ok();
+}
+
+#[test]
+fn should_fail_if_not_owner() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.first_user_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                sc.call_set_cid_of();
+            },
+        )
+        .assert_user_error("Endpoint can only be called by owner");
 }

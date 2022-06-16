@@ -7,7 +7,7 @@ export RUSTDOCFLAGS="-Cpanic=abort"
 cargo build
 cargo test -p customize_nft --test lib
 
-grcov ./target/debug/ -s . -t html --llvm --branch -o ./target/debug/coverage/ \
+grcov ./target/debug/ -s . -t lcov --llvm --branch -o ./target/debug/coverage.lcov \
 	--ignore-not-existing \
 	--ignore *abi/src* \
 	--ignore ./tests/

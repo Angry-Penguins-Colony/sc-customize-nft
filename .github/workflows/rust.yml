@@ -18,25 +18,16 @@ jobs:
     - uses: actions/checkout@v3
     - name: Setup nightly
       run: rustup toolchain install nightly && rustup default nightly && rustup target add wasm32-unknown-unknown    
-    - name: Run tests
-      run: cargo test -p customize_nft --test lib --verbose
     - name: Install requirements for code coverage
-      run: rustup component add llvm-tools-preview    
-    - uses: actions-rs/cargo@v1
-      with:
-        command: test
-        args: -p customize_nft --test lib
-      env:
-        CARGO_INCREMENTAL: '0'
-        RUSTFLAGS: '-Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests'
-        RUSTDOCFLAGS: '-Cpanic=abort'
-    - uses: actions-rs/grcov@v0.1
-      with:
-        config: configs/grcov.yml
+      run: cargo install grcov  
+    - name: Test + Measure code coverage
+      run: |
+        chmod +x ./coverage.sh
+        ./coverage.sh
     - uses: codecov/codecov-action@v2
       with:
         token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-        files: ${{ steps.coverage.outputs.report }}
+        files: "./target/debug/coverage.lcov"
         verbose: true # optional (default = false)
     - name: Build
       run: cargo build --verbose

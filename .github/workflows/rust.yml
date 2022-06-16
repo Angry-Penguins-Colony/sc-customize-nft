@@ -23,7 +23,7 @@ jobs:
     - name: Test + Measure code coverage
       run: |
         chmod +x ./coverage.sh
-        ./coverage.sh
+        ./coverage.sh lcov
     - uses: codecov/codecov-action@v2
       with:
         token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos

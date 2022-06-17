@@ -102,7 +102,7 @@ fn customize_complete_flow() {
     ]);
 
     // 2. ACT
-    let (sc_result, tx_result) = setup.customize(transfers, ITEM_TO_UNEQUIP_SLOT);
+    let (sc_result, tx_result) = setup.customize(transfers, &[ITEM_TO_UNEQUIP_SLOT]);
 
     // 3. ASSERT
     tx_result.assert_ok();

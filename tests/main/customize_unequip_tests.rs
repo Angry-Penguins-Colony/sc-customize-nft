@@ -1,4 +1,5 @@
 use customize_nft::{
+    constants::ERR_CANNOT_UNEQUIP_EMPTY_SLOT,
     libs::storage::StorageModule,
     structs::{
         equippable_nft_attributes::EquippableNftAttributes, item::Item,
@@ -67,7 +68,7 @@ fn customize_only_unequip() {
     let transfers = testing_utils::create_esdt_transfers(&[(EQUIPPABLE_TOKEN_ID, NONCE)]);
 
     // 2. ACT
-    let (sc_result, tx_result) = setup.customize(transfers, slot);
+    let (sc_result, tx_result) = setup.customize(transfers, &[slot]);
 
     // 3. ASSERT
     tx_result.assert_ok();
@@ -104,4 +105,62 @@ fn customize_only_unequip() {
         &rust_biguint!(1),
         Option::Some(&EquippableNftAttributes::<DebugApi>::empty()),
     );
+}
+
+#[test]
+fn unequip_twice_the_same_slot() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    let slot = b"Background";
+    const ITEM_TO_UNEQUIP_ID: &[u8] = b"BG-a1a1a1";
+    const ITEM_TO_UNEQUIP_NAME: &[u8] = b"Some Item";
+    const NONCE: u64 = 30;
+
+    DebugApi::dummy();
+
+    setup.create_equippable_with_registered_item(
+        NONCE,
+        ITEM_TO_UNEQUIP_ID,
+        NONCE,
+        slot,
+        ItemAttributes::random(),
+    );
+
+    // setup CID
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                let attributes_before_custom = EquippableNftAttributes::new(&[(
+                    &ManagedBuffer::new_from_bytes(slot),
+                    Item {
+                        token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_UNEQUIP_ID),
+                        nonce: NONCE,
+                        name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
+                    },
+                )]);
+
+                sc.set_cid_of(
+                    &attributes_before_custom,
+                    ManagedBuffer::<DebugApi>::new_from_bytes(b"this is a cid"),
+                );
+
+                sc.set_cid_of(
+                    &EquippableNftAttributes::<DebugApi>::empty(),
+                    ManagedBuffer::new_from_bytes(b"empty"),
+                );
+            },
+        )
+        .assert_ok();
+
+    let transfers = testing_utils::create_esdt_transfers(&[(EQUIPPABLE_TOKEN_ID, NONCE)]);
+
+    // 2. ACT
+    let (_, tx_result) = setup.customize(transfers.clone(), &[slot, slot]);
+
+    // 3. ASSERT
+    tx_result.assert_user_error(ERR_CANNOT_UNEQUIP_EMPTY_SLOT);
 }

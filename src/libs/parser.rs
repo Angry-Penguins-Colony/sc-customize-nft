@@ -11,18 +11,18 @@ use crate::structs::{
 };
 
 #[elrond_wasm::module]
-pub trait ParsePenguin {
-    fn parse_penguin_attributes(
+pub trait Parser {
+    fn parse_equippable_attributes(
         &self,
-        penguin_id: &TokenIdentifier,
-        penguin_nonce: u64,
+        equippable_token_id: &TokenIdentifier, // TODO: use from storage
+        equippable_nonce: u64,
     ) -> EquippableNftAttributes<Self::Api> {
         let attributes = self
             .blockchain()
             .get_esdt_token_data(
                 &self.blockchain().get_sc_address(),
-                &penguin_id,
-                penguin_nonce,
+                &equippable_token_id,
+                equippable_nonce,
             )
             .decode_attributes::<EquippableNftAttributes<Self::Api>>();
 

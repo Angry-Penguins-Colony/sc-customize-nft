@@ -225,7 +225,9 @@ pub fn u64_to_ascii<M: ManagedTypeApi>(val: &u64) -> ManagedBuffer<M> {
     return o;
 }
 
-pub fn get_number_from_penguin_name<M: ManagedTypeApi>(name: &ManagedBuffer<M>) -> Option<u64> {
+pub fn extract_number_from_equippable_name<M: ManagedTypeApi>(
+    name: &ManagedBuffer<M>,
+) -> Option<u64> {
     let buffers = split_last_occurence(name, b'#');
     let number_buffer = &buffers.1;
 

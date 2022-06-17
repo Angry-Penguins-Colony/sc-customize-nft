@@ -9,7 +9,7 @@ use elrond_wasm_debug::{managed_buffer, DebugApi};
 fn should_top_encode() {
     DebugApi::dummy();
 
-    let penguin = EquippableNftAttributes::new(&[(
+    let equippable_nft_attributes = EquippableNftAttributes::new(&[(
         &ManagedBuffer::new_from_bytes(b"hat"),
         Item::<DebugApi> {
             token: TokenIdentifier::from_esdt_bytes(b"HAT-a2b4e5"),
@@ -20,14 +20,14 @@ fn should_top_encode() {
 
     let expected = b"Hat:Pirate Hat (HAT-a2b4e5-01)";
 
-    assert_penguin_encode_eq(penguin, expected);
+    assert_equippable_encode_eq(equippable_nft_attributes, expected);
 }
 
 #[test]
 fn should_top_encode_with_nonce_equals_0a() {
     DebugApi::dummy();
 
-    let penguin = EquippableNftAttributes::new(&[(
+    let equippable_nft_attributes = EquippableNftAttributes::new(&[(
         &ManagedBuffer::new_from_bytes(b"hat"),
         Item::<DebugApi> {
             token: TokenIdentifier::from_esdt_bytes(b"HAT-a2b4e5"),
@@ -38,15 +38,15 @@ fn should_top_encode_with_nonce_equals_0a() {
 
     let expected = b"Hat:Pirate Hat (HAT-a2b4e5-0a)";
 
-    assert_penguin_encode_eq(penguin, expected);
+    assert_equippable_encode_eq(equippable_nft_attributes, expected);
 }
 
-fn assert_penguin_encode_eq(
-    penguin: EquippableNftAttributes<elrond_wasm_debug::tx_mock::TxContextRef>,
+fn assert_equippable_encode_eq(
+    equippable_nft_attributes: EquippableNftAttributes<elrond_wasm_debug::tx_mock::TxContextRef>,
     expected: &[u8],
 ) {
     let mut serialized_attributes = Vec::new();
-    match penguin.top_encode(&mut serialized_attributes) {
+    match equippable_nft_attributes.top_encode(&mut serialized_attributes) {
         Ok(_) => {
             println!(
                 "\n========\nActual:\n{}\n\nExpected:\n{}\n========\n",

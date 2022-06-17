@@ -7,7 +7,7 @@ fn is_empty_while_not_empty() {
     DebugApi::dummy();
     let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
-    let penguin = EquippableNftAttributes::<DebugApi>::new(&[(
+    let equippable_nft_attributes = EquippableNftAttributes::<DebugApi>::new(&[(
         slot,
         Item {
             token: TokenIdentifier::from_esdt_bytes(b"ITEM-a"),
@@ -16,7 +16,7 @@ fn is_empty_while_not_empty() {
         },
     )]);
 
-    assert_eq!(penguin.is_slot_empty(slot), false);
+    assert_eq!(equippable_nft_attributes.is_slot_empty(slot), false);
 }
 
 #[test]
@@ -24,7 +24,7 @@ fn is_empty_while_empty() {
     DebugApi::dummy();
     let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
-    let penguin = EquippableNftAttributes::<DebugApi>::empty();
+    let equippable_nft_attributes = EquippableNftAttributes::<DebugApi>::empty();
 
-    assert_eq!(penguin.is_slot_empty(slot), true);
+    assert_eq!(equippable_nft_attributes.is_slot_empty(slot), true);
 }

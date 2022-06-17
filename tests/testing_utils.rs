@@ -15,7 +15,7 @@ use elrond_wasm_debug::{rust_biguint, DebugApi};
 
 pub const WASM_PATH: &'static str = "sc-customize-nft/output/customize_nft.wasm";
 
-pub const PENGUIN_TOKEN_ID: &[u8] = b"PENG-ae5a";
+pub const EQUIPPABLE_TOKEN_ID: &[u8] = b"PENG-ae5a";
 
 pub const HAT_TOKEN_ID: &[u8] = b"HAT-a";
 
@@ -128,19 +128,19 @@ where
         );
     }
 
-    pub fn create_penguin_empty(&mut self, penguin_nonce: u64) {
+    pub fn create_empty_equippable(&mut self, nonce: u64) {
         self.blockchain_wrapper.set_nft_balance(
             &self.first_user_address,
-            PENGUIN_TOKEN_ID,
-            penguin_nonce,
+            EQUIPPABLE_TOKEN_ID,
+            nonce,
             &rust_biguint!(1),
             &EquippableNftAttributes::<DebugApi>::empty(),
         );
     }
 
-    pub fn create_penguin_with_registered_item(
+    pub fn create_equippable_with_registered_item(
         &mut self,
-        penguin_nonce: u64,
+        nonce: u64,
         item_identifier: &[u8],
         item_nonce: u64,
         slot: &[u8],
@@ -167,8 +167,8 @@ where
 
         self.blockchain_wrapper.set_nft_balance(
             &self.first_user_address,
-            PENGUIN_TOKEN_ID,
-            penguin_nonce,
+            EQUIPPABLE_TOKEN_ID,
+            nonce,
             &rust_biguint!(1),
             &attributes,
         );
@@ -269,7 +269,7 @@ where
     blockchain_wrapper
         .execute_tx(&owner_address, &cf_wrapper, &rust_zero, |sc| {
             sc.init(
-                managed_token_id!(PENGUIN_TOKEN_ID),
+                managed_token_id!(EQUIPPABLE_TOKEN_ID),
                 managed_buffer!(b"https://ipfs.io/ipfs/"),
             );
         })
@@ -284,7 +284,7 @@ where
         cf_wrapper,
     };
 
-    equip_setup.set_all_permissions_on_token(PENGUIN_TOKEN_ID);
+    equip_setup.set_all_permissions_on_token(EQUIPPABLE_TOKEN_ID);
 
     return equip_setup;
 }

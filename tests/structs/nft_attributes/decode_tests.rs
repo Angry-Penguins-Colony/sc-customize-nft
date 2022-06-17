@@ -6,7 +6,7 @@ use elrond_wasm::{
 use elrond_wasm_debug::{managed_buffer, DebugApi};
 
 #[test]
-fn decode_penguin() {
+fn decode_equippable_nft() {
     DebugApi::dummy();
 
     let input_data = b"Hat:Pirate Hat (HAT-a2b4e5-01)";
@@ -27,7 +27,7 @@ fn decode_penguin() {
 }
 
 #[test]
-fn decode_penguin_empty() {
+fn decode_empty_equippable_nft() {
     DebugApi::dummy();
 
     let attributes_buffer = ManagedBuffer::<DebugApi>::new_from_bytes(b"");

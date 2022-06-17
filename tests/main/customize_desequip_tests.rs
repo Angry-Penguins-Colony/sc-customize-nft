@@ -10,7 +10,7 @@ use elrond_wasm_debug::{rust_biguint, DebugApi};
 
 use crate::testing_utils;
 
-const PENGUIN_TOKEN_ID: &[u8] = testing_utils::PENGUIN_TOKEN_ID;
+const EQUIPPABLE_TOKEN_ID: &[u8] = testing_utils::EQUIPPABLE_TOKEN_ID;
 
 #[test]
 fn customize_only_desequip() {
@@ -24,7 +24,7 @@ fn customize_only_desequip() {
 
     DebugApi::dummy();
 
-    setup.create_penguin_with_registered_item(
+    setup.create_equippable_with_registered_item(
         NONCE,
         ITEM_TO_DESEQUIP_ID,
         NONCE,
@@ -64,7 +64,7 @@ fn customize_only_desequip() {
         )
         .assert_ok();
 
-    let transfers = testing_utils::create_esdt_transfers(&[(PENGUIN_TOKEN_ID, NONCE)]);
+    let transfers = testing_utils::create_esdt_transfers(&[(EQUIPPABLE_TOKEN_ID, NONCE)]);
 
     // 2. ACT
     let (sc_result, tx_result) = setup.customize(transfers, slot);
@@ -73,8 +73,8 @@ fn customize_only_desequip() {
     tx_result.assert_ok();
     assert_eq!(sc_result.unwrap(), 1u64);
 
-    // penguin&items sent burned
-    setup.assert_is_burn(PENGUIN_TOKEN_ID, NONCE);
+    // equippable & items sent burned
+    setup.assert_is_burn(EQUIPPABLE_TOKEN_ID, NONCE);
 
     assert_eq!(
         setup.blockchain_wrapper.get_esdt_balance(
@@ -89,17 +89,17 @@ fn customize_only_desequip() {
     assert_eq!(
         setup.blockchain_wrapper.get_esdt_balance(
             &setup.first_user_address,
-            PENGUIN_TOKEN_ID,
+            EQUIPPABLE_TOKEN_ID,
             1u64
         ),
         rust_biguint!(1),
-        "Penguin should be received"
+        "Equippable NFT should be received"
     );
 
     // is pinguin empty
     setup.blockchain_wrapper.check_nft_balance(
         &setup.first_user_address,
-        PENGUIN_TOKEN_ID,
+        EQUIPPABLE_TOKEN_ID,
         1,
         &rust_biguint!(1),
         Option::Some(&EquippableNftAttributes::<DebugApi>::empty()),

@@ -8,7 +8,7 @@ fn empty_slot_while_slot_is_empty() {
 
     let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
-    let mut penguin = EquippableNftAttributes::<DebugApi>::new(&[(
+    let mut equippable_nft_attributes = EquippableNftAttributes::<DebugApi>::new(&[(
         slot,
         Item {
             token: TokenIdentifier::from_esdt_bytes(b""),
@@ -17,9 +17,9 @@ fn empty_slot_while_slot_is_empty() {
         },
     )]);
 
-    penguin.empty_slot(&slot);
+    equippable_nft_attributes.empty_slot(&slot);
 
-    assert_eq!(penguin.is_slot_empty(&slot), true);
+    assert_eq!(equippable_nft_attributes.is_slot_empty(&slot), true);
 }
 
 #[test]
@@ -28,7 +28,7 @@ fn empty_slot_while_slot_is_not_empty() {
 
     let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
-    let mut penguin = EquippableNftAttributes::<DebugApi>::new(&[(
+    let mut equippable_nft_attributes = EquippableNftAttributes::<DebugApi>::new(&[(
         slot,
         Item {
             token: TokenIdentifier::from_esdt_bytes(b"HAT-aaaa"),
@@ -37,6 +37,6 @@ fn empty_slot_while_slot_is_not_empty() {
         },
     )]);
 
-    penguin.empty_slot(&slot);
-    assert_eq!(penguin.is_slot_empty(&slot), true);
+    equippable_nft_attributes.empty_slot(&slot);
+    assert_eq!(equippable_nft_attributes.is_slot_empty(&slot), true);
 }

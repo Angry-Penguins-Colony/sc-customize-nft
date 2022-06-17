@@ -2,7 +2,7 @@ mod append_trailing_character_if_missing;
 mod ascii_to_u64;
 mod capitalize;
 mod equals_ignore_case;
-mod get_number_from_penguin_name;
+mod extract_number_from_equippable_name;
 mod hex_to_u64;
 mod remove_first_and_last_char;
 mod remove_first_char;

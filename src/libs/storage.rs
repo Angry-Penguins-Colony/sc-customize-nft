@@ -5,16 +5,16 @@ elrond_wasm::derive_imports!();
 
 #[elrond_wasm::module]
 pub trait StorageModule {
-    #[storage_mapper("penguins_identifier")]
-    fn penguins_identifier(&self) -> SingleValueMapper<TokenIdentifier>;
+    #[storage_mapper("equippable_token_id")]
+    fn equippable_token_id(&self) -> SingleValueMapper<TokenIdentifier>;
 
-    #[storage_mapper("ipfsGateway")]
+    #[storage_mapper("ipfs_gateway")]
     fn ipfs_gateway(&self) -> SingleValueMapper<ManagedBuffer<Self::Api>>;
 
     #[storage_mapper("slot_of_items")]
     fn __slot_of(&self, token: &TokenIdentifier) -> SingleValueMapper<ManagedBuffer>;
 
-    #[storage_mapper("penguin_cid_by_attributes")]
+    #[storage_mapper("cid_of_equippable")]
     fn cid_of(
         &self,
         attributes: &EquippableNftAttributes<Self::Api>,

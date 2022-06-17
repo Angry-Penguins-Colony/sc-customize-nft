@@ -12,7 +12,7 @@ use crate::structs::{
 };
 
 #[elrond_wasm::module]
-pub trait PenguinURLBuilder: super::storage::StorageModule {
+pub trait URLBuilder: super::storage::StorageModule {
     fn build_thumbnail_url(
         &self,
         attributes: &EquippableNftAttributes<Self::Api>,

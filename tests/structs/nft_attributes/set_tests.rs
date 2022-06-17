@@ -8,13 +8,13 @@ fn set_item_on_empty_slot() {
 
     let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
-    let mut penguin = EquippableNftAttributes::<DebugApi>::empty();
+    let mut equippable_nft_attributes = EquippableNftAttributes::<DebugApi>::empty();
 
     let token = b"ITEM-b";
     let managed_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(token);
     let nonce = 1;
 
-    penguin.set_item(
+    equippable_nft_attributes.set_item(
         &slot,
         Option::Some(Item {
             token: managed_token.clone(),
@@ -23,7 +23,7 @@ fn set_item_on_empty_slot() {
         }),
     );
 
-    let item = penguin.get_item(slot).unwrap();
+    let item = equippable_nft_attributes.get_item(slot).unwrap();
 
     assert_eq!(item.token, managed_token);
     assert_eq!(item.nonce, nonce);
@@ -36,7 +36,7 @@ fn set_item_on_not_empty_slot() {
 
     let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
-    let mut penguin = EquippableNftAttributes::<DebugApi>::new(&[(
+    let mut equippable_nft_attributes = EquippableNftAttributes::<DebugApi>::new(&[(
         slot,
         Item {
             token: TokenIdentifier::from_esdt_bytes(b"ITEM-a"),
@@ -50,7 +50,7 @@ fn set_item_on_not_empty_slot() {
     let nonce = 1;
 
     // expect panic
-    penguin.set_item(
+    equippable_nft_attributes.set_item(
         &slot,
         Option::Some(Item {
             token: managed_token.clone(),

@@ -20,14 +20,14 @@ use structs::{
 
 #[elrond_wasm::derive::contract]
 pub trait Equip:
-    penguin_mint::MintPenguin
-    + penguin_parse::ParsePenguin
+    equippable_minter::MintEquippable
+    + parser::Parser
     + storage::StorageModule
-    + penguin_url_builder::PenguinURLBuilder
+    + url_builder::URLBuilder
 {
     #[init]
-    fn init(&self, penguins_identifier: TokenIdentifier, gateway: ManagedBuffer) {
-        self.penguins_identifier().set(&penguins_identifier);
+    fn init(&self, equippable_token_id: TokenIdentifier, gateway: ManagedBuffer) {
+        self.equippable_token_id().set(&equippable_token_id);
 
         // if the user forgot the backslash, we add it silently
         let valid_gateway = utils::append_trailing_character_if_missing(&gateway, b'/');
@@ -48,7 +48,7 @@ pub trait Equip:
 
         for item_id in items_id_to_add {
             require!(
-                item_id != self.penguins_identifier().get(),
+                item_id != self.equippable_token_id().get(),
                 "You cannot register a penguin as an item."
             );
 
@@ -63,7 +63,7 @@ pub trait Equip:
         #[payment_multi] payments: ManagedVec<EsdtTokenPayment<Self::Api>>,
         to_desequip_slots: MultiValueEncoded<ManagedBuffer>,
     ) -> u64 {
-        self.require_penguin_roles_set();
+        self.require_equippable_collection_roles_set();
         require!(
             payments.len() >= 1,
             "You must provide at least one penguin."
@@ -74,11 +74,11 @@ pub trait Equip:
         );
 
         let first_payment = payments.get(0);
-        let penguin_id = first_payment.token_identifier;
-        let penguin_nonce = first_payment.token_nonce;
+        let equippable_token_id = first_payment.token_identifier;
+        let equippable_nonce = first_payment.token_nonce;
 
         require!(
-            &penguin_id == &self.penguins_identifier().get(),
+            &equippable_token_id == &self.equippable_token_id().get(),
             "Please provide a penguin as the first payment"
         );
 
@@ -87,7 +87,8 @@ pub trait Equip:
             "You must sent only one penguin."
         );
 
-        let mut attributes = self.parse_penguin_attributes(&penguin_id, penguin_nonce);
+        let mut attributes =
+            self.parse_equippable_attributes(&equippable_token_id, equippable_nonce);
 
         // first desequip
         for slot in to_desequip_slots {
@@ -111,7 +112,7 @@ pub trait Equip:
             self.equip_slot(&mut attributes, &item);
         }
 
-        return self.update_penguin(&penguin_id, penguin_nonce, &attributes);
+        return self.update_equippable(&equippable_token_id, equippable_nonce, &attributes);
     }
 
     fn get_token_name(&self, item_id: &TokenIdentifier, nonce: u64) -> ManagedBuffer {
@@ -137,7 +138,7 @@ pub trait Equip:
         );
 
         require!(
-            item_id != &self.penguins_identifier().get(),
+            item_id != &self.equippable_token_id().get(),
             "Cannot equip a penguin as an item."
         );
 
@@ -153,9 +154,11 @@ pub trait Equip:
         attributes.set_item(&item_slot, Option::Some(item.clone()));
     }
 
-    fn require_penguin_roles_set(&self) {
-        let penguin_id = self.penguins_identifier().get();
-        let roles = self.blockchain().get_esdt_local_roles(&penguin_id);
+    /// Make sure that the smart contract can create and burn the equippable.
+    fn require_equippable_collection_roles_set(&self) {
+        let roles = self
+            .blockchain()
+            .get_esdt_local_roles(&self.equippable_token_id().get());
 
         require!(
             roles.has_role(&EsdtLocalRole::NftCreate) == true,
@@ -164,7 +167,7 @@ pub trait Equip:
 
         require!(
             roles.has_role(&EsdtLocalRole::NftBurn) == true,
-            "Local burn role not set  for penguin"
+            "Local burn role not set for penguin"
         );
     }
 

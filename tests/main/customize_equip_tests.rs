@@ -10,9 +10,9 @@ use elrond_wasm_debug::{rust_biguint, DebugApi};
 
 use crate::testing_utils;
 
-const PENGUIN_TOKEN_ID: &[u8] = testing_utils::PENGUIN_TOKEN_ID;
+const EQUIPPABLE_TOKEN_ID: &[u8] = testing_utils::EQUIPPABLE_TOKEN_ID;
 const HAT_TOKEN_ID: &[u8] = testing_utils::HAT_TOKEN_ID;
-const NOT_PENGUIN_TOKEN_ID: &[u8] = b"QUACK-a456e";
+const NOT_EQUIPPABLE_TOKEN_ID: &[u8] = b"QUACK-a456e";
 const INIT_NONCE: u64 = 65535;
 
 // create NFT on blockchain wrapper
@@ -55,7 +55,7 @@ fn test_equip() {
     // add empty pingouin to the USER
     setup.blockchain_wrapper.set_nft_balance(
         &setup.first_user_address,
-        PENGUIN_TOKEN_ID,
+        EQUIPPABLE_TOKEN_ID,
         INIT_NONCE,
         &rust_biguint!(1),
         &EquippableNftAttributes::<DebugApi>::empty(),
@@ -103,7 +103,7 @@ fn test_equip() {
         .assert_ok();
 
     let transfers = testing_utils::create_esdt_transfers(&[
-        (PENGUIN_TOKEN_ID, INIT_NONCE),
+        (EQUIPPABLE_TOKEN_ID, INIT_NONCE),
         (ITEM_TO_EQUIP_ID, item_nonce),
     ]);
 
@@ -112,22 +112,24 @@ fn test_equip() {
     tx_result.assert_ok();
     assert_eq!(sc_result.unwrap(), 1u64);
 
-    // the transfered penguin is burn
-    setup.assert_is_burn(&PENGUIN_TOKEN_ID, INIT_NONCE);
+    // the transfered equippable is burn
+    setup.assert_is_burn(&EQUIPPABLE_TOKEN_ID, INIT_NONCE);
     setup.assert_is_burn(&HAT_TOKEN_ID, item_nonce);
 
-    // the NEW penguin has been received
     assert_eq!(
-        setup
-            .blockchain_wrapper
-            .get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, 1),
-        rust_biguint!(1)
+        setup.blockchain_wrapper.get_esdt_balance(
+            &setup.first_user_address,
+            EQUIPPABLE_TOKEN_ID,
+            1
+        ),
+        rust_biguint!(1),
+        "The new equippable NFT has been received."
     );
 
-    // the NEW penguin has the right attributes
+    // the NEW equippable has the right attributes
     setup.blockchain_wrapper.check_nft_balance(
         &setup.first_user_address,
-        PENGUIN_TOKEN_ID,
+        EQUIPPABLE_TOKEN_ID,
         1u64,
         &rust_biguint!(1),
         Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[(
@@ -168,10 +170,10 @@ fn equip_item_while_another_item_equipped_on_slot() {
         &[],
     );
 
-    // Give the user a penguin equiped with the hat to remove
+    // Give the user an equippable NFT equiped with the hat to remove
     setup.blockchain_wrapper.set_nft_balance(
         &setup.first_user_address,
-        PENGUIN_TOKEN_ID,
+        EQUIPPABLE_TOKEN_ID,
         INIT_NONCE,
         &rust_biguint!(1),
         &EquippableNftAttributes::<DebugApi>::new(&[(
@@ -238,7 +240,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
         .assert_ok();
 
     let (esdt_transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[
-        (PENGUIN_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
+        (EQUIPPABLE_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
         (ITEM_ID, ITEM_TO_EQUIP_NONCE, EsdtTokenType::SemiFungible),
     ]);
 
@@ -247,8 +249,8 @@ fn equip_item_while_another_item_equipped_on_slot() {
     tx_result.assert_ok();
     assert_eq!(sc_result.unwrap(), 1u64);
 
-    // Sent penguin is burned
-    setup.assert_is_burn(&PENGUIN_TOKEN_ID, INIT_NONCE);
+    // Sent an equippable NFT is burned
+    setup.assert_is_burn(&EQUIPPABLE_TOKEN_ID, INIT_NONCE);
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -265,15 +267,15 @@ fn equip_item_while_another_item_equipped_on_slot() {
     );
 
     assert_eq!(
-        b_wrapper.get_esdt_balance(&setup.first_user_address, PENGUIN_TOKEN_ID, 1),
+        b_wrapper.get_esdt_balance(&setup.first_user_address, EQUIPPABLE_TOKEN_ID, 1),
         rust_biguint!(1),
-        "User should have received its new penguin"
+        "User should have received its new equippable NFT"
     );
 
-    // Received penguin has the right attributes
+    // Received an equippable NFT has the right attributes
     b_wrapper.check_nft_balance(
         &setup.first_user_address,
-        PENGUIN_TOKEN_ID,
+        EQUIPPABLE_TOKEN_ID,
         1,
         &rust_biguint!(1),
         Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[(
@@ -293,17 +295,17 @@ fn customize_nft_without_items() {
 
     DebugApi::dummy();
     let b_wrapper = &mut setup.blockchain_wrapper;
-    // user own a penguin equiped with an hat
+    // user own an equippable NFT equiped with an hat
     b_wrapper.set_nft_balance(
         &setup.first_user_address,
-        PENGUIN_TOKEN_ID,
+        EQUIPPABLE_TOKEN_ID,
         INIT_NONCE,
         &rust_biguint!(1),
         &EquippableNftAttributes::<DebugApi>::empty(),
     );
 
     let (esdt_transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[(
-        PENGUIN_TOKEN_ID,
+        EQUIPPABLE_TOKEN_ID,
         INIT_NONCE,
         EsdtTokenType::NonFungible,
     )]);
@@ -316,16 +318,16 @@ fn customize_nft_without_items() {
 }
 
 #[test]
-fn equip_while_nft_to_equip_is_not_a_penguin() {
+fn equip_while_nft_to_equip_is_not_an_equippable() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     DebugApi::dummy();
     let b_wrapper = &mut setup.blockchain_wrapper;
 
-    // not a penguin
+    // not an equippable NFT
     b_wrapper.set_nft_balance(
         &setup.first_user_address,
-        NOT_PENGUIN_TOKEN_ID,
+        NOT_EQUIPPABLE_TOKEN_ID,
         INIT_NONCE,
         &rust_biguint!(1),
         &Option::Some({}),
@@ -342,7 +344,11 @@ fn equip_while_nft_to_equip_is_not_a_penguin() {
     );
 
     let (esdt_transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[
-        (NOT_PENGUIN_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
+        (
+            NOT_EQUIPPABLE_TOKEN_ID,
+            INIT_NONCE,
+            EsdtTokenType::NonFungible,
+        ),
         (HAT_TOKEN_ID, INIT_NONCE, EsdtTokenType::SemiFungible),
     ]);
 
@@ -360,14 +366,14 @@ fn equip_while_item_is_not_an_item() {
     const ITEM_TO_EQUIP_ID: &[u8] = b"NOT-AN-ITEM-a";
 
     DebugApi::dummy();
-    let penguin_attributes = EquippableNftAttributes::<DebugApi>::empty();
+    let equippable_nft_attributes = EquippableNftAttributes::<DebugApi>::empty();
 
     setup.blockchain_wrapper.set_nft_balance(
         &setup.first_user_address,
-        PENGUIN_TOKEN_ID,
+        EQUIPPABLE_TOKEN_ID,
         INIT_NONCE,
         &rust_biguint!(1),
-        &penguin_attributes,
+        &equippable_nft_attributes,
     );
 
     setup.blockchain_wrapper.set_nft_balance(
@@ -381,7 +387,7 @@ fn equip_while_item_is_not_an_item() {
     );
 
     let (transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[
-        (PENGUIN_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
+        (EQUIPPABLE_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
         (ITEM_TO_EQUIP_ID, INIT_NONCE, EsdtTokenType::SemiFungible),
     ]);
 
@@ -407,7 +413,7 @@ fn test_equip_while_sending_two_as_value_of_sft() {
     // add empty pingouin to the USER
     setup.blockchain_wrapper.set_nft_balance(
         &setup.first_user_address,
-        PENGUIN_TOKEN_ID,
+        EQUIPPABLE_TOKEN_ID,
         NONCE,
         &rust_biguint!(1),
         &EquippableNftAttributes::<DebugApi>::empty(),
@@ -417,7 +423,7 @@ fn test_equip_while_sending_two_as_value_of_sft() {
 
     let transfers = vec![
         TxInputESDT {
-            token_identifier: PENGUIN_TOKEN_ID.to_vec(),
+            token_identifier: EQUIPPABLE_TOKEN_ID.to_vec(),
             nonce: NONCE,
             value: rust_biguint!(1),
         },

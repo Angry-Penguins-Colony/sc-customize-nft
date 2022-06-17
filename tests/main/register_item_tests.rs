@@ -135,11 +135,10 @@ fn change_item_slot() {
 }
 
 #[test]
-fn register_penguin_as_item_should_not_work() {
+fn register_equippable_as_item_should_not_work() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     let slot = b"hat";
-    const PENGUIN_TOKEN_ID: &[u8] = testing_utils::PENGUIN_TOKEN_ID;
 
     setup
         .blockchain_wrapper
@@ -150,7 +149,7 @@ fn register_penguin_as_item_should_not_work() {
             |sc| {
                 let mut managed_items_ids =
                     MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
-                managed_items_ids.push(managed_token_id!(PENGUIN_TOKEN_ID));
+                managed_items_ids.push(managed_token_id!(testing_utils::EQUIPPABLE_TOKEN_ID));
 
                 let _ = sc.register_item(ManagedBuffer::new_from_bytes(slot), managed_items_ids);
             },

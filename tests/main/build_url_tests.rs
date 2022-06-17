@@ -1,6 +1,6 @@
 use crate::testing_utils;
 use customize_nft::constants::ERR_NO_CID_URL;
-use customize_nft::libs::penguin_url_builder::PenguinURLBuilder;
+use customize_nft::libs::url_builder::URLBuilder;
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm::types::TokenIdentifier;
 use elrond_wasm_debug::DebugApi;
@@ -18,7 +18,7 @@ fn build_url_with_no_associated_cid() {
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
-            let penguin_attributes = EquippableNftAttributes::<DebugApi>::new(&[(
+            let equippable_attributes = EquippableNftAttributes::<DebugApi>::new(&[(
                 &ManagedBuffer::new_from_bytes(b"hat"),
                 Item::<DebugApi> {
                     token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_IDENTIFIER),
@@ -27,7 +27,7 @@ fn build_url_with_no_associated_cid() {
                 },
             )]);
 
-            let _ = sc.build_thumbnail_url(&penguin_attributes);
+            let _ = sc.build_thumbnail_url(&equippable_attributes);
         })
         .assert_user_error(ERR_NO_CID_URL);
 }

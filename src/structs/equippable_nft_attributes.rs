@@ -7,7 +7,7 @@ use core::ops::Deref;
 
 use elrond_wasm::elrond_codec::{TopDecodeInput, TopEncode};
 
-use crate::utils::{self, split_buffer};
+use crate::utils::{self, split_buffer, ManagedBufferUtils};
 
 use super::item::Item;
 
@@ -137,7 +137,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
         };
 
         let mut managed_buffer = ManagedBuffer::<M>::new();
-        managed_buffer.append(&utils::capitalize(slot));
+        managed_buffer.append(&slot.capitalize());
         managed_buffer.append_bytes(b":");
         managed_buffer.append(&item);
 
@@ -148,7 +148,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
         return self
             .slots
             .iter()
-            .position(|current_slot| utils::equals_ignore_case(current_slot.deref(), target_slot));
+            .position(|current_slot| current_slot.deref().equals_ignore_case(target_slot));
     }
 
     /// Set an item on a slot, without checking if the slot is empty.
@@ -170,7 +170,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
             }
             None => match item {
                 Some(item) => {
-                    self.slots.push(utils::to_lowercase(slot));
+                    self.slots.push(slot.to_lowercase());
                     self.items.push(item);
                 }
                 None => {

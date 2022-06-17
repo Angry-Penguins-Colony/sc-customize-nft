@@ -5,33 +5,6 @@ use elrond_wasm::{
     types::{ManagedBuffer, ManagedRef, ManagedVec},
 };
 
-pub fn equals_ignore_case<M: ManagedTypeApi>(
-    buffer_a: &ManagedBuffer<M>,
-    buffer_b: &ManagedBuffer<M>,
-) -> bool {
-    if buffer_a.len() != buffer_b.len() {
-        return false;
-    }
-
-    let mut bytes_a: [u8; 512] = [0; 512];
-    let mut bytes_b: [u8; 512] = [0; 512];
-
-    buffer_a.load_to_byte_array(&mut bytes_a);
-    buffer_b.load_to_byte_array(&mut bytes_b);
-
-    for (i, byte) in bytes_a.iter().enumerate() {
-        if i >= buffer_a.len() {
-            break;
-        };
-
-        if byte.to_ascii_lowercase() != bytes_b[i].to_ascii_lowercase() {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 pub fn split_buffer<M: ManagedTypeApi>(
     buffer: &ManagedBuffer<M>,
     char: u8,
@@ -234,87 +207,52 @@ pub fn extract_number_from_equippable_name<M: ManagedTypeApi>(
     return ascii_to_u64(&number_buffer);
 }
 
-pub fn capitalize<M: ManagedTypeApi>(buffer: &ManagedBuffer<M>) -> ManagedBuffer<M> {
-    let mut bytes: [u8; 512] = [0; 512];
-
-    buffer.load_to_byte_array(&mut bytes);
-
-    let mut o = ManagedBuffer::<M>::new();
-
-    // uppercase first letter
-    o.append_bytes(&[bytes[0].to_ascii_uppercase()]);
-    o.append_bytes(&bytes[1..buffer.len()]);
-
-    return o;
-}
-
-pub fn to_lowercase<M: ManagedTypeApi>(buffer: &ManagedBuffer<M>) -> ManagedBuffer<M> {
-    let mut bytes: [u8; 512] = [0; 512];
-
-    buffer.load_to_byte_array(&mut bytes);
-
-    let mut o = ManagedBuffer::<M>::new();
-
-    for (index, byte) in bytes.iter().enumerate() {
-        if index >= buffer.len() {
-            break;
-        }
-
-        o.append_bytes(&[byte.to_ascii_lowercase()]);
-    }
-
-    return o;
-}
-
-pub fn append_trailing_character_if_missing<M: ManagedTypeApi>(
-    buffer: &ManagedBuffer<M>,
-    character: u8,
-) -> ManagedBuffer<M> {
-    let mut bytes: [u8; 512] = [0; 512];
-
-    buffer.load_to_byte_array(&mut bytes);
-
-    let mut o = ManagedBuffer::<M>::new();
-
-    o.append_bytes(&bytes[0..buffer.len()]);
-
-    if bytes[buffer.len() - 1] != character {
-        o.append_bytes(&[character]);
-    }
-
-    return o;
-}
-
-pub fn do_buffer_contains<M: ManagedTypeApi>(buffer: &ManagedBuffer<M>, to_find: &[u8]) -> bool {
-    let mut bytes: [u8; 512] = [0; 512];
-
-    buffer.load_to_byte_array(&mut bytes);
-
-    // naive implementation of includes() algorithm
-    // An upgrade could be the KMP algorithm
-    for i in 0..buffer.len() {
-        if bytes[i] == to_find[0] {
-            for j in 0..to_find.len() {
-                if bytes[i + j] != to_find[j] {
-                    break;
-                }
-
-                if j == to_find.len() - 1 {
-                    return true;
-                }
-            }
-        }
-    }
-
-    return false;
-}
-
 pub trait ManagedBufferUtils<M: ManagedTypeApi> {
+    /// Set the first character to uppercase
+    fn capitalize(&self) -> ManagedBuffer<M>;
+    fn equals_ignore_case(&self, other: &ManagedBuffer<M>) -> bool;
+    fn append_trailing_character_if_missing(&self, character: u8) -> ManagedBuffer<M>;
+    /// The replace method use new_buffer as ManagedBuffer because is it the easier way to implement
     fn replace(&self, old_buffer: &[u8], new_buffer: &ManagedBuffer<M>) -> ManagedBuffer<M>;
+    fn contains(&self, to_find: &[u8]) -> bool;
+    fn to_lowercase(&self) -> ManagedBuffer<M>;
 }
 
 impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
-    /// The replace method use new_buffer as ManagedBuffer because is it the easier way to implement
+    fn capitalize(&self) -> ManagedBuffer<M> {
+        let mut bytes: [u8; 512] = [0; 512];
+
+        self.load_to_byte_array(&mut bytes);
+
+        let mut o = ManagedBuffer::<M>::new();
+
+        // uppercase first letter
+        o.append_bytes(&[bytes[0].to_ascii_uppercase()]);
+        o.append_bytes(&bytes[1..self.len()]);
+
+        return o;
+    }
+
+    fn equals_ignore_case(self: &ManagedBuffer<M>, other: &ManagedBuffer<M>) -> bool {
+        if self.len() != other.len() {
+            return false;
+        }
+
+        let mut self_bytes: [u8; 512] = [0; 512];
+        let mut other_bytes: [u8; 512] = [0; 512];
+
+        self.load_to_byte_array(&mut self_bytes);
+        other.load_to_byte_array(&mut other_bytes);
+
+        for i in 0..self.len() {
+            if self_bytes[i].to_ascii_lowercase() != other_bytes[i].to_ascii_lowercase() {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     fn replace(&self, old_buffer: &[u8], new_buffer: &ManagedBuffer<M>) -> ManagedBuffer<M> {
         let mut bytes: [u8; 512] = [0; 512];
         self.load_to_byte_array(&mut bytes);
@@ -347,6 +285,60 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
             } else {
                 o.append_bytes(&[bytes[i]]);
             }
+        }
+
+        return o;
+    }
+
+    fn contains(&self, to_find: &[u8]) -> bool {
+        let mut bytes: [u8; 512] = [0; 512];
+
+        self.load_to_byte_array(&mut bytes);
+
+        // naive implementation of includes() algorithm
+        // An upgrade could be the KMP algorithm
+        for i in 0..self.len() {
+            if bytes[i] == to_find[0] {
+                for j in 0..to_find.len() {
+                    if bytes[i + j] != to_find[j] {
+                        break;
+                    }
+
+                    if j == to_find.len() - 1 {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    fn to_lowercase(&self) -> ManagedBuffer<M> {
+        let mut bytes: [u8; 512] = [0; 512];
+
+        self.load_to_byte_array(&mut bytes);
+
+        let mut o = ManagedBuffer::<M>::new();
+
+        for i in 0..self.len() {
+            o.append_bytes(&[bytes[i].to_ascii_lowercase()]);
+        }
+
+        return o;
+    }
+
+    fn append_trailing_character_if_missing(&self, character: u8) -> ManagedBuffer<M> {
+        let mut bytes: [u8; 512] = [0; 512];
+
+        self.load_to_byte_array(&mut bytes);
+
+        let mut o = ManagedBuffer::<M>::new();
+
+        o.append_bytes(&bytes[0..self.len()]);
+
+        if bytes[self.len() - 1] != character {
+            o.append_bytes(&[character]);
         }
 
         return o;

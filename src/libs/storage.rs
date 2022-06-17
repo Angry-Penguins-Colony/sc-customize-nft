@@ -1,5 +1,7 @@
 use crate::{
-    constants::ERR_NO_CID_URL, structs::equippable_nft_attributes::EquippableNftAttributes, utils,
+    constants::ERR_NO_CID_URL,
+    structs::equippable_nft_attributes::EquippableNftAttributes,
+    utils::{self, ManagedBufferUtils},
 };
 
 elrond_wasm::imports!();
@@ -56,7 +58,7 @@ pub trait StorageModule {
     // SLOTS
 
     fn set_slot_of(&self, token: &TokenIdentifier, slot: ManagedBuffer) {
-        self.__slot_of(token).set(utils::to_lowercase(&slot));
+        self.__slot_of(token).set(&slot.to_lowercase());
     }
 
     #[view(hasSlot)]

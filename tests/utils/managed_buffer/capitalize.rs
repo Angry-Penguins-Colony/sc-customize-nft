@@ -1,4 +1,4 @@
-use customize_nft::utils;
+use customize_nft::utils::ManagedBufferUtils;
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm_debug::DebugApi;
 
@@ -7,7 +7,7 @@ fn capitalize() {
     DebugApi::dummy();
 
     assert_eq!(
-        utils::capitalize::<DebugApi>(&ManagedBuffer::new_from_bytes(b"hello world")),
+        ManagedBuffer::<DebugApi>::new_from_bytes(b"hello world").capitalize(),
         ManagedBuffer::new_from_bytes(b"Hello world")
     );
 }
@@ -17,7 +17,7 @@ fn capitalize_already_capitalized() {
     DebugApi::dummy();
 
     assert_eq!(
-        utils::capitalize::<DebugApi>(&ManagedBuffer::new_from_bytes(b"Hello world")),
+        ManagedBuffer::<DebugApi>::new_from_bytes(b"Hello world").capitalize(),
         ManagedBuffer::new_from_bytes(b"Hello world")
     );
 }

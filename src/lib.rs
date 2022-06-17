@@ -18,14 +18,17 @@ use structs::{
     equippable_nft_attributes::EquippableNftAttributes, item::Item, item_attributes::ItemAttributes,
 };
 
-use crate::constants::{
-    EQUIPPABLE_NAME_FORMAT_NUMBER, ERR_BURN_ROLE_NOT_SET_FOR_EQUIPPABLE,
-    ERR_CANNOT_EQUIP_EQUIPPABLE, ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM,
-    ERR_CANNOT_UNEQUIP_EMPTY_SLOT, ERR_CREATE_ROLE_NOT_SET_FOR_EQUIPPABLE,
-    ERR_FIRST_PAYMENT_IS_EQUIPPABLE, ERR_INIT_MISSING_NUMBER_FORMAT,
-    ERR_ITEM_TO_UNEQUIP_HAS_NO_SLOT, ERR_MORE_THAN_ONE_EQUIPPABLE_RECEIVED,
-    ERR_MORE_THAN_ONE_ITEM_RECEIVED, ERR_NEED_EQUIPPABLE, ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
-    ERR_NOT_OWNER,
+use crate::{
+    constants::{
+        EQUIPPABLE_NAME_FORMAT_NUMBER, ERR_BURN_ROLE_NOT_SET_FOR_EQUIPPABLE,
+        ERR_CANNOT_EQUIP_EQUIPPABLE, ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM,
+        ERR_CANNOT_UNEQUIP_EMPTY_SLOT, ERR_CREATE_ROLE_NOT_SET_FOR_EQUIPPABLE,
+        ERR_FIRST_PAYMENT_IS_EQUIPPABLE, ERR_INIT_MISSING_NUMBER_FORMAT,
+        ERR_ITEM_TO_UNEQUIP_HAS_NO_SLOT, ERR_MORE_THAN_ONE_EQUIPPABLE_RECEIVED,
+        ERR_MORE_THAN_ONE_ITEM_RECEIVED, ERR_NEED_EQUIPPABLE, ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
+        ERR_NOT_OWNER,
+    },
+    utils::ManagedBufferUtils,
 };
 
 #[elrond_wasm::derive::contract]
@@ -42,11 +45,11 @@ pub trait Equip:
         self.equippable_token_id().set(&equippable_token_id);
 
         // if the user forgot the backslash, we add it silently
-        let valid_gateway = utils::append_trailing_character_if_missing(&gateway, b'/');
+        let valid_gateway = &gateway.append_trailing_character_if_missing(b'/');
         self.ipfs_gateway().set(valid_gateway);
 
         require!(
-            utils::do_buffer_contains(&equippable_name_format, EQUIPPABLE_NAME_FORMAT_NUMBER),
+            equippable_name_format.contains(EQUIPPABLE_NAME_FORMAT_NUMBER),
             ERR_INIT_MISSING_NUMBER_FORMAT
         );
 

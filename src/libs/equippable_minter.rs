@@ -13,7 +13,7 @@ use crate::{
 pub trait MintEquippableModule:
     super::storage::StorageModule + super::parser::ParserModule
 {
-    /// Burn old eqquipable, and mint a new one.
+    /// Burn old equipable, and mint a new one.
     fn update_equippable(
         &self,
         equippable_token_id: &TokenIdentifier, // TODO: equippable_token_id is registered somewhere in storage, can we remove this arg ?

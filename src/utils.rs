@@ -98,6 +98,8 @@ impl UtilsU64 for u64 {
 }
 
 pub trait ManagedBufferUtils<M: ManagedTypeApi> {
+    fn load_512_bytes(&self) -> [u8; 512];
+
     fn split(&self, char: u8) -> ManagedVec<M, ManagedBuffer<M>>;
     fn split_last_occurence(&self, char: u8) -> (ManagedBuffer<M>, ManagedBuffer<M>);
 
@@ -117,14 +119,24 @@ pub trait ManagedBufferUtils<M: ManagedTypeApi> {
 }
 
 impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
-    fn split(&self, char: u8) -> ManagedVec<M, ManagedBuffer<M>> {
-        if self.len() == 0 {
-            return ManagedVec::new();
+    fn load_512_bytes(&self) -> [u8; 512] {
+        if (self.len() as usize) > 512 {
+            panic!("ManagedBuffer is too big");
         }
 
         let mut bytes: [u8; 512] = [0; 512];
 
         self.load_to_byte_array(&mut bytes);
+
+        return bytes;
+    }
+
+    fn split(&self, char: u8) -> ManagedVec<M, ManagedBuffer<M>> {
+        if self.len() == 0 {
+            return ManagedVec::new();
+        }
+
+        let bytes = self.load_512_bytes();
 
         let mut output = ManagedVec::<M, ManagedBuffer<M>>::new();
 
@@ -144,10 +156,9 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
 
         return output;
     }
-    fn split_last_occurence(&self, char: u8) -> (ManagedBuffer<M>, ManagedBuffer<M>) {
-        let mut bytes: [u8; 512] = [0; 512];
 
-        self.load_to_byte_array(&mut bytes);
+    fn split_last_occurence(&self, char: u8) -> (ManagedBuffer<M>, ManagedBuffer<M>) {
+        let bytes = self.load_512_bytes();
 
         for i in (0..self.len() - 1).rev() {
             if bytes[i] == char {
@@ -162,25 +173,19 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
     }
 
     fn remove_first_char(&self) -> ManagedBuffer<M> {
-        let mut bytes: [u8; 512] = [0; 512];
-
-        self.load_to_byte_array(&mut bytes);
+        let bytes = self.load_512_bytes();
 
         ManagedBuffer::new_from_bytes(&bytes[1..self.len()])
     }
 
     fn remove_first_and_last_char(&self) -> ManagedBuffer<M> {
-        let mut bytes: [u8; 512] = [0; 512];
-
-        self.load_to_byte_array(&mut bytes);
+        let bytes = self.load_512_bytes();
 
         return ManagedBuffer::new_from_bytes(&bytes[1..self.len() - 1]);
     }
 
     fn hex_to_u64(&self) -> Option<u64> {
-        let mut bytes: [u8; 512] = [0; 512];
-
-        self.load_to_byte_array(&mut bytes);
+        let bytes = self.load_512_bytes();
 
         let mut result: u64 = 0;
 
@@ -197,9 +202,7 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
     }
 
     fn ascii_to_u64(&self) -> Option<u64> {
-        let mut bytes: [u8; 512] = [0; 512];
-
-        self.load_to_byte_array(&mut bytes);
+        let bytes = self.load_512_bytes();
 
         let mut result: u64 = 0;
 
@@ -216,9 +219,7 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
     }
 
     fn capitalize(&self) -> ManagedBuffer<M> {
-        let mut bytes: [u8; 512] = [0; 512];
-
-        self.load_to_byte_array(&mut bytes);
+        let bytes = self.load_512_bytes();
 
         let mut o = ManagedBuffer::<M>::new();
 
@@ -234,10 +235,9 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
             return false;
         }
 
-        let mut self_bytes: [u8; 512] = [0; 512];
-        let mut other_bytes: [u8; 512] = [0; 512];
+        let self_bytes = self.load_512_bytes();
 
-        self.load_to_byte_array(&mut self_bytes);
+        let mut other_bytes: [u8; 512] = [0; 512];
         other.load_to_byte_array(&mut other_bytes);
 
         for i in 0..self.len() {
@@ -250,8 +250,7 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
     }
 
     fn replace(&self, old_buffer: &[u8], new_buffer: &ManagedBuffer<M>) -> ManagedBuffer<M> {
-        let mut bytes: [u8; 512] = [0; 512];
-        self.load_to_byte_array(&mut bytes);
+        let bytes = self.load_512_bytes();
 
         let mut o = ManagedBuffer::<M>::new();
 
@@ -287,9 +286,7 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
     }
 
     fn contains(&self, to_find: &[u8]) -> bool {
-        let mut bytes: [u8; 512] = [0; 512];
-
-        self.load_to_byte_array(&mut bytes);
+        let bytes = self.load_512_bytes();
 
         // naive implementation of includes() algorithm
         // An upgrade could be the KMP algorithm
@@ -311,9 +308,7 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
     }
 
     fn to_lowercase(&self) -> ManagedBuffer<M> {
-        let mut bytes: [u8; 512] = [0; 512];
-
-        self.load_to_byte_array(&mut bytes);
+        let bytes = self.load_512_bytes();
 
         let mut o = ManagedBuffer::<M>::new();
 
@@ -325,9 +320,7 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
     }
 
     fn append_trailing_character_if_missing(&self, character: u8) -> ManagedBuffer<M> {
-        let mut bytes: [u8; 512] = [0; 512];
-
-        self.load_to_byte_array(&mut bytes);
+        let bytes = self.load_512_bytes();
 
         let mut o = ManagedBuffer::<M>::new();
 

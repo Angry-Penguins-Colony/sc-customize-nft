@@ -18,6 +18,15 @@ use structs::{
     equippable_nft_attributes::EquippableNftAttributes, item::Item, item_attributes::ItemAttributes,
 };
 
+use crate::constants::{
+    ERR_BURN_ROLE_NOT_SET_FOR_EQUIPPABLE, ERR_CANNOT_DESEQUIP_EMPTY_SLOT,
+    ERR_CANNOT_EQUIP_EQUIPPABLE, ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM,
+    ERR_CREATE_ROLE_NOT_SET_FOR_EQUIPPABLE, ERR_FIRST_PAYMENT_IS_EQUIPPABLE,
+    ERR_ITEM_TO_DESEQUIP_HAS_NO_SLOT, ERR_MORE_THAN_ONE_EQUIPPABLE_RECEIVED,
+    ERR_MORE_THAN_ONE_ITEM_RECEIVED, ERR_NEED_EQUIPPABLE, ERR_NEED_ONE_ITEM_OR_DESEQUIP_SLOT,
+    ERR_NOT_OWNER,
+};
+
 #[elrond_wasm::derive::contract]
 pub trait Equip:
     equippable_minter::MintEquippable
@@ -43,13 +52,13 @@ pub trait Equip:
     ) {
         require!(
             self.blockchain().get_caller() == self.blockchain().get_owner_address(),
-            "Only the owner can call this method."
+            ERR_NOT_OWNER
         );
 
         for item_id in items_id_to_add {
             require!(
                 item_id != self.equippable_token_id().get(),
-                "You cannot register a penguin as an item."
+                ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM
             );
 
             self.set_slot_of(&item_id, item_slot.clone());
@@ -64,13 +73,10 @@ pub trait Equip:
         to_desequip_slots: MultiValueEncoded<ManagedBuffer>,
     ) -> u64 {
         self.require_equippable_collection_roles_set();
-        require!(
-            payments.len() >= 1,
-            "You must provide at least one penguin."
-        );
+        require!(payments.len() >= 1, ERR_NEED_EQUIPPABLE);
         require!(
             payments.len() >= 2 || to_desequip_slots.len() >= 1,
-            "You must either provide at least one penguin and one item OR provide a slot to desequip."
+            ERR_NEED_ONE_ITEM_OR_DESEQUIP_SLOT
         );
 
         let first_payment = payments.get(0);
@@ -79,12 +85,12 @@ pub trait Equip:
 
         require!(
             &equippable_token_id == &self.equippable_token_id().get(),
-            "Please provide a penguin as the first payment"
+            ERR_FIRST_PAYMENT_IS_EQUIPPABLE
         );
 
         require!(
             first_payment.amount == BigUint::from(1u64),
-            "You must sent only one penguin."
+            ERR_MORE_THAN_ONE_EQUIPPABLE_RECEIVED
         );
 
         let mut attributes =
@@ -100,7 +106,7 @@ pub trait Equip:
         for payment in items_token {
             require!(
                 payment.amount == BigUint::from(1u64),
-                "You must sent only one item."
+                ERR_MORE_THAN_ONE_ITEM_RECEIVED
             );
 
             let item = Item {
@@ -133,18 +139,16 @@ pub trait Equip:
 
         require!(
             self.has_slot(&item_id) == true,
-            "Trying to equip {} but is not considered as an item",
+            "Trying to equip {} but is not considered as an item", // TODO: extract to constant
             item_id
         );
 
         require!(
             item_id != &self.equippable_token_id().get(),
-            "Cannot equip a penguin as an item."
+            ERR_CANNOT_EQUIP_EQUIPPABLE
         );
 
         let item_slot = self.get_slot_of(&item_id);
-
-        sc_print!("Equipping {} in slot {}", item_id, item_slot);
 
         // desequip slot if any
         if attributes.is_slot_empty(&item_slot) == false {
@@ -162,12 +166,12 @@ pub trait Equip:
 
         require!(
             roles.has_role(&EsdtLocalRole::NftCreate) == true,
-            "Local create role not set for penguin"
+            ERR_CREATE_ROLE_NOT_SET_FOR_EQUIPPABLE
         );
 
         require!(
             roles.has_role(&EsdtLocalRole::NftBurn) == true,
-            "Local burn role not set for penguin"
+            ERR_BURN_ROLE_NOT_SET_FOR_EQUIPPABLE
         );
     }
 
@@ -182,7 +186,7 @@ pub trait Equip:
     ) {
         require!(
             self.blockchain().get_caller() == self.blockchain().get_owner_address(),
-            "Only the owner can call this method."
+            ERR_NOT_OWNER
         );
 
         // TODO: require! to only send registered SFT
@@ -196,11 +200,6 @@ pub trait Equip:
     ) {
         let caller = self.blockchain().get_caller();
 
-        require!(
-            attributes.is_slot_empty(&slot) == false,
-            "Cannot sent item from an empty slot"
-        );
-
         let opt_item = attributes.get_item(&slot);
 
         match opt_item {
@@ -210,7 +209,7 @@ pub trait Equip:
 
                 require!(
                     self.has_slot(&item_id) == true,
-                    "A item to desequip is not considered like an item. The item has maybe been removed. Please contact an administrator."
+                    ERR_ITEM_TO_DESEQUIP_HAS_NO_SLOT
                 );
 
                 if self.blockchain().get_sc_balance(
@@ -219,7 +218,7 @@ pub trait Equip:
                 ) <= BigUint::from(1u64)
                 {
                     sc_panic!(
-                        "No token {} with nonce {:x} on the SC. Please contact an administrator.",
+                        "No token {} with nonce {:x} on the smart contract wallet. Please contact an administrator.", // TODO: extract to constant
                         item_id,
                         item_nonce,
                     );
@@ -232,7 +231,7 @@ pub trait Equip:
             }
 
             None => {
-                sc_panic!("Slot is empty, we can't sent item to it");
+                sc_panic!(ERR_CANNOT_DESEQUIP_EMPTY_SLOT);
             }
         }
     }

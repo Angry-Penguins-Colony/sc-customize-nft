@@ -1,3 +1,4 @@
+use customize_nft::constants::{ERR_FIRST_PAYMENT_IS_EQUIPPABLE, ERR_MORE_THAN_ONE_ITEM_RECEIVED};
 use customize_nft::libs::storage::StorageModule;
 use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
 use customize_nft::structs::item::Item;
@@ -356,7 +357,7 @@ fn equip_while_nft_to_equip_is_not_an_equippable() {
 
     let (_, tx_result) = setup.equip(esdt_transfers);
 
-    tx_result.assert_user_error("Please provide a penguin as the first payment");
+    tx_result.assert_user_error(ERR_FIRST_PAYMENT_IS_EQUIPPABLE);
 }
 
 #[test]
@@ -435,5 +436,5 @@ fn test_equip_while_sending_two_as_value_of_sft() {
     ];
     let (_, tx_result) = setup.equip(transfers);
 
-    tx_result.assert_user_error("You must sent only one item.");
+    tx_result.assert_user_error(ERR_MORE_THAN_ONE_ITEM_RECEIVED);
 }

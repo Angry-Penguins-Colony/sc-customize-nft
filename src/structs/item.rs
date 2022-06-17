@@ -5,8 +5,9 @@
 
 use elrond_wasm::elrond_codec::TopDecodeInput;
 
-use crate::utils::{ManagedBufferUtils, UtilsU64};
 use core::{ops::Deref, str::FromStr};
+
+use crate::utils::{managed_buffer_utils::ManagedBufferUtils, u64_utils::UtilsU64};
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();

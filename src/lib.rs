@@ -28,7 +28,7 @@ use crate::{
         ERR_MORE_THAN_ONE_ITEM_RECEIVED, ERR_NEED_EQUIPPABLE, ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
         ERR_NOT_OWNER,
     },
-    utils::ManagedBufferUtils,
+    utils::managed_buffer_utils::ManagedBufferUtils,
 };
 
 #[elrond_wasm::derive::contract]

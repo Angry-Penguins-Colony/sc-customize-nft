@@ -7,7 +7,7 @@ use core::ops::Deref;
 
 use elrond_wasm::elrond_codec::{TopDecodeInput, TopEncode};
 
-use crate::utils::{self, ManagedBufferUtils};
+use crate::utils::{self, managed_buffer_utils::ManagedBufferUtils};
 
 use super::item::Item;
 

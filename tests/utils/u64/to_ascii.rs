@@ -1,4 +1,4 @@
-use customize_nft::utils::UtilsU64;
+use customize_nft::utils::u64_utils::UtilsU64;
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm_debug::DebugApi;
 

@@ -9,7 +9,7 @@ use elrond_wasm::{
 use crate::{
     constants::EQUIPPABLE_NAME_FORMAT_NUMBER,
     structs::equippable_nft_attributes::EquippableNftAttributes,
-    utils::{ManagedBufferUtils, UtilsU64},
+    utils::{managed_buffer_utils::ManagedBufferUtils, u64_utils::UtilsU64},
 };
 use crate::{constants::ERR_NO_CID_URL, utils};
 

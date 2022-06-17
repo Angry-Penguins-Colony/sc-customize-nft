@@ -1,11 +1,6 @@
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-use elrond_wasm::{
-    elrond_codec::TopEncode,
-    types::{ManagedBuffer, ManagedByteArray, ManagedVec},
-};
-
 use crate::structs::{
     equippable_nft_attributes::EquippableNftAttributes, item_attributes::ItemAttributes,
 };

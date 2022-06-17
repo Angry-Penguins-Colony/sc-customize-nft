@@ -1,17 +1,13 @@
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-use elrond_wasm::{
-    elrond_codec::TopEncode,
-    types::{ManagedBuffer, ManagedByteArray, ManagedVec},
-};
+use elrond_wasm::types::{ManagedBuffer, ManagedVec};
 
 use crate::{
     constants::EQUIPPABLE_NAME_FORMAT_NUMBER,
     structs::equippable_nft_attributes::EquippableNftAttributes,
     utils::{managed_buffer_utils::ManagedBufferUtils, u64_utils::UtilsU64},
 };
-use crate::{constants::ERR_NO_CID_URL, utils};
 
 #[elrond_wasm::module]
 pub trait MintEquippableModule:

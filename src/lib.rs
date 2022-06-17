@@ -1,7 +1,5 @@
 #![no_std]
 #![no_main]
-#![allow(unused_attributes)]
-#![allow(unused_imports)]
 #![feature(generic_associated_types)]
 
 elrond_wasm::imports!();
@@ -12,11 +10,8 @@ pub mod libs;
 pub mod structs;
 pub mod utils;
 
-use elrond_wasm::elrond_codec::TopEncode;
 use libs::*;
-use structs::{
-    equippable_nft_attributes::EquippableNftAttributes, item::Item, item_attributes::ItemAttributes,
-};
+use structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item};
 
 use crate::{
     constants::{

@@ -1,7 +1,6 @@
 use crate::{
-    constants::ERR_NO_CID_URL,
-    structs::equippable_nft_attributes::EquippableNftAttributes,
-    utils::{self, managed_buffer_utils::ManagedBufferUtils},
+    constants::ERR_NO_CID_URL, structs::equippable_nft_attributes::EquippableNftAttributes,
+    utils::managed_buffer_utils::ManagedBufferUtils,
 };
 
 elrond_wasm::imports!();

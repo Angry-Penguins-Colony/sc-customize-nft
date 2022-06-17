@@ -1,8 +1,6 @@
-use core::ops::Deref;
-
 use elrond_wasm::{
     api::ManagedTypeApi,
-    types::{ManagedBuffer, ManagedRef, ManagedVec},
+    types::{ManagedBuffer, ManagedVec},
 };
 
 pub trait ManagedBufferUtils<M: ManagedTypeApi> {

@@ -164,3 +164,37 @@ fn unequip_twice_the_same_slot() {
     // 3. ASSERT
     tx_result.assert_user_error(ERR_CANNOT_UNEQUIP_EMPTY_SLOT);
 }
+
+#[test]
+fn panic_when_unequip_on_empty_slot() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    let slot = b"Background";
+    const NONCE: u64 = 30;
+
+    setup.create_empty_equippable(NONCE);
+
+    // setup CID
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                sc.set_cid_of(
+                    &EquippableNftAttributes::<DebugApi>::empty(),
+                    ManagedBuffer::new_from_bytes(b"empty"),
+                );
+            },
+        )
+        .assert_ok();
+
+    let transfers = testing_utils::create_esdt_transfers(&[(EQUIPPABLE_TOKEN_ID, NONCE)]);
+
+    // 2. ACT
+    let (_, tx_result) = setup.customize(transfers.clone(), &[slot]);
+
+    // 3. ASSERT
+    tx_result.assert_user_error(ERR_CANNOT_UNEQUIP_EMPTY_SLOT);
+}

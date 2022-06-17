@@ -129,6 +129,8 @@ where
     }
 
     pub fn create_empty_equippable(&mut self, nonce: u64) {
+        DebugApi::dummy();
+
         self.blockchain_wrapper.set_nft_balance(
             &self.first_user_address,
             EQUIPPABLE_TOKEN_ID,

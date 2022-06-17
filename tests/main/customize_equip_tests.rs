@@ -559,3 +559,144 @@ fn equip_while_sending_twice_same_items() {
         )])),
     );
 }
+
+#[test]
+fn equip_while_sending_two_items_of_same_slot() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    DebugApi::dummy();
+    const EQUIPPABLE_NONCE: u64 = 65535;
+    const SLOT: &[u8] = b"hat";
+    const FIRST_ITEM_ID: &[u8] = b"FIRST-000000";
+    const SECOND_ITEM_ID: &[u8] = b"SECOND-ffffff";
+
+    setup.create_empty_equippable(EQUIPPABLE_NONCE);
+
+    // Give the user the first item
+    let first_item_nonce = setup.register_item(SLOT, FIRST_ITEM_ID, &ItemAttributes::random());
+    setup.blockchain_wrapper.set_nft_balance(
+        &setup.first_user_address,
+        FIRST_ITEM_ID,
+        first_item_nonce,
+        &rust_biguint!(1),
+        &ItemAttributes::<DebugApi>::random(),
+    );
+
+    // Give the user the second item
+    let second_item_nonce = setup.register_item(SLOT, SECOND_ITEM_ID, &ItemAttributes::random());
+    setup.blockchain_wrapper.set_nft_balance(
+        &setup.first_user_address,
+        SECOND_ITEM_ID,
+        second_item_nonce,
+        &rust_biguint!(1),
+        &ItemAttributes::<DebugApi>::random(),
+    );
+
+    // set CID
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                let attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[(
+                    &managed_buffer!(SLOT),
+                    Item {
+                        token: managed_token_id!(SECOND_ITEM_ID),
+                        nonce: second_item_nonce,
+                        name: ManagedBuffer::new_from_bytes(SECOND_ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
+                    },
+                )]);
+
+                sc.set_cid_of(
+                    &attributes_after_custom,
+                    ManagedBuffer::new_from_bytes(b"cid after custom"),
+                );
+
+                sc.set_cid_of(
+                    &EquippableNftAttributes::<DebugApi>::empty(),
+                    ManagedBuffer::new_from_bytes(b"cid before custom"),
+                );
+            },
+        )
+        .assert_ok();
+
+    let (esdt_transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[
+        (
+            EQUIPPABLE_TOKEN_ID,
+            EQUIPPABLE_NONCE,
+            EsdtTokenType::NonFungible,
+        ),
+        (FIRST_ITEM_ID, first_item_nonce, EsdtTokenType::SemiFungible),
+        (
+            SECOND_ITEM_ID,
+            second_item_nonce,
+            EsdtTokenType::SemiFungible,
+        ),
+    ]);
+
+    let (sc_result, tx_result) = setup.equip(esdt_transfers);
+
+    tx_result.assert_ok();
+    assert_eq!(sc_result.unwrap(), 1u64);
+
+    // Sent an equippable NFT is burned
+    setup.assert_is_burn(&EQUIPPABLE_TOKEN_ID, EQUIPPABLE_NONCE);
+
+    let b_wrapper = &mut setup.blockchain_wrapper;
+
+    assert_eq!(
+        b_wrapper.get_esdt_balance(&setup.first_user_address, FIRST_ITEM_ID, first_item_nonce),
+        rust_biguint!(1),
+        "User have sent first this item but it is replaced by the second item; so he got it back"
+    );
+
+    assert_eq!(
+        b_wrapper.get_esdt_balance(
+            &setup.cf_wrapper.address_ref(),
+            FIRST_ITEM_ID,
+            first_item_nonce
+        ),
+        rust_biguint!(2),
+        "The smart contract should have sent back the first item. He own two because it need it for the attributes (like for every other items) and register_item give 2 of the items"
+    );
+
+    assert_eq!(
+        b_wrapper.get_esdt_balance(&setup.first_user_address, SECOND_ITEM_ID, second_item_nonce),
+        rust_biguint!(0),
+        "The second item has been sent to the smart contract"
+    );
+
+    assert_eq!(
+        b_wrapper.get_esdt_balance(
+            &setup.cf_wrapper.address_ref(),
+            SECOND_ITEM_ID,
+            second_item_nonce
+        ),
+        rust_biguint!(3),
+        "The smart contract received the second item; He two more because it need it for the attributes (like for every other items)"
+    );
+
+    assert_eq!(
+        b_wrapper.get_esdt_balance(&setup.first_user_address, EQUIPPABLE_TOKEN_ID, 1),
+        rust_biguint!(1),
+        "User should have received its new equippable NFT"
+    );
+
+    // Received an equippable NFT has the right attributes
+    b_wrapper.check_nft_balance(
+        &setup.first_user_address,
+        EQUIPPABLE_TOKEN_ID,
+        1,
+        &rust_biguint!(1),
+        Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[(
+            &managed_buffer!(SLOT),
+            Item {
+                token: managed_token_id!(SECOND_ITEM_ID),
+                nonce: second_item_nonce,
+                name: ManagedBuffer::new_from_bytes(SECOND_ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
+            },
+        )])),
+    );
+}

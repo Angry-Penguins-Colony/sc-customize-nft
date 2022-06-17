@@ -21,7 +21,7 @@ const NOT_EQUIPPABLE_TOKEN_ID: &[u8] = b"QUACK-a456e";
 // create NFT on blockchain wrapper
 #[test]
 fn test_equip() {
-    const INIT_NONCE: u64 = 65535;
+    const EQUIPPABLE_TOKEN_NONCE: u64 = 65535;
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     DebugApi::dummy();
@@ -60,7 +60,7 @@ fn test_equip() {
     setup.blockchain_wrapper.set_nft_balance(
         &setup.first_user_address,
         EQUIPPABLE_TOKEN_ID,
-        INIT_NONCE,
+        EQUIPPABLE_TOKEN_NONCE,
         &rust_biguint!(1),
         &EquippableNftAttributes::<DebugApi>::empty(),
     );
@@ -107,7 +107,7 @@ fn test_equip() {
         .assert_ok();
 
     let transfers = testing_utils::create_esdt_transfers(&[
-        (EQUIPPABLE_TOKEN_ID, INIT_NONCE),
+        (EQUIPPABLE_TOKEN_ID, EQUIPPABLE_TOKEN_NONCE),
         (ITEM_TO_EQUIP_ID, item_nonce),
     ]);
 
@@ -117,7 +117,7 @@ fn test_equip() {
     assert_eq!(sc_result.unwrap(), 1u64);
 
     // the transfered equippable is burn
-    setup.assert_is_burn(&EQUIPPABLE_TOKEN_ID, INIT_NONCE);
+    setup.assert_is_burn(&EQUIPPABLE_TOKEN_ID, EQUIPPABLE_TOKEN_NONCE);
     setup.assert_is_burn(&HAT_TOKEN_ID, item_nonce);
 
     assert_eq!(
@@ -145,6 +145,12 @@ fn test_equip() {
             },
         )])),
     );
+
+    setup.assert_uris(
+        EQUIPPABLE_TOKEN_ID,
+        1,
+        &[b"https://ipfs.io/ipfs/after custom"],
+    )
 }
 
 #[test]
@@ -292,6 +298,12 @@ fn equip_item_while_another_item_equipped_on_slot() {
             },
         )])),
     );
+
+    setup.assert_uris(
+        EQUIPPABLE_TOKEN_ID,
+        1,
+        &[b"https://ipfs.io/ipfs/cid after custom"],
+    )
 }
 
 #[test]
@@ -558,6 +570,12 @@ fn equip_while_sending_twice_same_items() {
             },
         )])),
     );
+
+    setup.assert_uris(
+        EQUIPPABLE_TOKEN_ID,
+        1,
+        &[b"https://ipfs.io/ipfs/cid after custom"],
+    )
 }
 
 #[test]
@@ -698,5 +716,11 @@ fn equip_while_sending_two_items_of_same_slot() {
                 name: ManagedBuffer::new_from_bytes(SECOND_ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
             },
         )])),
+    );
+
+    setup.assert_uris(
+        EQUIPPABLE_TOKEN_ID,
+        1,
+        &[b"https://ipfs.io/ipfs/cid after custom"],
     );
 }

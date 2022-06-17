@@ -155,6 +155,12 @@ fn customize_complete_flow() {
             },
         )])),
     );
+
+    setup.assert_uris(
+        EQUIPPABLE_TOKEN_ID,
+        1,
+        &[b"https://ipfs.io/ipfs/cid after custom"],
+    );
 }
 
 #[test]

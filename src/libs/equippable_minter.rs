@@ -73,6 +73,13 @@ pub trait MintEquippableModule:
                 &uris,
             );
 
+        sc_print!(
+            "Minting {} uris to {}-{}",
+            uris.len(),
+            self.equippable_token_id().get(),
+            token_nonce
+        );
+
         return token_nonce;
     }
 

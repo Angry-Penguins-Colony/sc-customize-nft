@@ -1,3 +1,4 @@
+use std::ops::Deref;
 use std::u8;
 
 use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
@@ -53,6 +54,33 @@ where
             Option::None,
             &[],
         );
+    }
+
+    pub fn assert_uris(&mut self, token: &[u8], nonce: u64, expected_uris: &[&[u8]]) {
+        self.blockchain_wrapper
+            .execute_query(&self.cf_wrapper, |sc| {
+                let actual_uris = sc
+                    .blockchain()
+                    .get_esdt_token_data(
+                        &sc.blockchain().get_sc_address(),
+                        &managed_token_id!(token),
+                        nonce,
+                    )
+                    .uris;
+
+                assert_eq!(
+                    actual_uris.len(),
+                    expected_uris.len(),
+                    "The URIS of {}-{} should have the same length.",
+                    std::str::from_utf8(token).unwrap(),
+                    nonce
+                );
+
+                for (i, expected_uri) in expected_uris.iter().enumerate() {
+                    assert_eq!(actual_uris.get(i).deref(), &managed_buffer!(expected_uri));
+                }
+            })
+            .assert_ok();
     }
 
     pub fn register_item_all_properties(

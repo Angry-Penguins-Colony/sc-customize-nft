@@ -105,6 +105,8 @@ fn customize_only_unequip() {
         &rust_biguint!(1),
         Option::Some(&EquippableNftAttributes::<DebugApi>::empty()),
     );
+
+    setup.assert_uris(EQUIPPABLE_TOKEN_ID, 1, &[b"https://ipfs.io/ipfs/empty"]);
 }
 
 #[test]

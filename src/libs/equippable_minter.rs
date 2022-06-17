@@ -58,7 +58,7 @@ pub trait MintEquippableModule:
         name: &ManagedBuffer,
     ) -> u64 {
         let mut uris = ManagedVec::new();
-        let thumbnail = self.get_thumbnail_uri(&attributes);
+        let thumbnail = self.get_uri_of(&attributes);
         uris.push(thumbnail);
 
         let token_nonce = self

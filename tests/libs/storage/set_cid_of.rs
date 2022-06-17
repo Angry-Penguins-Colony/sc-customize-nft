@@ -22,7 +22,7 @@ fn should_set_if_empty() {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
                 sc.set_cid_of(&attributes, managed_buffer!(cid_bytes));
 
-                assert_eq!(sc.cid_of(&attributes).get(), managed_buffer!(cid_bytes));
+                assert_eq!(sc.__cid_of(&attributes).get(), managed_buffer!(cid_bytes));
             },
         )
         .assert_ok();
@@ -46,13 +46,13 @@ fn should_set_if_not_emtpy() {
 
                 sc.set_cid_of(&attributes, managed_buffer!(first_cid_bytes));
                 assert_eq!(
-                    sc.cid_of(&attributes).get(),
+                    sc.__cid_of(&attributes).get(),
                     managed_buffer!(first_cid_bytes)
                 );
 
                 sc.set_cid_of(&attributes, managed_buffer!(second_cid_bytes));
                 assert_eq!(
-                    sc.cid_of(&attributes).get(),
+                    sc.__cid_of(&attributes).get(),
                     managed_buffer!(second_cid_bytes),
                     "first_cid_bytes should be overwrited by second_cid_bytes"
                 );

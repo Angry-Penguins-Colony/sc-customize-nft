@@ -17,12 +17,13 @@ pub trait StorageModule {
     fn __slot_of(&self, token: &TokenIdentifier) -> SingleValueMapper<ManagedBuffer>;
 
     #[storage_mapper("cid_of_equippable")]
-    fn cid_of(
+    fn __cid_of(
         &self,
         attributes: &EquippableNftAttributes<Self::Api>,
     ) -> SingleValueMapper<ManagedBuffer>;
 
     // STORAGE MODIFIERS
+    // CID
 
     #[endpoint(setCidOf)]
     #[only_owner]
@@ -31,8 +32,25 @@ pub trait StorageModule {
         attributes: &EquippableNftAttributes<Self::Api>,
         cid: ManagedBuffer<Self::Api>,
     ) {
-        self.cid_of(attributes).set(cid);
+        self.__cid_of(attributes).set(cid);
     }
+
+    fn get_uri_of(
+        &self,
+        attributes: &EquippableNftAttributes<Self::Api>,
+    ) -> ManagedBuffer<Self::Api> {
+        let cid = self.__cid_of(attributes);
+
+        require!(cid.is_empty() == false, ERR_NO_CID_URL);
+
+        let mut url = self.ipfs_gateway().get();
+        url.append(&cid.get());
+
+        return url;
+    }
+
+    // ===
+    // SLOTS
 
     fn set_slot_of(&self, token: &TokenIdentifier, slot: ManagedBuffer) {
         self.__slot_of(token).set(utils::to_lowercase(&slot));
@@ -50,19 +68,5 @@ pub trait StorageModule {
         } else {
             sc_panic!("Item {} not found.", item_id);
         }
-    }
-
-    fn get_thumbnail_uri(
-        &self,
-        attributes: &EquippableNftAttributes<Self::Api>,
-    ) -> ManagedBuffer<Self::Api> {
-        let cid = self.cid_of(attributes);
-
-        require!(cid.is_empty() == false, ERR_NO_CID_URL);
-
-        let mut url = self.ipfs_gateway().get();
-        url.append(&cid.get());
-
-        return url;
     }
 }

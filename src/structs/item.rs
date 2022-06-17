@@ -5,12 +5,8 @@
 
 use elrond_wasm::elrond_codec::TopDecodeInput;
 
-use crate::utils::{remove_first_and_last_char, split_last_occurence};
-
-use crate::utils::{hex_to_u64, remove_first_char, u64_to_hex};
+use crate::utils::{ManagedBufferUtils, UtilsU64};
 use core::{ops::Deref, str::FromStr};
-
-use crate::utils::split_buffer;
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
@@ -37,7 +33,7 @@ impl<M: ManagedTypeApi> elrond_codec::TopEncode for Item<M> {
 
         managed_buffer.append(&self.token.as_managed_buffer());
         managed_buffer.append_bytes(b"-");
-        managed_buffer.append(&u64_to_hex(&self.nonce));
+        managed_buffer.append(&self.nonce.to_hex());
         managed_buffer.append_bytes(b")");
 
         // set buffer to output
@@ -51,18 +47,18 @@ impl<M: ManagedTypeApi> elrond_codec::TopEncode for Item<M> {
 
 impl<M: ManagedTypeApi> Item<M> {
     pub fn top_decode(input: &ManagedBuffer<M>) -> Result<Self, DecodeError> {
-        let splited = split_last_occurence(&input, b' ');
+        let splited = input.split_last_occurence(b' ');
 
         // part 1 build name
         let name = splited.0;
 
         // part 2: build identifier
-        let identifier = remove_first_and_last_char(&splited.1); // remove parenthesis
-        let (token, nonce) = split_last_occurence(&identifier, b'-');
+        let identifier = &splited.1.remove_first_and_last_char(); // removiing parenthesis
+        let (token, nonce) = identifier.split_last_occurence(b'-');
 
         return Result::Ok(Self {
             token: TokenIdentifier::from_esdt_bytes(token),
-            nonce: hex_to_u64(&nonce).unwrap(),
+            nonce: nonce.hex_to_u64().unwrap(),
             name: name,
         });
     }

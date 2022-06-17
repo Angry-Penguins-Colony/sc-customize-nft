@@ -1,4 +1,4 @@
-use customize_nft::utils;
+use customize_nft::utils::UtilsU64;
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm_debug::DebugApi;
 
@@ -7,17 +7,17 @@ fn test_u64_to_ascii() {
     DebugApi::dummy();
 
     assert_eq!(
-        utils::u64_to_ascii::<DebugApi>(&10),
+        10.to_ascii::<DebugApi>(),
         ManagedBuffer::new_from_bytes(b"10")
     );
 
     assert_eq!(
-        utils::u64_to_ascii::<DebugApi>(&1),
+        1.to_ascii::<DebugApi>(),
         ManagedBuffer::new_from_bytes(b"1")
     );
 
     assert_eq!(
-        utils::u64_to_ascii::<DebugApi>(&0),
+        0.to_ascii::<DebugApi>(),
         ManagedBuffer::new_from_bytes(b"0")
     );
 }

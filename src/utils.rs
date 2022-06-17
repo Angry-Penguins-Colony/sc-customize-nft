@@ -5,209 +5,107 @@ use elrond_wasm::{
     types::{ManagedBuffer, ManagedRef, ManagedVec},
 };
 
-pub fn split_buffer<M: ManagedTypeApi>(
-    buffer: &ManagedBuffer<M>,
-    char: u8,
-) -> ManagedVec<M, ManagedBuffer<M>> {
-    if buffer.len() == 0 {
-        return ManagedVec::new();
-    }
-
-    let mut bytes: [u8; 512] = [0; 512];
-
-    buffer.load_to_byte_array(&mut bytes);
-
-    let mut output = ManagedVec::<M, ManagedBuffer<M>>::new();
-
-    let mut start_index = 0;
-
-    for (i, &byte) in bytes.iter().enumerate() {
-        if byte == char || i >= buffer.len() {
-            let slice = ManagedBuffer::new_from_bytes(&bytes[start_index..i]);
-            output.push(slice);
-            start_index = i + 1;
-
-            if i >= buffer.len() {
-                break;
-            }
-        }
-    }
-
-    return output;
+pub trait UtilsU64 {
+    fn to_ascii<M: ManagedTypeApi>(&self) -> ManagedBuffer<M>;
+    fn to_hex<M: ManagedTypeApi>(&self) -> ManagedBuffer<M>;
 }
 
-pub fn split_last_occurence<M: ManagedTypeApi>(
-    buffer: &ManagedBuffer<M>,
-    char: u8,
-) -> (ManagedBuffer<M>, ManagedBuffer<M>) {
-    let mut bytes: [u8; 512] = [0; 512];
+impl UtilsU64 for u64 {
+    fn to_hex<M: ManagedTypeApi>(&self) -> ManagedBuffer<M> {
+        let mut reversed_digits = ManagedVec::<M, u8>::new();
+        let mut result = self.clone();
 
-    buffer.load_to_byte_array(&mut bytes);
+        while result > 0 {
+            let digit = result % 16;
+            result /= 16;
 
-    for i in (0..buffer.len() - 1).rev() {
-        if bytes[i] == char {
-            let first = ManagedBuffer::<M>::new_from_bytes(&bytes[..i]);
-            let second = ManagedBuffer::<M>::new_from_bytes(&bytes[i + 1..buffer.len()]);
+            let digit_char = match digit {
+                0 => b'0',
+                1 => b'1',
+                2 => b'2',
+                3 => b'3',
+                4 => b'4',
+                5 => b'5',
+                6 => b'6',
+                7 => b'7',
+                8 => b'8',
+                9 => b'9',
+                10 => b'a',
+                11 => b'b',
+                12 => b'c',
+                13 => b'd',
+                14 => b'e',
+                15 => b'f',
+                _ => panic!("invalid digit"),
+            };
 
-            return (first, second);
-        }
-    }
-
-    panic!("no occurence of char {} in bytes {:?}", char, buffer);
-}
-
-pub fn remove_first_char<M: ManagedTypeApi>(buffer: &ManagedBuffer<M>) -> ManagedBuffer<M> {
-    let mut bytes: [u8; 512] = [0; 512];
-
-    buffer.load_to_byte_array(&mut bytes);
-
-    ManagedBuffer::new_from_bytes(&bytes[1..buffer.len()])
-}
-
-pub fn remove_first_and_last_char<M: ManagedTypeApi>(
-    buffer: &ManagedBuffer<M>,
-) -> ManagedBuffer<M> {
-    let mut bytes: [u8; 512] = [0; 512];
-
-    buffer.load_to_byte_array(&mut bytes);
-
-    ManagedBuffer::new_from_bytes(&bytes[1..buffer.len() - 1])
-}
-
-pub fn hex_to_u64<M: ManagedTypeApi>(buffer: &ManagedBuffer<M>) -> Option<u64> {
-    let mut bytes: [u8; 512] = [0; 512];
-
-    buffer.load_to_byte_array(&mut bytes);
-
-    let mut result: u64 = 0;
-
-    for i in bytes {
-        if i == 0 {
-            break;
+            reversed_digits.push(digit_char);
         }
 
-        result *= 16;
-        result += (i as char).to_digit(16)? as u64;
-    }
-
-    Some(result)
-}
-
-pub fn ascii_to_u64<M: ManagedTypeApi>(buffer: &ManagedBuffer<M>) -> Option<u64> {
-    let mut bytes: [u8; 512] = [0; 512];
-
-    buffer.load_to_byte_array(&mut bytes);
-
-    let mut result: u64 = 0;
-
-    for i in bytes {
-        if i == 0 {
-            break;
+        if &reversed_digits.len() == &0 {
+            return ManagedBuffer::<M>::new_from_bytes(b"00");
         }
 
-        result *= 10;
-        result += (i as char).to_digit(16)? as u64;
+        let mut o = ManagedBuffer::<M>::new();
+
+        if &reversed_digits.len() % 2 != 0 {
+            o.append_bytes(b"0");
+        }
+
+        for digit in reversed_digits.iter().rev() {
+            o.append_bytes(&[digit]);
+        }
+
+        return o;
     }
+    fn to_ascii<M: ManagedTypeApi>(&self) -> ManagedBuffer<M> {
+        let mut reversed_digits = ManagedVec::<M, u8>::new();
+        let mut result = self.clone();
 
-    Some(result)
-}
+        while result > 0 {
+            let digit = result % 10;
+            result /= 10;
 
-pub fn u64_to_hex<M: ManagedTypeApi>(val: &u64) -> ManagedBuffer<M> {
-    let mut reversed_digits = ManagedVec::<M, u8>::new();
-    let mut result = val.clone();
+            let digit_char = match digit {
+                0 => b'0',
+                1 => b'1',
+                2 => b'2',
+                3 => b'3',
+                4 => b'4',
+                5 => b'5',
+                6 => b'6',
+                7 => b'7',
+                8 => b'8',
+                9 => b'9',
+                _ => panic!("invalid digit"),
+            };
 
-    while result > 0 {
-        let digit = result % 16;
-        result /= 16;
+            reversed_digits.push(digit_char);
+        }
 
-        let digit_char = match digit {
-            0 => b'0',
-            1 => b'1',
-            2 => b'2',
-            3 => b'3',
-            4 => b'4',
-            5 => b'5',
-            6 => b'6',
-            7 => b'7',
-            8 => b'8',
-            9 => b'9',
-            10 => b'a',
-            11 => b'b',
-            12 => b'c',
-            13 => b'd',
-            14 => b'e',
-            15 => b'f',
-            _ => panic!("invalid digit"),
-        };
+        if &reversed_digits.len() == &0 {
+            return ManagedBuffer::<M>::new_from_bytes(b"0");
+        }
 
-        reversed_digits.push(digit_char);
+        let mut o = ManagedBuffer::<M>::new();
+
+        for digit in reversed_digits.iter().rev() {
+            o.append_bytes(&[digit]);
+        }
+
+        return o;
     }
-
-    if &reversed_digits.len() == &0 {
-        return ManagedBuffer::<M>::new_from_bytes(b"00");
-    }
-
-    let mut o = ManagedBuffer::<M>::new();
-
-    if &reversed_digits.len() % 2 != 0 {
-        o.append_bytes(b"0");
-    }
-
-    for digit in reversed_digits.iter().rev() {
-        o.append_bytes(&[digit]);
-    }
-
-    return o;
-}
-
-pub fn u64_to_ascii<M: ManagedTypeApi>(val: &u64) -> ManagedBuffer<M> {
-    let mut reversed_digits = ManagedVec::<M, u8>::new();
-    let mut result = val.clone();
-
-    while result > 0 {
-        let digit = result % 10;
-        result /= 10;
-
-        let digit_char = match digit {
-            0 => b'0',
-            1 => b'1',
-            2 => b'2',
-            3 => b'3',
-            4 => b'4',
-            5 => b'5',
-            6 => b'6',
-            7 => b'7',
-            8 => b'8',
-            9 => b'9',
-            _ => panic!("invalid digit"),
-        };
-
-        reversed_digits.push(digit_char);
-    }
-
-    if &reversed_digits.len() == &0 {
-        return ManagedBuffer::<M>::new_from_bytes(b"0");
-    }
-
-    let mut o = ManagedBuffer::<M>::new();
-
-    for digit in reversed_digits.iter().rev() {
-        o.append_bytes(&[digit]);
-    }
-
-    return o;
-}
-
-pub fn extract_number_from_equippable_name<M: ManagedTypeApi>(
-    name: &ManagedBuffer<M>,
-) -> Option<u64> {
-    let buffers = split_last_occurence(name, b'#');
-    let number_buffer = &buffers.1;
-
-    return ascii_to_u64(&number_buffer);
 }
 
 pub trait ManagedBufferUtils<M: ManagedTypeApi> {
+    fn split(&self, char: u8) -> ManagedVec<M, ManagedBuffer<M>>;
+    fn split_last_occurence(&self, char: u8) -> (ManagedBuffer<M>, ManagedBuffer<M>);
+
+    fn remove_first_char(&self) -> ManagedBuffer<M>;
+    fn remove_first_and_last_char(&self) -> ManagedBuffer<M>;
+
+    fn hex_to_u64(&self) -> Option<u64>;
+    fn ascii_to_u64(&self) -> Option<u64>;
     /// Set the first character to uppercase
     fn capitalize(&self) -> ManagedBuffer<M>;
     fn equals_ignore_case(&self, other: &ManagedBuffer<M>) -> bool;
@@ -219,6 +117,104 @@ pub trait ManagedBufferUtils<M: ManagedTypeApi> {
 }
 
 impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
+    fn split(&self, char: u8) -> ManagedVec<M, ManagedBuffer<M>> {
+        if self.len() == 0 {
+            return ManagedVec::new();
+        }
+
+        let mut bytes: [u8; 512] = [0; 512];
+
+        self.load_to_byte_array(&mut bytes);
+
+        let mut output = ManagedVec::<M, ManagedBuffer<M>>::new();
+
+        let mut start_index = 0;
+
+        for (i, &byte) in bytes.iter().enumerate() {
+            if byte == char || i >= self.len() {
+                let slice = ManagedBuffer::new_from_bytes(&bytes[start_index..i]);
+                output.push(slice);
+                start_index = i + 1;
+
+                if i >= self.len() {
+                    break;
+                }
+            }
+        }
+
+        return output;
+    }
+    fn split_last_occurence(&self, char: u8) -> (ManagedBuffer<M>, ManagedBuffer<M>) {
+        let mut bytes: [u8; 512] = [0; 512];
+
+        self.load_to_byte_array(&mut bytes);
+
+        for i in (0..self.len() - 1).rev() {
+            if bytes[i] == char {
+                let first = ManagedBuffer::<M>::new_from_bytes(&bytes[..i]);
+                let second = ManagedBuffer::<M>::new_from_bytes(&bytes[i + 1..self.len()]);
+
+                return (first, second);
+            }
+        }
+
+        panic!("no occurence of char {} in bytes {:?}", char, self);
+    }
+
+    fn remove_first_char(&self) -> ManagedBuffer<M> {
+        let mut bytes: [u8; 512] = [0; 512];
+
+        self.load_to_byte_array(&mut bytes);
+
+        ManagedBuffer::new_from_bytes(&bytes[1..self.len()])
+    }
+
+    fn remove_first_and_last_char(&self) -> ManagedBuffer<M> {
+        let mut bytes: [u8; 512] = [0; 512];
+
+        self.load_to_byte_array(&mut bytes);
+
+        return ManagedBuffer::new_from_bytes(&bytes[1..self.len() - 1]);
+    }
+
+    fn hex_to_u64(&self) -> Option<u64> {
+        let mut bytes: [u8; 512] = [0; 512];
+
+        self.load_to_byte_array(&mut bytes);
+
+        let mut result: u64 = 0;
+
+        for i in bytes {
+            if i == 0 {
+                break;
+            }
+
+            result *= 16;
+            result += (i as char).to_digit(16)? as u64;
+        }
+
+        Some(result)
+    }
+
+    fn ascii_to_u64(&self) -> Option<u64> {
+        let mut bytes: [u8; 512] = [0; 512];
+
+        self.load_to_byte_array(&mut bytes);
+
+        let mut result: u64 = 0;
+
+        for i in bytes {
+            if i == 0 {
+                break;
+            }
+
+            result *= 10;
+            result += (i as char).to_digit(16)? as u64;
+        }
+
+        Some(result)
+    }
+
     fn capitalize(&self) -> ManagedBuffer<M> {
         let mut bytes: [u8; 512] = [0; 512];
 
@@ -343,4 +339,13 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
 
         return o;
     }
+}
+
+pub fn extract_number_from_equippable_name<M: ManagedTypeApi>(
+    name: &ManagedBuffer<M>,
+) -> Option<u64> {
+    let buffers = name.split_last_occurence(b'#');
+    let number_buffer = &buffers.1;
+
+    return number_buffer.ascii_to_u64();
 }

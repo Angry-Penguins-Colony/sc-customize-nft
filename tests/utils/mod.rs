@@ -1,10 +1,3 @@
-mod ascii_to_u64;
 mod extract_number_from_equippable_name;
-mod hex_to_u64;
 mod managed_buffer;
-mod remove_first_and_last_char;
-mod remove_first_char;
-mod split_buffer;
-mod split_last_occurence;
-mod u64_to_ascii;
-mod u64_to_hex;
+mod u64;

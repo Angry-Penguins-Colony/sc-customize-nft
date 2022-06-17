@@ -7,7 +7,7 @@ use core::ops::Deref;
 
 use elrond_wasm::elrond_codec::{TopDecodeInput, TopEncode};
 
-use crate::utils::{self, split_buffer, ManagedBufferUtils};
+use crate::utils::{self, ManagedBufferUtils};
 
 use super::item::Item;
 
@@ -27,10 +27,10 @@ impl<M: ManagedTypeApi> TopDecode for EquippableNftAttributes<M> {
         let mut equippable_attributes = EquippableNftAttributes::empty();
 
         let buffer = <ManagedBuffer<M> as TopDecode>::top_decode(input).unwrap();
-        let items_raw = split_buffer(&buffer, b';');
+        let items_raw = buffer.split(b';');
 
         for item_raw in items_raw.iter() {
-            let parts = split_buffer(item_raw.deref(), b':');
+            let parts = item_raw.deref().split(b':');
 
             let slot = parts.get(0).deref().clone();
             let item_buffer = parts.get(1);

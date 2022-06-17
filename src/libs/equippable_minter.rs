@@ -8,7 +8,8 @@ use elrond_wasm::{
 
 use crate::{
     constants::EQUIPPABLE_NAME_FORMAT_NUMBER,
-    structs::equippable_nft_attributes::EquippableNftAttributes, utils::ManagedBufferUtils,
+    structs::equippable_nft_attributes::EquippableNftAttributes,
+    utils::{ManagedBufferUtils, UtilsU64},
 };
 use crate::{constants::ERR_NO_CID_URL, utils};
 
@@ -90,7 +91,7 @@ pub trait MintEquippableModule:
             &self.equippable_token_id().get(),
         ) + 1;
 
-        let token_index = utils::u64_to_ascii(&index);
+        let token_index = index.to_ascii();
         let token_name = self
             .equippable_name_format()
             .get()

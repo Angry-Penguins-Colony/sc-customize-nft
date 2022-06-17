@@ -108,7 +108,7 @@ fn customize_only_unequip() {
 }
 
 #[test]
-fn unequip_twice_the_same_slot() {
+fn panic_when_unequip_twice_the_same_slot() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     let slot = b"Background";

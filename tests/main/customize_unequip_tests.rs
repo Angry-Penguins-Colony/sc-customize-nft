@@ -13,20 +13,20 @@ use crate::testing_utils;
 const EQUIPPABLE_TOKEN_ID: &[u8] = testing_utils::EQUIPPABLE_TOKEN_ID;
 
 #[test]
-fn customize_only_desequip() {
+fn customize_only_unequip() {
     // 1. ARRANGE
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     let slot = b"Background";
-    const ITEM_TO_DESEQUIP_ID: &[u8] = b"BG-a1a1a1";
-    const ITEM_TO_DESEQUIP_NAME: &[u8] = b"Some Item";
+    const ITEM_TO_UNEQUIP_ID: &[u8] = b"BG-a1a1a1";
+    const ITEM_TO_UNEQUIP_NAME: &[u8] = b"Some Item";
     const NONCE: u64 = 30;
 
     DebugApi::dummy();
 
     setup.create_equippable_with_registered_item(
         NONCE,
-        ITEM_TO_DESEQUIP_ID,
+        ITEM_TO_UNEQUIP_ID,
         NONCE,
         slot,
         ItemAttributes::random(),
@@ -45,9 +45,9 @@ fn customize_only_desequip() {
                 let attributes_before_custom = EquippableNftAttributes::new(&[(
                     &ManagedBuffer::new_from_bytes(slot),
                     Item {
-                        token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_DESEQUIP_ID),
+                        token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_UNEQUIP_ID),
                         nonce: NONCE,
-                        name: ManagedBuffer::new_from_bytes(ITEM_TO_DESEQUIP_NAME),
+                        name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
                     },
                 )]);
 
@@ -79,11 +79,11 @@ fn customize_only_desequip() {
     assert_eq!(
         setup.blockchain_wrapper.get_esdt_balance(
             &setup.first_user_address,
-            ITEM_TO_DESEQUIP_ID,
+            ITEM_TO_UNEQUIP_ID,
             NONCE
         ),
         rust_biguint!(1),
-        "Item desequipped should be received"
+        "Item unequipped should be received"
     );
 
     assert_eq!(

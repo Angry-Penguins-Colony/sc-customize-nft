@@ -1,5 +1,5 @@
 use customize_nft::{
-    constants::ERR_NEED_ONE_ITEM_OR_DESEQUIP_SLOT,
+    constants::ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
     libs::storage::StorageModule,
     structs::{
         equippable_nft_attributes::EquippableNftAttributes, item::Item,
@@ -24,21 +24,21 @@ fn customize_complete_flow() {
 
     const EQUIPPABLE_TOKEN_NONCE: u64 = 5;
 
-    const ITEM_TO_DESEQUIP_SLOT: &[u8] = b"background";
-    const ITEM_TO_DESEQUIP_ID: &[u8] = b"ITEM-a1a1a1";
-    const ITEM_TO_DESEQUIP_NONCE: u64 = 30;
+    const ITEM_TO_UNEQUIP_SLOT: &[u8] = b"background";
+    const ITEM_TO_UNEQUIP_ID: &[u8] = b"ITEM-a1a1a1";
+    const ITEM_TO_UNEQUIP_NONCE: u64 = 30;
 
     const ITEM_TO_EQUIP_SLOT: &[u8] = b"hat";
     const ITEM_TO_EQUIP_ID: &[u8] = b"HAT-b2b2b2";
 
     DebugApi::dummy();
 
-    // Create an equippable NFT with item to desequip
+    // Create an equippable NFT with item to unequip
     setup.create_equippable_with_registered_item(
         EQUIPPABLE_TOKEN_NONCE,
-        ITEM_TO_DESEQUIP_ID,
-        ITEM_TO_DESEQUIP_NONCE,
-        ITEM_TO_DESEQUIP_SLOT,
+        ITEM_TO_UNEQUIP_ID,
+        ITEM_TO_UNEQUIP_NONCE,
+        ITEM_TO_UNEQUIP_SLOT,
         ItemAttributes::random(),
     );
 
@@ -66,11 +66,11 @@ fn customize_complete_flow() {
             &rust_biguint!(0),
             |sc| {
                 let attributes_before_custom = EquippableNftAttributes::new(&[(
-                    &ManagedBuffer::new_from_bytes(ITEM_TO_DESEQUIP_SLOT),
+                    &ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT),
                     Item {
-                        token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_DESEQUIP_ID),
-                        nonce: ITEM_TO_DESEQUIP_NONCE,
-                        name: ManagedBuffer::new_from_bytes(ITEM_TO_DESEQUIP_ID),
+                        token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_UNEQUIP_ID),
+                        nonce: ITEM_TO_UNEQUIP_NONCE,
+                        name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_ID),
                     },
                 )]);
 
@@ -102,7 +102,7 @@ fn customize_complete_flow() {
     ]);
 
     // 2. ACT
-    let (sc_result, tx_result) = setup.customize(transfers, ITEM_TO_DESEQUIP_SLOT);
+    let (sc_result, tx_result) = setup.customize(transfers, ITEM_TO_UNEQUIP_SLOT);
 
     // 3. ASSERT
     tx_result.assert_ok();
@@ -124,11 +124,11 @@ fn customize_complete_flow() {
     assert_eq!(
         setup.blockchain_wrapper.get_esdt_balance(
             &setup.first_user_address,
-            ITEM_TO_DESEQUIP_ID,
-            ITEM_TO_DESEQUIP_NONCE
+            ITEM_TO_UNEQUIP_ID,
+            ITEM_TO_UNEQUIP_NONCE
         ),
         rust_biguint!(1),
-        "The user should have received the item desequipped"
+        "The user should have received the item unequipped"
     );
 
     assert_eq!(
@@ -158,7 +158,7 @@ fn customize_complete_flow() {
 }
 
 #[test]
-fn customize_nothing_to_desequip_and_equip() {
+fn customize_nothing_to_unequip_and_equip() {
     const NONCE: u64 = 30;
 
     // 1. ARRANGE
@@ -182,5 +182,5 @@ fn customize_nothing_to_desequip_and_equip() {
     );
 
     // 3. ASSERT
-    tx_result.assert_user_error(ERR_NEED_ONE_ITEM_OR_DESEQUIP_SLOT);
+    tx_result.assert_user_error(ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT);
 }

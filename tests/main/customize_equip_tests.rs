@@ -1,6 +1,6 @@
 use customize_nft::constants::{
     ERR_FIRST_PAYMENT_IS_EQUIPPABLE, ERR_MORE_THAN_ONE_ITEM_RECEIVED,
-    ERR_NEED_ONE_ITEM_OR_DESEQUIP_SLOT,
+    ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
 };
 use customize_nft::libs::storage::StorageModule;
 use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
@@ -158,18 +158,18 @@ fn equip_item_while_another_item_equipped_on_slot() {
     const ITEM_TO_EQUIP_NONCE: u64 = 30;
     const ITEM_TO_EQUIP_NAME: &[u8] = b"pirate hat";
 
-    const ITEM_TO_DESEQUIP_NAME: &[u8] = b"cap";
+    const ITEM_TO_UNEQUIP_NAME: &[u8] = b"cap";
 
     let slot = b"hat";
 
     // Register hat to remove
-    let item_to_desequip_nonce = setup.register_item_all_properties(
+    let item_to_unequip_nonce = setup.register_item_all_properties(
         slot,
         ITEM_ID,
         &ItemAttributes::<DebugApi>::random(),
         0u64,
         Option::None,
-        Option::Some(ITEM_TO_DESEQUIP_NAME),
+        Option::Some(ITEM_TO_UNEQUIP_NAME),
         Option::None,
         &[],
     );
@@ -184,7 +184,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
             &managed_buffer!(slot),
             Item {
                 token: managed_token_id!(ITEM_ID),
-                nonce: item_to_desequip_nonce,
+                nonce: item_to_unequip_nonce,
                 name: ManagedBuffer::new_from_bytes(ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in Elrond mocking force us to do this
             },
         )]),
@@ -216,7 +216,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
                     &managed_buffer!(slot),
                     Item {
                         token: managed_token_id!(ITEM_ID),
-                        nonce: item_to_desequip_nonce,
+                        nonce: item_to_unequip_nonce,
                         name: ManagedBuffer::new_from_bytes(ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in Elrond mocking force us to do this
                     },
                 )]);
@@ -265,9 +265,9 @@ fn equip_item_while_another_item_equipped_on_slot() {
     );
 
     assert_eq!(
-        b_wrapper.get_esdt_balance(&setup.first_user_address, ITEM_ID, item_to_desequip_nonce),
+        b_wrapper.get_esdt_balance(&setup.first_user_address, ITEM_ID, item_to_unequip_nonce),
         rust_biguint!(1),
-        "User should have received the hat he desequipped.",
+        "User should have received the hat he unequipped.",
     );
 
     assert_eq!(
@@ -315,7 +315,7 @@ fn customize_nft_without_items() {
     )]);
 
     let (_, tx_result) = setup.equip(esdt_transfers);
-    tx_result.assert_error(4, ERR_NEED_ONE_ITEM_OR_DESEQUIP_SLOT);
+    tx_result.assert_user_error(ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT);
 }
 
 #[test]

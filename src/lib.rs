@@ -19,11 +19,11 @@ use structs::{
 };
 
 use crate::constants::{
-    ERR_BURN_ROLE_NOT_SET_FOR_EQUIPPABLE, ERR_CANNOT_DESEQUIP_EMPTY_SLOT,
-    ERR_CANNOT_EQUIP_EQUIPPABLE, ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM,
+    ERR_BURN_ROLE_NOT_SET_FOR_EQUIPPABLE, ERR_CANNOT_EQUIP_EQUIPPABLE,
+    ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM, ERR_CANNOT_UNEQUIP_EMPTY_SLOT,
     ERR_CREATE_ROLE_NOT_SET_FOR_EQUIPPABLE, ERR_FIRST_PAYMENT_IS_EQUIPPABLE,
-    ERR_ITEM_TO_DESEQUIP_HAS_NO_SLOT, ERR_MORE_THAN_ONE_EQUIPPABLE_RECEIVED,
-    ERR_MORE_THAN_ONE_ITEM_RECEIVED, ERR_NEED_EQUIPPABLE, ERR_NEED_ONE_ITEM_OR_DESEQUIP_SLOT,
+    ERR_ITEM_TO_UNEQUIP_HAS_NO_SLOT, ERR_MORE_THAN_ONE_EQUIPPABLE_RECEIVED,
+    ERR_MORE_THAN_ONE_ITEM_RECEIVED, ERR_NEED_EQUIPPABLE, ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
     ERR_NOT_OWNER,
 };
 
@@ -70,13 +70,13 @@ pub trait Equip:
     fn customize(
         &self,
         #[payment_multi] payments: ManagedVec<EsdtTokenPayment<Self::Api>>,
-        to_desequip_slots: MultiValueEncoded<ManagedBuffer>,
+        to_unequip_slots: MultiValueEncoded<ManagedBuffer>,
     ) -> u64 {
         self.require_equippable_collection_roles_set();
         require!(payments.len() >= 1, ERR_NEED_EQUIPPABLE);
         require!(
-            payments.len() >= 2 || to_desequip_slots.len() >= 1,
-            ERR_NEED_ONE_ITEM_OR_DESEQUIP_SLOT
+            payments.len() >= 2 || to_unequip_slots.len() >= 1,
+            ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT
         );
 
         let first_payment = payments.get(0);
@@ -96,9 +96,9 @@ pub trait Equip:
         let mut attributes =
             self.parse_equippable_attributes(&equippable_token_id, equippable_nonce);
 
-        // first desequip
-        for slot in to_desequip_slots {
-            self.desequip_slot(&mut attributes, &slot);
+        // first unequip
+        for slot in to_unequip_slots {
+            self.unequip_slot(&mut attributes, &slot);
         }
 
         // then, equip
@@ -150,9 +150,9 @@ pub trait Equip:
 
         let item_slot = self.get_slot_of(&item_id);
 
-        // desequip slot if any
+        // unequip slot if any
         if attributes.is_slot_empty(&item_slot) == false {
-            self.desequip_slot(attributes, &item_slot);
+            self.unequip_slot(attributes, &item_slot);
         }
 
         attributes.set_item(&item_slot, Option::Some(item.clone()));
@@ -193,7 +193,7 @@ pub trait Equip:
     }
 
     /// Empty the item at the slot provided and sent it to the caller.
-    fn desequip_slot(
+    fn unequip_slot(
         &self,
         attributes: &mut EquippableNftAttributes<Self::Api>,
         slot: &ManagedBuffer,
@@ -209,7 +209,7 @@ pub trait Equip:
 
                 require!(
                     self.has_slot(&item_id) == true,
-                    ERR_ITEM_TO_DESEQUIP_HAS_NO_SLOT
+                    ERR_ITEM_TO_UNEQUIP_HAS_NO_SLOT
                 );
 
                 if self.blockchain().get_sc_balance(
@@ -231,7 +231,7 @@ pub trait Equip:
             }
 
             None => {
-                sc_panic!(ERR_CANNOT_DESEQUIP_EMPTY_SLOT);
+                sc_panic!(ERR_CANNOT_UNEQUIP_EMPTY_SLOT);
             }
         }
     }

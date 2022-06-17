@@ -1,4 +1,4 @@
-use customize_nft::constants::ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM;
+use customize_nft::constants::{ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM, ERR_NOT_OWNER};
 use customize_nft::libs::storage::StorageModule;
 use customize_nft::structs::item_attributes::ItemAttributes;
 use customize_nft::*;
@@ -155,7 +155,7 @@ fn register_equippable_as_item_should_not_work() {
                 let _ = sc.register_item(ManagedBuffer::new_from_bytes(slot), managed_items_ids);
             },
         )
-        .assert_error(4, ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM);
+        .assert_user_error(ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM);
 }
 
 #[test]
@@ -178,7 +178,7 @@ fn register_while_not_the_owner() {
                 let _ = sc.register_item(ManagedBuffer::new_from_bytes(slot), managed_items_ids);
             },
         )
-        .assert_error(4, "Only the owner can call this method.");
+        .assert_user_error(ERR_NOT_OWNER);
 }
 
 #[test]

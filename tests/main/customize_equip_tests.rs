@@ -17,11 +17,11 @@ use crate::testing_utils;
 const EQUIPPABLE_TOKEN_ID: &[u8] = testing_utils::EQUIPPABLE_TOKEN_ID;
 const HAT_TOKEN_ID: &[u8] = testing_utils::HAT_TOKEN_ID;
 const NOT_EQUIPPABLE_TOKEN_ID: &[u8] = b"QUACK-a456e";
-const INIT_NONCE: u64 = 65535;
 
 // create NFT on blockchain wrapper
 #[test]
 fn test_equip() {
+    const INIT_NONCE: u64 = 65535;
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     DebugApi::dummy();
@@ -153,6 +153,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
 
     DebugApi::dummy();
 
+    const INIT_NONCE: u64 = 65535;
     const ITEM_ID: &[u8] = b"ITEM-a1a1a1";
 
     const ITEM_TO_EQUIP_NONCE: u64 = 30;
@@ -295,6 +296,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
 
 #[test]
 fn customize_nft_without_items() {
+    const INIT_NONCE: u64 = 65535;
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     DebugApi::dummy();
@@ -321,6 +323,8 @@ fn customize_nft_without_items() {
 #[test]
 fn equip_while_nft_to_equip_is_not_an_equippable() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    const INIT_NONCE: u64 = 65535;
 
     DebugApi::dummy();
     let b_wrapper = &mut setup.blockchain_wrapper;
@@ -364,6 +368,7 @@ fn equip_while_nft_to_equip_is_not_an_equippable() {
 fn equip_while_item_is_not_an_item() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
+    const INIT_NONCE: u64 = 65535;
     const ITEM_TO_EQUIP_ID: &[u8] = b"NOT-AN-ITEM-a";
 
     DebugApi::dummy();
@@ -437,4 +442,120 @@ fn test_equip_while_sending_two_as_value_of_sft() {
     let (_, tx_result) = setup.equip(transfers);
 
     tx_result.assert_user_error(ERR_MORE_THAN_ONE_ITEM_RECEIVED);
+}
+
+#[test]
+fn equip_while_sending_twice_same_items() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    DebugApi::dummy();
+    const EQUIPPABLE_NONCE: u64 = 65535;
+    const SLOT: &[u8] = b"hat";
+    const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
+
+    let item_to_equip_nonce =
+        setup.register_item(SLOT, ITEM_TO_EQUIP_ID, &ItemAttributes::random());
+
+    setup.create_empty_equippable(EQUIPPABLE_NONCE);
+
+    // Give the user a hat to equip
+    setup.blockchain_wrapper.set_nft_balance(
+        &setup.first_user_address,
+        ITEM_TO_EQUIP_ID,
+        item_to_equip_nonce,
+        &rust_biguint!(2),
+        &ItemAttributes::<DebugApi>::random(),
+    );
+
+    // set CID
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                let attributes_before_custom = EquippableNftAttributes::<DebugApi>::empty();
+
+                let attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[(
+                    &managed_buffer!(SLOT),
+                    Item {
+                        token: managed_token_id!(ITEM_TO_EQUIP_ID),
+                        nonce: item_to_equip_nonce,
+                        name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
+                    },
+                )]);
+
+                sc.set_cid_of(
+                    &attributes_before_custom,
+                    ManagedBuffer::new_from_bytes(b"cid before custom"),
+                );
+
+                sc.set_cid_of(
+                    &attributes_after_custom,
+                    ManagedBuffer::new_from_bytes(b"cid after custom"),
+                );
+            },
+        )
+        .assert_ok();
+
+    let (esdt_transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[
+        (
+            EQUIPPABLE_TOKEN_ID,
+            EQUIPPABLE_NONCE,
+            EsdtTokenType::NonFungible,
+        ),
+        (
+            ITEM_TO_EQUIP_ID,
+            item_to_equip_nonce,
+            EsdtTokenType::SemiFungible,
+        ),
+        (
+            ITEM_TO_EQUIP_ID,
+            item_to_equip_nonce,
+            EsdtTokenType::SemiFungible,
+        ),
+    ]);
+
+    let (sc_result, tx_result) = setup.equip(esdt_transfers);
+
+    tx_result.assert_ok();
+    assert_eq!(sc_result.unwrap(), 1u64);
+
+    // Sent an equippable NFT is burned
+    setup.assert_is_burn(&EQUIPPABLE_TOKEN_ID, EQUIPPABLE_NONCE);
+
+    let b_wrapper = &mut setup.blockchain_wrapper;
+
+    assert_eq!(
+        b_wrapper.get_esdt_balance(
+            &setup.first_user_address,
+            ITEM_TO_EQUIP_ID,
+            item_to_equip_nonce
+        ),
+        rust_biguint!(1),
+        "User have sent 2 items but only 1 item is equiped; so he got one back"
+    );
+
+    assert_eq!(
+        b_wrapper.get_esdt_balance(&setup.first_user_address, EQUIPPABLE_TOKEN_ID, 1),
+        rust_biguint!(1),
+        "User should have received its new equippable NFT"
+    );
+
+    // Received an equippable NFT has the right attributes
+    b_wrapper.check_nft_balance(
+        &setup.first_user_address,
+        EQUIPPABLE_TOKEN_ID,
+        1,
+        &rust_biguint!(1),
+        Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[(
+            &managed_buffer!(SLOT),
+            Item {
+                token: managed_token_id!(ITEM_TO_EQUIP_ID),
+                nonce: item_to_equip_nonce,
+                name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
+            },
+        )])),
+    );
 }

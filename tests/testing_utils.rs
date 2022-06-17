@@ -205,32 +205,42 @@ where
         return (opt_sc_result, tx_result);
     }
 
-    pub fn assert_is_burn(&mut self, token_id: &[u8], token_nonce: u64) {
-        assert_eq!(
-            self.blockchain_wrapper.get_esdt_balance(
-                &self.first_user_address,
-                token_id,
-                token_nonce
-            ),
-            rust_biguint!(0)
+    pub fn assert_is_burn(&self, token_id: &[u8], token_nonce: u64) {
+        self.assert_is_burn_on(
+            token_id,
+            token_nonce,
+            &self.cf_wrapper.address_ref(),
+            "cf_wrapper",
         );
-
-        assert_eq!(
-            self.blockchain_wrapper.get_esdt_balance(
-                &self.second_user_address,
-                token_id,
-                token_nonce
-            ),
-            rust_biguint!(0)
+        self.assert_is_burn_on(
+            token_id,
+            token_nonce,
+            &self.first_user_address,
+            "first_user_address",
         );
+        self.assert_is_burn_on(
+            token_id,
+            token_nonce,
+            &self.second_user_address,
+            "second_user_address",
+        )
+    }
 
+    pub fn assert_is_burn_on(
+        &self,
+        token_id: &[u8],
+        token_nonce: u64,
+        address: &Address,
+        address_name: &str,
+    ) {
         assert_eq!(
-            self.blockchain_wrapper.get_esdt_balance(
-                self.cf_wrapper.address_ref(),
-                token_id,
-                token_nonce
-            ),
-            rust_biguint!(0)
+            self.blockchain_wrapper
+                .get_esdt_balance(address, token_id, token_nonce),
+            rust_biguint!(0),
+            "{} owns {}-{} while it should be burned.",
+            address_name,
+            std::str::from_utf8(token_id).unwrap(),
+            token_nonce,
         );
     }
 

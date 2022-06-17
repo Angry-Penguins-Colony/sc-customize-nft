@@ -6,7 +6,10 @@ use elrond_wasm::{
     types::{ManagedBuffer, ManagedByteArray, ManagedVec},
 };
 
-use crate::structs::equippable_nft_attributes::EquippableNftAttributes;
+use crate::{
+    constants::EQUIPPABLE_NAME_FORMAT_NUMBER,
+    structs::equippable_nft_attributes::EquippableNftAttributes, utils::ManagedBufferUtils,
+};
 use crate::{constants::ERR_NO_CID_URL, utils};
 
 #[elrond_wasm::module]
@@ -87,15 +90,12 @@ pub trait MintEquippableModule:
             &self.equippable_token_id().get(),
         ) + 1;
 
-        let mut full_token_name = ManagedBuffer::new();
-        let token_name_from_storage = ManagedBuffer::new_from_bytes(b"Penguin");
-        let hash_sign = ManagedBuffer::new_from_bytes(b" #");
         let token_index = utils::u64_to_ascii(&index);
+        let token_name = self
+            .equippable_name_format()
+            .get()
+            .replace(EQUIPPABLE_NAME_FORMAT_NUMBER, &token_index);
 
-        full_token_name.append(&token_name_from_storage);
-        full_token_name.append(&hash_sign);
-        full_token_name.append(&token_index);
-
-        return full_token_name;
+        return token_name;
     }
 }

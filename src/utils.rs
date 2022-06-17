@@ -284,3 +284,71 @@ pub fn append_trailing_character_if_missing<M: ManagedTypeApi>(
 
     return o;
 }
+
+pub fn do_buffer_contains<M: ManagedTypeApi>(buffer: &ManagedBuffer<M>, to_find: &[u8]) -> bool {
+    let mut bytes: [u8; 512] = [0; 512];
+
+    buffer.load_to_byte_array(&mut bytes);
+
+    // naive implementation of includes() algorithm
+    // An upgrade could be the KMP algorithm
+    for i in 0..buffer.len() {
+        if bytes[i] == to_find[0] {
+            for j in 0..to_find.len() {
+                if bytes[i + j] != to_find[j] {
+                    break;
+                }
+
+                if j == to_find.len() - 1 {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+pub trait ManagedBufferUtils<M: ManagedTypeApi> {
+    fn replace(&self, old_buffer: &[u8], new_buffer: &ManagedBuffer<M>) -> ManagedBuffer<M>;
+}
+
+impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
+    /// The replace method use new_buffer as ManagedBuffer because is it the easier way to implement
+    fn replace(&self, old_buffer: &[u8], new_buffer: &ManagedBuffer<M>) -> ManagedBuffer<M> {
+        let mut bytes: [u8; 512] = [0; 512];
+        self.load_to_byte_array(&mut bytes);
+
+        let mut o = ManagedBuffer::<M>::new();
+
+        let mut elements_to_skip = 0;
+
+        for i in 0..self.len() {
+            if elements_to_skip > 0 {
+                elements_to_skip -= 1;
+                continue;
+            }
+
+            if bytes[i] == old_buffer[0] {
+                for j in 0..old_buffer.len() {
+                    // is not a match, let's continue to the next character
+                    if bytes[i + j] != old_buffer[j] {
+                        o.append_bytes(&[bytes[i]]);
+                        break;
+                    }
+
+                    // is it a match
+                    if j == old_buffer.len() - 1 {
+                        o.append(new_buffer);
+                        elements_to_skip = j; // skip the old buffer
+                        break;
+                    }
+                }
+            } else {
+                o.append_bytes(&[bytes[i]]);
+            }
+        }
+
+        return o;
+    }
+}

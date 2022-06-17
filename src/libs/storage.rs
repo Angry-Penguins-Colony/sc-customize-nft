@@ -10,6 +10,9 @@ pub trait StorageModule {
     #[storage_mapper("equippable_token_id")]
     fn equippable_token_id(&self) -> SingleValueMapper<TokenIdentifier>;
 
+    #[storage_mapper("equippable_name_format")]
+    fn equippable_name_format(&self) -> SingleValueMapper<ManagedBuffer<Self::Api>>;
+
     #[storage_mapper("ipfs_gateway")]
     fn ipfs_gateway(&self) -> SingleValueMapper<ManagedBuffer<Self::Api>>;
 

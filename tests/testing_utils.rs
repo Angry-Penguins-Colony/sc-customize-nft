@@ -271,6 +271,7 @@ where
             sc.init(
                 managed_token_id!(EQUIPPABLE_TOKEN_ID),
                 managed_buffer!(b"https://ipfs.io/ipfs/"),
+                managed_buffer!(b"Equippable #{number}"),
             );
         })
         .assert_ok();

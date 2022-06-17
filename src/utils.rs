@@ -333,12 +333,3 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
         return o;
     }
 }
-
-pub fn extract_number_from_equippable_name<M: ManagedTypeApi>(
-    name: &ManagedBuffer<M>,
-) -> Option<u64> {
-    let buffers = name.split_last_occurence(b'#');
-    let number_buffer = &buffers.1;
-
-    return number_buffer.ascii_to_u64();
-}

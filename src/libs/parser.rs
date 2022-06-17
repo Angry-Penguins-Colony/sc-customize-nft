@@ -11,7 +11,7 @@ use crate::structs::{
 };
 
 #[elrond_wasm::module]
-pub trait Parser {
+pub trait ParserModule {
     fn parse_equippable_attributes(
         &self,
         equippable_token_id: &TokenIdentifier, // TODO: use from storage

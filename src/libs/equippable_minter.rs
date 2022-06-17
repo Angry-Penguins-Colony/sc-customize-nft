@@ -10,8 +10,8 @@ use crate::structs::equippable_nft_attributes::EquippableNftAttributes;
 use crate::{constants::ERR_NO_CID_URL, utils};
 
 #[elrond_wasm::module]
-pub trait MintEquippable:
-    super::storage::StorageModule + super::parser::Parser + super::url_builder::URLBuilder
+pub trait MintEquippableModule:
+    super::storage::StorageModule + super::parser::ParserModule
 {
     /// Burn old eqquipable, and mint a new one.
     fn update_equippable(
@@ -58,7 +58,7 @@ pub trait MintEquippable:
         name: &ManagedBuffer,
     ) -> u64 {
         let mut uris = ManagedVec::new();
-        let thumbnail = self.build_thumbnail_url(&attributes);
+        let thumbnail = self.get_thumbnail_uri(&attributes);
         uris.push(thumbnail);
 
         let token_nonce = self

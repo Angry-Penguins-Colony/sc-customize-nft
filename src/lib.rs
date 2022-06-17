@@ -29,10 +29,7 @@ use crate::constants::{
 
 #[elrond_wasm::derive::contract]
 pub trait Equip:
-    equippable_minter::MintEquippable
-    + parser::Parser
-    + storage::StorageModule
-    + url_builder::URLBuilder
+    equippable_minter::MintEquippableModule + parser::ParserModule + storage::StorageModule
 {
     #[init]
     fn init(&self, equippable_token_id: TokenIdentifier, gateway: ManagedBuffer) {

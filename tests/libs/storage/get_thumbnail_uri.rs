@@ -1,6 +1,6 @@
 use crate::testing_utils;
 use customize_nft::constants::ERR_NO_CID_URL;
-use customize_nft::libs::url_builder::URLBuilder;
+use customize_nft::libs::storage::StorageModule;
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm::types::TokenIdentifier;
 use elrond_wasm_debug::DebugApi;
@@ -27,7 +27,7 @@ fn build_url_with_no_associated_cid() {
                 },
             )]);
 
-            let _ = sc.build_thumbnail_url(&equippable_attributes);
+            let _ = sc.get_thumbnail_uri(&equippable_attributes);
         })
         .assert_user_error(ERR_NO_CID_URL);
 }

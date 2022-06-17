@@ -1,4 +1,6 @@
-use crate::{structs::equippable_nft_attributes::EquippableNftAttributes, utils};
+use crate::{
+    constants::ERR_NO_CID_URL, structs::equippable_nft_attributes::EquippableNftAttributes, utils,
+};
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
@@ -48,5 +50,19 @@ pub trait StorageModule {
         } else {
             sc_panic!("Item {} not found.", item_id);
         }
+    }
+
+    fn get_thumbnail_uri(
+        &self,
+        attributes: &EquippableNftAttributes<Self::Api>,
+    ) -> ManagedBuffer<Self::Api> {
+        let cid = self.cid_of(attributes);
+
+        require!(cid.is_empty() == false, ERR_NO_CID_URL);
+
+        let mut url = self.ipfs_gateway().get();
+        url.append(&cid.get());
+
+        return url;
     }
 }

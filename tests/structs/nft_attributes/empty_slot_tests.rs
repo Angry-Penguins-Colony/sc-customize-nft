@@ -1,4 +1,4 @@
-use customize_nft::structs::{item::Item, penguin_attributes::PenguinAttributes};
+use customize_nft::structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item};
 use elrond_wasm::types::{ManagedBuffer, TokenIdentifier};
 use elrond_wasm_debug::DebugApi;
 
@@ -8,7 +8,7 @@ fn empty_slot_while_slot_is_empty() {
 
     let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
-    let mut penguin = PenguinAttributes::<DebugApi>::new(&[(
+    let mut penguin = EquippableNftAttributes::<DebugApi>::new(&[(
         slot,
         Item {
             token: TokenIdentifier::from_esdt_bytes(b""),
@@ -28,7 +28,7 @@ fn empty_slot_while_slot_is_not_empty() {
 
     let slot = &ManagedBuffer::new_from_bytes(b"hat");
 
-    let mut penguin = PenguinAttributes::<DebugApi>::new(&[(
+    let mut penguin = EquippableNftAttributes::<DebugApi>::new(&[(
         slot,
         Item {
             token: TokenIdentifier::from_esdt_bytes(b"HAT-aaaa"),

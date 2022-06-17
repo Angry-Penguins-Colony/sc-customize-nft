@@ -5,8 +5,8 @@ use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm::types::TokenIdentifier;
 use elrond_wasm_debug::DebugApi;
 
+use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
 use customize_nft::structs::item::Item;
-use customize_nft::structs::penguin_attributes::PenguinAttributes;
 
 #[test]
 fn build_url_with_no_associated_cid() {
@@ -18,7 +18,7 @@ fn build_url_with_no_associated_cid() {
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
-            let penguin_attributes = PenguinAttributes::<DebugApi>::new(&[(
+            let penguin_attributes = EquippableNftAttributes::<DebugApi>::new(&[(
                 &ManagedBuffer::new_from_bytes(b"hat"),
                 Item::<DebugApi> {
                     token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_IDENTIFIER),

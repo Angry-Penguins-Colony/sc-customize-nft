@@ -1,4 +1,4 @@
-use customize_nft::structs::{item::Item, penguin_attributes::PenguinAttributes};
+use customize_nft::structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item};
 use elrond_wasm::types::{ManagedBuffer, TokenIdentifier};
 use elrond_wasm_debug::DebugApi;
 
@@ -6,7 +6,7 @@ use elrond_wasm_debug::DebugApi;
 fn get_count_while_empty() {
     DebugApi::dummy();
 
-    let attributes = PenguinAttributes::<DebugApi>::empty();
+    let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
     assert_eq!(attributes.get_count(), 0);
 }
@@ -15,7 +15,7 @@ fn get_count_while_empty() {
 fn get_count_expected_two() {
     DebugApi::dummy();
 
-    let attributes = PenguinAttributes::<DebugApi>::new(&[
+    let attributes = EquippableNftAttributes::<DebugApi>::new(&[
         (
             &ManagedBuffer::new_from_bytes(b"hat"),
             Item {
@@ -42,7 +42,7 @@ fn get_count_expected_one_after_delete() {
     DebugApi::dummy();
 
     let slot_to_empty = &&ManagedBuffer::new_from_bytes(b"background");
-    let mut attributes = PenguinAttributes::<DebugApi>::new(&[
+    let mut attributes = EquippableNftAttributes::<DebugApi>::new(&[
         (
             &ManagedBuffer::new_from_bytes(b"hat"),
             Item {

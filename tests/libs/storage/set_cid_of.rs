@@ -1,6 +1,6 @@
 use customize_nft::{
     libs::storage::{EndpointWrappers, StorageModule},
-    structs::penguin_attributes::PenguinAttributes,
+    structs::equippable_nft_attributes::EquippableNftAttributes,
 };
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
@@ -19,7 +19,7 @@ fn should_set_if_empty() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes = PenguinAttributes::<DebugApi>::empty();
+                let attributes = EquippableNftAttributes::<DebugApi>::empty();
                 sc.set_cid_of(&attributes, managed_buffer!(cid_bytes));
 
                 assert_eq!(sc.cid_of(&attributes).get(), managed_buffer!(cid_bytes));
@@ -42,7 +42,7 @@ fn should_set_if_not_emtpy() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes = PenguinAttributes::<DebugApi>::empty();
+                let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
                 sc.set_cid_of(&attributes, managed_buffer!(first_cid_bytes));
                 assert_eq!(

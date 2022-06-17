@@ -7,13 +7,15 @@ use elrond_wasm::{
 };
 
 use crate::constants::ERR_NO_CID_URL;
-use crate::structs::{item_attributes::ItemAttributes, penguin_attributes::PenguinAttributes};
+use crate::structs::{
+    equippable_nft_attributes::EquippableNftAttributes, item_attributes::ItemAttributes,
+};
 
 #[elrond_wasm::module]
 pub trait PenguinURLBuilder: super::storage::StorageModule {
     fn build_thumbnail_url(
         &self,
-        attributes: &PenguinAttributes<Self::Api>,
+        attributes: &EquippableNftAttributes<Self::Api>,
     ) -> ManagedBuffer<Self::Api> {
         let cid = self.cid_of(attributes);
 

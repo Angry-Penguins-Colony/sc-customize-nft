@@ -15,16 +15,16 @@ elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
 #[derive(NestedEncode, NestedDecode, PartialEq, TypeAbi, Debug)]
-pub struct PenguinAttributes<M: ManagedTypeApi> {
+pub struct EquippableNftAttributes<M: ManagedTypeApi> {
     pub slots: ManagedVec<M, ManagedBuffer<M>>,
     items: ManagedVec<M, Item<M>>,
 }
 
-impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
+impl<M: ManagedTypeApi> TopDecode for EquippableNftAttributes<M> {
     fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
         let unequipped_buffer = ManagedBuffer::<M>::new_from_bytes(b"unequipped");
 
-        let mut penguin = PenguinAttributes::empty();
+        let mut penguin = EquippableNftAttributes::empty();
 
         let buffer = <ManagedBuffer<M> as TopDecode>::top_decode(input).unwrap();
         let items_raw = split_buffer(&buffer, b';');
@@ -48,7 +48,7 @@ impl<M: ManagedTypeApi> TopDecode for PenguinAttributes<M> {
     }
 }
 
-impl<M: ManagedTypeApi> TopEncode for PenguinAttributes<M> {
+impl<M: ManagedTypeApi> TopEncode for EquippableNftAttributes<M> {
     fn top_encode<O: elrond_codec::TopEncodeOutput>(
         &self,
         output: O,
@@ -72,7 +72,7 @@ impl<M: ManagedTypeApi> TopEncode for PenguinAttributes<M> {
     }
 }
 
-impl<M: ManagedTypeApi> PenguinAttributes<M> {
+impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
     pub fn new(items_by_slot: &[(&ManagedBuffer<M>, Item<M>)]) -> Self {
         let mut attributes = Self::empty();
 
@@ -116,7 +116,7 @@ impl<M: ManagedTypeApi> PenguinAttributes<M> {
     }
 
     pub fn empty() -> Self {
-        return PenguinAttributes {
+        return EquippableNftAttributes {
             slots: ManagedVec::new(),
             items: ManagedVec::new(),
         };

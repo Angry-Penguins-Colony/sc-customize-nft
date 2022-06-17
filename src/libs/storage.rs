@@ -1,4 +1,4 @@
-use crate::{structs::penguin_attributes::PenguinAttributes, utils};
+use crate::{structs::equippable_nft_attributes::EquippableNftAttributes, utils};
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
@@ -15,14 +15,20 @@ pub trait StorageModule {
     fn __slot_of(&self, token: &TokenIdentifier) -> SingleValueMapper<ManagedBuffer>;
 
     #[storage_mapper("penguin_cid_by_attributes")]
-    fn cid_of(&self, attributes: &PenguinAttributes<Self::Api>)
-        -> SingleValueMapper<ManagedBuffer>;
+    fn cid_of(
+        &self,
+        attributes: &EquippableNftAttributes<Self::Api>,
+    ) -> SingleValueMapper<ManagedBuffer>;
 
     // STORAGE MODIFIERS
 
     #[endpoint(setCidOf)]
     #[only_owner]
-    fn set_cid_of(&self, attributes: &PenguinAttributes<Self::Api>, cid: ManagedBuffer<Self::Api>) {
+    fn set_cid_of(
+        &self,
+        attributes: &EquippableNftAttributes<Self::Api>,
+        cid: ManagedBuffer<Self::Api>,
+    ) {
         self.cid_of(attributes).set(cid);
     }
 

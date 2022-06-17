@@ -14,7 +14,9 @@ pub mod utils;
 
 use elrond_wasm::elrond_codec::TopEncode;
 use libs::*;
-use structs::{item::Item, item_attributes::ItemAttributes, penguin_attributes::PenguinAttributes};
+use structs::{
+    equippable_nft_attributes::EquippableNftAttributes, item::Item, item_attributes::ItemAttributes,
+};
 
 #[elrond_wasm::derive::contract]
 pub trait Equip:
@@ -121,7 +123,11 @@ pub trait Equip:
         return item_name;
     }
 
-    fn equip_slot(&self, attributes: &mut PenguinAttributes<Self::Api>, item: &Item<Self::Api>) {
+    fn equip_slot(
+        &self,
+        attributes: &mut EquippableNftAttributes<Self::Api>,
+        item: &Item<Self::Api>,
+    ) {
         let item_id = &item.token;
 
         require!(
@@ -180,7 +186,11 @@ pub trait Equip:
     }
 
     /// Empty the item at the slot provided and sent it to the caller.
-    fn desequip_slot(&self, attributes: &mut PenguinAttributes<Self::Api>, slot: &ManagedBuffer) {
+    fn desequip_slot(
+        &self,
+        attributes: &mut EquippableNftAttributes<Self::Api>,
+        slot: &ManagedBuffer,
+    ) {
         let caller = self.blockchain().get_caller();
 
         require!(

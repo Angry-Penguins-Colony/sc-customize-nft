@@ -6,7 +6,9 @@ use elrond_wasm::{
     types::{ManagedBuffer, ManagedByteArray, ManagedVec},
 };
 
-use crate::structs::{item_attributes::ItemAttributes, penguin_attributes::PenguinAttributes};
+use crate::structs::{
+    equippable_nft_attributes::EquippableNftAttributes, item_attributes::ItemAttributes,
+};
 
 #[elrond_wasm::module]
 pub trait ParsePenguin {
@@ -14,7 +16,7 @@ pub trait ParsePenguin {
         &self,
         penguin_id: &TokenIdentifier,
         penguin_nonce: u64,
-    ) -> PenguinAttributes<Self::Api> {
+    ) -> EquippableNftAttributes<Self::Api> {
         let attributes = self
             .blockchain()
             .get_esdt_token_data(
@@ -22,7 +24,7 @@ pub trait ParsePenguin {
                 &penguin_id,
                 penguin_nonce,
             )
-            .decode_attributes::<PenguinAttributes<Self::Api>>();
+            .decode_attributes::<EquippableNftAttributes<Self::Api>>();
 
         return attributes;
     }

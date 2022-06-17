@@ -1,6 +1,9 @@
 use customize_nft::{
     libs::storage::StorageModule,
-    structs::{item::Item, item_attributes::ItemAttributes, penguin_attributes::PenguinAttributes},
+    structs::{
+        equippable_nft_attributes::EquippableNftAttributes, item::Item,
+        item_attributes::ItemAttributes,
+    },
     Equip,
 };
 use elrond_wasm::{
@@ -61,7 +64,7 @@ fn customize_complete_flow() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes_before_custom = PenguinAttributes::new(&[(
+                let attributes_before_custom = EquippableNftAttributes::new(&[(
                     &ManagedBuffer::new_from_bytes(ITEM_TO_DESEQUIP_SLOT),
                     Item {
                         token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_DESEQUIP_ID),
@@ -70,7 +73,7 @@ fn customize_complete_flow() {
                     },
                 )]);
 
-                let attributes_after_custom = PenguinAttributes::new(&[(
+                let attributes_after_custom = EquippableNftAttributes::new(&[(
                     &ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT),
                     Item {
                         token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_EQUIP_ID),
@@ -142,7 +145,7 @@ fn customize_complete_flow() {
         PENGUIN_TOKEN_ID,
         1,
         &rust_biguint!(1),
-        Option::Some(&PenguinAttributes::<DebugApi>::new(&[(
+        Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[(
             &managed_buffer!(ITEM_TO_EQUIP_SLOT),
             Item {
                 token: TokenIdentifier::from_esdt_bytes(ITEM_TO_EQUIP_ID),

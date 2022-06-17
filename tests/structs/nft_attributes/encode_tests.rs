@@ -1,4 +1,4 @@
-use customize_nft::structs::{item::Item, penguin_attributes::PenguinAttributes};
+use customize_nft::structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item};
 use elrond_wasm::{
     elrond_codec::TopEncode,
     types::{ManagedBuffer, TokenIdentifier},
@@ -9,7 +9,7 @@ use elrond_wasm_debug::{managed_buffer, DebugApi};
 fn should_top_encode() {
     DebugApi::dummy();
 
-    let penguin = PenguinAttributes::new(&[(
+    let penguin = EquippableNftAttributes::new(&[(
         &ManagedBuffer::new_from_bytes(b"hat"),
         Item::<DebugApi> {
             token: TokenIdentifier::from_esdt_bytes(b"HAT-a2b4e5"),
@@ -27,7 +27,7 @@ fn should_top_encode() {
 fn should_top_encode_with_nonce_equals_0a() {
     DebugApi::dummy();
 
-    let penguin = PenguinAttributes::new(&[(
+    let penguin = EquippableNftAttributes::new(&[(
         &ManagedBuffer::new_from_bytes(b"hat"),
         Item::<DebugApi> {
             token: TokenIdentifier::from_esdt_bytes(b"HAT-a2b4e5"),
@@ -42,7 +42,7 @@ fn should_top_encode_with_nonce_equals_0a() {
 }
 
 fn assert_penguin_encode_eq(
-    penguin: PenguinAttributes<elrond_wasm_debug::tx_mock::TxContextRef>,
+    penguin: EquippableNftAttributes<elrond_wasm_debug::tx_mock::TxContextRef>,
     expected: &[u8],
 ) {
     let mut serialized_attributes = Vec::new();

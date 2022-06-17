@@ -1,7 +1,7 @@
 use customize_nft::libs::storage::StorageModule;
+use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
 use customize_nft::structs::item::Item;
 use customize_nft::structs::item_attributes::ItemAttributes;
-use customize_nft::structs::penguin_attributes::PenguinAttributes;
 use elrond_wasm::contract_base::ContractBase;
 use elrond_wasm::types::{EsdtTokenType, ManagedBuffer, TokenIdentifier};
 use elrond_wasm_debug::tx_mock::TxInputESDT;
@@ -58,7 +58,7 @@ fn test_equip() {
         PENGUIN_TOKEN_ID,
         INIT_NONCE,
         &rust_biguint!(1),
-        &PenguinAttributes::<DebugApi>::empty(),
+        &EquippableNftAttributes::<DebugApi>::empty(),
     );
 
     // add item_to_equip_id
@@ -78,9 +78,9 @@ fn test_equip() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes_before_custom = PenguinAttributes::<DebugApi>::empty();
+                let attributes_before_custom = EquippableNftAttributes::<DebugApi>::empty();
 
-                let attributes_after_custom = PenguinAttributes::<DebugApi>::new(&[(
+                let attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[(
                     &managed_buffer!(slot),
                     Item {
                         token: managed_token_id!(ITEM_TO_EQUIP_ID),
@@ -130,7 +130,7 @@ fn test_equip() {
         PENGUIN_TOKEN_ID,
         1u64,
         &rust_biguint!(1),
-        Option::Some(&PenguinAttributes::<DebugApi>::new(&[(
+        Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[(
             &managed_buffer!(slot),
             Item {
                 token: managed_token_id!(ITEM_TO_EQUIP_ID),
@@ -174,7 +174,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
         PENGUIN_TOKEN_ID,
         INIT_NONCE,
         &rust_biguint!(1),
-        &PenguinAttributes::<DebugApi>::new(&[(
+        &EquippableNftAttributes::<DebugApi>::new(&[(
             &managed_buffer!(slot),
             Item {
                 token: managed_token_id!(ITEM_ID),
@@ -206,7 +206,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes_before_custom = PenguinAttributes::<DebugApi>::new(&[(
+                let attributes_before_custom = EquippableNftAttributes::<DebugApi>::new(&[(
                     &managed_buffer!(slot),
                     Item {
                         token: managed_token_id!(ITEM_ID),
@@ -215,7 +215,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
                     },
                 )]);
 
-                let attributes_after_custom = PenguinAttributes::<DebugApi>::new(&[(
+                let attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[(
                     &managed_buffer!(slot),
                     Item {
                         token: managed_token_id!(ITEM_ID),
@@ -276,7 +276,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
         PENGUIN_TOKEN_ID,
         1,
         &rust_biguint!(1),
-        Option::Some(&PenguinAttributes::<DebugApi>::new(&[(
+        Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[(
             &managed_buffer!(slot),
             Item {
                 token: managed_token_id!(ITEM_ID),
@@ -299,7 +299,7 @@ fn customize_nft_without_items() {
         PENGUIN_TOKEN_ID,
         INIT_NONCE,
         &rust_biguint!(1),
-        &PenguinAttributes::<DebugApi>::empty(),
+        &EquippableNftAttributes::<DebugApi>::empty(),
     );
 
     let (esdt_transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[(
@@ -360,7 +360,7 @@ fn equip_while_item_is_not_an_item() {
     const ITEM_TO_EQUIP_ID: &[u8] = b"NOT-AN-ITEM-a";
 
     DebugApi::dummy();
-    let penguin_attributes = PenguinAttributes::<DebugApi>::empty();
+    let penguin_attributes = EquippableNftAttributes::<DebugApi>::empty();
 
     setup.blockchain_wrapper.set_nft_balance(
         &setup.first_user_address,
@@ -410,7 +410,7 @@ fn test_equip_while_sending_two_as_value_of_sft() {
         PENGUIN_TOKEN_ID,
         NONCE,
         &rust_biguint!(1),
-        &PenguinAttributes::<DebugApi>::empty(),
+        &EquippableNftAttributes::<DebugApi>::empty(),
     );
 
     setup.add_random_item_to_user(ITEM_TO_EQUIP_ID, NONCE, 3);

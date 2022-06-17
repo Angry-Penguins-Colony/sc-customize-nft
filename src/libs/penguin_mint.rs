@@ -6,7 +6,7 @@ use elrond_wasm::{
     types::{ManagedBuffer, ManagedByteArray, ManagedVec},
 };
 
-use crate::structs::penguin_attributes::PenguinAttributes;
+use crate::structs::equippable_nft_attributes::EquippableNftAttributes;
 use crate::{constants::ERR_NO_CID_URL, utils};
 
 #[elrond_wasm::module]
@@ -19,7 +19,7 @@ pub trait MintPenguin:
         &self,
         penguin_id: &TokenIdentifier,
         penguin_nonce: u64,
-        attributes: &PenguinAttributes<Self::Api>,
+        attributes: &EquippableNftAttributes<Self::Api>,
     ) -> u64 {
         let caller = self.blockchain().get_caller();
 
@@ -47,27 +47,33 @@ pub trait MintPenguin:
         return nft_data.name;
     }
 
-    fn mint_penguin(&self, attributes: &PenguinAttributes<Self::Api>, name: &ManagedBuffer) -> u64 {
+    fn mint_penguin(
+        &self,
+        attributes: &EquippableNftAttributes<Self::Api>,
+        name: &ManagedBuffer,
+    ) -> u64 {
         let penguin_id = self.penguins_identifier().get();
 
         let mut uris = ManagedVec::new();
         let thumbnail = self.build_thumbnail_url(&attributes);
         uris.push(thumbnail);
 
-        let token_nonce = self.send().esdt_nft_create::<PenguinAttributes<Self::Api>>(
-            &penguin_id,
-            &BigUint::from(1u32),
-            &name,
-            &BigUint::zero(),
-            &self.calculate_hash(&attributes),
-            &attributes,
-            &uris,
-        );
+        let token_nonce = self
+            .send()
+            .esdt_nft_create::<EquippableNftAttributes<Self::Api>>(
+                &penguin_id,
+                &BigUint::from(1u32),
+                &name,
+                &BigUint::zero(),
+                &self.calculate_hash(&attributes),
+                &attributes,
+                &uris,
+            );
 
         return token_nonce;
     }
 
-    fn calculate_hash(&self, _attributes: &PenguinAttributes<Self::Api>) -> ManagedBuffer {
+    fn calculate_hash(&self, _attributes: &EquippableNftAttributes<Self::Api>) -> ManagedBuffer {
         // we disabled hash calculating for now
         return ManagedBuffer::new();
     }

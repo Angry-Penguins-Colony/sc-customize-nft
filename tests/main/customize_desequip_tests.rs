@@ -1,6 +1,9 @@
 use customize_nft::{
     libs::storage::StorageModule,
-    structs::{item::Item, item_attributes::ItemAttributes, penguin_attributes::PenguinAttributes},
+    structs::{
+        equippable_nft_attributes::EquippableNftAttributes, item::Item,
+        item_attributes::ItemAttributes,
+    },
 };
 use elrond_wasm::types::{ManagedBuffer, TokenIdentifier};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
@@ -39,7 +42,7 @@ fn customize_only_desequip() {
                 sc.ipfs_gateway()
                     .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/"));
 
-                let attributes_before_custom = PenguinAttributes::new(&[(
+                let attributes_before_custom = EquippableNftAttributes::new(&[(
                     &ManagedBuffer::new_from_bytes(slot),
                     Item {
                         token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_DESEQUIP_ID),
@@ -54,7 +57,7 @@ fn customize_only_desequip() {
                 );
 
                 sc.set_cid_of(
-                    &PenguinAttributes::<DebugApi>::empty(),
+                    &EquippableNftAttributes::<DebugApi>::empty(),
                     ManagedBuffer::new_from_bytes(b"empty"),
                 );
             },
@@ -99,6 +102,6 @@ fn customize_only_desequip() {
         PENGUIN_TOKEN_ID,
         1,
         &rust_biguint!(1),
-        Option::Some(&PenguinAttributes::<DebugApi>::empty()),
+        Option::Some(&EquippableNftAttributes::<DebugApi>::empty()),
     );
 }

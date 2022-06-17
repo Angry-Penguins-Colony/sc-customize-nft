@@ -1,4 +1,4 @@
-use customize_nft::structs::{item::Item, penguin_attributes::PenguinAttributes};
+use customize_nft::structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item};
 use elrond_wasm::{
     elrond_codec::TopDecode,
     types::{ManagedBuffer, TokenIdentifier},
@@ -12,7 +12,7 @@ fn decode_penguin() {
     let input_data = b"Hat:Pirate Hat (HAT-a2b4e5-01)";
     let input_buffer = ManagedBuffer::<DebugApi>::new_from_bytes(input_data);
 
-    let expected_output = PenguinAttributes::new(&[(
+    let expected_output = EquippableNftAttributes::new(&[(
         &ManagedBuffer::new_from_bytes(b"hat"),
         Item::<DebugApi> {
             token: TokenIdentifier::from_esdt_bytes(b"HAT-a2b4e5"),
@@ -21,7 +21,7 @@ fn decode_penguin() {
         },
     )]);
 
-    let actual_output = PenguinAttributes::top_decode(input_buffer).unwrap();
+    let actual_output = EquippableNftAttributes::top_decode(input_buffer).unwrap();
 
     assert_eq!(expected_output, actual_output);
 }
@@ -31,7 +31,7 @@ fn decode_penguin_empty() {
     DebugApi::dummy();
 
     let attributes_buffer = ManagedBuffer::<DebugApi>::new_from_bytes(b"");
-    let actual_output = PenguinAttributes::<DebugApi>::top_decode(attributes_buffer).unwrap();
+    let actual_output = EquippableNftAttributes::<DebugApi>::top_decode(attributes_buffer).unwrap();
 
-    assert_eq!(PenguinAttributes::empty(), actual_output);
+    assert_eq!(EquippableNftAttributes::empty(), actual_output);
 }

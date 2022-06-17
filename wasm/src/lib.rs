@@ -10,8 +10,9 @@ elrond_wasm_node::wasm_endpoints! {
         customize
         fill
         getItemType
+        hasSlot
         registerItem
-        set_thumbnail_cid
+        setCidOf
     )
 }
 

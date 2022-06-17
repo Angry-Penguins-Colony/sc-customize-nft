@@ -1,8 +1,8 @@
 use std::u8;
 
+use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
 use customize_nft::structs::item::Item;
 use customize_nft::structs::item_attributes::ItemAttributes;
-use customize_nft::structs::penguin_attributes::PenguinAttributes;
 use customize_nft::*;
 use elrond_wasm::contract_base::ContractBase;
 use elrond_wasm::types::{
@@ -134,7 +134,7 @@ where
             PENGUIN_TOKEN_ID,
             penguin_nonce,
             &rust_biguint!(1),
-            &PenguinAttributes::<DebugApi>::empty(),
+            &EquippableNftAttributes::<DebugApi>::empty(),
         );
     }
 
@@ -156,7 +156,7 @@ where
             &attributes,
         );
 
-        let attributes = PenguinAttributes::new(&[(
+        let attributes = EquippableNftAttributes::new(&[(
             &ManagedBuffer::new_from_bytes(slot),
             Item {
                 token: TokenIdentifier::<DebugApi>::from_esdt_bytes(item_identifier),

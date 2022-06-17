@@ -96,7 +96,7 @@ fn customize_only_desequip() {
         "Equippable NFT should be received"
     );
 
-    // is pinguin empty
+    // is equippable empty
     setup.blockchain_wrapper.check_nft_balance(
         &setup.first_user_address,
         EQUIPPABLE_TOKEN_ID,

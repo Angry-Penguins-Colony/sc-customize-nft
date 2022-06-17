@@ -1,3 +1,4 @@
+use customize_nft::constants::ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM;
 use customize_nft::libs::storage::StorageModule;
 use customize_nft::structs::item_attributes::ItemAttributes;
 use customize_nft::*;
@@ -154,7 +155,7 @@ fn register_equippable_as_item_should_not_work() {
                 let _ = sc.register_item(ManagedBuffer::new_from_bytes(slot), managed_items_ids);
             },
         )
-        .assert_error(4, "You cannot register a penguin as an item.");
+        .assert_error(4, ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM);
 }
 
 #[test]

@@ -1,4 +1,7 @@
-use customize_nft::constants::{ERR_FIRST_PAYMENT_IS_EQUIPPABLE, ERR_MORE_THAN_ONE_ITEM_RECEIVED};
+use customize_nft::constants::{
+    ERR_FIRST_PAYMENT_IS_EQUIPPABLE, ERR_MORE_THAN_ONE_ITEM_RECEIVED,
+    ERR_NEED_ONE_ITEM_OR_DESEQUIP_SLOT,
+};
 use customize_nft::libs::storage::StorageModule;
 use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
 use customize_nft::structs::item::Item;
@@ -53,7 +56,7 @@ fn test_equip() {
         })
         .assert_ok();
 
-    // add empty pingouin to the USER
+    // add empty equippable to the USER
     setup.blockchain_wrapper.set_nft_balance(
         &setup.first_user_address,
         EQUIPPABLE_TOKEN_ID,
@@ -312,10 +315,7 @@ fn customize_nft_without_items() {
     )]);
 
     let (_, tx_result) = setup.equip(esdt_transfers);
-    tx_result.assert_error(
-        4,
-        "You must either provide at least one penguin and one item OR provide a slot to desequip.",
-    );
+    tx_result.assert_error(4, ERR_NEED_ONE_ITEM_OR_DESEQUIP_SLOT);
 }
 
 #[test]
@@ -411,7 +411,7 @@ fn test_equip_while_sending_two_as_value_of_sft() {
     DebugApi::dummy();
     setup.register_item(slot, ITEM_TO_EQUIP_ID, &ItemAttributes::random());
 
-    // add empty pingouin to the USER
+    // add empty equippable to the USER
     setup.blockchain_wrapper.set_nft_balance(
         &setup.first_user_address,
         EQUIPPABLE_TOKEN_ID,

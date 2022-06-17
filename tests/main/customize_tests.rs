@@ -1,4 +1,5 @@
 use customize_nft::{
+    constants::ERR_NEED_ONE_ITEM_OR_DESEQUIP_SLOT,
     libs::storage::StorageModule,
     structs::{
         equippable_nft_attributes::EquippableNftAttributes, item::Item,
@@ -181,7 +182,5 @@ fn customize_nothing_to_desequip_and_equip() {
     );
 
     // 3. ASSERT
-    tx_result.assert_user_error(
-        "You must either provide at least one penguin and one item OR provide a slot to desequip.",
-    );
+    tx_result.assert_user_error(ERR_NEED_ONE_ITEM_OR_DESEQUIP_SLOT);
 }

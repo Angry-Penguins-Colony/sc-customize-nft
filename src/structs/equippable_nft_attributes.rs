@@ -22,8 +22,6 @@ pub struct EquippableNftAttributes<M: ManagedTypeApi> {
 
 impl<M: ManagedTypeApi> TopDecode for EquippableNftAttributes<M> {
     fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
-        let unequipped_buffer = ManagedBuffer::<M>::new_from_bytes(b"unequipped");
-
         let mut equippable_attributes = EquippableNftAttributes::empty();
 
         let buffer = <ManagedBuffer<M> as TopDecode>::top_decode(input).unwrap();
@@ -35,13 +33,9 @@ impl<M: ManagedTypeApi> TopDecode for EquippableNftAttributes<M> {
             let slot = parts.get(0).deref().clone();
             let item_buffer = parts.get(1);
 
-            let item = if item_buffer.deref() == &unequipped_buffer {
-                None
-            } else {
-                Some(Item::top_decode(item_buffer.deref()).unwrap())
-            };
+            let item = Some(Item::top_decode(item_buffer.deref()).unwrap());
 
-            let _ = equippable_attributes.set_item(&slot, item);
+            equippable_attributes.set_item(&slot, item);
         }
 
         return Result::Ok(equippable_attributes);

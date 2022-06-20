@@ -13,18 +13,7 @@ pub mod utils;
 use libs::*;
 use structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item};
 
-use crate::{
-    constants::{
-        EQUIPPABLE_NAME_FORMAT_NUMBER, ERR_BURN_ROLE_NOT_SET_FOR_EQUIPPABLE,
-        ERR_CANNOT_EQUIP_EQUIPPABLE, ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM,
-        ERR_CANNOT_UNEQUIP_EMPTY_SLOT, ERR_CREATE_ROLE_NOT_SET_FOR_EQUIPPABLE,
-        ERR_FIRST_PAYMENT_IS_EQUIPPABLE, ERR_INIT_MISSING_NUMBER_FORMAT,
-        ERR_ITEM_TO_UNEQUIP_HAS_NO_SLOT, ERR_MORE_THAN_ONE_EQUIPPABLE_RECEIVED,
-        ERR_MORE_THAN_ONE_ITEM_RECEIVED, ERR_NEED_EQUIPPABLE, ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
-        ERR_NOT_OWNER,
-    },
-    utils::managed_buffer_utils::ManagedBufferUtils,
-};
+use crate::{constants::*, utils::managed_buffer_utils::ManagedBufferUtils};
 
 #[elrond_wasm::derive::contract]
 pub trait Equip:

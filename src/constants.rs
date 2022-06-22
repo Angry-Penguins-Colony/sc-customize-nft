@@ -1,4 +1,3 @@
-pub const ERR_NO_CID_URL: &str = "There is no CID associated to the attributes.";
 pub const ERR_INIT_MISSING_NUMBER_FORMAT: &str = "The name format require {number} somewhere.";
 pub const ERR_NOT_OWNER: &str = "Only the owner can call this method.";
 pub const ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM: &str =

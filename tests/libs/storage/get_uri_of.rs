@@ -1,5 +1,4 @@
 use crate::testing_utils;
-use customize_nft::constants::ERR_NO_CID_URL;
 use customize_nft::libs::storage::StorageModule;
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm::types::TokenIdentifier;
@@ -29,7 +28,9 @@ fn build_url_with_no_associated_cid() {
 
             let _ = sc.get_uri_of(&equippable_attributes);
         })
-        .assert_user_error(ERR_NO_CID_URL);
+        .assert_user_error(
+            "There is no CID associated to the attributes Hat:item name (ITEM-a1a1a1-01).",
+        );
 }
 
 #[test]

@@ -5,7 +5,10 @@
 
 use core::ops::Deref;
 
-use elrond_wasm::elrond_codec::{TopDecodeInput, TopEncode};
+use elrond_wasm::{
+    elrond_codec::{TopDecodeInput, TopEncode},
+    formatter::SCDisplay,
+};
 
 use crate::{
     sc_panic_self,
@@ -21,6 +24,15 @@ elrond_wasm::derive_imports!();
 pub struct EquippableNftAttributes<M: ManagedTypeApi> {
     pub slots: ManagedVec<M, ManagedBuffer<M>>,
     items: ManagedVec<M, Item<M>>,
+}
+
+impl<M: ManagedTypeApi> SCDisplay for EquippableNftAttributes<M> {
+    fn fmt<F: elrond_wasm::formatter::FormatByteReceiver>(&self, f: &mut F) {
+        let mut output = ManagedBuffer::<F::Api>::new_from_bytes(b"");
+
+        let _ = self.top_encode(&mut output);
+        f.append_managed_buffer(&output);
+    }
 }
 
 impl<M: ManagedTypeApi> TopDecode for EquippableNftAttributes<M> {

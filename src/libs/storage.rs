@@ -1,5 +1,5 @@
 use crate::{
-    constants::ERR_NO_CID_URL, structs::equippable_nft_attributes::EquippableNftAttributes,
+    structs::equippable_nft_attributes::EquippableNftAttributes,
     utils::managed_buffer_utils::ManagedBufferUtils,
 };
 
@@ -45,7 +45,11 @@ pub trait StorageModule {
     ) -> ManagedBuffer<Self::Api> {
         let cid = self.__cid_of(attributes);
 
-        require!(cid.is_empty() == false, ERR_NO_CID_URL);
+        require!(
+            cid.is_empty() == false,
+            "There is no CID associated to the attributes {}.",
+            attributes
+        );
 
         let mut url = self.ipfs_gateway().get();
         url.append(&cid.get());

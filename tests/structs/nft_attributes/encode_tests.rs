@@ -1,8 +1,5 @@
 use customize_nft::structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item};
-use elrond_wasm::{
-    elrond_codec::TopEncode,
-    types::{ManagedBuffer, TokenIdentifier},
-};
+use elrond_wasm::{elrond_codec::TopEncode, types::ManagedBuffer};
 use elrond_wasm_debug::{managed_buffer, DebugApi};
 
 #[test]
@@ -12,13 +9,11 @@ fn should_top_encode() {
     let equippable_nft_attributes = EquippableNftAttributes::new(&[(
         &ManagedBuffer::new_from_bytes(b"hat"),
         Item::<DebugApi> {
-            token: TokenIdentifier::from_esdt_bytes(b"HAT-a2b4e5"),
-            nonce: 1,
             name: managed_buffer!(b"Pirate Hat"),
         },
     )]);
 
-    let expected = b"Hat:Pirate Hat (HAT-a2b4e5-01)";
+    let expected = b"Hat:Pirate Hat";
 
     assert_equippable_encode_eq(equippable_nft_attributes, expected);
 }
@@ -30,13 +25,11 @@ fn should_top_encode_with_nonce_equals_0a() {
     let equippable_nft_attributes = EquippableNftAttributes::new(&[(
         &ManagedBuffer::new_from_bytes(b"hat"),
         Item::<DebugApi> {
-            token: TokenIdentifier::from_esdt_bytes(b"HAT-a2b4e5"),
-            nonce: 10,
             name: managed_buffer!(b"Pirate Hat"),
         },
     )]);
 
-    let expected = b"Hat:Pirate Hat (HAT-a2b4e5-0a)";
+    let expected = b"Hat:Pirate Hat";
 
     assert_equippable_encode_eq(equippable_nft_attributes, expected);
 }

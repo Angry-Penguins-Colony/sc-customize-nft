@@ -1,5 +1,5 @@
 use crate::{
-    structs::equippable_nft_attributes::EquippableNftAttributes,
+    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item},
     utils::managed_buffer_utils::ManagedBufferUtils,
 };
 
@@ -16,6 +16,12 @@ pub trait StorageModule {
 
     #[storage_mapper("ipfs_gateway")]
     fn ipfs_gateway(&self) -> SingleValueMapper<ManagedBuffer<Self::Api>>;
+
+    #[storage_mapper("items_token")]
+    fn token_of(
+        &self,
+        item: &Item<Self::Api>,
+    ) -> SingleValueMapper<(TokenIdentifier<Self::Api>, u64)>;
 
     #[storage_mapper("slot_of_items")]
     fn __slot_of(&self, token: &TokenIdentifier) -> SingleValueMapper<ManagedBuffer>;

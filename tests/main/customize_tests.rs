@@ -9,7 +9,7 @@ use customize_nft::{
 };
 use elrond_wasm::{
     contract_base::ContractBase,
-    types::{ManagedBuffer, MultiValueEncoded, TokenIdentifier},
+    types::{ManagedBuffer, MultiValueEncoded},
 };
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
@@ -30,6 +30,7 @@ fn customize_complete_flow() {
 
     const ITEM_TO_EQUIP_SLOT: &[u8] = b"hat";
     const ITEM_TO_EQUIP_ID: &[u8] = b"HAT-b2b2b2";
+    const ITEM_TO_EQUIP_NONCE: u64 = 42;
 
     DebugApi::dummy();
 
@@ -43,9 +44,10 @@ fn customize_complete_flow() {
     );
 
     // Register item to equip
-    let item_to_equip_nonce = setup.register_item(
+    setup.register_and_fill_item(
         ITEM_TO_EQUIP_SLOT,
         ITEM_TO_EQUIP_ID,
+        ITEM_TO_EQUIP_NONCE,
         &ItemAttributes::random(),
     );
 
@@ -53,7 +55,7 @@ fn customize_complete_flow() {
     setup.blockchain_wrapper.set_nft_balance(
         &setup.first_user_address,
         ITEM_TO_EQUIP_ID,
-        item_to_equip_nonce,
+        ITEM_TO_EQUIP_NONCE,
         &rust_biguint!(1),
         &ItemAttributes::<DebugApi>::random(),
     );
@@ -68,8 +70,6 @@ fn customize_complete_flow() {
                 let attributes_before_custom = EquippableNftAttributes::new(&[(
                     &ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT),
                     Item {
-                        token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_UNEQUIP_ID),
-                        nonce: ITEM_TO_UNEQUIP_NONCE,
                         name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_ID),
                     },
                 )]);
@@ -77,8 +77,6 @@ fn customize_complete_flow() {
                 let attributes_after_custom = EquippableNftAttributes::new(&[(
                     &ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT),
                     Item {
-                        token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_EQUIP_ID),
-                        nonce: item_to_equip_nonce,
                         name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID),
                     },
                 )]);
@@ -98,7 +96,7 @@ fn customize_complete_flow() {
 
     let transfers = testing_utils::create_esdt_transfers(&[
         (EQUIPPABLE_TOKEN_ID, EQUIPPABLE_TOKEN_NONCE),
-        (ITEM_TO_EQUIP_ID, item_to_equip_nonce),
+        (ITEM_TO_EQUIP_ID, ITEM_TO_EQUIP_NONCE),
     ]);
 
     // 2. ACT
@@ -109,13 +107,13 @@ fn customize_complete_flow() {
     assert_eq!(sc_result.unwrap(), 1u64);
 
     // Equippable NFT sent burned
-    setup.assert_is_burn(EQUIPPABLE_TOKEN_ID, item_to_equip_nonce);
+    setup.assert_is_burn(EQUIPPABLE_TOKEN_ID, ITEM_TO_EQUIP_NONCE);
 
     assert_eq!(
         setup.blockchain_wrapper.get_esdt_balance(
             &setup.cf_wrapper.address_ref(),
             ITEM_TO_EQUIP_ID,
-            item_to_equip_nonce
+            ITEM_TO_EQUIP_NONCE
         ),
         rust_biguint!(3),
         "The user should have send the item to equip on the smart contract + the 2 items from register_item() function."
@@ -149,8 +147,6 @@ fn customize_complete_flow() {
         Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[(
             &managed_buffer!(ITEM_TO_EQUIP_SLOT),
             Item {
-                token: TokenIdentifier::from_esdt_bytes(ITEM_TO_EQUIP_ID),
-                nonce: item_to_equip_nonce,
                 name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework force us to do this
             },
         )])),

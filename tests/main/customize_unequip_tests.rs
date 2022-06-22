@@ -6,7 +6,7 @@ use customize_nft::{
         item_attributes::ItemAttributes,
     },
 };
-use elrond_wasm::types::{ManagedBuffer, TokenIdentifier};
+use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
 use crate::testing_utils;
@@ -21,14 +21,15 @@ fn customize_only_unequip() {
     let slot = b"Background";
     const ITEM_TO_UNEQUIP_ID: &[u8] = b"BG-a1a1a1";
     const ITEM_TO_UNEQUIP_NAME: &[u8] = b"Some Item";
-    const NONCE: u64 = 30;
+    const ITEM_TO_UNEQUIP_NONCE: u64 = 42;
+    const EQUIPPABLE_NONCE: u64 = 30;
 
     DebugApi::dummy();
 
     setup.create_equippable_with_registered_item(
-        NONCE,
+        EQUIPPABLE_NONCE,
         ITEM_TO_UNEQUIP_ID,
-        NONCE,
+        ITEM_TO_UNEQUIP_NONCE,
         slot,
         ItemAttributes::random(),
     );
@@ -46,8 +47,6 @@ fn customize_only_unequip() {
                 let attributes_before_custom = EquippableNftAttributes::new(&[(
                     &ManagedBuffer::new_from_bytes(slot),
                     Item {
-                        token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_UNEQUIP_ID),
-                        nonce: NONCE,
                         name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
                     },
                 )]);
@@ -65,7 +64,8 @@ fn customize_only_unequip() {
         )
         .assert_ok();
 
-    let transfers = testing_utils::create_esdt_transfers(&[(EQUIPPABLE_TOKEN_ID, NONCE)]);
+    let transfers =
+        testing_utils::create_esdt_transfers(&[(EQUIPPABLE_TOKEN_ID, EQUIPPABLE_NONCE)]);
 
     // 2. ACT
     let (sc_result, tx_result) = setup.customize(transfers, &[slot]);
@@ -75,13 +75,13 @@ fn customize_only_unequip() {
     assert_eq!(sc_result.unwrap(), 1u64);
 
     // equippable & items sent burned
-    setup.assert_is_burn(EQUIPPABLE_TOKEN_ID, NONCE);
+    setup.assert_is_burn(EQUIPPABLE_TOKEN_ID, EQUIPPABLE_NONCE);
 
     assert_eq!(
         setup.blockchain_wrapper.get_esdt_balance(
             &setup.first_user_address,
             ITEM_TO_UNEQUIP_ID,
-            NONCE
+            ITEM_TO_UNEQUIP_NONCE
         ),
         rust_biguint!(1),
         "Item unequipped should be received"
@@ -118,14 +118,15 @@ fn unequip_should_ignore_case_of_slot() {
     const SLOT_UPPERCASE: &[u8] = b"BACKGROUND";
     const ITEM_TO_UNEQUIP_ID: &[u8] = b"BG-a1a1a1";
     const ITEM_TO_UNEQUIP_NAME: &[u8] = b"Some Item";
-    const NONCE: u64 = 30;
+    const ITEM_TO_UNEQUIP_NONCE: u64 = 42;
+    const EQUIPPABLE_NONCE: u64 = 30;
 
     DebugApi::dummy();
 
     setup.create_equippable_with_registered_item(
-        NONCE,
+        EQUIPPABLE_NONCE,
         ITEM_TO_UNEQUIP_ID,
-        NONCE,
+        ITEM_TO_UNEQUIP_NONCE,
         SLOT_LOWERCASE,
         ItemAttributes::random(),
     );
@@ -143,8 +144,6 @@ fn unequip_should_ignore_case_of_slot() {
                 let attributes_before_custom = EquippableNftAttributes::new(&[(
                     &ManagedBuffer::new_from_bytes(SLOT_LOWERCASE),
                     Item {
-                        token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_UNEQUIP_ID),
-                        nonce: NONCE,
                         name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
                     },
                 )]);
@@ -162,7 +161,8 @@ fn unequip_should_ignore_case_of_slot() {
         )
         .assert_ok();
 
-    let transfers = testing_utils::create_esdt_transfers(&[(EQUIPPABLE_TOKEN_ID, NONCE)]);
+    let transfers =
+        testing_utils::create_esdt_transfers(&[(EQUIPPABLE_TOKEN_ID, EQUIPPABLE_NONCE)]);
 
     // 2. ACT
     let (sc_result, tx_result) = setup.customize(transfers, &[SLOT_UPPERCASE]);
@@ -172,13 +172,13 @@ fn unequip_should_ignore_case_of_slot() {
     assert_eq!(sc_result.unwrap(), 1u64);
 
     // equippable & items sent burned
-    setup.assert_is_burn(EQUIPPABLE_TOKEN_ID, NONCE);
+    setup.assert_is_burn(EQUIPPABLE_TOKEN_ID, EQUIPPABLE_NONCE);
 
     assert_eq!(
         setup.blockchain_wrapper.get_esdt_balance(
             &setup.first_user_address,
             ITEM_TO_UNEQUIP_ID,
-            NONCE
+            ITEM_TO_UNEQUIP_NONCE
         ),
         rust_biguint!(1),
         "Item unequipped should be received"
@@ -213,14 +213,15 @@ fn panic_when_unequip_twice_the_same_slot() {
     let slot = b"Background";
     const ITEM_TO_UNEQUIP_ID: &[u8] = b"BG-a1a1a1";
     const ITEM_TO_UNEQUIP_NAME: &[u8] = b"Some Item";
-    const NONCE: u64 = 30;
+    const ITEM_TO_UNEQUIP_NONCE: u64 = 42;
+    const EQUIPPABLE_NONCE: u64 = 30;
 
     DebugApi::dummy();
 
     setup.create_equippable_with_registered_item(
-        NONCE,
+        EQUIPPABLE_NONCE,
         ITEM_TO_UNEQUIP_ID,
-        NONCE,
+        ITEM_TO_UNEQUIP_NONCE,
         slot,
         ItemAttributes::random(),
     );
@@ -236,8 +237,6 @@ fn panic_when_unequip_twice_the_same_slot() {
                 let attributes_before_custom = EquippableNftAttributes::new(&[(
                     &ManagedBuffer::new_from_bytes(slot),
                     Item {
-                        token: TokenIdentifier::<DebugApi>::from_esdt_bytes(ITEM_TO_UNEQUIP_ID),
-                        nonce: NONCE,
                         name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
                     },
                 )]);
@@ -255,7 +254,8 @@ fn panic_when_unequip_twice_the_same_slot() {
         )
         .assert_ok();
 
-    let transfers = testing_utils::create_esdt_transfers(&[(EQUIPPABLE_TOKEN_ID, NONCE)]);
+    let transfers =
+        testing_utils::create_esdt_transfers(&[(EQUIPPABLE_TOKEN_ID, EQUIPPABLE_NONCE)]);
 
     // 2. ACT
     let (_, tx_result) = setup.customize(transfers.clone(), &[slot, slot]);

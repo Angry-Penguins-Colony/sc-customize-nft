@@ -10,10 +10,11 @@ const HAT_TOKEN_ID: &[u8] = testing_utils::HAT_TOKEN_ID;
 fn should_returns_some() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let slot = b"hat";
+    const SLOT: &[u8] = b"hat";
+    const ITEM_NONCE: u64 = 1u64;
 
     DebugApi::dummy();
-    setup.register_item(slot, HAT_TOKEN_ID, &ItemAttributes::random());
+    setup.register_and_fill_item(SLOT, HAT_TOKEN_ID, ITEM_NONCE, &ItemAttributes::random());
 
     setup
         .blockchain_wrapper
@@ -21,7 +22,7 @@ fn should_returns_some() {
             let hat_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID);
 
             let actual_slot = sc.get_slot_of(&hat_token);
-            assert_eq!(actual_slot, managed_buffer!(slot));
+            assert_eq!(actual_slot, managed_buffer!(SLOT));
         })
         .assert_ok();
 }

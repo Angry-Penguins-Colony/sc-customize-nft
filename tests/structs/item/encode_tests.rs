@@ -1,33 +1,16 @@
 use customize_nft::structs::item::Item;
-use elrond_wasm::{elrond_codec::TopEncode, types::TokenIdentifier};
+use elrond_wasm::elrond_codec::TopEncode;
 use elrond_wasm_debug::{managed_buffer, DebugApi};
 
 #[test]
-fn encode_item_with_nonce_1() {
+fn encode_item() {
     DebugApi::dummy();
 
     let item = Item::<DebugApi> {
-        token: TokenIdentifier::from_esdt_bytes(b"HAT-a2b4e5"),
-        nonce: 1,
         name: managed_buffer!(b"Pirate Hat"),
     };
 
-    let expected = b"Pirate Hat (HAT-a2b4e5-01)";
-
-    assert_item_encode_eq(item, expected);
-}
-
-#[test]
-fn encode_item_with_nonce_10() {
-    DebugApi::dummy();
-
-    let item = Item::<DebugApi> {
-        token: TokenIdentifier::from_esdt_bytes(b"HAT-a2b4e5"),
-        nonce: 10,
-        name: managed_buffer!(b"Pirate Hat"),
-    };
-
-    let expected = b"Pirate Hat (HAT-a2b4e5-0a)";
+    let expected = b"Pirate Hat";
 
     assert_item_encode_eq(item, expected);
 }

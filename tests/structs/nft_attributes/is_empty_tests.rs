@@ -1,5 +1,5 @@
 use customize_nft::structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item};
-use elrond_wasm::types::{ManagedBuffer, TokenIdentifier};
+use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm_debug::DebugApi;
 
 #[test]
@@ -10,8 +10,6 @@ fn is_empty_while_not_empty() {
     let equippable_nft_attributes = EquippableNftAttributes::<DebugApi>::new(&[(
         slot,
         Item {
-            token: TokenIdentifier::from_esdt_bytes(b"ITEM-a"),
-            nonce: 0,
             name: ManagedBuffer::new_from_bytes(b"item name"),
         },
     )]);

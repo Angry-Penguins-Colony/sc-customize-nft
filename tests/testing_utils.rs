@@ -20,8 +20,6 @@ pub const EQUIPPABLE_TOKEN_ID: &[u8] = b"PENG-ae5a";
 
 pub const HAT_TOKEN_ID: &[u8] = b"HAT-a";
 
-pub const INIT_NONCE: u64 = 65535u64;
-
 pub struct EquipSetup<CrowdfundingObjBuilder>
 where
     CrowdfundingObjBuilder: 'static + Copy + Fn() -> customize_nft::ContractObj<DebugApi>,
@@ -38,24 +36,6 @@ impl<CrowdfundingObjBuilder> EquipSetup<CrowdfundingObjBuilder>
 where
     CrowdfundingObjBuilder: 'static + Copy + Fn() -> customize_nft::ContractObj<DebugApi>,
 {
-    pub fn register_item(
-        &mut self,
-        slot: &[u8],
-        item_id: &[u8],
-        attributes: &ItemAttributes<DebugApi>,
-    ) -> u64 {
-        return self.register_item_all_properties(
-            slot,
-            item_id,
-            attributes,
-            0u64,
-            Option::None,
-            Option::None,
-            Option::None,
-            &[],
-        );
-    }
-
     pub fn assert_uris(&mut self, token: &[u8], nonce: u64, expected_uris: &[&[u8]]) {
         self.blockchain_wrapper
             .execute_query(&self.cf_wrapper, |sc| {
@@ -83,30 +63,38 @@ where
             .assert_ok();
     }
 
-    pub fn register_item_all_properties(
+    pub fn register_and_fill_item(
         &mut self,
         slot: &[u8],
         item_id: &[u8],
+        item_nonce: u64,
+        attributes: &ItemAttributes<DebugApi>,
+    ) {
+        self.register_and_fill_items_all_properties(
+            slot,
+            item_id,
+            item_nonce,
+            attributes,
+            0u64,
+            Option::None,
+            Option::None,
+            Option::None,
+            &[],
+        );
+    }
+
+    pub fn register_and_fill_items_all_properties(
+        &mut self,
+        slot: &[u8],
+        item_id: &[u8],
+        item_nonce: u64,
         attributes: &ItemAttributes<DebugApi>,
         royalties: u64,
         creator: Option<&Address>,
         name: Option<&[u8]>,
         hash: Option<&[u8]>,
         uri: &[Vec<u8>],
-    ) -> u64 {
-        self.blockchain_wrapper.set_nft_balance_all_properties(
-            &self.cf_wrapper.address_ref(),
-            &item_id,
-            INIT_NONCE,
-            &rust_biguint!(2u64),
-            &attributes,
-            royalties,
-            creator,
-            name,
-            hash,
-            uri,
-        );
-
+    ) {
         self.set_all_permissions_on_token(item_id);
 
         self.blockchain_wrapper
@@ -124,13 +112,42 @@ where
             )
             .assert_ok();
 
+        self.blockchain_wrapper.set_nft_balance_all_properties(
+            &self.owner_address,
+            &item_id,
+            item_nonce,
+            &rust_biguint!(2u64),
+            &attributes,
+            royalties,
+            creator,
+            name,
+            hash,
+            uri,
+        );
+
+        self.blockchain_wrapper
+            .execute_esdt_transfer(
+                &self.owner_address,
+                &self.cf_wrapper,
+                &item_id,
+                item_nonce,
+                &rust_biguint!(2),
+                |sc| {
+                    let payment = sc.call_value().egld_or_single_esdt();
+                    sc.fill(
+                        payment.token_identifier,
+                        payment.token_nonce,
+                        payment.amount,
+                    );
+                },
+            )
+            .assert_ok();
+
         println!(
             "Item {:?} created and register with nonce {:x}",
             std::str::from_utf8(item_id).unwrap(),
-            INIT_NONCE
+            item_nonce
         );
-
-        return INIT_NONCE;
     }
 
     pub fn add_random_item_to_user(&mut self, token_id: &[u8], nonce: u64, quantity: u64) {
@@ -176,22 +193,14 @@ where
         slot: &[u8],
         attributes: ItemAttributes<DebugApi>,
     ) {
-        self.register_item(slot, item_identifier, &attributes);
+        self.register_and_fill_item(slot, item_identifier, item_nonce, &attributes);
 
-        self.blockchain_wrapper.set_nft_balance(
-            &self.cf_wrapper.address_ref(),
-            &item_identifier,
-            item_nonce,
-            &rust_biguint!(2u64),
-            &attributes,
-        );
-
-        let attributes = EquippableNftAttributes::new(&[(
+        let attributes = EquippableNftAttributes::<DebugApi>::new(&[(
             &ManagedBuffer::new_from_bytes(slot),
             Item {
-                token: TokenIdentifier::<DebugApi>::from_esdt_bytes(item_identifier),
-                nonce: item_nonce,
-                name: ManagedBuffer::new_from_bytes(b"item name"),
+                name: ManagedBuffer::new_from_bytes(
+                    item_identifier, // sadly, bug in the mock force us to use the item identifier as its name
+                ),
             },
         )]);
 

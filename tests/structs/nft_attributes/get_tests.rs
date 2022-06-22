@@ -1,5 +1,5 @@
 use customize_nft::structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item};
-use elrond_wasm::types::{ManagedBuffer, TokenIdentifier};
+use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm_debug::DebugApi;
 
 #[test]
@@ -20,8 +20,6 @@ fn get_item() {
     let slot = ManagedBuffer::<DebugApi>::new_from_bytes(b"hat");
     let item = Item {
         name: ManagedBuffer::<DebugApi>::new_from_bytes(b"hat"),
-        nonce: 1u64,
-        token: TokenIdentifier::<DebugApi>::from_esdt_bytes(b"token"),
     };
 
     let attributes = EquippableNftAttributes::<DebugApi>::new(&[(&slot, item.clone())]);

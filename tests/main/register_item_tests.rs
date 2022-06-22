@@ -12,12 +12,18 @@ use crate::testing_utils;
 fn test_register_item() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    const TOKEN_ID: &[u8] = b"ITEM-a1a1a1";
     let slot = b"hat";
+    const TOKEN_ID: &[u8] = b"ITEM-a1a1a1";
+    const TOKEN_NONCE: u64 = 42;
 
     DebugApi::dummy();
 
-    setup.register_item(slot, TOKEN_ID, &ItemAttributes::<DebugApi>::random());
+    setup.register_and_fill_item(
+        slot,
+        TOKEN_ID,
+        TOKEN_NONCE,
+        &ItemAttributes::<DebugApi>::random(),
+    );
 
     setup
         .blockchain_wrapper
@@ -37,13 +43,25 @@ fn register_another_item_on_slot() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     const FIRST_TOKEN_ID: &[u8] = b"a";
+    const FIRST_TOKEN_NONCE: u64 = 42;
     const SECOND_TOKEN_ID: &[u8] = b"A";
+    const SECOND_TOKEN_NONCE: u64 = 43;
 
     let slot = b"slot";
 
     DebugApi::dummy();
-    setup.register_item(slot, FIRST_TOKEN_ID, &ItemAttributes::random());
-    setup.register_item(slot, SECOND_TOKEN_ID, &ItemAttributes::random());
+    setup.register_and_fill_item(
+        slot,
+        FIRST_TOKEN_ID,
+        FIRST_TOKEN_NONCE,
+        &ItemAttributes::random(),
+    );
+    setup.register_and_fill_item(
+        slot,
+        SECOND_TOKEN_ID,
+        SECOND_TOKEN_NONCE,
+        &ItemAttributes::random(),
+    );
 
     setup
         .blockchain_wrapper
@@ -120,10 +138,11 @@ fn change_item_slot() {
     let new_slot = b"hat";
     let old_slot = b"background";
     const ITEM_ID: &[u8] = b"ITEM-a1a1a1";
+    const ITEM_NONCE: u64 = 42;
 
     DebugApi::dummy();
-    setup.register_item(old_slot, ITEM_ID, &ItemAttributes::random());
-    setup.register_item(new_slot, ITEM_ID, &ItemAttributes::random());
+    setup.register_and_fill_item(old_slot, ITEM_ID, ITEM_NONCE, &ItemAttributes::random());
+    setup.register_and_fill_item(new_slot, ITEM_ID, ITEM_NONCE, &ItemAttributes::random());
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -133,52 +152,6 @@ fn change_item_slot() {
             assert_eq!(result, managed_buffer!(new_slot));
         })
         .assert_ok();
-}
-
-#[test]
-fn register_equippable_as_item_should_not_work() {
-    let mut setup = testing_utils::setup(customize_nft::contract_obj);
-
-    let slot = b"hat";
-
-    setup
-        .blockchain_wrapper
-        .execute_tx(
-            &setup.owner_address,
-            &setup.cf_wrapper,
-            &rust_biguint!(0u64),
-            |sc| {
-                let mut managed_items_ids =
-                    MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
-                managed_items_ids.push(managed_token_id!(testing_utils::EQUIPPABLE_TOKEN_ID));
-
-                let _ = sc.register_item(ManagedBuffer::new_from_bytes(slot), managed_items_ids);
-            },
-        )
-        .assert_user_error(ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM);
-}
-
-#[test]
-fn register_while_not_the_owner() {
-    let mut setup = testing_utils::setup(customize_nft::contract_obj);
-
-    let slot = b"hat";
-
-    setup
-        .blockchain_wrapper
-        .execute_tx(
-            &setup.first_user_address,
-            &setup.cf_wrapper,
-            &rust_biguint!(0u64),
-            |sc| {
-                let mut managed_items_ids =
-                    MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
-                managed_items_ids.push(managed_token_id!(b"ITEM-a1a1a1"));
-
-                let _ = sc.register_item(ManagedBuffer::new_from_bytes(slot), managed_items_ids);
-            },
-        )
-        .assert_user_error(ERR_NOT_OWNER);
 }
 
 #[test]
@@ -223,4 +196,50 @@ fn register_to_slot_with_different_case() {
             },
         )
         .assert_ok();
+}
+
+#[test]
+fn panic_if_register_equippable() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    let slot = b"hat";
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                let mut managed_items_ids =
+                    MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                managed_items_ids.push(managed_token_id!(testing_utils::EQUIPPABLE_TOKEN_ID));
+
+                let _ = sc.register_item(ManagedBuffer::new_from_bytes(slot), managed_items_ids);
+            },
+        )
+        .assert_user_error(ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM);
+}
+
+#[test]
+fn panic_if_not_the_owner() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    let slot = b"hat";
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.first_user_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                let mut managed_items_ids =
+                    MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                managed_items_ids.push(managed_token_id!(b"ITEM-a1a1a1"));
+
+                let _ = sc.register_item(ManagedBuffer::new_from_bytes(slot), managed_items_ids);
+            },
+        )
+        .assert_user_error(ERR_NOT_OWNER);
 }

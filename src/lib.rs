@@ -107,8 +107,6 @@ pub trait Equip:
             );
 
             let item = Item {
-                token: payment.token_identifier.clone(),
-                nonce: payment.token_nonce,
                 name: self.get_token_name(&payment.token_identifier, payment.token_nonce),
             };
 
@@ -132,7 +130,15 @@ pub trait Equip:
         attributes: &mut EquippableNftAttributes<Self::Api>,
         item: &Item<Self::Api>,
     ) {
-        let item_id = &item.token;
+        let n = item.clone().name;
+
+        require!(
+            self.token_of(&item).is_empty() == false,
+            "Trying to equip '{}' but is not considered as an item", // TODO: extract to constant
+            n
+        );
+
+        let (item_id, _) = self.token_of(&item).get();
 
         require!(
             self.has_slot(&item_id) == true,
@@ -141,7 +147,7 @@ pub trait Equip:
         );
 
         require!(
-            item_id != &self.equippable_token_id().get(),
+            item_id != self.equippable_token_id().get(),
             ERR_CANNOT_EQUIP_EQUIPPABLE
         );
 
@@ -177,8 +183,8 @@ pub trait Equip:
     #[only_owner]
     fn fill(
         &self,
-        #[payment_token] _token: EgldOrEsdtTokenIdentifier<Self::Api>,
-        #[payment_nonce] _nonce: u64,
+        #[payment_token] token: EgldOrEsdtTokenIdentifier<Self::Api>,
+        #[payment_nonce] nonce: u64,
         #[payment_amount] _amount: BigUint,
     ) {
         require!(
@@ -187,6 +193,18 @@ pub trait Equip:
         );
 
         // TODO: require! to only send registered SFT
+
+        let token_id = &token.unwrap_esdt();
+
+        // TODO: extract to Item.fromId()
+        let item_name = self
+            .blockchain()
+            .get_esdt_token_data(&self.blockchain().get_sc_address(), token_id, nonce)
+            .name;
+
+        let item = &Item { name: item_name };
+
+        self.token_of(item).set((token_id.clone(), nonce));
     }
 
     /// Empty the item at the slot provided and sent it to the caller.
@@ -201,8 +219,15 @@ pub trait Equip:
 
         match opt_item {
             Some(item) => {
-                let item_id = item.token;
-                let item_nonce = item.nonce;
+                let n = item.clone().name;
+
+                require!(
+                    self.token_of(&item).is_empty() == false,
+                    "{} token is empty, while it should be filled.",
+                    n
+                );
+
+                let (item_id, item_nonce) = self.token_of(&item).get();
 
                 require!(
                     self.has_slot(&item_id) == true,

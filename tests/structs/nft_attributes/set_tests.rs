@@ -1,5 +1,5 @@
 use customize_nft::structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item};
-use elrond_wasm::types::{ManagedBuffer, TokenIdentifier};
+use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm_debug::DebugApi;
 
 #[test]
@@ -10,23 +10,16 @@ fn set_item_on_empty_slot() {
 
     let mut equippable_nft_attributes = EquippableNftAttributes::<DebugApi>::empty();
 
-    let token = b"ITEM-b";
-    let managed_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(token);
-    let nonce = 1;
-
     equippable_nft_attributes.set_item(
         &slot,
         Option::Some(Item {
-            token: managed_token.clone(),
-            nonce: nonce,
             name: ManagedBuffer::new_from_bytes(b"item name"),
         }),
     );
 
     let item = equippable_nft_attributes.get_item(slot).unwrap();
 
-    assert_eq!(item.token, managed_token);
-    assert_eq!(item.nonce, nonce);
+    assert_eq!(item.name, b"item name");
 }
 
 #[test]
@@ -39,22 +32,14 @@ fn set_item_on_not_empty_slot() {
     let mut equippable_nft_attributes = EquippableNftAttributes::<DebugApi>::new(&[(
         slot,
         Item {
-            token: TokenIdentifier::from_esdt_bytes(b"ITEM-a"),
-            nonce: 0,
             name: ManagedBuffer::new_from_bytes(b"item name"),
         },
     )]);
-
-    let token = b"ITEM-b";
-    let managed_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(token);
-    let nonce = 1;
 
     // expect panic
     equippable_nft_attributes.set_item(
         &slot,
         Option::Some(Item {
-            token: managed_token.clone(),
-            nonce: nonce,
             name: ManagedBuffer::new_from_bytes(b"item name"),
         }),
     );

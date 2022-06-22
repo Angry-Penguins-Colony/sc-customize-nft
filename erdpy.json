@@ -9,7 +9,9 @@
             "pem": "wallets/gh8.pem",
             "gas-limit": 600000000,
             "arguments": [
-                "0x43454C2D316133643631"
+                "0x50454E4755494E532D313038373062",
+                "0x68747470733A2F2F6170632E6D7970696E6174612E636C6F75642F697066732F",
+                "0x50656E6775696E207B6E756D6265727D"
             ],
             "send": true,
             "outfile": "deploy-mainnet.interaction.json"

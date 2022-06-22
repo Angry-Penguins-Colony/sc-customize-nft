@@ -7,7 +7,10 @@ use core::ops::Deref;
 
 use elrond_wasm::elrond_codec::{TopDecodeInput, TopEncode};
 
-use crate::utils::{self, managed_buffer_utils::ManagedBufferUtils};
+use crate::{
+    sc_panic_self,
+    utils::{self, managed_buffer_utils::ManagedBufferUtils},
+};
 
 use super::item::Item;
 
@@ -86,7 +89,10 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
 
     pub fn set_item(&mut self, slot: &ManagedBuffer<M>, item: Option<Item<M>>) {
         if self.is_slot_empty(slot) == false {
-            panic!("The slot is not empty. Please free it, before setting an item.");
+            sc_panic_self!(
+                M,
+                "The slot is not empty. Please free it, before setting an item."
+            );
         }
 
         return self.__set_item_no_check(slot, item);
@@ -155,7 +161,10 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
                     let result = self.items.set(index, &item);
 
                     if result.is_err() {
-                        panic!("Failed to set item: {:?}", result.err());
+                        sc_panic_self!(
+                            M,
+                            "Failed to set item, InvalidSliceError exception happened."
+                        );
                     }
                 } else {
                     self.items.remove(index);

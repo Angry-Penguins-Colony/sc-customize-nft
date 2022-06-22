@@ -3,6 +3,7 @@ use elrond_wasm::{
     types::{ManagedBuffer, ManagedVec},
 };
 
+use crate::sc_panic_self;
 pub trait UtilsU64 {
     fn to_ascii<M: ManagedTypeApi>(&self) -> ManagedBuffer<M>;
     fn to_hex<M: ManagedTypeApi>(&self) -> ManagedBuffer<M>;
@@ -34,7 +35,7 @@ impl UtilsU64 for u64 {
                 13 => b'd',
                 14 => b'e',
                 15 => b'f',
-                _ => panic!("invalid digit"),
+                _ => sc_panic_self!(M, "invalid digit"),
             };
 
             reversed_digits.push(digit_char);
@@ -75,7 +76,7 @@ impl UtilsU64 for u64 {
                 7 => b'7',
                 8 => b'8',
                 9 => b'9',
-                _ => panic!("invalid digit"),
+                _ => sc_panic_self!(M, "invalid digit"),
             };
 
             reversed_digits.push(digit_char);

@@ -3,6 +3,8 @@ use elrond_wasm::{
     types::{ManagedBuffer, ManagedVec},
 };
 
+use crate::sc_panic_self;
+
 pub trait ManagedBufferUtils<M: ManagedTypeApi> {
     fn load_512_bytes(&self) -> [u8; 512];
 
@@ -27,7 +29,7 @@ pub trait ManagedBufferUtils<M: ManagedTypeApi> {
 impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
     fn load_512_bytes(&self) -> [u8; 512] {
         if (self.len() as usize) > 512 {
-            panic!("ManagedBuffer is too big");
+            sc_panic_self!(M, "ManagedBuffer is too big");
         }
 
         let mut bytes: [u8; 512] = [0; 512];
@@ -75,7 +77,7 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
             }
         }
 
-        panic!("no occurence of char {} in bytes {:?}", char, self);
+        sc_panic_self!(M, "no occurence of char {:x} in bytes {:x}", char, self);
     }
 
     fn remove_first_char(&self) -> ManagedBuffer<M> {

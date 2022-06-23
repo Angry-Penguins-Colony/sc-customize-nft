@@ -45,6 +45,14 @@ pub trait StorageModule {
         self.__cid_of(attributes).set(cid);
     }
 
+    #[view(getCidOf)]
+    fn get_cid_of(
+        &self,
+        attributes: &EquippableNftAttributes<Self::Api>,
+    ) -> ManagedBuffer<Self::Api> {
+        return self.__cid_of(attributes).get();
+    }
+
     fn get_uri_of(
         &self,
         attributes: &EquippableNftAttributes<Self::Api>,

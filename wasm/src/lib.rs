@@ -9,6 +9,7 @@ elrond_wasm_node::wasm_endpoints! {
     (
         customize
         fill
+        getCidOf
         getItemType
         hasSlot
         registerItem

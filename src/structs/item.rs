@@ -12,7 +12,7 @@ use crate::utils::{managed_buffer_utils::ManagedBufferUtils, u64_utils::UtilsU64
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-#[derive(ManagedVecItem, NestedEncode, NestedDecode, TypeAbi, Clone, PartialEq, Debug)]
+#[derive(ManagedVecItem, NestedEncode, NestedDecode, PartialEq, TypeAbi, Clone, Debug)]
 pub struct Item<M: ManagedTypeApi> {
     pub name: ManagedBuffer<M>,
 }

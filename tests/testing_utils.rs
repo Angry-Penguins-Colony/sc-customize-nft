@@ -20,6 +20,22 @@ pub const EQUIPPABLE_TOKEN_ID: &[u8] = b"PENG-ae5a";
 
 pub const HAT_TOKEN_ID: &[u8] = b"HAT-a";
 
+#[macro_export]
+macro_rules! assert_eq_symetry {
+    ($a: expr, $b: expr) => {
+        assert_eq!($a, $b, "Failed with (a, b)");
+        assert_eq!($b, $a, "Failed with (b, a)");
+    };
+}
+
+#[macro_export]
+macro_rules! assert_ne_symetry {
+    ($a: expr, $b: expr) => {
+        assert_ne!($a, $b, "Failed with (a, b)");
+        assert_ne!($b, $a, "Failed with (b, a)");
+    };
+}
+
 pub struct EquipSetup<CrowdfundingObjBuilder>
 where
     CrowdfundingObjBuilder: 'static + Copy + Fn() -> customize_nft::ContractObj<DebugApi>,

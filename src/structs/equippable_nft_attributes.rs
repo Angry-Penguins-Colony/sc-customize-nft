@@ -12,7 +12,7 @@ use elrond_wasm::{
 
 use crate::{
     sc_panic_self,
-    utils::{self, managed_buffer_utils::ManagedBufferUtils},
+    utils::{self, managed_buffer_utils::ManagedBufferUtils, managed_vec_utils::ManagedVecUtils},
 };
 
 use super::item::Item;
@@ -20,10 +20,16 @@ use super::item::Item;
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-#[derive(NestedEncode, NestedDecode, PartialEq, TypeAbi, Debug)]
+#[derive(NestedEncode, NestedDecode, TypeAbi, Debug)]
 pub struct EquippableNftAttributes<M: ManagedTypeApi> {
     pub slots: ManagedVec<M, ManagedBuffer<M>>,
     items: ManagedVec<M, Item<M>>,
+}
+
+impl<M: ManagedTypeApi + core::cmp::PartialEq> PartialEq for EquippableNftAttributes<M> {
+    fn eq(&self, other: &Self) -> bool {
+        return self.items.eq_unorder(&other.items) && self.slots.eq_unorder(&other.slots);
+    }
 }
 
 impl<M: ManagedTypeApi> SCDisplay for EquippableNftAttributes<M> {

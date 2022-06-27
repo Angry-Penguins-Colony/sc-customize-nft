@@ -12,11 +12,7 @@ use elrond_wasm::{
 
 use crate::{
     sc_panic_self,
-    utils::{
-        self,
-        managed_buffer_utils::ManagedBufferUtils,
-        managed_vec_utils::{EqUtils, SortUtils},
-    },
+    utils::{self, managed_buffer_utils::ManagedBufferUtils, managed_vec_utils::EqUtils},
 };
 
 use super::item::Item;
@@ -54,6 +50,12 @@ pub struct EquippableNftAttributes<M: ManagedTypeApi> {
     kvp: ManagedVec<M, Kvp<M>>,
 }
 
+pub trait SortUtils<M>
+where
+    M: ManagedTypeApi,
+{
+    fn sort_alphabetically(&self) -> Self;
+}
 impl<M> SortUtils<M> for ManagedVec<M, Kvp<M>>
 where
     M: ManagedTypeApi,

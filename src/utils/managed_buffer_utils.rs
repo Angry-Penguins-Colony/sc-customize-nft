@@ -1,3 +1,5 @@
+use core::cmp::Ordering;
+
 use elrond_wasm::{
     api::ManagedTypeApi,
     types::{ManagedBuffer, ManagedVec},
@@ -24,6 +26,9 @@ pub trait ManagedBufferUtils<M: ManagedTypeApi> {
     fn replace(&self, old_buffer: &[u8], new_buffer: &ManagedBuffer<M>) -> ManagedBuffer<M>;
     fn contains(&self, to_find: &[u8]) -> bool;
     fn to_lowercase(&self) -> ManagedBuffer<M>;
+
+    /// Returns 0 if equals. Return 1 if self is after other in the alphabetically order. Returns 0 if self is before other in the alphabetically order.
+    fn compare(&self, other: &Self) -> Ordering;
 }
 
 impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
@@ -157,6 +162,20 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
         return true;
     }
 
+    fn append_trailing_character_if_missing(&self, character: u8) -> ManagedBuffer<M> {
+        let bytes = self.load_512_bytes();
+
+        let mut o = ManagedBuffer::<M>::new();
+
+        o.append_bytes(&bytes[0..self.len()]);
+
+        if bytes[self.len() - 1] != character {
+            o.append_bytes(&[character]);
+        }
+
+        return o;
+    }
+
     fn replace(&self, old_buffer: &[u8], new_buffer: &ManagedBuffer<M>) -> ManagedBuffer<M> {
         let bytes = self.load_512_bytes();
 
@@ -227,17 +246,10 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
         return o;
     }
 
-    fn append_trailing_character_if_missing(&self, character: u8) -> ManagedBuffer<M> {
-        let bytes = self.load_512_bytes();
+    fn compare(&self, other: &Self) -> Ordering {
+        let a_bytes = self.load_512_bytes();
+        let b_bytes = other.load_512_bytes();
 
-        let mut o = ManagedBuffer::<M>::new();
-
-        o.append_bytes(&bytes[0..self.len()]);
-
-        if bytes[self.len() - 1] != character {
-            o.append_bytes(&[character]);
-        }
-
-        return o;
+        return a_bytes.cmp(&b_bytes);
     }
 }

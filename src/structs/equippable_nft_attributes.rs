@@ -12,7 +12,11 @@ use elrond_wasm::{
 
 use crate::{
     sc_panic_self,
-    utils::{self, managed_buffer_utils::ManagedBufferUtils, managed_vec_utils::ManagedVecUtils},
+    utils::{
+        self,
+        managed_buffer_utils::ManagedBufferUtils,
+        managed_vec_utils::{EqUtils, SortUtils},
+    },
 };
 
 use super::item::Item;
@@ -70,7 +74,7 @@ impl<M: ManagedTypeApi> TopEncode for EquippableNftAttributes<M> {
     ) -> Result<(), elrond_codec::EncodeError> {
         let mut managed_buffer = ManagedBuffer::<M>::new();
 
-        for (i, slot) in self.slots.iter().enumerate() {
+        for (i, slot) in self.slots.sort_alphabetically().iter().enumerate() {
             managed_buffer.append(&self.to_kvp_buffer(slot.deref()));
 
             // add comma, except for the last line

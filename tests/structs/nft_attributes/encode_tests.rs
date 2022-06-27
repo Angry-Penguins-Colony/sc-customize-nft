@@ -18,20 +18,43 @@ fn should_top_encode() {
     assert_equippable_encode_eq(equippable_nft_attributes, expected);
 }
 
+/// no matter the order, the encoding must be sorted alphabetically
 #[test]
-fn should_top_encode_with_nonce_equals_0a() {
+fn should_top_encode_two() {
     DebugApi::dummy();
 
-    let equippable_nft_attributes = EquippableNftAttributes::new(&[(
-        &ManagedBuffer::new_from_bytes(b"hat"),
-        Item::<DebugApi> {
-            name: managed_buffer!(b"Pirate Hat"),
-        },
-    )]);
+    let attributes_order_one = EquippableNftAttributes::new(&[
+        (
+            &ManagedBuffer::new_from_bytes(b"weapon"),
+            Item::<DebugApi> {
+                name: managed_buffer!(b"Gun"),
+            },
+        ),
+        (
+            &ManagedBuffer::new_from_bytes(b"hat"),
+            Item::<DebugApi> {
+                name: managed_buffer!(b"Pirate Hat"),
+            },
+        ),
+    ]);
 
-    let expected = b"Hat:Pirate Hat";
+    let attributes_order_two = EquippableNftAttributes::new(&[
+        (
+            &ManagedBuffer::new_from_bytes(b"hat"),
+            Item::<DebugApi> {
+                name: managed_buffer!(b"Pirate Hat"),
+            },
+        ),
+        (
+            &ManagedBuffer::new_from_bytes(b"weapon"),
+            Item::<DebugApi> {
+                name: managed_buffer!(b"Gun"),
+            },
+        ),
+    ]);
 
-    assert_equippable_encode_eq(equippable_nft_attributes, expected);
+    assert_equippable_encode_eq(attributes_order_one, b"Hat:Pirate Hat;Weapon:Gun");
+    assert_equippable_encode_eq(attributes_order_two, b"Hat:Pirate Hat;Weapon:Gun");
 }
 
 fn assert_equippable_encode_eq(

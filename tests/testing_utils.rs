@@ -36,6 +36,15 @@ macro_rules! assert_ne_symetry {
     };
 }
 
+#[macro_export]
+macro_rules! managed_vec [
+    ($vec_type: tt, $($e:expr),*) => ({
+        let mut _temp = ::std::vec::Vec::<$vec_type>::new();
+        $(_temp.push($e);)*
+        ManagedVec::<DebugApi, u64>::from(_temp)
+    })
+];
+
 pub struct EquipSetup<CrowdfundingObjBuilder>
 where
     CrowdfundingObjBuilder: 'static + Copy + Fn() -> customize_nft::ContractObj<DebugApi>,

@@ -1,14 +1,8 @@
-use customize_nft::utils::managed_vec_utils::ManagedVecUtils;
+use customize_nft::utils::managed_vec_utils::EqUtils;
 use elrond_wasm::types::ManagedVec;
 use elrond_wasm_debug::DebugApi;
 
-macro_rules! managed_vec [
-    ($vec_type: tt, $($e:expr),*) => ({
-        let mut _temp = ::std::vec::Vec::<$vec_type>::new();
-        $(_temp.push($e);)*
-        ManagedVec::<DebugApi, u64>::from(_temp)
-    })
-];
+use crate::managed_vec;
 
 macro_rules! assert_eq_unorder {
     ($a: expr, $b: expr) => {

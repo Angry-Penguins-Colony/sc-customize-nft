@@ -24,15 +24,66 @@ use super::item::Item;
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
+#[derive(ManagedVecItem, NestedEncode, NestedDecode, PartialEq, TypeAbi, Clone, Debug)]
+struct Kvp<M: ManagedTypeApi> {
+    pub slot: ManagedBuffer<M>,
+    pub item: Item<M>,
+}
+
+impl<M: ManagedTypeApi> Kvp<M> {
+    pub fn to_kvp_buffer(&self) -> ManagedBuffer<M> {
+        let mut output_buffer = ManagedBuffer::<M>::new();
+
+        // 1. add slot
+        output_buffer.append(&self.slot.capitalize());
+
+        // 2. separator
+        output_buffer.append_bytes(b":");
+
+        // 3. item_buffer
+        let mut item_buffer = ManagedBuffer::new();
+        self.item.top_encode(&mut item_buffer).unwrap();
+        output_buffer.append(&item_buffer);
+
+        return output_buffer;
+    }
+}
+
 #[derive(NestedEncode, NestedDecode, TypeAbi, Debug)]
 pub struct EquippableNftAttributes<M: ManagedTypeApi> {
-    pub slots: ManagedVec<M, ManagedBuffer<M>>,
-    items: ManagedVec<M, Item<M>>,
+    kvp: ManagedVec<M, Kvp<M>>,
+}
+
+impl<M> SortUtils<M> for ManagedVec<M, Kvp<M>>
+where
+    M: ManagedTypeApi,
+{
+    fn sort_alphabetically(&self) -> Self {
+        let mut remaining_items = self.clone();
+        let mut output = Self::new();
+
+        while remaining_items.len() > 0 {
+            let mut smallest_item = remaining_items.get(0);
+            let mut smallest_item_index = 0;
+
+            for (index, kvp) in remaining_items.iter().enumerate() {
+                if kvp.slot.compare(&smallest_item.slot).is_le() {
+                    smallest_item = kvp;
+                    smallest_item_index = index;
+                }
+            }
+
+            output.push(smallest_item.clone());
+            remaining_items.remove(smallest_item_index);
+        }
+
+        return output;
+    }
 }
 
 impl<M: ManagedTypeApi + core::cmp::PartialEq> PartialEq for EquippableNftAttributes<M> {
     fn eq(&self, other: &Self) -> bool {
-        return self.items.eq_unorder(&other.items) && self.slots.eq_unorder(&other.slots);
+        return self.kvp.eq_unorder(&other.kvp);
     }
 }
 
@@ -74,11 +125,11 @@ impl<M: ManagedTypeApi> TopEncode for EquippableNftAttributes<M> {
     ) -> Result<(), elrond_codec::EncodeError> {
         let mut managed_buffer = ManagedBuffer::<M>::new();
 
-        for (i, slot) in self.slots.sort_alphabetically().iter().enumerate() {
-            managed_buffer.append(&self.to_kvp_buffer(slot.deref()));
+        for (i, kvp) in self.kvp.iter().enumerate() {
+            managed_buffer.append(&kvp.to_kvp_buffer());
 
             // add comma, except for the last line
-            if i < self.items.len() - 1 {
+            if i < self.kvp.len() - 1 {
                 managed_buffer.append_bytes(b";");
             }
         }
@@ -104,7 +155,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
 
     pub fn get_item(&self, slot: &ManagedBuffer<M>) -> Option<Item<M>> {
         match self.__get_index(slot) {
-            Some(index) => Option::Some(self.items.get(index)),
+            Some(index) => Option::Some(self.kvp.get(index).item),
             None => None,
         }
     }
@@ -121,7 +172,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
     }
 
     pub fn get_count(&self) -> usize {
-        return self.items.len();
+        return self.kvp.len();
     }
 
     pub fn is_slot_empty(&self, slot: &ManagedBuffer<M>) -> bool {
@@ -139,38 +190,15 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
 
     pub fn empty() -> Self {
         return EquippableNftAttributes {
-            slots: ManagedVec::new(),
-            items: ManagedVec::new(),
+            kvp: ManagedVec::new(),
         };
-    }
-
-    pub fn to_kvp_buffer(&self, slot: &ManagedBuffer<M>) -> ManagedBuffer<M> {
-        let item = match self.get_item(slot) {
-            Some(item) => {
-                let mut output = ManagedBuffer::new();
-
-                // TODO: optimize Item.top_encode
-                // TODO: we unwrap to trigger if top_encode fails, but there must be a better way
-                item.top_encode(&mut output).unwrap();
-
-                output
-            }
-            None => ManagedBuffer::<M>::new_from_bytes(b"unequipped"),
-        };
-
-        let mut managed_buffer = ManagedBuffer::<M>::new();
-        managed_buffer.append(&slot.capitalize());
-        managed_buffer.append_bytes(b":");
-        managed_buffer.append(&item);
-
-        return managed_buffer;
     }
 
     fn __get_index(&self, target_slot: &ManagedBuffer<M>) -> Option<usize> {
         return self
-            .slots
+            .kvp
             .iter()
-            .position(|current_slot| current_slot.deref().equals_ignore_case(target_slot));
+            .position(|kvp| kvp.slot.equals_ignore_case(target_slot));
     }
 
     /// Set an item on a slot, without checking if the slot is empty.
@@ -180,7 +208,13 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
         match index {
             Some(index) => {
                 if let Some(item) = item {
-                    let result = self.items.set(index, &item);
+                    let result = self.kvp.set(
+                        index,
+                        &Kvp {
+                            item,
+                            slot: slot.clone(),
+                        },
+                    );
 
                     if result.is_err() {
                         sc_panic_self!(
@@ -189,19 +223,22 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
                         );
                     }
                 } else {
-                    self.items.remove(index);
-                    self.slots.remove(index);
+                    self.kvp.remove(index);
                 }
             }
             None => match item {
                 Some(item) => {
-                    self.slots.push(slot.to_lowercase());
-                    self.items.push(item);
+                    self.kvp.push(Kvp {
+                        slot: slot.to_lowercase(),
+                        item,
+                    });
                 }
                 None => {
                     // Try to remove a None item, so we do nothing
                 }
             },
         }
+
+        self.kvp = self.kvp.sort_alphabetically();
     }
 }

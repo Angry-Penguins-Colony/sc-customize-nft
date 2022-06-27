@@ -6,4 +6,3 @@ mod get_count_tests;
 mod get_tests;
 mod is_empty_tests;
 mod set_tests;
-mod to_kvp_buffer;

@@ -30,3 +30,29 @@ fn decode_empty_equippable_nft() {
 
     assert_eq!(EquippableNftAttributes::empty(), actual_output);
 }
+
+#[test]
+fn should_equals() {
+    DebugApi::dummy();
+
+    let a_bytes = ManagedBuffer::<DebugApi>::new_from_bytes(b"Hat:Pirate Hat;Badge:1");
+    let b_bytes = ManagedBuffer::<DebugApi>::new_from_bytes(b"Badge:1;Hat:Pirate Hat");
+
+    let a = EquippableNftAttributes::<DebugApi>::top_decode(a_bytes).unwrap();
+    let b = EquippableNftAttributes::<DebugApi>::top_decode(b_bytes).unwrap();
+
+    assert!(a == b);
+}
+
+#[test]
+fn should_not_equals() {
+    DebugApi::dummy();
+
+    let a_bytes = ManagedBuffer::<DebugApi>::new_from_bytes(b"Hat:Pirate Hat;Badge:1");
+    let b_bytes = ManagedBuffer::<DebugApi>::new_from_bytes(b"Badge:10;Hat:Pirate Hat");
+
+    let a = EquippableNftAttributes::<DebugApi>::top_decode(a_bytes).unwrap();
+    let b = EquippableNftAttributes::<DebugApi>::top_decode(b_bytes).unwrap();
+
+    assert!(a != b);
+}

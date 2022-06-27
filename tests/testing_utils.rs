@@ -23,16 +23,16 @@ pub const HAT_TOKEN_ID: &[u8] = b"HAT-a";
 #[macro_export]
 macro_rules! assert_eq_symetry {
     ($a: expr, $b: expr) => {
-        assert_eq!($a, $b, "Failed with (a, b)");
-        assert_eq!($b, $a, "Failed with (b, a)");
+        assert!($a == $b, "Failed with (a, b)");
+        assert!($b == $a, "Failed with (b, a)");
     };
 }
 
 #[macro_export]
 macro_rules! assert_ne_symetry {
     ($a: expr, $b: expr) => {
-        assert_ne!($a, $b, "Failed with (a, b)");
-        assert_ne!($b, $a, "Failed with (b, a)");
+        assert!($a != $b, "Failed with (a, b)");
+        assert!($b != $a, "Failed with (b, a)");
     };
 }
 

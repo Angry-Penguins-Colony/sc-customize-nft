@@ -43,6 +43,72 @@ fn works_if_is_the_owner() {
 }
 
 #[test]
+fn panic_if_override() {
+    const TOKEN_A_ID: &[u8] = b"ITEM-a1a1a1";
+    const TOKEN_A_NONCE: u64 = 654;
+
+    const TOKEN_B_ID: &[u8] = TOKEN_A_ID;
+    const TOKEN_B_NONCE: u64 = 1;
+
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    setup.blockchain_wrapper.set_nft_balance(
+        &setup.owner_address,
+        &TOKEN_A_ID,
+        TOKEN_A_NONCE,
+        &rust_biguint!(1u64),
+        &Option::Some({}),
+    );
+
+    setup.blockchain_wrapper.set_nft_balance(
+        &setup.owner_address,
+        &TOKEN_B_ID,
+        TOKEN_B_NONCE,
+        &rust_biguint!(1u64),
+        &Option::Some({}),
+    );
+
+    setup
+        .blockchain_wrapper
+        .execute_esdt_transfer(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            TOKEN_A_ID,
+            TOKEN_A_NONCE,
+            &rust_biguint!(1),
+            |sc| {
+                sc.fill();
+
+                let (item_id, item_nonce) = sc
+                    .token_of(&Item {
+                        name: managed_buffer!(TOKEN_A_ID),
+                    })
+                    .get();
+
+                assert_eq!(item_id, managed_token_id!(TOKEN_A_ID));
+                assert_eq!(item_nonce, TOKEN_A_NONCE);
+            },
+        )
+        .assert_ok();
+
+    setup
+        .blockchain_wrapper
+        .execute_esdt_transfer(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            TOKEN_B_ID,
+            TOKEN_B_NONCE,
+            &rust_biguint!(1),
+            |sc| {
+                sc.fill();
+            },
+        )
+        .assert_user_error(
+            "The item with name ITEM-a1a1a1 is already registered. Please, use another name.",
+        );
+}
+
+#[test]
 fn panic_if_not_the_owner() {
     const TOKEN_ID: &[u8] = b"ITEM-a1a1a1";
     const TOKEN_NONCE: u64 = 654;

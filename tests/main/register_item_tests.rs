@@ -141,9 +141,69 @@ fn change_item_slot() {
     const ITEM_NONCE: u64 = 42;
 
     DebugApi::dummy();
-    setup.register_and_fill_item(old_slot, ITEM_ID, ITEM_NONCE, &ItemAttributes::random());
-    setup.register_and_fill_item(new_slot, ITEM_ID, ITEM_NONCE, &ItemAttributes::random());
 
+    // register to old_slot
+    {
+        setup.set_all_permissions_on_token(ITEM_ID);
+
+        setup
+            .blockchain_wrapper
+            .execute_tx(
+                &setup.owner_address,
+                &setup.cf_wrapper,
+                &rust_biguint!(0u64),
+                |sc| {
+                    let mut managed_items_ids =
+                        MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                    managed_items_ids.push(managed_token_id!(ITEM_ID));
+
+                    sc.register_item(ManagedBuffer::new_from_bytes(old_slot), managed_items_ids);
+                },
+            )
+            .assert_ok();
+
+        setup.blockchain_wrapper.set_nft_balance(
+            &setup.owner_address,
+            &ITEM_ID,
+            ITEM_NONCE,
+            &rust_biguint!(2u64),
+            &ItemAttributes::<DebugApi>::random(),
+        );
+    }
+
+    // register to new_slot
+    {
+        {
+            setup.set_all_permissions_on_token(ITEM_ID);
+
+            setup
+                .blockchain_wrapper
+                .execute_tx(
+                    &setup.owner_address,
+                    &setup.cf_wrapper,
+                    &rust_biguint!(0u64),
+                    |sc| {
+                        let mut managed_items_ids =
+                            MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                        managed_items_ids.push(managed_token_id!(ITEM_ID));
+
+                        sc.register_item(
+                            ManagedBuffer::new_from_bytes(new_slot),
+                            managed_items_ids,
+                        );
+                    },
+                )
+                .assert_ok();
+
+            setup.blockchain_wrapper.set_nft_balance(
+                &setup.owner_address,
+                &ITEM_ID,
+                ITEM_NONCE,
+                &rust_biguint!(2u64),
+                &ItemAttributes::<DebugApi>::random(),
+            );
+        }
+    }
     let b_wrapper = &mut setup.blockchain_wrapper;
 
     b_wrapper

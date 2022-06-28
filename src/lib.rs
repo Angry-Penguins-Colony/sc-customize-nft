@@ -197,8 +197,15 @@ pub trait Equip:
             .get_esdt_token_data(&self.blockchain().get_sc_address(), &token_id, token_nonce)
             .name;
 
-        let item = &Item { name: item_name };
+        let item = &Item {
+            name: item_name.clone(),
+        };
 
+        require!(
+            self.token_of(item).is_empty(),
+            "The item with name {} is already registered. Please, use another name.",
+            item_name
+        );
         self.token_of(item).set((token_id.clone(), token_nonce));
     }
 

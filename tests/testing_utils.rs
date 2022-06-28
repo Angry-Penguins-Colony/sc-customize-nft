@@ -180,7 +180,7 @@ where
         );
     }
 
-    fn set_all_permissions_on_token(&mut self, token_id: &[u8]) {
+    pub fn set_all_permissions_on_token(&mut self, token_id: &[u8]) {
         let contract_roles = [
             EsdtLocalRole::NftCreate,
             EsdtLocalRole::NftBurn,

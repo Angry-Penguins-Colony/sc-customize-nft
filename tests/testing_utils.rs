@@ -252,8 +252,7 @@ where
                     unequip_slots_managed.push(managed_buffer!(s));
                 }
 
-                let result =
-                    sc.customize(sc.call_value().all_esdt_transfers(), unequip_slots_managed);
+                let result = sc.customize(unequip_slots_managed);
 
                 opt_sc_result = Option::Some(result.clone());
             },
@@ -309,10 +308,8 @@ where
             &self.cf_wrapper,
             &transfers,
             |sc| {
-                let result = sc.customize(
-                    sc.call_value().all_esdt_transfers(),
-                    MultiValueEncoded::<DebugApi, ManagedBuffer<DebugApi>>::new(),
-                );
+                let result =
+                    sc.customize(MultiValueEncoded::<DebugApi, ManagedBuffer<DebugApi>>::new());
 
                 opt_sc_result = Option::Some(result);
             },

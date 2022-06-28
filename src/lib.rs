@@ -64,11 +64,9 @@ pub trait Equip:
 
     #[payable("*")]
     #[endpoint(customize)]
-    fn customize(
-        &self,
-        #[payment_multi] payments: ManagedVec<EsdtTokenPayment<Self::Api>>,
-        to_unequip_slots: MultiValueEncoded<ManagedBuffer>,
-    ) -> u64 {
+    fn customize(&self, to_unequip_slots: MultiValueEncoded<ManagedBuffer>) -> u64 {
+        let payments = self.call_value().all_esdt_transfers();
+
         self.require_equippable_collection_roles_set();
         require!(payments.len() >= 1, ERR_NEED_EQUIPPABLE);
         require!(

@@ -7,10 +7,7 @@ use customize_nft::{
     },
     Equip,
 };
-use elrond_wasm::{
-    contract_base::ContractBase,
-    types::{ManagedBuffer, MultiValueEncoded},
-};
+use elrond_wasm::types::{ManagedBuffer, MultiValueEncoded};
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
 use crate::testing_utils;
@@ -179,7 +176,7 @@ fn customize_nothing_to_unequip_and_equip() {
         |sc| {
             let managed_slots = MultiValueEncoded::<DebugApi, ManagedBuffer<DebugApi>>::new();
 
-            let _ = sc.customize(sc.call_value().all_esdt_transfers(), managed_slots);
+            let _ = sc.customize(managed_slots);
         },
     );
 

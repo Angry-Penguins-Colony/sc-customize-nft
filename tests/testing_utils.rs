@@ -158,12 +158,7 @@ where
                 item_nonce,
                 &rust_biguint!(2),
                 |sc| {
-                    let payment = sc.call_value().egld_or_single_esdt();
-                    sc.fill(
-                        payment.token_identifier,
-                        payment.token_nonce,
-                        payment.amount,
-                    );
+                    sc.fill();
                 },
             )
             .assert_ok();

@@ -1,6 +1,5 @@
 use crate::testing_utils;
 use customize_nft::{libs::storage::StorageModule, structs::item::Item, Equip};
-use elrond_wasm::{contract_base::ContractBase, types::EgldOrEsdtTokenIdentifier};
 use elrond_wasm_debug::{managed_buffer, managed_token_id, rust_biguint};
 
 #[test]
@@ -28,13 +27,7 @@ fn works_if_is_the_owner() {
             TOKEN_NONCE,
             &rust_biguint!(1),
             |sc| {
-                let payment = sc.call_value().single_esdt();
-
-                let _ = sc.fill(
-                    EgldOrEsdtTokenIdentifier::esdt(payment.token_identifier),
-                    payment.token_nonce,
-                    payment.amount,
-                );
+                sc.fill();
 
                 let (item_id, item_nonce) = sc
                     .token_of(&Item {
@@ -74,13 +67,7 @@ fn panic_if_not_the_owner() {
             TOKEN_NONCE,
             &rust_biguint!(1),
             |sc| {
-                let payment = sc.call_value().single_esdt();
-
-                let _ = sc.fill(
-                    EgldOrEsdtTokenIdentifier::esdt(payment.token_identifier),
-                    payment.token_nonce,
-                    payment.amount,
-                );
+                sc.fill();
             },
         )
         .assert_user_error("Only the owner can call this method.");

@@ -181,12 +181,7 @@ pub trait Equip:
     #[payable("*")]
     #[endpoint]
     #[only_owner]
-    fn fill(
-        &self,
-        #[payment_token] token: EgldOrEsdtTokenIdentifier<Self::Api>,
-        #[payment_nonce] nonce: u64,
-        #[payment_amount] _amount: BigUint,
-    ) {
+    fn fill(&self) {
         require!(
             self.blockchain().get_caller() == self.blockchain().get_owner_address(),
             ERR_NOT_OWNER
@@ -194,17 +189,19 @@ pub trait Equip:
 
         // TODO: require! to only send registered SFT
 
-        let token_id = &token.unwrap_esdt();
+        let payment = self.call_value().single_esdt();
+        let token_id = payment.token_identifier;
+        let token_nonce = payment.token_nonce;
 
         // TODO: extract to Item.fromId()
         let item_name = self
             .blockchain()
-            .get_esdt_token_data(&self.blockchain().get_sc_address(), token_id, nonce)
+            .get_esdt_token_data(&self.blockchain().get_sc_address(), &token_id, token_nonce)
             .name;
 
         let item = &Item { name: item_name };
 
-        self.token_of(item).set((token_id.clone(), nonce));
+        self.token_of(item).set((token_id.clone(), token_nonce));
     }
 
     /// Empty the item at the slot provided and sent it to the caller.

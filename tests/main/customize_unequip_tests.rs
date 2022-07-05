@@ -7,9 +7,10 @@ use customize_nft::{
     },
 };
 use elrond_wasm::types::ManagedBuffer;
+use elrond_wasm::types::MultiValueEncoded;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
-use crate::testing_utils;
+use crate::{args_set_cid_of, testing_utils};
 
 const EQUIPPABLE_TOKEN_ID: &[u8] = testing_utils::EQUIPPABLE_TOKEN_ID;
 
@@ -51,15 +52,15 @@ fn customize_only_unequip() {
                     },
                 )]);
 
-                sc.set_cid_of(
-                    &attributes_before_custom,
-                    ManagedBuffer::<DebugApi>::new_from_bytes(b"this is a cid"),
-                );
+                sc.set_cid_of(args_set_cid_of!(
+                    attributes_before_custom,
+                    ManagedBuffer::<DebugApi>::new_from_bytes(b"this is a cid")
+                ));
 
-                sc.set_cid_of(
-                    &EquippableNftAttributes::<DebugApi>::empty(),
-                    ManagedBuffer::new_from_bytes(b"empty"),
-                );
+                sc.set_cid_of(args_set_cid_of!(
+                    EquippableNftAttributes::<DebugApi>::empty(),
+                    ManagedBuffer::new_from_bytes(b"empty")
+                ));
             },
         )
         .assert_ok();
@@ -148,15 +149,15 @@ fn unequip_should_ignore_case_of_slot() {
                     },
                 )]);
 
-                sc.set_cid_of(
-                    &attributes_before_custom,
-                    ManagedBuffer::<DebugApi>::new_from_bytes(b"this is a cid"),
-                );
+                sc.set_cid_of(args_set_cid_of!(
+                    attributes_before_custom,
+                    ManagedBuffer::<DebugApi>::new_from_bytes(b"this is a cid")
+                ));
 
-                sc.set_cid_of(
-                    &EquippableNftAttributes::<DebugApi>::empty(),
-                    ManagedBuffer::new_from_bytes(b"empty"),
-                );
+                sc.set_cid_of(args_set_cid_of!(
+                    EquippableNftAttributes::<DebugApi>::empty(),
+                    ManagedBuffer::new_from_bytes(b"empty")
+                ));
             },
         )
         .assert_ok();
@@ -241,15 +242,15 @@ fn panic_when_unequip_twice_the_same_slot() {
                     },
                 )]);
 
-                sc.set_cid_of(
-                    &attributes_before_custom,
-                    ManagedBuffer::<DebugApi>::new_from_bytes(b"this is a cid"),
-                );
+                sc.set_cid_of(args_set_cid_of!(
+                    attributes_before_custom,
+                    ManagedBuffer::<DebugApi>::new_from_bytes(b"this is a cid")
+                ));
 
-                sc.set_cid_of(
-                    &EquippableNftAttributes::<DebugApi>::empty(),
-                    ManagedBuffer::new_from_bytes(b"empty"),
-                );
+                sc.set_cid_of(args_set_cid_of!(
+                    EquippableNftAttributes::<DebugApi>::empty(),
+                    ManagedBuffer::new_from_bytes(b"empty")
+                ));
             },
         )
         .assert_ok();
@@ -281,10 +282,10 @@ fn panic_when_unequip_on_empty_slot() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                sc.set_cid_of(
-                    &EquippableNftAttributes::<DebugApi>::empty(),
-                    ManagedBuffer::new_from_bytes(b"empty"),
-                );
+                sc.set_cid_of(args_set_cid_of!(
+                    EquippableNftAttributes::<DebugApi>::empty(),
+                    ManagedBuffer::new_from_bytes(b"empty")
+                ));
             },
         )
         .assert_ok();

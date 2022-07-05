@@ -2,9 +2,10 @@ use customize_nft::{
     libs::storage::StorageModule,
     structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item},
 };
+use elrond_wasm::types::MultiValueEncoded;
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
-use crate::testing_utils;
+use crate::{args_set_cid_of, testing_utils};
 
 /// The eq of nft_attributes doesn't work on storage. We write these tests to help us fix this.
 
@@ -24,7 +25,7 @@ fn should_return_cid() {
                 let cid_buffer = managed_buffer!(cid_bytes);
 
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
-                sc.set_cid_of(&attributes, cid_buffer.clone());
+                sc.set_cid_of(args_set_cid_of!(attributes.clone(), cid_buffer.clone()));
 
                 assert_eq!(sc.get_cid_of(&attributes), cid_buffer)
             },
@@ -68,7 +69,7 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
                         },
                     ),
                 ]);
-                sc.set_cid_of(&attributes, cid_buffer.clone());
+                sc.set_cid_of(args_set_cid_of!(attributes.clone(), cid_buffer.clone()));
 
                 assert_eq!(sc.get_cid_of(&attributes), cid_buffer)
             },

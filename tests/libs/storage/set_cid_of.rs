@@ -2,9 +2,10 @@ use customize_nft::{
     libs::storage::{EndpointWrappers, StorageModule},
     structs::equippable_nft_attributes::EquippableNftAttributes,
 };
+use elrond_wasm::types::MultiValueEncoded;
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
-use crate::testing_utils;
+use crate::{args_set_cid_of, testing_utils};
 
 #[test]
 fn should_set_if_empty() {
@@ -20,7 +21,10 @@ fn should_set_if_empty() {
             &rust_biguint!(0),
             |sc| {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
-                sc.set_cid_of(&attributes, managed_buffer!(cid_bytes));
+                sc.set_cid_of(args_set_cid_of!(
+                    attributes.clone(),
+                    managed_buffer!(cid_bytes)
+                ));
 
                 assert_eq!(sc.__cid_of(&attributes).get(), managed_buffer!(cid_bytes));
             },
@@ -44,13 +48,19 @@ fn should_set_if_not_emtpy() {
             |sc| {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
-                sc.set_cid_of(&attributes, managed_buffer!(first_cid_bytes));
+                sc.set_cid_of(args_set_cid_of!(
+                    attributes.clone(),
+                    managed_buffer!(first_cid_bytes)
+                ));
                 assert_eq!(
                     sc.__cid_of(&attributes).get(),
                     managed_buffer!(first_cid_bytes)
                 );
 
-                sc.set_cid_of(&attributes, managed_buffer!(second_cid_bytes));
+                sc.set_cid_of(args_set_cid_of!(
+                    attributes.clone(),
+                    managed_buffer!(second_cid_bytes)
+                ));
                 assert_eq!(
                     sc.__cid_of(&attributes).get(),
                     managed_buffer!(second_cid_bytes),

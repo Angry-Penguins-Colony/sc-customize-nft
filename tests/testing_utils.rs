@@ -6,9 +6,10 @@ use customize_nft::structs::item::Item;
 use customize_nft::structs::item_attributes::ItemAttributes;
 use customize_nft::*;
 use elrond_wasm::contract_base::ContractBase;
+use elrond_wasm::types::MultiValueEncoded;
 use elrond_wasm::types::{
     Address, BigUint, EsdtLocalRole, EsdtTokenPayment, EsdtTokenType, ManagedBuffer, ManagedVec,
-    MultiValueEncoded, TokenIdentifier,
+    TokenIdentifier,
 };
 use elrond_wasm_debug::tx_mock::{TxInputESDT, TxResult};
 use elrond_wasm_debug::{managed_buffer, managed_token_id, testing_framework::*};
@@ -44,6 +45,16 @@ macro_rules! managed_vec [
         ManagedVec::<DebugApi, u64>::from(_temp)
     })
 ];
+
+#[macro_export]
+macro_rules! args_set_cid_of {
+    ($attr: expr, $cid: expr) => {{
+        let mut _val = MultiValueEncoded::new();
+        _val.push(($attr, $cid.clone()));
+
+        _val
+    }};
+}
 
 pub struct EquipSetup<CrowdfundingObjBuilder>
 where

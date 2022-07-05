@@ -10,7 +10,7 @@ use customize_nft::{
 use elrond_wasm::types::{ManagedBuffer, MultiValueEncoded};
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
-use crate::testing_utils;
+use crate::{args_set_cid_of, testing_utils};
 
 const EQUIPPABLE_TOKEN_ID: &[u8] = testing_utils::EQUIPPABLE_TOKEN_ID;
 
@@ -78,15 +78,15 @@ fn customize_complete_flow() {
                     },
                 )]);
 
-                sc.set_cid_of(
-                    &attributes_before_custom,
-                    ManagedBuffer::new_from_bytes(b"cid before custom"),
-                );
+                sc.set_cid_of(args_set_cid_of!(
+                    attributes_before_custom,
+                    ManagedBuffer::new_from_bytes(b"cid before custom")
+                ));
 
-                sc.set_cid_of(
-                    &attributes_after_custom,
-                    ManagedBuffer::new_from_bytes(b"cid after custom"),
-                );
+                sc.set_cid_of(args_set_cid_of!(
+                    attributes_after_custom,
+                    ManagedBuffer::new_from_bytes(b"cid after custom")
+                ));
             },
         )
         .assert_ok();

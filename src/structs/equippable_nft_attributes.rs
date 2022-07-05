@@ -45,7 +45,7 @@ impl<M: ManagedTypeApi> Kvp<M> {
     }
 }
 
-#[derive(NestedEncode, NestedDecode, TypeAbi, Debug)]
+#[derive(NestedEncode, NestedDecode, TypeAbi, Debug, Clone)]
 pub struct EquippableNftAttributes<M: ManagedTypeApi> {
     kvp: ManagedVec<M, Kvp<M>>,
 }

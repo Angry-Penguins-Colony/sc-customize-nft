@@ -6,6 +6,7 @@ use customize_nft::{
         item_attributes::ItemAttributes,
     },
 };
+use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm::types::MultiValueEncoded;
 use elrond_wasm_debug::{rust_biguint, DebugApi};

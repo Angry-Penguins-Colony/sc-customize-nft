@@ -39,9 +39,13 @@ pub trait StorageModule {
     #[only_owner]
     fn set_cid_of(
         &self,
-        cid_kvp: MultiValueEncoded<(EquippableNftAttributes<Self::Api>, ManagedBuffer<Self::Api>)>,
+        cid_kvp: MultiValueEncoded<
+            MultiValue2<EquippableNftAttributes<Self::Api>, ManagedBuffer<Self::Api>>,
+        >,
     ) {
-        for (attributes, cid) in cid_kvp {
+        for kvp in cid_kvp {
+            let (attributes, cid) = kvp.0;
+
             self.__cid_of(&attributes).set(cid);
         }
     }

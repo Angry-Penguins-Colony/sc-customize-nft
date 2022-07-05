@@ -7,6 +7,7 @@ use customize_nft::{
     },
     Equip,
 };
+use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::{ManagedBuffer, MultiValueEncoded};
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 

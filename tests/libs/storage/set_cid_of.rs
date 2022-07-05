@@ -2,6 +2,7 @@ use customize_nft::{
     libs::storage::{EndpointWrappers, StorageModule},
     structs::equippable_nft_attributes::EquippableNftAttributes,
 };
+use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::MultiValueEncoded;
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 

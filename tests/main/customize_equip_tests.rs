@@ -7,6 +7,7 @@ use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
 use customize_nft::structs::item::Item;
 use customize_nft::structs::item_attributes::ItemAttributes;
 use elrond_wasm::contract_base::ContractBase;
+use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::MultiValueEncoded;
 use elrond_wasm::types::{EsdtTokenType, ManagedBuffer, TokenIdentifier};
 use elrond_wasm_debug::managed_buffer;

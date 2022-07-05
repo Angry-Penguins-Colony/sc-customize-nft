@@ -50,7 +50,9 @@ macro_rules! managed_vec [
 macro_rules! args_set_cid_of {
     ($attr: expr, $cid: expr) => {{
         let mut _val = MultiValueEncoded::new();
-        _val.push(($attr, $cid.clone()));
+
+        let element = MultiValue2::from(($attr, $cid.clone()));
+        _val.push(element);
 
         _val
     }};

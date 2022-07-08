@@ -120,6 +120,7 @@ pub trait StorageModule {
         self.__images_to_render().remove_item(attributes);
     }
 
+    #[view(getImagesToRender)]
     fn get_images_to_render(&self) -> MultiValueEncoded<EquippableNftAttributes<Self::Api>> {
         let mut o = MultiValueEncoded::new();
 

@@ -10,9 +10,11 @@ elrond_wasm_node::wasm_endpoints! {
         customize
         fill
         getCidOf
+        getImagesToRender
         getItemType
         hasSlot
         registerItem
+        renderImage
         setCidOf
     )
 }

@@ -88,3 +88,37 @@ fn should_fail_if_not_owner() {
         )
         .assert_user_error("Endpoint can only be called by owner");
 }
+
+#[test]
+fn should_remove_enqueued_image_to_render() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    let first_cid_bytes = b"some cid";
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                let attributes = EquippableNftAttributes::<DebugApi>::empty();
+
+                sc.enqueue_image_to_render(&attributes);
+                assert_eq!(sc.__images_to_render().len(), 1);
+                assert_eq!(&sc.__images_to_render().get(1), &attributes);
+
+                sc.set_cid_of(args_set_cid_of!(
+                    attributes.clone(),
+                    managed_buffer!(first_cid_bytes)
+                ));
+
+                assert_eq!(
+                    sc.__images_to_render().len(),
+                    0,
+                    "The enqueud image to render should be has been removed."
+                );
+            },
+        )
+        .assert_ok();
+}

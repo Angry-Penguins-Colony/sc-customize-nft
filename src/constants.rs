@@ -1,3 +1,5 @@
+pub const EQUIPPABLE_NAME_FORMAT_NUMBER: &[u8] = b"{number}";
+
 pub const ERR_INIT_MISSING_NUMBER_FORMAT: &str = "The name format require {number} somewhere.";
 pub const ERR_NOT_OWNER: &str = "Only the owner can call this method.";
 pub const ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM: &str =
@@ -19,5 +21,7 @@ pub const ERR_BURN_ROLE_NOT_SET_FOR_EQUIPPABLE: &str =
 pub const ERR_CANNOT_UNEQUIP_EMPTY_SLOT: &str = "Cannot unequip an empty slot";
 pub const ERR_ITEM_TO_UNEQUIP_HAS_NO_SLOT: &str =
     "Item to unequip has no slot. Please, contact an admin.";
-
-pub const EQUIPPABLE_NAME_FORMAT_NUMBER: &[u8] = b"{number}";
+pub const ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_CID_ALREADY_RENDERER: &str =
+    "We can't enqueue this image, because it has already been rendered";
+pub const ERR_RENDER_ALREADY_IN_QUEUE: &str = "This image is already in the queue";
+pub const ERR_IMAGE_NOT_IN_QUEUE: &str = "This image is not in the queue";

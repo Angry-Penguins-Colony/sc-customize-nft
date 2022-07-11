@@ -1,5 +1,6 @@
 use customize_nft::{
-    libs::storage::StorageModule, structs::equippable_nft_attributes::EquippableNftAttributes,
+    constants::ERR_IMAGE_NOT_IN_QUEUE, libs::storage::StorageModule,
+    structs::equippable_nft_attributes::EquippableNftAttributes,
 };
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
@@ -28,7 +29,7 @@ fn should_remove_enqueued_image_to_render() {
 }
 
 #[test]
-fn handle_when_removing_not_in_queue() {
+fn panic_when_removing_not_in_queue() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     setup
@@ -45,5 +46,5 @@ fn handle_when_removing_not_in_queue() {
                 assert_eq!(sc.__images_to_render().len(), 0);
             },
         )
-        .assert_ok();
+        .assert_user_error(ERR_IMAGE_NOT_IN_QUEUE);
 }

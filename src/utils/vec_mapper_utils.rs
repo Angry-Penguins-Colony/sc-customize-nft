@@ -1,5 +1,5 @@
 use elrond_wasm::{
-    api::StorageMapperApi,
+    api::{ErrorApiImpl, StorageMapperApi},
     elrond_codec::{TopDecode, TopEncode},
     storage::mappers::VecMapper,
 };
@@ -30,11 +30,16 @@ where
         return Option::None;
     }
 
+    /**
+     * Panic if missing items
+     */
     fn remove_item(&mut self, item: &T) {
         let opt_index = self.find_index(item);
 
         if let Some(index) = opt_index {
             self.swap_remove(index);
+        } else {
+            SA::error_api_impl().signal_error(b"Item not found in VecMapper")
         }
     }
 

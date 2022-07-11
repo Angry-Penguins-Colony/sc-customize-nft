@@ -1,5 +1,9 @@
 use customize_nft::{
-    libs::storage::StorageModule, structs::equippable_nft_attributes::EquippableNftAttributes,
+    constants::{
+        ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_CID_ALREADY_RENDERER, ERR_RENDER_ALREADY_IN_QUEUE,
+    },
+    libs::storage::StorageModule,
+    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item},
 };
 use elrond_wasm::{elrond_codec::multi_types::MultiValue2, types::MultiValueEncoded};
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
@@ -29,7 +33,7 @@ fn works() {
 }
 
 #[test]
-fn handle_duplicate() {
+fn enqueue_two_differents_attributes() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     setup
@@ -39,20 +43,32 @@ fn handle_duplicate() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes = EquippableNftAttributes::<DebugApi>::empty();
+                let attributes_a = EquippableNftAttributes::<DebugApi>::empty();
+                let attributes_b = EquippableNftAttributes::<DebugApi>::new(&[(
+                    &managed_buffer!(b"hat"),
+                    Item {
+                        name: managed_buffer!(b"pirate hat"),
+                    },
+                )]);
 
-                sc.enqueue_image_to_render(&attributes);
-                sc.enqueue_image_to_render(&attributes);
+                sc.enqueue_image_to_render(&attributes_a);
+                sc.enqueue_image_to_render(&attributes_b);
 
-                assert_eq!(sc.__images_to_render().len(), 1);
-                assert_eq!(sc.__images_to_render().get(1), attributes);
+                assert_eq!(sc.__images_to_render().len(), 2);
+                assert_eq!(sc.__images_to_render().get(1), attributes_a);
+                assert_eq!(sc.__images_to_render().get(2), attributes_b);
+
+                let mut iter = sc.get_images_to_render().into_iter();
+                assert_eq!(iter.next(), Some(attributes_a));
+                assert_eq!(iter.next(), Some(attributes_b));
+                assert_eq!(iter.next(), None);
             },
         )
         .assert_ok();
 }
 
 #[test]
-fn dont_add_if_in_cid_of() {
+fn panic_if_already_rendererer() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     setup
@@ -76,5 +92,28 @@ fn dont_add_if_in_cid_of() {
                 assert_eq!(sc.__images_to_render().len(), 0);
             },
         )
-        .assert_ok();
+        .assert_user_error(ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_CID_ALREADY_RENDERER);
+}
+
+#[test]
+fn panic_if_already_in_queue() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                let attributes = EquippableNftAttributes::<DebugApi>::empty();
+
+                sc.enqueue_image_to_render(&attributes);
+                sc.enqueue_image_to_render(&attributes);
+
+                assert_eq!(sc.__images_to_render().len(), 1);
+                assert_eq!(sc.__images_to_render().get(1), attributes);
+            },
+        )
+        .assert_user_error(ERR_RENDER_ALREADY_IN_QUEUE);
 }

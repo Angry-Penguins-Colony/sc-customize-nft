@@ -51,7 +51,7 @@ pub trait StorageModule {
         >,
     ) {
         for kvp in cid_kvp {
-            let (attributes, cid) = kvp.0;
+            let (attributes, cid) = kvp.into_tuple();
 
             self.__cid_of(&attributes).set(cid);
 
@@ -115,7 +115,7 @@ pub trait StorageModule {
     // ===
     // IMAGES
     #[endpoint(renderImage)]
-    fn enqueue_image_to_render(&self, attributes: &EquippableNftAttributes<Self::Api>) {
+    fn enqueue_image_to_render(&self, attributes: &EquippableNftAttributes<Self::Api>) -> usize {
         require!(
             self.cid_of_exist(attributes) == false,
             ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_CID_ALREADY_RENDERER
@@ -125,7 +125,7 @@ pub trait StorageModule {
             ERR_RENDER_ALREADY_IN_QUEUE
         );
 
-        self.__images_to_render().push(attributes);
+        self.__images_to_render().push(attributes)
     }
 
     fn dequeue_image_to_render(&self, attributes: &EquippableNftAttributes<Self::Api>) {

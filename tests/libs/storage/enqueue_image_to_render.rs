@@ -1,6 +1,7 @@
 use customize_nft::{
     constants::{
-        ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_CID_ALREADY_RENDERER, ERR_RENDER_ALREADY_IN_QUEUE,
+        ENQUEUE_PRICE, ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_CID_ALREADY_RENDERER,
+        ERR_RENDER_ALREADY_IN_QUEUE,
     },
     libs::storage::StorageModule,
     structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item},
@@ -16,10 +17,14 @@ fn works() {
 
     setup
         .blockchain_wrapper
+        .set_egld_balance(&setup.owner_address, &rust_biguint!(ENQUEUE_PRICE));
+
+    setup
+        .blockchain_wrapper
         .execute_tx(
             &setup.owner_address,
             &setup.cf_wrapper,
-            &rust_biguint!(0),
+            &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
@@ -38,10 +43,14 @@ fn enqueue_two_differents_attributes() {
 
     setup
         .blockchain_wrapper
+        .set_egld_balance(&setup.owner_address, &rust_biguint!(ENQUEUE_PRICE));
+
+    setup
+        .blockchain_wrapper
         .execute_tx(
             &setup.owner_address,
             &setup.cf_wrapper,
-            &rust_biguint!(0),
+            &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
                 let attributes_a = EquippableNftAttributes::<DebugApi>::empty();
                 let attributes_b = EquippableNftAttributes::<DebugApi>::new(&[(
@@ -73,10 +82,14 @@ fn panic_if_already_rendererer() {
 
     setup
         .blockchain_wrapper
+        .set_egld_balance(&setup.owner_address, &rust_biguint!(ENQUEUE_PRICE));
+
+    setup
+        .blockchain_wrapper
         .execute_tx(
             &setup.owner_address,
             &setup.cf_wrapper,
-            &rust_biguint!(0),
+            &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
                 assert_eq!(sc.__images_to_render().len(), 0);
                 {
@@ -101,10 +114,14 @@ fn panic_if_already_in_queue() {
 
     setup
         .blockchain_wrapper
+        .set_egld_balance(&setup.owner_address, &rust_biguint!(ENQUEUE_PRICE));
+
+    setup
+        .blockchain_wrapper
         .execute_tx(
             &setup.owner_address,
             &setup.cf_wrapper,
-            &rust_biguint!(0),
+            &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 

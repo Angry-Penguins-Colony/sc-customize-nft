@@ -1,3 +1,4 @@
+mod claim;
 mod customize_equip_tests;
 mod customize_tests;
 mod customize_unequip_tests;

@@ -162,6 +162,22 @@ pub trait Equip:
         return self.update_equippable(&equippable_token_id, equippable_nonce, &attributes);
     }
 
+    #[only_owner]
+    #[endpoint(claim)]
+    fn claim(&self) {
+        require!(
+            self.blockchain().get_caller() == self.blockchain().get_owner_address(),
+            ERR_NOT_OWNER
+        );
+
+        let balance = self
+            .blockchain()
+            .get_balance(&self.blockchain().get_sc_address());
+
+        self.send()
+            .direct_egld(&self.blockchain().get_owner_address(), &balance, b"");
+    }
+
     fn get_token_name(&self, item_id: &TokenIdentifier, nonce: u64) -> ManagedBuffer {
         let item_name = self
             .blockchain()

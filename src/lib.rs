@@ -17,10 +17,7 @@ use crate::{constants::*, utils::managed_buffer_utils::ManagedBufferUtils};
 
 #[elrond_wasm::derive::contract]
 pub trait Equip:
-    equippable_minter::MintEquippableModule
-    + parser::ParserModule
-    + endpoint::EndpointsModule
-    + storage::StorageModule
+    equippable_minter::MintEquippableModule + parser::ParserModule + storage::StorageModule
 {
     #[init]
     fn init(
@@ -63,6 +60,54 @@ pub trait Equip:
 
             self.set_slot_of(&item_id, item_slot.clone());
         }
+    }
+
+    #[payable("*")]
+    #[endpoint]
+    #[only_owner]
+    fn fill(&self) {
+        require!(
+            self.blockchain().get_caller() == self.blockchain().get_owner_address(),
+            ERR_NOT_OWNER
+        );
+
+        // TODO: require! to only send registered SFT
+
+        let payment = self.call_value().single_esdt();
+        let token_id = payment.token_identifier;
+        let token_nonce = payment.token_nonce;
+
+        // TODO: extract to Item.fromId()
+        let item_name = self
+            .blockchain()
+            .get_esdt_token_data(&self.blockchain().get_sc_address(), &token_id, token_nonce)
+            .name;
+
+        let item = &Item {
+            name: item_name.clone(),
+        };
+
+        require!(
+            self.token_of(item).is_empty(),
+            "The item with name {} is already registered. Please, use another name.",
+            item_name
+        );
+        self.token_of(item).set((token_id.clone(), token_nonce));
+    }
+
+    /**
+     * Endpoint of enqueue_image_to_render
+     */
+    #[endpoint(renderImage)]
+    #[payable("EGLD")]
+    fn render_image(&self, attributes: &EquippableNftAttributes<Self::Api>) {
+        sc_print!("egld {}", self.call_value().egld_value());
+        require!(
+            self.call_value().egld_value() == BigUint::from(ENQUEUE_PRICE),
+            ERR_PAY_0001_EGLD
+        );
+
+        self.enqueue_image_to_render(&attributes);
     }
 
     #[payable("*")]
@@ -162,56 +207,6 @@ pub trait Equip:
         attributes.set_item(&item_slot, Option::Some(item.clone()));
     }
 
-    /// Make sure that the smart contract can create and burn the equippable.
-    fn require_equippable_collection_roles_set(&self) {
-        let roles = self
-            .blockchain()
-            .get_esdt_local_roles(&self.equippable_token_id().get());
-
-        require!(
-            roles.has_role(&EsdtLocalRole::NftCreate) == true,
-            ERR_CREATE_ROLE_NOT_SET_FOR_EQUIPPABLE
-        );
-
-        require!(
-            roles.has_role(&EsdtLocalRole::NftBurn) == true,
-            ERR_BURN_ROLE_NOT_SET_FOR_EQUIPPABLE
-        );
-    }
-
-    #[payable("*")]
-    #[endpoint]
-    #[only_owner]
-    fn fill(&self) {
-        require!(
-            self.blockchain().get_caller() == self.blockchain().get_owner_address(),
-            ERR_NOT_OWNER
-        );
-
-        // TODO: require! to only send registered SFT
-
-        let payment = self.call_value().single_esdt();
-        let token_id = payment.token_identifier;
-        let token_nonce = payment.token_nonce;
-
-        // TODO: extract to Item.fromId()
-        let item_name = self
-            .blockchain()
-            .get_esdt_token_data(&self.blockchain().get_sc_address(), &token_id, token_nonce)
-            .name;
-
-        let item = &Item {
-            name: item_name.clone(),
-        };
-
-        require!(
-            self.token_of(item).is_empty(),
-            "The item with name {} is already registered. Please, use another name.",
-            item_name
-        );
-        self.token_of(item).set((token_id.clone(), token_nonce));
-    }
-
     /// Empty the item at the slot provided and sent it to the caller.
     fn unequip_slot(
         &self,
@@ -261,5 +256,22 @@ pub trait Equip:
                 sc_panic!(ERR_CANNOT_UNEQUIP_EMPTY_SLOT);
             }
         }
+    }
+
+    /// Make sure that the smart contract can create and burn the equippable.
+    fn require_equippable_collection_roles_set(&self) {
+        let roles = self
+            .blockchain()
+            .get_esdt_local_roles(&self.equippable_token_id().get());
+
+        require!(
+            roles.has_role(&EsdtLocalRole::NftCreate) == true,
+            ERR_CREATE_ROLE_NOT_SET_FOR_EQUIPPABLE
+        );
+
+        require!(
+            roles.has_role(&EsdtLocalRole::NftBurn) == true,
+            ERR_BURN_ROLE_NOT_SET_FOR_EQUIPPABLE
+        );
     }
 }

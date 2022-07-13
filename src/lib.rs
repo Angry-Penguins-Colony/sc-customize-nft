@@ -17,7 +17,10 @@ use crate::{constants::*, utils::managed_buffer_utils::ManagedBufferUtils};
 
 #[elrond_wasm::derive::contract]
 pub trait Equip:
-    equippable_minter::MintEquippableModule + parser::ParserModule + storage::StorageModule
+    equippable_minter::MintEquippableModule
+    + parser::ParserModule
+    + endpoint::EndpointsModule
+    + storage::StorageModule
 {
     #[init]
     fn init(

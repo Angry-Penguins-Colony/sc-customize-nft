@@ -1,7 +1,7 @@
 use crate::{
     constants::{
-        ENQUEUE_PRICE, ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_CID_ALREADY_RENDERER,
-        ERR_IMAGE_NOT_IN_QUEUE, ERR_PAY_0001_EGLD, ERR_RENDER_ALREADY_IN_QUEUE,
+        ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_CID_ALREADY_RENDERER, ERR_IMAGE_NOT_IN_QUEUE,
+        ERR_RENDER_ALREADY_IN_QUEUE,
     },
     structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item},
     utils::{managed_buffer_utils::ManagedBufferUtils, vec_mapper_utils::VecMapperUtils},
@@ -114,21 +114,6 @@ pub trait StorageModule {
 
     // ===
     // IMAGES
-    /**
-     * Endpoint of enqueue_image_to_render
-     */
-    #[endpoint(renderImage)]
-    #[payable("EGLD")]
-    fn render_image(&self, attributes: &EquippableNftAttributes<Self::Api>) {
-        sc_print!("egld {}", self.call_value().egld_value());
-        require!(
-            self.call_value().egld_value() == BigUint::from(ENQUEUE_PRICE),
-            ERR_PAY_0001_EGLD
-        );
-
-        self.enqueue_image_to_render(&attributes);
-    }
-
     fn enqueue_image_to_render(&self, attributes: &EquippableNftAttributes<Self::Api>) -> usize {
         require!(
             self.cid_of_exist(attributes) == false,

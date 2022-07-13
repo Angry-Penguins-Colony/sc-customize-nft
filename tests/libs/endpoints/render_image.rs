@@ -1,6 +1,6 @@
 use customize_nft::{
     constants::{ENQUEUE_PRICE, ERR_PAY_0001_EGLD},
-    libs::storage::StorageModule,
+    libs::{endpoint::EndpointsModule, storage::StorageModule},
     structs::equippable_nft_attributes::EquippableNftAttributes,
 };
 use elrond_wasm_debug::{rust_biguint, DebugApi};

@@ -4,6 +4,10 @@
 
 # 📜 Smart Contract
 
+## Description
+
+The customisation smart contract of Angry Penguins Colony's customisation system. 
+
 # How to setup the contract?
 ## Deploy contract
 

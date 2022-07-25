@@ -183,10 +183,10 @@ TransferTransaction {
             "@02" + <number of tokens to transfer in hexadecimal encoding> +
             "@" + <equippable token identifier in hex encoding> +
             "@" + <equippable to customize nonce in hex encoding> +
-            "@01" + // quantity of equippable to send
+            "@01" + // quantity of equippable to send; we just send one
             "@" + <item to equip 1 identifier in hexadecimal encoding> +
             "@" + <item to equip 1 nonce in hexadecimal encoding> +
-            "@" + <item to equip 1 quantity to transfer in hexadecimal encoding> +
+            "@01" + // quantity of item to equip 1; we just send one
             <...> + // item to equip can be repeated
             "@customize"
 }
@@ -240,7 +240,7 @@ TransferTransaction {
         "@01" + // quantity of penguin to send
         "@" + <item to equip 1 identifier in hexadecimal encoding> +
         "@" + <item to equip 1 nonce in hexadecimal encoding> +
-        "@" + <item to equip 1 quantity to transfer in hexadecimal encoding> +
+        "@01" + // just send one item to equip 1
         <...> // item to equip can be repeated
         "@customize" +
         "@" + <slot to desequip in hex encoding>

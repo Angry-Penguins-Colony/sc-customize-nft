@@ -48,8 +48,8 @@ TransferTransaction {
     Value: 0
     GasLimit: 6_000_000
     Data: "registerItem" +
-		  "@" + <slot in hexadecimal encoding>
-		  "@" + <collection identifier in hexadecimal neconding>
+            "@" + <slot in hexadecimal encoding>
+            "@" + <collection identifier in hexadecimal neconding>
 }
 ```
 
@@ -63,8 +63,8 @@ TransferTransaction {
 >     Value: 0
 >     GasLimit: 6_000_000
 >     Data: "registerItem" +
-> 			"@686174" + // hat
-> 			"@4841542D356537386434" // HAT-5e78d4
+>            "@686174" + // hat
+>            "@4841542D356537386434" // HAT-5e78d4
 > }
 > ```
 
@@ -80,37 +80,13 @@ TransferTransaction {
     Value: 0
     GasLimit: 6_000_000
     Data: "ESDTNFTTransfer" +
-		  "@" + <token identifier in hexadecimal encoding> +
-          "@" + <the nonce in hexadecimal encoding> +
-          "@01" + // quantity to send; always one
-          "@" + <smart contract address in hexadecimal encoding> +
-          "@66696C6C" + // name of method to call; this is "fill"
+            "@" + <token identifier in hexadecimal encoding> +
+            "@" + <the nonce in hexadecimal encoding> +
+            "@01" + // quantity to send; always one
+            "@" + <smart contract address in hexadecimal encoding> +
+            "@66696C6C" + // name of method to call; this is "fill"
 }
 ```
-
-> **EXAMPLE**
->
-> Render the image of an equippable that has "Pirate Hat" as hat slot.
-> 
-> ```rust
-> TransferTransaction {
->     Sender: <account address of the sender>
->     Receiver: <smart contract>
->     Value: 1_000_000_000_000_000, // 0.001 EGLD
->     GasLimit: 50_000_000
->     Data: "renderImage" +
-> 		  "@4861743A50697261746520486174" + // Hat:Pirate Hat
-> }
-> ```
-
-> **💡 WHY THIS TRANSACTION MUST BE PAYED?**
-> 
-> For the **autonomy** of the system.  
-> 
-> The server push renderer listen to `renderImage` transactions, and responds by sending a `setCidOf` transaction.   
-> 
-> But, if the server has not funds, he will not be able to send the transaction `setCidOf`. All the system would be frozen.  
-> Hopefully, before that happen, the server will claim the wallet of the smart contract. 
 
 ## Transfer required role
 
@@ -159,6 +135,30 @@ TransferTransaction {
 		  "@" + <equippable attributes in hexadecimal encoding>
 }
 ```
+
+> **EXAMPLE**
+>
+> Render the image of an equippable that has "Pirate Hat" as hat slot.
+> 
+> ```rust
+> TransferTransaction {
+>     Sender: <account address of the sender>
+>     Receiver: <smart contract>
+>     Value: 1_000_000_000_000_000, // 0.001 EGLD
+>     GasLimit: 50_000_000
+>     Data: "renderImage" +
+> 		  "@4861743A50697261746520486174" + // Hat:Pirate Hat
+> }
+> ```
+
+> **💡 WHY THIS TRANSACTION MUST BE PAYED?**
+> 
+> For the **autonomy** of the system.  
+> 
+> The server push renderer listen to `renderImage` transactions, and responds by sending a `setCidOf` transaction.   
+> 
+> But, if the server has not funds, he will not be able to send the transaction `setCidOf`. All the system would be frozen.  
+> Hopefully, before that happen, the server will claim the wallet of the smart contract. 
 
 # How to customize?
 ## Equip an Equippable

@@ -6,9 +6,16 @@
 
 ## Description
 
-The customisation smart contract of Angry Penguins Colony's customisation system. 
+The customization smart contract of Angry Penguins Colony's customization system. 
 
-# How to setup the contract?
+# How to set up the contract?
+
+## Build contract
+
+```
+erdpy contract build
+```
+
 ## Deploy contract
 
 There are three arguments to deploy the smart contract : 
@@ -19,6 +26,11 @@ There are three arguments to deploy the smart contract :
 | IPFS Gateway                            | If you don't know what to put, https://ipfs.io/ipfs/ is recommended.<br />It is worth specifying another gateway if your visuals are hosted on services like Pinata.cloud. |
 | Equippable name format                  | This is the name of the Equippable.<br /><br />{number} must be included. It will be replaced the number (not the nonce) of the penguin<br />E.g. `Penguin #{number}` will become `Penguin #10` if the Equippable is the 10st |
 
+
+Fill erdpy.json, then run:
+```
+erdpy contract deploy
+```
 
 
 ## Register an item

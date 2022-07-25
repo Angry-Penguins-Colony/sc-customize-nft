@@ -90,12 +90,12 @@ TransferTransaction {
 
 ## Transfer required role
 
-On Elrond, we cannot update the URI associated to a NFT (we can just add new URI).   
+On Elrond, we cannot update the URI associated with an NFT (we can just add a new URI).   
 To update the visual, we burn and recreate a new NFT, with the wanted visual.
 
 > The total supply of your collection will stay the same.
 
-Therefore, we need to **transfer the create role** of the Equippable to the smart contract:
+Therefore, we need to **transfer the creation role** of the Equippable to the smart contract:
 ```rust
 TransferCreationRoleTransaction {
     Sender: <address of the current creation role owner>
@@ -201,7 +201,7 @@ TransferTransaction {
 
 ## Unequip an Equippable
 
-Call the `customize` endpoint while transfering the Equippable NFT. Then, add the slots you want to unequip after `customize` in the data field.
+Call the `customize` endpoint while transferring the Equippable NFT. Then, add the slots you want to unequip after `customize` in the data field.
 
 > **EXAMPLE**
 >

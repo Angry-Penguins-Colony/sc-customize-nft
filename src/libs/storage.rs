@@ -50,9 +50,8 @@ pub trait StorageModule {
 
     #[endpoint(addPermissionSetCid)]
     #[only_owner]
-    fn add_permission_set_cid(&self) {
-        self.__permissions_set_cid_of(&self.blockchain().get_caller())
-            .set(true);
+    fn add_permission_set_cid(&self, address: ManagedAddress) {
+        self.__permissions_set_cid_of(&address).set(true);
     }
 
     #[endpoint(setCidOf)]

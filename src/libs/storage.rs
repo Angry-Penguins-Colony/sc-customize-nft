@@ -27,6 +27,12 @@ pub trait StorageModule {
         item: &Item<Self::Api>,
     ) -> SingleValueMapper<(TokenIdentifier<Self::Api>, u64)>;
 
+    #[storage_mapper("permissions")]
+    fn __permissions_set_cid_of(
+        &self,
+        address: &ManagedAddress<Self::Api>,
+    ) -> SingleValueMapper<bool>;
+
     #[storage_mapper("slot_of_items")]
     fn __slot_of(&self, token: &TokenIdentifier) -> SingleValueMapper<ManagedBuffer>;
 
@@ -42,14 +48,28 @@ pub trait StorageModule {
     // STORAGE MODIFIERS
     // CID
 
-    #[endpoint(setCidOf)]
+    #[endpoint(addPermissionSetCid)]
     #[only_owner]
+    fn add_permission_set_cid(&self) {
+        self.__permissions_set_cid_of(&self.blockchain().get_caller())
+            .set(true);
+    }
+
+    #[endpoint(setCidOf)]
     fn set_cid_of(
         &self,
         cid_kvp: MultiValueEncoded<
             MultiValue2<EquippableNftAttributes<Self::Api>, ManagedBuffer<Self::Api>>,
         >,
     ) {
+        let caller = &self.blockchain().get_caller();
+
+        require!(
+            &self.blockchain().get_owner_address() == caller
+                || self.__permissions_set_cid_of(caller).get() == true,
+            "You don't have the permission to call this endpoint."
+        );
+
         for kvp in cid_kvp {
             let (attributes, cid) = kvp.into_tuple();
 

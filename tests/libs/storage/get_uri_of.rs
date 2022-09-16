@@ -7,6 +7,7 @@ use elrond_wasm_debug::DebugApi;
 use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
 use customize_nft::structs::item::Item;
 use elrond_wasm::elrond_codec::multi_types::MultiValue2;
+use elrond_wasm_debug::rust_biguint;
 
 #[test]
 fn build_url_with_no_associated_cid() {
@@ -33,28 +34,33 @@ fn build_url_with_associated_cid() {
 
     setup
         .blockchain_wrapper
-        .execute_query(&setup.cf_wrapper, |sc| {
-            let penguin_attributes = EquippableNftAttributes::<DebugApi>::new(&[(
-                &ManagedBuffer::new_from_bytes(b"hat"),
-                Item::<DebugApi> {
-                    name: ManagedBuffer::new_from_bytes(b"item name"),
-                },
-            )]);
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                let penguin_attributes = EquippableNftAttributes::<DebugApi>::new(&[(
+                    &ManagedBuffer::new_from_bytes(b"hat"),
+                    Item::<DebugApi> {
+                        name: ManagedBuffer::new_from_bytes(b"item name"),
+                    },
+                )]);
 
-            sc.set_cid_of(args_set_cid_of!(
-                penguin_attributes.clone(),
-                ManagedBuffer::new_from_bytes(b"this is a CID")
-            ));
+                sc.set_cid_of(args_set_cid_of!(
+                    penguin_attributes.clone(),
+                    ManagedBuffer::new_from_bytes(b"this is a CID")
+                ));
 
-            sc.ipfs_gateway()
-                .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/"));
+                sc.ipfs_gateway()
+                    .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/"));
 
-            let url = sc.get_uri_of(&penguin_attributes);
+                let url = sc.get_uri_of(&penguin_attributes);
 
-            assert_eq!(
-                url,
-                ManagedBuffer::from(b"https://ipfs.io/ipfs/this is a CID")
-            )
-        })
+                assert_eq!(
+                    url,
+                    ManagedBuffer::from(b"https://ipfs.io/ipfs/this is a CID")
+                )
+            },
+        )
         .assert_ok();
 }

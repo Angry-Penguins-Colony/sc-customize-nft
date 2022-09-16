@@ -86,7 +86,7 @@ fn should_fail_if_not_owner() {
                 sc.call_set_cid_of();
             },
         )
-        .assert_user_error("Endpoint can only be called by owner");
+        .assert_user_error("You don't have the permission to call this endpoint.");
 }
 
 #[test]

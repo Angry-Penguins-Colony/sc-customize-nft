@@ -9,7 +9,7 @@ use customize_nft::{
 };
 use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::{ManagedBuffer, MultiValueEncoded};
-use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
+use elrond_wasm_debug::{rust_biguint, DebugApi};
 
 use crate::{args_set_cid_of, testing_utils};
 
@@ -72,12 +72,15 @@ fn customize_complete_flow() {
                     },
                 )]);
 
-                let attributes_after_custom = EquippableNftAttributes::new(&[(
+                let mut attributes_after_custom = attributes_before_custom.clone();
+                attributes_after_custom
+                    .empty_slot(&ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT));
+                attributes_after_custom.set_item(
                     &ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT),
-                    Item {
+                    Some(Item {
                         name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID),
-                    },
-                )]);
+                    }),
+                );
 
                 sc.set_cid_of(args_set_cid_of!(
                     attributes_before_custom,
@@ -137,17 +140,26 @@ fn customize_complete_flow() {
         "The user should have received the penguin"
     );
 
+    let mut attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[(
+        &ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT),
+        Item {
+            name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_ID),
+        },
+    )]);
+    attributes_after_custom.empty_slot(&ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT));
+    attributes_after_custom.set_item(
+        &ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT),
+        Some(Item {
+            name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID),
+        }),
+    );
+
     setup.blockchain_wrapper.check_nft_balance(
         &setup.first_user_address,
         EQUIPPABLE_TOKEN_ID,
         1,
         &rust_biguint!(1),
-        Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[(
-            &managed_buffer!(ITEM_TO_EQUIP_SLOT),
-            Item {
-                name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework force us to do this
-            },
-        )])),
+        Option::Some(&attributes_after_custom),
     );
 
     setup.assert_uris(

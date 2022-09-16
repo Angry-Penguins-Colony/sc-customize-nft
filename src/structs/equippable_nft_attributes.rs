@@ -23,7 +23,7 @@ elrond_wasm::derive_imports!();
 #[derive(ManagedVecItem, NestedEncode, NestedDecode, PartialEq, TypeAbi, Clone, Debug)]
 struct Kvp<M: ManagedTypeApi> {
     pub slot: ManagedBuffer<M>,
-    pub item: Item<M>,
+    pub item: Option<Item<M>>,
 }
 
 impl<M: ManagedTypeApi> Kvp<M> {
@@ -31,14 +31,21 @@ impl<M: ManagedTypeApi> Kvp<M> {
         let mut output_buffer = ManagedBuffer::<M>::new();
 
         // 1. add slot
-        output_buffer.append(&self.slot.capitalize());
+        output_buffer.append(&self.slot.to_lowercase().capitalize());
 
         // 2. separator
         output_buffer.append_bytes(b":");
 
         // 3. item_buffer
         let mut item_buffer = ManagedBuffer::new();
-        self.item.top_encode(&mut item_buffer).unwrap();
+        match &self.item {
+            Some(item) => {
+                item.top_encode(&mut item_buffer).unwrap();
+            }
+            None => {
+                item_buffer.append_bytes(b"unequipped");
+            }
+        }
         output_buffer.append(&item_buffer);
 
         return output_buffer;
@@ -108,12 +115,16 @@ impl<M: ManagedTypeApi> TopDecode for EquippableNftAttributes<M> {
         for item_raw in items_raw.iter() {
             let parts = item_raw.deref().split(b':');
 
-            let slot = parts.get(0).deref().clone();
+            let slot = parts.get(0).deref().clone().to_lowercase();
             let item_buffer = parts.get(1);
 
-            let item = Some(Item::top_decode(item_buffer.deref()).unwrap());
-
-            equippable_attributes.set_item(&slot, item);
+            if item_buffer.deref() == &ManagedBuffer::new_from_bytes(b"unequipped") {
+                equippable_attributes.set_item(&slot, None);
+                continue;
+            } else {
+                let item = Some(Item::top_decode(item_buffer.deref()).unwrap());
+                equippable_attributes.set_item(&slot, item);
+            }
         }
 
         return Result::Ok(equippable_attributes);
@@ -157,7 +168,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
 
     pub fn get_item(&self, slot: &ManagedBuffer<M>) -> Option<Item<M>> {
         match self.__get_index(slot) {
-            Some(index) => Option::Some(self.kvp.get(index).item),
+            Some(index) => self.kvp.get(index).item,
             None => None,
         }
     }
@@ -174,11 +185,19 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
     }
 
     pub fn get_count(&self) -> usize {
-        return self.kvp.len();
+        let mut count = 0;
+
+        for kvp in self.kvp.iter() {
+            if kvp.item.is_some() {
+                count = count + 1;
+            }
+        }
+
+        return count;
     }
 
     pub fn is_slot_empty(&self, slot: &ManagedBuffer<M>) -> bool {
-        let item = self.get_item(slot);
+        let item = self.get_item(&slot.to_lowercase());
 
         match item {
             Some(_) => false,
@@ -187,7 +206,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
     }
 
     pub fn empty_slot(&mut self, slot: &ManagedBuffer<M>) {
-        return self.__set_item_no_check(slot, Option::None);
+        return self.__set_item_no_check(&slot, Option::None);
     }
 
     pub fn empty() -> Self {
@@ -196,49 +215,32 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
         };
     }
 
-    fn __get_index(&self, target_slot: &ManagedBuffer<M>) -> Option<usize> {
+    fn __get_index(&self, slot: &ManagedBuffer<M>) -> Option<usize> {
         return self
             .kvp
             .iter()
-            .position(|kvp| kvp.slot.equals_ignore_case(target_slot));
+            .position(|kvp| kvp.slot.equals_ignore_case(slot));
     }
 
     /// Set an item on a slot, without checking if the slot is empty.
     fn __set_item_no_check(&mut self, slot: &ManagedBuffer<M>, item: Option<Item<M>>) {
-        let index = self.__get_index(slot);
+        let slot = slot.to_lowercase();
+        let index = self.__get_index(&slot);
 
         match index {
             Some(index) => {
-                if let Some(item) = item {
-                    let result = self.kvp.set(
-                        index,
-                        &Kvp {
-                            item,
-                            slot: slot.clone(),
-                        },
-                    );
+                let result = self.kvp.set(index, &Kvp { item, slot });
 
-                    if result.is_err() {
-                        sc_panic_self!(
-                            M,
-                            "Failed to set item, InvalidSliceError exception happened."
-                        );
-                    }
-                } else {
-                    self.kvp.remove(index);
+                if result.is_err() {
+                    sc_panic_self!(
+                        M,
+                        "Failed to set item, InvalidSliceError exception happened."
+                    );
                 }
             }
-            None => match item {
-                Some(item) => {
-                    self.kvp.push(Kvp {
-                        slot: slot.to_lowercase(),
-                        item,
-                    });
-                }
-                None => {
-                    // Try to remove a None item, so we do nothing
-                }
-            },
+            None => {
+                self.kvp.push(Kvp { slot, item });
+            }
         }
 
         self.kvp = self.kvp.sort_alphabetically();

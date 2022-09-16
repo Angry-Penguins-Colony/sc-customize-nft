@@ -20,7 +20,7 @@ fn customize_only_unequip() {
     // 1. ARRANGE
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let slot = b"Background";
+    let slot = b"background";
     const ITEM_TO_UNEQUIP_ID: &[u8] = b"BG-a1a1a1";
     const ITEM_TO_UNEQUIP_NAME: &[u8] = b"Some Item";
     const ITEM_TO_UNEQUIP_NONCE: u64 = 42;
@@ -53,13 +53,16 @@ fn customize_only_unequip() {
                     },
                 )]);
 
+                let mut attributes_after_custom = attributes_before_custom.clone();
+                attributes_after_custom.empty_slot(&ManagedBuffer::new_from_bytes(slot));
+
                 sc.set_cid_of(args_set_cid_of!(
                     attributes_before_custom,
                     ManagedBuffer::<DebugApi>::new_from_bytes(b"this is a cid")
                 ));
 
                 sc.set_cid_of(args_set_cid_of!(
-                    EquippableNftAttributes::<DebugApi>::empty(),
+                    attributes_after_custom,
                     ManagedBuffer::new_from_bytes(b"empty")
                 ));
             },
@@ -99,13 +102,21 @@ fn customize_only_unequip() {
         "Equippable NFT should be received"
     );
 
+    let mut attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[(
+        &ManagedBuffer::new_from_bytes(slot),
+        Item {
+            name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
+        },
+    )]);
+    attributes_after_custom.empty_slot(&ManagedBuffer::new_from_bytes(slot));
+
     // is equippable empty
     setup.blockchain_wrapper.check_nft_balance(
         &setup.first_user_address,
         EQUIPPABLE_TOKEN_ID,
         1,
         &rust_biguint!(1),
-        Option::Some(&EquippableNftAttributes::<DebugApi>::empty()),
+        Option::Some(&attributes_after_custom),
     );
 
     setup.assert_uris(EQUIPPABLE_TOKEN_ID, 1, &[b"https://ipfs.io/ipfs/empty"]);
@@ -150,13 +161,16 @@ fn unequip_should_ignore_case_of_slot() {
                     },
                 )]);
 
+                let mut attributes_after_custom = attributes_before_custom.clone();
+                attributes_after_custom.empty_slot(&ManagedBuffer::new_from_bytes(SLOT_LOWERCASE));
+
                 sc.set_cid_of(args_set_cid_of!(
                     attributes_before_custom,
                     ManagedBuffer::<DebugApi>::new_from_bytes(b"this is a cid")
                 ));
 
                 sc.set_cid_of(args_set_cid_of!(
-                    EquippableNftAttributes::<DebugApi>::empty(),
+                    attributes_after_custom,
                     ManagedBuffer::new_from_bytes(b"empty")
                 ));
             },
@@ -197,12 +211,20 @@ fn unequip_should_ignore_case_of_slot() {
     );
 
     // is equippable empty
+    let mut attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[(
+        &ManagedBuffer::new_from_bytes(SLOT_LOWERCASE),
+        Item {
+            name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
+        },
+    )]);
+    attributes_after_custom.empty_slot(&ManagedBuffer::new_from_bytes(SLOT_LOWERCASE));
+
     setup.blockchain_wrapper.check_nft_balance(
         &setup.first_user_address,
         EQUIPPABLE_TOKEN_ID,
         1,
         &rust_biguint!(1),
-        Option::Some(&EquippableNftAttributes::<DebugApi>::empty()),
+        Option::Some(&attributes_after_custom),
     );
 
     setup.assert_uris(EQUIPPABLE_TOKEN_ID, 1, &[b"https://ipfs.io/ipfs/empty"]);

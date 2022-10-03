@@ -226,7 +226,7 @@ fn unequip_should_ignore_case_of_slot() {
 fn panic_when_unequip_twice_the_same_slot() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let slot = b"Background";
+    let slot = b"background";
     const ITEM_TO_UNEQUIP_ID: &[u8] = b"BG-a1a1a1";
     const ITEM_TO_UNEQUIP_NAME: &[u8] = b"Some Item";
     const ITEM_TO_UNEQUIP_NONCE: u64 = 42;

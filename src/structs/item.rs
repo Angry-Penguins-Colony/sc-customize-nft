@@ -25,12 +25,29 @@ impl<M: ManagedTypeApi> elrond_codec::TopEncode for Item<M> {
         &self,
         output: O,
     ) -> Result<(), elrond_codec::EncodeError> {
-        panic!("not implemented");
+        let mut managed_buffer = ManagedBuffer::<M>::new();
+
+        // build buffer
+        managed_buffer.append(&self.slot.capitalize());
+        managed_buffer.append_bytes(b":");
+        managed_buffer.append(&self.name);
+
+        // set buffer to output
+        let mut bytes: [u8; 512] = [0; 512];
+        managed_buffer.load_to_byte_array(&mut bytes);
+        output.set_slice_u8(&bytes[..managed_buffer.len()]);
+
+        return Result::Ok(());
     }
 }
 
 impl<M: ManagedTypeApi> Item<M> {
     pub fn top_decode(input: &ManagedBuffer<M>) -> Result<Self, DecodeError> {
-        panic!("not implemented");
+        let parts = input.split(b':');
+
+        return Result::Ok(Self {
+            slot: parts.get(0).to_lowercase(),
+            name: parts.get(1).deref().clone(),
+        });
     }
 }

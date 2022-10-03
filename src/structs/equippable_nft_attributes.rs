@@ -30,13 +30,6 @@ impl<M: ManagedTypeApi> Kvp<M> {
     pub fn to_kvp_buffer(&self) -> ManagedBuffer<M> {
         let mut output_buffer = ManagedBuffer::<M>::new();
 
-        // 1. add slot
-        output_buffer.append(&self.slot.to_lowercase().capitalize());
-
-        // 2. separator
-        output_buffer.append_bytes(b":");
-
-        // 3. item_buffer
         let mut item_buffer = ManagedBuffer::new();
         match &self.item {
             Some(item) => {
@@ -113,17 +106,14 @@ impl<M: ManagedTypeApi> TopDecode for EquippableNftAttributes<M> {
         let items_raw = buffer.split(b';');
 
         for item_raw in items_raw.iter() {
-            let parts = item_raw.deref().split(b':');
+            let item = Item::top_decode(item_raw.deref()).unwrap();
+            let slot = item.slot.clone();
 
-            let slot = parts.get(0).deref().clone().to_lowercase();
-            let item_buffer = parts.get(1);
-
-            if item_buffer.deref() == &ManagedBuffer::new_from_bytes(b"unequipped") {
+            if &item.name == &ManagedBuffer::new_from_bytes(b"unequipped") {
                 equippable_attributes.set_item(&slot, None);
                 continue;
             } else {
-                let item = Some(Item::top_decode(item_buffer.deref()).unwrap());
-                equippable_attributes.set_item(&slot, item);
+                equippable_attributes.set_item(&slot, Some(item));
             }
         }
 

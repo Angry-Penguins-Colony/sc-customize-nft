@@ -388,10 +388,7 @@ fn panic_if_token_is_not_an_item() {
 
     let (_, tx_result) = setup.equip(transfers);
 
-    tx_result.assert_error(
-        4,
-        "Trying to equip 'NOT-AN-ITEM-a' but is not considered as an item",
-    );
+    tx_result.assert_error(4, "No slot found for NOT-AN-ITEM-a.");
 }
 
 #[test]

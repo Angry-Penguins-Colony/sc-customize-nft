@@ -56,18 +56,14 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
                 let cid_buffer = managed_buffer!(cid_bytes);
 
                 let attributes = EquippableNftAttributes::<DebugApi>::new(&[
-                    (
-                        &managed_buffer!(a_slot),
-                        Item::<DebugApi> {
-                            name: managed_buffer!(a_value),
-                        },
-                    ),
-                    (
-                        &managed_buffer!(b_slot),
-                        Item::<DebugApi> {
-                            name: managed_buffer!(b_value),
-                        },
-                    ),
+                    Item::<DebugApi> {
+                        name: managed_buffer!(a_value),
+                        slot: managed_buffer!(a_slot),
+                    },
+                    Item::<DebugApi> {
+                        name: managed_buffer!(b_value),
+                        slot: managed_buffer!(b_slot),
+                    },
                 ]);
                 sc.set_cid_of(args_set_cid_of!(attributes.clone(), cid_buffer.clone()));
 
@@ -81,18 +77,14 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             let attributes = EquippableNftAttributes::<DebugApi>::new(&[
-                (
-                    &managed_buffer!(b_slot),
-                    Item::<DebugApi> {
-                        name: managed_buffer!(b_value),
-                    },
-                ),
-                (
-                    &managed_buffer!(a_slot),
-                    Item::<DebugApi> {
-                        name: managed_buffer!(a_value),
-                    },
-                ),
+                Item::<DebugApi> {
+                    name: managed_buffer!(b_value),
+                    slot: managed_buffer!(b_slot),
+                },
+                Item::<DebugApi> {
+                    name: managed_buffer!(a_value),
+                    slot: managed_buffer!(a_slot),
+                },
             ]);
 
             assert_eq!(sc.get_cid_of(&attributes), managed_buffer!(cid_bytes));

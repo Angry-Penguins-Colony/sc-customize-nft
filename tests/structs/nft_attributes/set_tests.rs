@@ -16,6 +16,7 @@ fn set_item_on_empty_slot() {
         &slot,
         Option::Some(Item {
             name: ManagedBuffer::new_from_bytes(b"item name"),
+            slot: slot.clone(),
         }),
     );
 
@@ -32,17 +33,16 @@ fn set_item_on_not_empty_slot() {
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |_sc| {
             let slot = &ManagedBuffer::new_from_bytes(b"hat");
-            let mut equippable_nft_attributes = EquippableNftAttributes::<DebugApi>::new(&[(
-                slot,
-                Item {
-                    name: ManagedBuffer::new_from_bytes(b"item name"),
-                },
-            )]);
+            let mut equippable_nft_attributes = EquippableNftAttributes::<DebugApi>::new(&[Item {
+                name: ManagedBuffer::new_from_bytes(b"item name"),
+                slot: slot.clone(),
+            }]);
 
             equippable_nft_attributes.set_item(
                 &slot,
                 Option::Some(Item {
                     name: ManagedBuffer::new_from_bytes(b"item name"),
+                    slot: slot.clone(),
                 }),
             );
         })

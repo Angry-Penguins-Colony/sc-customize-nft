@@ -20,9 +20,10 @@ fn get_item() {
     let slot = ManagedBuffer::<DebugApi>::new_from_bytes(b"hat");
     let item = Item {
         name: ManagedBuffer::<DebugApi>::new_from_bytes(b"hat"),
+        slot: slot.clone(),
     };
 
-    let attributes = EquippableNftAttributes::<DebugApi>::new(&[(&slot, item.clone())]);
+    let attributes = EquippableNftAttributes::<DebugApi>::new(&[item.clone()]);
 
     assert_eq!(attributes.get_item(&slot).is_some(), true);
     assert_eq!(attributes.get_item(&slot).unwrap(), item);

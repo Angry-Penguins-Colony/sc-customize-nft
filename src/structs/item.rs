@@ -15,6 +15,7 @@ elrond_wasm::derive_imports!();
 #[derive(ManagedVecItem, NestedEncode, NestedDecode, PartialEq, TypeAbi, Clone, Debug)]
 pub struct Item<M: ManagedTypeApi> {
     pub name: ManagedBuffer<M>,
+    pub slot: ManagedBuffer<M>,
 }
 
 impl<M: ManagedTypeApi> elrond_codec::TopEncode for Item<M> {
@@ -24,24 +25,12 @@ impl<M: ManagedTypeApi> elrond_codec::TopEncode for Item<M> {
         &self,
         output: O,
     ) -> Result<(), elrond_codec::EncodeError> {
-        let mut managed_buffer = ManagedBuffer::<M>::new();
-
-        // build buffer
-        managed_buffer.append(&self.name);
-
-        // set buffer to output
-        let mut bytes: [u8; 512] = [0; 512];
-        managed_buffer.load_to_byte_array(&mut bytes);
-        output.set_slice_u8(&bytes[..managed_buffer.len()]);
-
-        return Result::Ok(());
+        panic!("not implemented");
     }
 }
 
 impl<M: ManagedTypeApi> Item<M> {
     pub fn top_decode(input: &ManagedBuffer<M>) -> Result<Self, DecodeError> {
-        return Result::Ok(Self {
-            name: input.clone(),
-        });
+        panic!("not implemented");
     }
 }

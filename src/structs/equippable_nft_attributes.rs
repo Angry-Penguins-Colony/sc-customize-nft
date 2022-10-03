@@ -156,11 +156,11 @@ impl<M: ManagedTypeApi> TopEncode for EquippableNftAttributes<M> {
 }
 
 impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
-    pub fn new(items_by_slot: &[(&ManagedBuffer<M>, Item<M>)]) -> Self {
+    pub fn new(items_by_slot: &[Item<M>]) -> Self {
         let mut attributes = Self::empty();
 
-        for (slot, item) in items_by_slot {
-            attributes.set_item(&slot, Option::Some(item.clone()));
+        for item in items_by_slot {
+            attributes.set_item(&item.slot, Option::Some(item.clone()));
         }
 
         return attributes;
@@ -226,6 +226,10 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
     fn __set_item_no_check(&mut self, slot: &ManagedBuffer<M>, item: Option<Item<M>>) {
         let slot = slot.to_lowercase();
         let index = self.__get_index(&slot);
+
+        if item.is_some() && item.clone().unwrap().slot != slot {
+            sc_panic_self!(M, "The item slot does not match the slot parameter.");
+        }
 
         match index {
             Some(index) => {

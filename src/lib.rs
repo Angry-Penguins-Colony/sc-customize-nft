@@ -85,6 +85,7 @@ pub trait Equip:
 
         let item = &Item {
             name: item_name.clone(),
+            slot: self.get_slot_of(&token_id),
         };
 
         require!(
@@ -154,6 +155,7 @@ pub trait Equip:
 
             let item = Item {
                 name: self.get_token_name(&payment.token_identifier, payment.token_nonce),
+                slot: self.get_slot_of(&payment.token_identifier),
             };
 
             self.equip_slot(&mut attributes, &item);

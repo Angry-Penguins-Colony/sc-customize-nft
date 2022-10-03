@@ -65,12 +65,10 @@ fn customize_complete_flow() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes_before_custom = EquippableNftAttributes::new(&[(
-                    &ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT),
-                    Item {
-                        name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_ID),
-                    },
-                )]);
+                let attributes_before_custom = EquippableNftAttributes::new(&[Item {
+                    name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_ID),
+                    slot: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT),
+                }]);
 
                 let mut attributes_after_custom = attributes_before_custom.clone();
                 attributes_after_custom
@@ -79,6 +77,7 @@ fn customize_complete_flow() {
                     &ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT),
                     Some(Item {
                         name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID),
+                        slot: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT),
                     }),
                 );
 
@@ -140,17 +139,16 @@ fn customize_complete_flow() {
         "The user should have received the penguin"
     );
 
-    let mut attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[(
-        &ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT),
-        Item {
-            name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_ID),
-        },
-    )]);
+    let mut attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
+        name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_ID),
+        slot: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT),
+    }]);
     attributes_after_custom.empty_slot(&ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT));
     attributes_after_custom.set_item(
         &ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT),
         Some(Item {
             name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID),
+            slot: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT),
         }),
     );
 

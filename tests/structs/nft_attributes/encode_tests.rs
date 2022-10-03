@@ -1,17 +1,15 @@
 use customize_nft::structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item};
-use elrond_wasm::{elrond_codec::TopEncode, types::ManagedBuffer};
+use elrond_wasm::elrond_codec::TopEncode;
 use elrond_wasm_debug::{managed_buffer, DebugApi};
 
 #[test]
 fn should_top_encode() {
     DebugApi::dummy();
 
-    let equippable_nft_attributes = EquippableNftAttributes::new(&[(
-        &ManagedBuffer::new_from_bytes(b"hat"),
-        Item::<DebugApi> {
-            name: managed_buffer!(b"Pirate Hat"),
-        },
-    )]);
+    let equippable_nft_attributes = EquippableNftAttributes::new(&[Item::<DebugApi> {
+        name: managed_buffer!(b"Pirate Hat"),
+        slot: managed_buffer!(b"hat"),
+    }]);
 
     let expected = b"Hat:Pirate Hat";
 
@@ -24,33 +22,25 @@ fn should_top_encode_two() {
     DebugApi::dummy();
 
     let attributes_order_one = EquippableNftAttributes::new(&[
-        (
-            &ManagedBuffer::new_from_bytes(b"weapon"),
-            Item::<DebugApi> {
-                name: managed_buffer!(b"Gun"),
-            },
-        ),
-        (
-            &ManagedBuffer::new_from_bytes(b"hat"),
-            Item::<DebugApi> {
-                name: managed_buffer!(b"Pirate Hat"),
-            },
-        ),
+        Item::<DebugApi> {
+            name: managed_buffer!(b"Gun"),
+            slot: managed_buffer!(b"weapon"),
+        },
+        Item::<DebugApi> {
+            name: managed_buffer!(b"Pirate Hat"),
+            slot: managed_buffer!(b"hat"),
+        },
     ]);
 
     let attributes_order_two = EquippableNftAttributes::new(&[
-        (
-            &ManagedBuffer::new_from_bytes(b"hat"),
-            Item::<DebugApi> {
-                name: managed_buffer!(b"Pirate Hat"),
-            },
-        ),
-        (
-            &ManagedBuffer::new_from_bytes(b"weapon"),
-            Item::<DebugApi> {
-                name: managed_buffer!(b"Gun"),
-            },
-        ),
+        Item::<DebugApi> {
+            name: managed_buffer!(b"Pirate Hat"),
+            slot: managed_buffer!(b"hat"),
+        },
+        Item::<DebugApi> {
+            name: managed_buffer!(b"Gun"),
+            slot: managed_buffer!(b"weapon"),
+        },
     ]);
 
     assert_equippable_encode_eq(attributes_order_one, b"Hat:Pirate Hat;Weapon:Gun");

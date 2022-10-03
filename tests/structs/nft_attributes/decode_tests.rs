@@ -9,12 +9,10 @@ fn decode_equippable_nft() {
     let input_data = b"Hat:Pirate Hat";
     let input_buffer = ManagedBuffer::<DebugApi>::new_from_bytes(input_data);
 
-    let expected_output = EquippableNftAttributes::new(&[(
-        &ManagedBuffer::new_from_bytes(b"hat"),
-        Item::<DebugApi> {
-            name: managed_buffer!(b"Pirate Hat"),
-        },
-    )]);
+    let expected_output = EquippableNftAttributes::new(&[Item::<DebugApi> {
+        name: managed_buffer!(b"Pirate Hat"),
+        slot: managed_buffer!(b"hat"),
+    }]);
 
     let actual_output = EquippableNftAttributes::top_decode(input_buffer).unwrap();
 

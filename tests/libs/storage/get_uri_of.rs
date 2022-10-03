@@ -16,12 +16,11 @@ fn build_url_with_no_associated_cid() {
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
-            let equippable_attributes = EquippableNftAttributes::<DebugApi>::new(&[(
-                &ManagedBuffer::new_from_bytes(b"hat"),
-                Item::<DebugApi> {
+            let equippable_attributes =
+                EquippableNftAttributes::<DebugApi>::new(&[Item::<DebugApi> {
                     name: ManagedBuffer::new_from_bytes(b"item name"),
-                },
-            )]);
+                    slot: ManagedBuffer::new_from_bytes(b"hat"),
+                }]);
 
             let _ = sc.get_uri_of(&equippable_attributes);
         })
@@ -39,12 +38,11 @@ fn build_url_with_associated_cid() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let penguin_attributes = EquippableNftAttributes::<DebugApi>::new(&[(
-                    &ManagedBuffer::new_from_bytes(b"hat"),
-                    Item::<DebugApi> {
+                let penguin_attributes =
+                    EquippableNftAttributes::<DebugApi>::new(&[Item::<DebugApi> {
                         name: ManagedBuffer::new_from_bytes(b"item name"),
-                    },
-                )]);
+                        slot: ManagedBuffer::new_from_bytes(b"hat"),
+                    }]);
 
                 sc.set_cid_of(args_set_cid_of!(
                     penguin_attributes.clone(),

@@ -228,14 +228,12 @@ where
     ) {
         self.register_and_fill_item(slot, item_identifier, item_nonce, &attributes);
 
-        let attributes = EquippableNftAttributes::<DebugApi>::new(&[(
-            &ManagedBuffer::new_from_bytes(slot),
-            Item {
-                name: ManagedBuffer::new_from_bytes(
-                    item_identifier, // sadly, bug in the mock force us to use the item identifier as its name
-                ),
-            },
-        )]);
+        let attributes = EquippableNftAttributes::<DebugApi>::new(&[Item {
+            name: ManagedBuffer::new_from_bytes(
+                item_identifier, // sadly, bug in the mock force us to use the item identifier as its name
+            ),
+            slot: ManagedBuffer::new_from_bytes(slot),
+        }]);
 
         self.blockchain_wrapper.set_nft_balance(
             &self.first_user_address,

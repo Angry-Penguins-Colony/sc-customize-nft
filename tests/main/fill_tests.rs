@@ -5,6 +5,7 @@ use elrond_wasm_debug::{managed_buffer, managed_token_id, rust_biguint};
 #[test]
 fn works_if_is_the_owner() {
     const TOKEN_ID: &[u8] = b"ITEM-a1a1a1";
+    const TOKEN_SLOT: &[u8] = b"hat";
     const TOKEN_NONCE: u64 = 654;
 
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
@@ -32,6 +33,7 @@ fn works_if_is_the_owner() {
                 let (item_id, item_nonce) = sc
                     .token_of(&Item {
                         name: managed_buffer!(TOKEN_ID),
+                        slot: managed_buffer!(TOKEN_SLOT),
                     })
                     .get();
 
@@ -46,6 +48,7 @@ fn works_if_is_the_owner() {
 fn panic_if_override() {
     const TOKEN_A_ID: &[u8] = b"ITEM-a1a1a1";
     const TOKEN_A_NONCE: u64 = 654;
+    const TOKEN_A_SLOT: &[u8] = b"hat";
 
     const TOKEN_B_ID: &[u8] = TOKEN_A_ID;
     const TOKEN_B_NONCE: u64 = 1;
@@ -82,6 +85,7 @@ fn panic_if_override() {
                 let (item_id, item_nonce) = sc
                     .token_of(&Item {
                         name: managed_buffer!(TOKEN_A_ID),
+                        slot: managed_buffer!(TOKEN_A_SLOT),
                     })
                     .get();
 

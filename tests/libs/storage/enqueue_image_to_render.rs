@@ -53,12 +53,10 @@ fn enqueue_two_differents_attributes() {
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
                 let attributes_a = EquippableNftAttributes::<DebugApi>::empty();
-                let attributes_b = EquippableNftAttributes::<DebugApi>::new(&[(
-                    &managed_buffer!(b"hat"),
-                    Item {
-                        name: managed_buffer!(b"pirate hat"),
-                    },
-                )]);
+                let attributes_b = EquippableNftAttributes::<DebugApi>::new(&[Item {
+                    name: managed_buffer!(b"pirate hat"),
+                    slot: managed_buffer!(b"hat"),
+                }]);
 
                 sc.enqueue_image_to_render(&attributes_a);
                 sc.enqueue_image_to_render(&attributes_b);

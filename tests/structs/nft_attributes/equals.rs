@@ -17,12 +17,10 @@ fn one_empty_should_not_equals() {
 
     assert_ne_symetry!(
         EquippableNftAttributes::<DebugApi>::empty(),
-        EquippableNftAttributes::<DebugApi>::new(&[(
-            &managed_buffer!(b"hat"),
-            Item {
-                name: managed_buffer!(b"Pirate Hat"),
-            },
-        )])
+        EquippableNftAttributes::<DebugApi>::new(&[Item {
+            name: managed_buffer!(b"Pirate Hat"),
+            slot: managed_buffer!(b"hat"),
+        },])
     );
 }
 
@@ -31,18 +29,14 @@ fn should_equals_if_same() {
     DebugApi::dummy();
 
     assert_eq_symetry!(
-        EquippableNftAttributes::<DebugApi>::new(&[(
-            &managed_buffer!(b"hat"),
-            Item {
-                name: managed_buffer!(b"Pirate Hat")
-            }
-        )]),
-        EquippableNftAttributes::<DebugApi>::new(&[(
-            &managed_buffer!(b"hat"),
-            Item {
-                name: managed_buffer!(b"Pirate Hat")
-            }
-        )])
+        EquippableNftAttributes::<DebugApi>::new(&[Item {
+            name: managed_buffer!(b"Pirate Hat"),
+            slot: managed_buffer!(b"hat"),
+        }]),
+        EquippableNftAttributes::<DebugApi>::new(&[Item {
+            name: managed_buffer!(b"Pirate Hat"),
+            slot: managed_buffer!(b"hat"),
+        }])
     );
 }
 
@@ -52,32 +46,24 @@ fn should_equals_if_different_slot_order() {
 
     assert_eq_symetry!(
         EquippableNftAttributes::<DebugApi>::new(&[
-            (
-                &managed_buffer!(b"hat"),
-                Item {
-                    name: managed_buffer!(b"Pirate Hat")
-                }
-            ),
-            (
-                &managed_buffer!(b"weapon"),
-                Item {
-                    name: managed_buffer!(b"Fishing Rod")
-                }
-            )
+            Item {
+                name: managed_buffer!(b"Pirate Hat"),
+                slot: managed_buffer!(b"hat"),
+            },
+            Item {
+                name: managed_buffer!(b"Fishing Rod"),
+                slot: managed_buffer!(b"weapon"),
+            }
         ]),
         EquippableNftAttributes::<DebugApi>::new(&[
-            (
-                &managed_buffer!(b"weapon"),
-                Item {
-                    name: managed_buffer!(b"Fishing Rod")
-                }
-            ),
-            (
-                &managed_buffer!(b"hat"),
-                Item {
-                    name: managed_buffer!(b"Pirate Hat")
-                }
-            )
+            Item {
+                name: managed_buffer!(b"Fishing Rod"),
+                slot: managed_buffer!(b"weapon"),
+            },
+            Item {
+                name: managed_buffer!(b"Pirate Hat"),
+                slot: managed_buffer!(b"hat"),
+            }
         ])
     );
 }
@@ -88,38 +74,28 @@ fn different_size_should_return_false() {
 
     assert_ne_symetry!(
         EquippableNftAttributes::<DebugApi>::new(&[
-            (
-                &managed_buffer!(b"hat"),
-                Item {
-                    name: managed_buffer!(b"Pirate Hat")
-                }
-            ),
-            (
-                &managed_buffer!(b"weapon"),
-                Item {
-                    name: managed_buffer!(b"Fishing Rod")
-                }
-            ),
-            (
-                &managed_buffer!(b"background"),
-                Item {
-                    name: managed_buffer!(b"Background 1")
-                }
-            )
+            Item {
+                name: managed_buffer!(b"Pirate Hat"),
+                slot: managed_buffer!(b"hat"),
+            },
+            Item {
+                name: managed_buffer!(b"Fishing Rod"),
+                slot: managed_buffer!(b"weapon"),
+            },
+            Item {
+                name: managed_buffer!(b"Background 1"),
+                slot: managed_buffer!(b"background"),
+            }
         ]),
         EquippableNftAttributes::<DebugApi>::new(&[
-            (
-                &managed_buffer!(b"weapon"),
-                Item {
-                    name: managed_buffer!(b"Fishing Rod")
-                }
-            ),
-            (
-                &managed_buffer!(b"hat"),
-                Item {
-                    name: managed_buffer!(b"Pirate Hat")
-                }
-            )
+            Item {
+                name: managed_buffer!(b"Fishing Rod"),
+                slot: managed_buffer!(b"weapon"),
+            },
+            Item {
+                name: managed_buffer!(b"Pirate Hat"),
+                slot: managed_buffer!(b"hat"),
+            }
         ])
     );
 }
@@ -130,32 +106,24 @@ fn item_difference_should_false() {
 
     assert_ne_symetry!(
         EquippableNftAttributes::<DebugApi>::new(&[
-            (
-                &managed_buffer!(b"weapon"),
-                Item {
-                    name: managed_buffer!(b"Katana")
-                }
-            ),
-            (
-                &managed_buffer!(b"hat"),
-                Item {
-                    name: managed_buffer!(b"Pirate Hat")
-                }
-            ),
+            Item {
+                name: managed_buffer!(b"Katana"),
+                slot: managed_buffer!(b"weapon"),
+            },
+            Item {
+                name: managed_buffer!(b"Pirate Hat"),
+                slot: managed_buffer!(b"hat"),
+            }
         ]),
         EquippableNftAttributes::<DebugApi>::new(&[
-            (
-                &managed_buffer!(b"weapon"),
-                Item {
-                    name: managed_buffer!(b"Fishing Rod")
-                }
-            ),
-            (
-                &managed_buffer!(b"hat"),
-                Item {
-                    name: managed_buffer!(b"Pirate Hat")
-                }
-            )
+            Item {
+                name: managed_buffer!(b"Fishing Rod"),
+                slot: managed_buffer!(b"weapon"),
+            },
+            Item {
+                name: managed_buffer!(b"Pirate Hat"),
+                slot: managed_buffer!(b"hat"),
+            }
         ])
     );
 }

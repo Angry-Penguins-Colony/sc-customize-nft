@@ -1,6 +1,6 @@
 use customize_nft::structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item};
 use elrond_wasm::types::ManagedBuffer;
-use elrond_wasm_debug::DebugApi;
+use elrond_wasm_debug::{managed_buffer, DebugApi};
 
 #[test]
 fn get_count_while_empty() {
@@ -16,18 +16,14 @@ fn get_count_expected_two() {
     DebugApi::dummy();
 
     let attributes = EquippableNftAttributes::<DebugApi>::new(&[
-        (
-            &ManagedBuffer::new_from_bytes(b"hat"),
-            Item {
-                name: ManagedBuffer::new_from_bytes(b"pirate hat"),
-            },
-        ),
-        (
-            &ManagedBuffer::new_from_bytes(b"background"),
-            Item {
-                name: ManagedBuffer::new_from_bytes(b"blue bg"),
-            },
-        ),
+        Item {
+            name: ManagedBuffer::new_from_bytes(b"pirate hat"),
+            slot: ManagedBuffer::new_from_bytes(b"hat"),
+        },
+        Item {
+            name: ManagedBuffer::new_from_bytes(b"blue bg"),
+            slot: ManagedBuffer::new_from_bytes(b"background"),
+        },
     ]);
 
     assert_eq!(attributes.get_count(), 2);
@@ -37,23 +33,20 @@ fn get_count_expected_two() {
 fn get_count_expected_one_after_delete() {
     DebugApi::dummy();
 
-    let slot_to_empty = &&ManagedBuffer::new_from_bytes(b"background");
+    const SLOT: &[u8] = b"background";
+
     let mut attributes = EquippableNftAttributes::<DebugApi>::new(&[
-        (
-            &ManagedBuffer::new_from_bytes(b"hat"),
-            Item {
-                name: ManagedBuffer::new_from_bytes(b"pirate hat"),
-            },
-        ),
-        (
-            slot_to_empty,
-            Item {
-                name: ManagedBuffer::new_from_bytes(b"blue bg"),
-            },
-        ),
+        Item {
+            name: ManagedBuffer::new_from_bytes(b"pirate hat"),
+            slot: ManagedBuffer::new_from_bytes(b"hat"),
+        },
+        Item {
+            name: ManagedBuffer::new_from_bytes(b"blue bg"),
+            slot: managed_buffer!(SLOT),
+        },
     ]);
 
-    attributes.empty_slot(slot_to_empty);
+    attributes.empty_slot(&managed_buffer!(SLOT));
 
     assert_eq!(attributes.get_count(), 1);
 }

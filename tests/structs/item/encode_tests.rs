@@ -8,9 +8,10 @@ fn encode_item() {
 
     let item = Item::<DebugApi> {
         name: managed_buffer!(b"Pirate Hat"),
+        slot: managed_buffer!(b"hat"),
     };
 
-    let expected = b"Pirate Hat";
+    let expected = b"Hat:Pirate Hat";
 
     assert_item_encode_eq(item, expected);
 }

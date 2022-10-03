@@ -14,7 +14,7 @@ fn should_returns_some() {
     const ITEM_NONCE: u64 = 1u64;
 
     DebugApi::dummy();
-    setup.register_and_fill_item(SLOT, HAT_TOKEN_ID, ITEM_NONCE, &ItemAttributes::random());
+    setup.register_and_fill_item(SLOT, HAT_TOKEN_ID, ITEM_NONCE, &ItemAttributes {});
 
     setup
         .blockchain_wrapper
@@ -39,5 +39,5 @@ fn should_returns_none() {
 
             let _ = sc.get_slot_of(&not_existing_token);
         })
-        .assert_user_error("Item NOT_TOKEN_ID not found.");
+        .assert_user_error("No slot found for NOT_TOKEN_ID.");
 }

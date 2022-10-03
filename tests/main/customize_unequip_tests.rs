@@ -33,7 +33,7 @@ fn customize_only_unequip() {
         ITEM_TO_UNEQUIP_ID,
         ITEM_TO_UNEQUIP_NONCE,
         slot,
-        ItemAttributes::random(),
+        ItemAttributes {},
     );
 
     setup
@@ -137,7 +137,7 @@ fn unequip_should_ignore_case_of_slot() {
         ITEM_TO_UNEQUIP_ID,
         ITEM_TO_UNEQUIP_NONCE,
         SLOT_LOWERCASE,
-        ItemAttributes::random(),
+        ItemAttributes {},
     );
 
     setup
@@ -239,7 +239,7 @@ fn panic_when_unequip_twice_the_same_slot() {
         ITEM_TO_UNEQUIP_ID,
         ITEM_TO_UNEQUIP_NONCE,
         slot,
-        ItemAttributes::random(),
+        ItemAttributes {},
     );
 
     // setup CID

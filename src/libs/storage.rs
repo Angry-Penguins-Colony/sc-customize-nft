@@ -128,7 +128,7 @@ pub trait StorageModule {
         if self.has_slot(item_id) {
             return self.__slot_of(item_id).get();
         } else {
-            sc_panic!("Item {} not found.", item_id);
+            sc_panic!("No slot found for {}.", item_id);
         }
     }
 

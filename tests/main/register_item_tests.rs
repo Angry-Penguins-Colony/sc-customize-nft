@@ -18,12 +18,7 @@ fn test_register_item() {
 
     DebugApi::dummy();
 
-    setup.register_and_fill_item(
-        slot,
-        TOKEN_ID,
-        TOKEN_NONCE,
-        &ItemAttributes::<DebugApi>::random(),
-    );
+    setup.register_and_fill_item(slot, TOKEN_ID, TOKEN_NONCE, &ItemAttributes {});
 
     setup
         .blockchain_wrapper
@@ -50,17 +45,12 @@ fn register_another_item_on_slot() {
     let slot = b"slot";
 
     DebugApi::dummy();
-    setup.register_and_fill_item(
-        slot,
-        FIRST_TOKEN_ID,
-        FIRST_TOKEN_NONCE,
-        &ItemAttributes::random(),
-    );
+    setup.register_and_fill_item(slot, FIRST_TOKEN_ID, FIRST_TOKEN_NONCE, &ItemAttributes {});
     setup.register_and_fill_item(
         slot,
         SECOND_TOKEN_ID,
         SECOND_TOKEN_NONCE,
-        &ItemAttributes::random(),
+        &ItemAttributes {},
     );
 
     setup
@@ -167,7 +157,7 @@ fn change_item_slot() {
             &ITEM_ID,
             ITEM_NONCE,
             &rust_biguint!(2u64),
-            &ItemAttributes::<DebugApi>::random(),
+            &ItemAttributes {},
         );
     }
 
@@ -200,7 +190,7 @@ fn change_item_slot() {
                 &ITEM_ID,
                 ITEM_NONCE,
                 &rust_biguint!(2u64),
-                &ItemAttributes::<DebugApi>::random(),
+                &ItemAttributes {},
             );
         }
     }

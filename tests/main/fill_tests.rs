@@ -1,5 +1,9 @@
 use crate::testing_utils;
-use customize_nft::{libs::storage::StorageModule, structs::item::Item, Equip};
+use customize_nft::{
+    libs::storage::StorageModule,
+    structs::{item::Item, item_attributes::ItemAttributes},
+    Equip,
+};
 use elrond_wasm_debug::{managed_buffer, managed_token_id, rust_biguint};
 
 #[test]
@@ -17,6 +21,8 @@ fn works_if_is_the_owner() {
         &rust_biguint!(1u64),
         &Option::Some({}),
     );
+
+    setup.register_and_fill_item(TOKEN_SLOT, TOKEN_ID, TOKEN_NONCE, &ItemAttributes {});
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 

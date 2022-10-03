@@ -106,7 +106,7 @@ where
         slot: &[u8],
         item_id: &[u8],
         item_nonce: u64,
-        attributes: &ItemAttributes<DebugApi>,
+        attributes: &ItemAttributes,
     ) {
         self.register_and_fill_items_all_properties(
             slot,
@@ -126,7 +126,7 @@ where
         slot: &[u8],
         item_id: &[u8],
         item_nonce: u64,
-        attributes: &ItemAttributes<DebugApi>,
+        attributes: &ItemAttributes,
         royalties: u64,
         creator: Option<&Address>,
         name: Option<&[u8]>,
@@ -189,7 +189,7 @@ where
             token_id,
             nonce,
             &rust_biguint!(quantity),
-            &ItemAttributes::<DebugApi>::random(),
+            &ItemAttributes {},
         );
     }
 
@@ -224,7 +224,7 @@ where
         item_identifier: &[u8],
         item_nonce: u64,
         slot: &[u8],
-        attributes: ItemAttributes<DebugApi>,
+        attributes: ItemAttributes,
     ) {
         self.register_and_fill_item(slot, item_identifier, item_nonce, &attributes);
 

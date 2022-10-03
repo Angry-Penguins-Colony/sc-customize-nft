@@ -38,7 +38,7 @@ fn customize_complete_flow() {
         ITEM_TO_UNEQUIP_ID,
         ITEM_TO_UNEQUIP_NONCE,
         ITEM_TO_UNEQUIP_SLOT,
-        ItemAttributes::random(),
+        ItemAttributes {},
     );
 
     // Register item to equip
@@ -46,7 +46,7 @@ fn customize_complete_flow() {
         ITEM_TO_EQUIP_SLOT,
         ITEM_TO_EQUIP_ID,
         ITEM_TO_EQUIP_NONCE,
-        &ItemAttributes::random(),
+        &ItemAttributes {},
     );
 
     // Add to user an item to equip
@@ -55,7 +55,7 @@ fn customize_complete_flow() {
         ITEM_TO_EQUIP_ID,
         ITEM_TO_EQUIP_NONCE,
         &rust_biguint!(1),
-        &ItemAttributes::<DebugApi>::random(),
+        &ItemAttributes {},
     );
 
     setup

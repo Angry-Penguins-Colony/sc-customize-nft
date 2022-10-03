@@ -33,12 +33,11 @@ fn test_equip() {
     const ITEM_TO_EQUIP_NAME: &[u8] = b"item name";
     const ITEM_TO_EQUIP_NONCE: u64 = 600u64;
 
-    let item_attributes = ItemAttributes::random();
     setup.register_and_fill_items_all_properties(
         slot,
         ITEM_TO_EQUIP_ID,
         ITEM_TO_EQUIP_NONCE,
-        &item_attributes,
+        &ItemAttributes {},
         0,
         Option::None,
         Option::Some(ITEM_TO_EQUIP_NAME),
@@ -75,7 +74,7 @@ fn test_equip() {
         ITEM_TO_EQUIP_ID,
         ITEM_TO_EQUIP_NONCE,
         &rust_biguint!(1),
-        &item_attributes,
+        &ItemAttributes {},
     );
 
     // set cid
@@ -171,7 +170,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
         slot,
         ITEM_ID,
         ITEM_TO_UNEQUIP_NONCE,
-        &ItemAttributes::<DebugApi>::random(),
+        &ItemAttributes {},
         0u64,
         Option::None,
         Option::Some(ITEM_TO_UNEQUIP_NAME),
@@ -197,7 +196,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
         ITEM_ID,
         ITEM_TO_EQUIP_NONCE,
         &rust_biguint!(1),
-        &ItemAttributes::<DebugApi>::random(),
+        &ItemAttributes {},
         0,
         Option::Some(&setup.owner_address),
         Option::Some(ITEM_TO_EQUIP_NAME),
@@ -337,9 +336,7 @@ fn equip_while_nft_to_equip_is_not_an_equippable() {
         HAT_TOKEN_ID,
         INIT_NONCE,
         &rust_biguint!(1),
-        &ItemAttributes {
-            item_id: ManagedBuffer::<DebugApi>::new(),
-        },
+        &ItemAttributes {},
     );
 
     let (esdt_transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[
@@ -381,9 +378,7 @@ fn panic_if_token_is_not_an_item() {
         ITEM_TO_EQUIP_ID,
         INIT_NONCE,
         &rust_biguint!(1),
-        &ItemAttributes {
-            item_id: ManagedBuffer::<DebugApi>::new(),
-        },
+        &ItemAttributes {},
     );
 
     let (transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[
@@ -413,7 +408,7 @@ fn test_equip_while_sending_two_as_value_of_sft() {
         slot,
         ITEM_TO_EQUIP_ID,
         ITEM_TO_EQUIP_NONCE,
-        &ItemAttributes::random(),
+        &ItemAttributes {},
     );
 
     // add empty equippable to the USER
@@ -458,7 +453,7 @@ fn equip_while_sending_twice_same_items() {
         SLOT,
         ITEM_TO_EQUIP_ID,
         ITEM_TO_EQUIP_NONCE,
-        &ItemAttributes::random(),
+        &ItemAttributes {},
     );
 
     setup.create_empty_equippable(EQUIPPABLE_NONCE);
@@ -469,7 +464,7 @@ fn equip_while_sending_twice_same_items() {
         ITEM_TO_EQUIP_ID,
         ITEM_TO_EQUIP_NONCE,
         &rust_biguint!(2),
-        &ItemAttributes::<DebugApi>::random(),
+        &ItemAttributes {},
     );
 
     // set CID
@@ -578,33 +573,23 @@ fn equip_while_sending_two_items_of_same_slot() {
     setup.create_empty_equippable(EQUIPPABLE_NONCE);
 
     // Give the user the first item
-    setup.register_and_fill_item(
-        SLOT,
-        FIRST_ITEM_ID,
-        FIRST_ITEM_NONCE,
-        &ItemAttributes::random(),
-    );
+    setup.register_and_fill_item(SLOT, FIRST_ITEM_ID, FIRST_ITEM_NONCE, &ItemAttributes {});
     setup.blockchain_wrapper.set_nft_balance(
         &setup.first_user_address,
         FIRST_ITEM_ID,
         FIRST_ITEM_NONCE,
         &rust_biguint!(1),
-        &ItemAttributes::<DebugApi>::random(),
+        &ItemAttributes {},
     );
 
     // Give the user the second item
-    setup.register_and_fill_item(
-        SLOT,
-        SECOND_ITEM_ID,
-        SECOND_ITEM_NONCE,
-        &ItemAttributes::random(),
-    );
+    setup.register_and_fill_item(SLOT, SECOND_ITEM_ID, SECOND_ITEM_NONCE, &ItemAttributes {});
     setup.blockchain_wrapper.set_nft_balance(
         &setup.first_user_address,
         SECOND_ITEM_ID,
         SECOND_ITEM_NONCE,
         &rust_biguint!(1),
-        &ItemAttributes::<DebugApi>::random(),
+        &ItemAttributes {},
     );
 
     // set CID

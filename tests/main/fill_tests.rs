@@ -91,6 +91,12 @@ fn panic_if_override() {
             TOKEN_A_NONCE,
             &rust_biguint!(1),
             |sc| {
+                let mut managed_items_ids =
+                    MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                managed_items_ids.push(managed_token_id!(TOKEN_B_ID));
+
+                sc.register_item(managed_buffer!(TOKEN_A_SLOT), managed_items_ids);
+
                 sc.fill();
 
                 let (item_id, item_nonce) = sc

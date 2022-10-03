@@ -45,6 +45,10 @@ impl<M: ManagedTypeApi> Item<M> {
     pub fn top_decode(input: &ManagedBuffer<M>) -> Result<Self, DecodeError> {
         let parts = input.split(b':');
 
+        if parts.len() != 2 {
+            return Result::Err(DecodeError::INPUT_OUT_OF_RANGE);
+        }
+
         return Result::Ok(Self {
             slot: parts.get(0).to_lowercase(),
             name: parts.get(1).deref().clone(),

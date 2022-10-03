@@ -47,6 +47,21 @@ fn should_top_encode_two() {
     assert_equippable_encode_eq(attributes_order_two, b"Hat:Pirate Hat;Weapon:Gun");
 }
 
+#[test]
+fn should_top_encode_after_emptying() {
+    DebugApi::dummy();
+
+    let mut equippable_nft_attributes = EquippableNftAttributes::new(&[Item::<DebugApi> {
+        name: managed_buffer!(b"Pirate Hat"),
+        slot: managed_buffer!(b"hat"),
+    }]);
+    equippable_nft_attributes.empty_slot(&managed_buffer!(b"hat"));
+
+    let expected = b"Hat:unequipped";
+
+    assert_equippable_encode_eq(equippable_nft_attributes, expected);
+}
+
 fn assert_equippable_encode_eq(
     equippable_nft_attributes: EquippableNftAttributes<elrond_wasm_debug::tx_mock::TxContextRef>,
     expected: &[u8],

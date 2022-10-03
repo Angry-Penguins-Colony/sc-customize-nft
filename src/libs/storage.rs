@@ -70,7 +70,6 @@ pub trait StorageModule {
         );
 
         for kvp in cid_kvp {
-            sc_print!("{}", &kvp.clone().into_tuple().0);
             let (attributes, cid) = kvp.into_tuple();
 
             self.__cid_of(&attributes).set(cid);

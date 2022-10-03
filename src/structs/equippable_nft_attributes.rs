@@ -36,7 +36,12 @@ impl<M: ManagedTypeApi> Kvp<M> {
                 item.top_encode(&mut item_buffer).unwrap();
             }
             None => {
-                item_buffer.append_bytes(b"unequipped");
+                let unequipped_item = &Item {
+                    name: ManagedBuffer::new_from_bytes(b"unequipped"),
+                    slot: self.slot.clone(),
+                };
+
+                unequipped_item.top_encode(&mut item_buffer).unwrap();
             }
         }
         output_buffer.append(&item_buffer);

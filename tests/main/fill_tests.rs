@@ -4,7 +4,8 @@ use customize_nft::{
     structs::{item::Item, item_attributes::ItemAttributes},
     Equip,
 };
-use elrond_wasm_debug::{managed_buffer, managed_token_id, rust_biguint};
+use elrond_wasm::types::{MultiValueEncoded, TokenIdentifier};
+use elrond_wasm_debug::{managed_buffer, managed_token_id, rust_biguint, DebugApi};
 
 #[test]
 fn works_if_is_the_owner() {
@@ -19,10 +20,8 @@ fn works_if_is_the_owner() {
         &TOKEN_ID,
         TOKEN_NONCE,
         &rust_biguint!(1u64),
-        &Option::Some({}),
+        &ItemAttributes {},
     );
-
-    setup.register_and_fill_item(TOKEN_SLOT, TOKEN_ID, TOKEN_NONCE, &ItemAttributes {});
 
     let b_wrapper = &mut setup.blockchain_wrapper;
 
@@ -34,6 +33,12 @@ fn works_if_is_the_owner() {
             TOKEN_NONCE,
             &rust_biguint!(1),
             |sc| {
+                let mut managed_items_ids =
+                    MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
+                managed_items_ids.push(managed_token_id!(TOKEN_ID));
+
+                sc.register_item(managed_buffer!(TOKEN_SLOT), managed_items_ids);
+
                 sc.fill();
 
                 let (item_id, item_nonce) = sc

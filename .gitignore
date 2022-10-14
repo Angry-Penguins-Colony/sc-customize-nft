@@ -10,4 +10,4 @@ output
 
 wallets
 
-deploy-mainnet.interaction.json
+/interactions/*

@@ -1,7 +1,6 @@
 use crate::{
     constants::{
-        ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_CID_ALREADY_RENDERER, ERR_IMAGE_NOT_IN_QUEUE,
-        ERR_RENDER_ALREADY_IN_QUEUE,
+        ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_CID_ALREADY_RENDERER, ERR_RENDER_ALREADY_IN_QUEUE,
     },
     structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item},
     utils::{managed_buffer_utils::ManagedBufferUtils, vec_mapper_utils::VecMapperUtils},
@@ -73,10 +72,7 @@ pub trait StorageModule {
             let (attributes, cid) = kvp.into_tuple();
 
             self.__cid_of(&attributes).set(cid);
-
-            if self.__images_to_render().has_item(&attributes) {
-                self.dequeue_image_to_render(&attributes);
-            }
+            self.__images_to_render().remove_item(&attributes);
         }
     }
 
@@ -144,15 +140,6 @@ pub trait StorageModule {
         );
 
         self.__images_to_render().push(attributes)
-    }
-
-    fn dequeue_image_to_render(&self, attributes: &EquippableNftAttributes<Self::Api>) {
-        require!(
-            self.__images_to_render().has_item(attributes),
-            ERR_IMAGE_NOT_IN_QUEUE
-        );
-
-        self.__images_to_render().remove_item(attributes);
     }
 
     #[view(getImagesToRender)]

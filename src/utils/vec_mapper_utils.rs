@@ -12,7 +12,14 @@ where
     fn find_index(&self, item: &T) -> Option<usize>;
     fn has_item(&self, item: &T) -> bool;
 
+    /**
+     * Don't panic if item is not found
+     */
     fn remove_item(&mut self, item: &T);
+    /**
+     * Panic if item is not found
+     */
+    fn remove_item_panic(&mut self, item: &T);
 }
 
 impl<SA, T> VecMapperUtils<SA, T> for VecMapper<SA, T>
@@ -30,10 +37,15 @@ where
         return Option::None;
     }
 
-    /**
-     * Panic if missing items
-     */
     fn remove_item(&mut self, item: &T) {
+        let opt_index = self.find_index(item);
+
+        if let Some(index) = opt_index {
+            self.swap_remove(index);
+        }
+    }
+
+    fn remove_item_panic(&mut self, item: &T) {
         let opt_index = self.find_index(item);
 
         if let Some(index) = opt_index {

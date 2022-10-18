@@ -193,7 +193,7 @@ pub trait Equip:
             self.unequip_slot(attributes, &item_slot);
         }
 
-        attributes.set_item_if_empty(&item_slot, Option::Some(item.clone()));
+        attributes.set_item_if_empty(&item_slot, Option::Some(item.name.clone()));
     }
 
     /// Empty the item at the slot provided and sent it to the caller.
@@ -209,6 +209,8 @@ pub trait Equip:
         match opt_item {
             Some(item) => {
                 let n = item.clone().name;
+
+                sc_print!("{}:{}", item.slot, item.name);
 
                 require!(
                     self.token_of_item(&item).is_empty() == false,

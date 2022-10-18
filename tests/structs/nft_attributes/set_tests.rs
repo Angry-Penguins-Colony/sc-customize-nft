@@ -14,10 +14,7 @@ fn set_item_on_empty_slot() {
 
     equippable_nft_attributes.set_item_if_empty(
         &slot,
-        Option::Some(Item {
-            name: ManagedBuffer::new_from_bytes(b"item name"),
-            slot: slot.clone(),
-        }),
+        Option::Some(ManagedBuffer::new_from_bytes(b"item name")),
     );
 
     let item = equippable_nft_attributes.get_item(slot).unwrap();
@@ -40,10 +37,7 @@ fn set_item_on_not_empty_slot() {
 
             equippable_nft_attributes.set_item_if_empty(
                 &slot,
-                Option::Some(Item {
-                    name: ManagedBuffer::new_from_bytes(b"item name"),
-                    slot: slot.clone(),
-                }),
+                Option::Some(ManagedBuffer::new_from_bytes(b"item name")),
             );
         })
         .assert_user_error("The slot is not empty. Please free it, before setting an item.");

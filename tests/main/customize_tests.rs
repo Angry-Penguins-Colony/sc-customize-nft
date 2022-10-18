@@ -75,10 +75,7 @@ fn customize_complete_flow() {
                     .empty_slot(&ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT));
                 attributes_after_custom.set_item_if_empty(
                     &ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT),
-                    Some(Item {
-                        name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID),
-                        slot: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT),
-                    }),
+                    Some(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID)),
                 );
 
                 sc.set_cid_of(args_set_cid_of!(
@@ -146,10 +143,7 @@ fn customize_complete_flow() {
     attributes_after_custom.empty_slot(&ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT));
     attributes_after_custom.set_item_if_empty(
         &ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT),
-        Some(Item {
-            name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID),
-            slot: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT),
-        }),
+        Some(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID)),
     );
 
     setup.blockchain_wrapper.check_nft_balance(

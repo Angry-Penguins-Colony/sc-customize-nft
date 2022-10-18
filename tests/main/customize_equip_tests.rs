@@ -149,6 +149,12 @@ fn test_equip() {
     )
 }
 
+/**
+ * This test if failing because of a bug in the testing framework, the attributes are the same.
+ * And so, we trigger "Another URI has been set previously.".
+ *
+ * It will be fixed when we add name params to register_item (instead of querying the name from the blockchain)
+ */
 #[test]
 fn equip_item_while_another_item_equipped_on_slot() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);

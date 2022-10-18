@@ -25,3 +25,4 @@ pub const ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED: &str =
 pub const ERR_RENDER_ALREADY_IN_QUEUE: &str = "This image is already in the queue";
 pub const ERR_IMAGE_NOT_IN_QUEUE: &str = "This image is not in the queue";
 pub const ERR_PAY_0001_EGLD: &str = "You must pay 0.001 EGLD to call this endpoint.";
+pub const ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE: &str = "Another URI has been set previously.";

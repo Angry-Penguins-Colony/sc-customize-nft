@@ -1,5 +1,8 @@
 use crate::{
-    constants::{ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED, ERR_RENDER_ALREADY_IN_QUEUE},
+    constants::{
+        ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED, ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE,
+        ERR_RENDER_ALREADY_IN_QUEUE,
+    },
     structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot},
 };
 
@@ -61,6 +64,11 @@ pub trait StorageModule {
 
         for kvp in uri_kvp {
             let (attributes, uri) = kvp.into_tuple();
+
+            require!(
+                self.uris_of_attributes(&attributes).is_empty(),
+                ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE
+            );
 
             self.uris_of_attributes(&attributes).set(uri);
             self.images_to_render().swap_remove(&attributes);

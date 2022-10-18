@@ -4,4 +4,4 @@ mod get_images_to_render;
 mod get_slot_of;
 mod get_uri_of;
 mod has_slot;
-mod set_cid_of;
+mod set_uri_of;

@@ -1,4 +1,5 @@
 use customize_nft::{
+    constants::ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE,
     libs::storage::{EndpointWrappers, StorageModule},
     structs::equippable_nft_attributes::EquippableNftAttributes,
 };
@@ -37,7 +38,7 @@ fn should_set_if_empty() {
 }
 
 #[test]
-fn should_set_if_not_emtpy() {
+fn panic_if_override_previously_set_uri() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     let first_cid_bytes = b"https://ipfs.io/ipfs/some cid";
@@ -60,19 +61,26 @@ fn should_set_if_not_emtpy() {
                     sc.uris_of_attributes(&attributes).get(),
                     managed_buffer!(first_cid_bytes)
                 );
+            },
+        )
+        .assert_ok();
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
                 sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes.clone(),
                     managed_buffer!(second_cid_bytes)
                 ));
-                assert_eq!(
-                    sc.uris_of_attributes(&attributes).get(),
-                    managed_buffer!(second_cid_bytes),
-                    "first_cid_bytes should be overwrited by second_cid_bytes"
-                );
             },
         )
-        .assert_ok();
+        .assert_user_error(ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE);
 }
 
 #[test]

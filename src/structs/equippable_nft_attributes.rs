@@ -11,6 +11,7 @@ use elrond_wasm::{
 };
 
 use crate::{
+    constants::UNEQUIPPED_ITEM_NAME,
     sc_panic_self,
     utils::{self, managed_buffer_utils::ManagedBufferUtils, managed_vec_utils::EqUtils},
 };
@@ -30,7 +31,7 @@ impl<M: ManagedTypeApi> EquippableNftAttribute<M> {
     pub fn to_kvp_buffer(&self) -> ManagedBuffer<M> {
         let item_name = match &self.name {
             Some(item) => item.clone(),
-            None => ManagedBuffer::new_from_bytes(b"unequipped"),
+            None => ManagedBuffer::new_from_bytes(UNEQUIPPED_ITEM_NAME),
         };
 
         let item = &Item {
@@ -112,7 +113,7 @@ impl<M: ManagedTypeApi> TopDecode for EquippableNftAttributes<M> {
             let item = Item::top_decode(item_raw.deref()).unwrap();
             let slot = item.slot.clone();
 
-            if &item.name == &ManagedBuffer::new_from_bytes(b"unequipped") {
+            if &item.name == &ManagedBuffer::new_from_bytes(UNEQUIPPED_ITEM_NAME) {
                 equippable_attributes.set_item_if_empty(&slot, None);
                 continue;
             } else {

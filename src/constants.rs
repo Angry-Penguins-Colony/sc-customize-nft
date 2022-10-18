@@ -1,4 +1,5 @@
 pub const ENQUEUE_PRICE: u64 = 1_000_000_000_000_000; // 0.001 EGLD
+pub const UNEQUIPPED_ITEM_NAME: &[u8] = b"unequipped";
 
 pub const ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM: &str =
     "You cannot register an equippable NFT as an item.";

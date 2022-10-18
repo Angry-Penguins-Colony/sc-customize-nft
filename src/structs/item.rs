@@ -1,13 +1,5 @@
-#![no_std]
-#![no_main]
-#![allow(unused_attributes)]
-#![allow(unused_imports)]
-
-use elrond_wasm::elrond_codec::TopDecodeInput;
-
-use core::{ops::Deref, str::FromStr};
-
 use crate::utils::managed_buffer_utils::ManagedBufferUtils;
+use core::ops::Deref;
 
 use super::slot::Slot;
 

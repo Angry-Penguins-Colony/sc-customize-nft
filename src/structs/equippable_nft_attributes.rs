@@ -1,20 +1,10 @@
-#![no_std]
-#![no_main]
-#![allow(unused_attributes)]
-#![allow(unused_imports)]
-
-use core::ops::Deref;
-
-use elrond_wasm::{
-    elrond_codec::{TopDecodeInput, TopEncode},
-    formatter::SCDisplay,
-};
-
 use crate::{
     constants::UNEQUIPPED_ITEM_NAME,
     sc_panic_self,
-    utils::{self, managed_buffer_utils::ManagedBufferUtils, managed_vec_utils::EqUtils},
+    utils::{managed_buffer_utils::ManagedBufferUtils, managed_vec_utils::EqUtils},
 };
+use core::ops::Deref;
+use elrond_wasm::{elrond_codec::TopEncode, formatter::SCDisplay};
 
 use super::{item::Item, slot::Slot};
 

@@ -1,13 +1,6 @@
-#![no_std]
-#![no_main]
-#![allow(unused_attributes)]
-#![allow(unused_imports)]
-
-use elrond_wasm::elrond_codec::{TopDecodeInput, TopEncode};
-
-use core::{cmp::Ordering, ops::Deref, str::FromStr};
-
 use crate::{sc_panic_self, utils::managed_buffer_utils::ManagedBufferUtils};
+use core::cmp::Ordering;
+use elrond_wasm::elrond_codec::TopEncode;
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();

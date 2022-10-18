@@ -1,4 +1,4 @@
-use crate::testing_utils::TestItemAttributes;
+use crate::testing_utils::{New, TestItemAttributes};
 use customize_nft::constants::{
     ERR_FIRST_PAYMENT_IS_EQUIPPABLE, ERR_MORE_THAN_ONE_ITEM_RECEIVED,
     ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,

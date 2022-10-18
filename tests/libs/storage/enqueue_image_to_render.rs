@@ -9,7 +9,10 @@ use customize_nft::{
 use elrond_wasm::{elrond_codec::multi_types::MultiValue2, types::MultiValueEncoded};
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
-use crate::{args_set_cid_of, testing_utils};
+use crate::{
+    args_set_cid_of,
+    testing_utils::{self, New},
+};
 
 #[test]
 fn works() {

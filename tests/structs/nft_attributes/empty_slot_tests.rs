@@ -4,7 +4,7 @@ use customize_nft::structs::{
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm_debug::{managed_buffer, DebugApi};
 
-use crate::testing_utils;
+use crate::testing_utils::{self, New};
 
 #[test]
 fn should_empty_slot_if_already_empty() {

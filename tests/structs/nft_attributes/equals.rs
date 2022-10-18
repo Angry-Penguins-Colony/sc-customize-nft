@@ -3,7 +3,7 @@ use customize_nft::structs::{
 };
 use elrond_wasm_debug::{managed_buffer, DebugApi};
 
-use crate::{assert_eq_symetry, assert_ne_symetry};
+use crate::{assert_eq_symetry, assert_ne_symetry, testing_utils::New};
 #[test]
 fn both_empty_should_equals() {
     DebugApi::dummy();

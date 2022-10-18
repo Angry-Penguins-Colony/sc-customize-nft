@@ -1,3 +1,4 @@
+use crate::testing_utils::New;
 use crate::{args_set_cid_of, testing_utils};
 use customize_nft::libs::storage::StorageModule;
 use customize_nft::structs::slot::Slot;

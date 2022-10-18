@@ -143,16 +143,6 @@ impl<M: ManagedTypeApi> TopEncode for EquippableNftAttributes<M> {
 }
 
 impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
-    pub fn new(items_by_slot: &[Item<M>]) -> Self {
-        let mut attributes = Self::empty();
-
-        for item in items_by_slot {
-            attributes.set_item_if_empty(&item.slot, Option::Some(item.clone().name));
-        }
-
-        return attributes;
-    }
-
     pub fn empty() -> Self {
         return EquippableNftAttributes {
             items: ManagedVec::new(),
@@ -210,18 +200,6 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
         }
 
         self.items = self.items.sort_alphabetically();
-    }
-
-    pub fn get_count(&self) -> usize {
-        let mut count = 0;
-
-        for kvp in self.items.iter() {
-            if kvp.name.is_some() {
-                count = count + 1;
-            }
-        }
-
-        return count;
     }
 
     pub fn is_slot_empty(&self, slot: &Slot<M>) -> bool {

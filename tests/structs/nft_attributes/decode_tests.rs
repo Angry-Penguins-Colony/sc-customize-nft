@@ -4,6 +4,8 @@ use customize_nft::structs::{
 use elrond_wasm::{elrond_codec::TopDecode, types::ManagedBuffer};
 use elrond_wasm_debug::{managed_buffer, DebugApi};
 
+use crate::testing_utils::New;
+
 #[test]
 fn decode_equippable_nft() {
     DebugApi::dummy();

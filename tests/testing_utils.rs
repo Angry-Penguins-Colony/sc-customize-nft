@@ -426,3 +426,19 @@ pub fn create_payments(
 
 // TODO: register item (arg = slot)
 // TODO: add quantity (arg = quantity)
+
+pub trait New<M: ManagedTypeApi> {
+    fn new(items_by_slot: &[Item<M>]) -> Self;
+}
+
+impl<M: ManagedTypeApi> New<M> for EquippableNftAttributes<M> {
+    fn new(items_by_slot: &[Item<M>]) -> Self {
+        let mut attributes = Self::empty();
+
+        for item in items_by_slot {
+            attributes.set_item_if_empty(&item.slot, Option::Some(item.clone().name));
+        }
+
+        return attributes;
+    }
+}

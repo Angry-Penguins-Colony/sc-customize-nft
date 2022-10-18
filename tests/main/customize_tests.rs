@@ -10,7 +10,7 @@ use elrond_wasm_debug::{rust_biguint, DebugApi};
 
 use crate::{
     args_set_cid_of,
-    testing_utils::{self, TestItemAttributes},
+    testing_utils::{self, New, TestItemAttributes},
 };
 
 const EQUIPPABLE_TOKEN_ID: &[u8] = testing_utils::EQUIPPABLE_TOKEN_ID;

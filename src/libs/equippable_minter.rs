@@ -1,7 +1,7 @@
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-use elrond_wasm::types::{ManagedBuffer, ManagedVec};
+use elrond_wasm::types::ManagedVec;
 
 use crate::{
     constants::EQUIPPABLE_NAME_FORMAT_NUMBER,
@@ -22,9 +22,17 @@ pub trait MintEquippableModule:
     ) -> u64 {
         let caller = self.blockchain().get_caller();
 
+        let equippable_name = self
+            .blockchain()
+            .get_esdt_token_data(
+                &self.blockchain().get_sc_address(),
+                equippable_token_id,
+                equippable_nonce,
+            )
+            .name;
+
         // mint
-        let token_nonce =
-            self.mint_equippable(attributes, &self.get_equippable_name(equippable_nonce));
+        let token_nonce = self.mint_equippable(attributes, &equippable_name);
 
         // burn the old one
         self.send()
@@ -40,16 +48,6 @@ pub trait MintEquippableModule:
         );
 
         return token_nonce;
-    }
-
-    fn get_equippable_name(&self, nonce: u64) -> ManagedBuffer<Self::Api> {
-        let nft_data = self.blockchain().get_esdt_token_data(
-            &self.blockchain().get_sc_address(),
-            &self.equippable_token_id().get(),
-            nonce,
-        );
-
-        return nft_data.name;
     }
 
     fn mint_equippable(

@@ -18,6 +18,9 @@ use crate::{
 
 use super::{item::Item, slot::Slot};
 
+pub const ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS: &str =
+    "A name can't contains colon or semicolons";
+
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
@@ -190,12 +193,14 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
         return self.set_item(slot, name);
     }
 
-    pub fn set_item(&mut self, slot: &Slot<M>, name: Option<ManagedBuffer<M>>) {
+    pub fn set_item(&mut self, slot: &Slot<M>, opt_name: Option<ManagedBuffer<M>>) {
         let index = self.__get_index(&slot);
+
+        panic_if_name_contains_unsupported_characters::<M>(&opt_name);
 
         let new_equippable_attribute = EquippableNftAttribute {
             slot: slot.clone(),
-            name,
+            name: opt_name,
         };
 
         match index {
@@ -242,5 +247,15 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
 
     fn __get_index(&self, slot: &Slot<M>) -> Option<usize> {
         return self.items.iter().position(|kvp| &kvp.slot == slot);
+    }
+}
+
+fn panic_if_name_contains_unsupported_characters<M: ManagedTypeApi>(
+    opt_name: &Option<ManagedBuffer<M>>,
+) {
+    if let Some(name) = opt_name.clone() {
+        if name.contains(b";") || name.contains(b":") {
+            sc_panic_self!(M, ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS);
+        }
     }
 }

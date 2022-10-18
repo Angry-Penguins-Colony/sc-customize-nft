@@ -58,14 +58,6 @@ pub trait CustomizeModule: super::storage::StorageModule {
 
             let opt_item = self.get_item_from_token(&payment.token_identifier, payment.token_nonce);
 
-            if opt_item.is_empty() {
-                sc_print!(
-                    "Not registered {}-{}",
-                    payment.token_identifier,
-                    payment.token_nonce
-                );
-            }
-
             require!(
                 opt_item.is_empty() == false,
                 ERR_CANNOT_EQUIP_UNREGISTED_ITEM

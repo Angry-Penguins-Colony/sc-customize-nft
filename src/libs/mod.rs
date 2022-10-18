@@ -1,2 +1,2 @@
-pub mod equippable_minter;
+pub mod customize;
 pub mod storage;

@@ -20,18 +20,18 @@ pub trait StorageModule {
         item: &Item<Self::Api>,
     ) -> SingleValueMapper<(TokenIdentifier<Self::Api>, u64)>;
 
-    #[storage_mapper("whitelist_set_uris_of_attributes_endpoint")]
-    fn whitelist_set_uris_of_attributes_endpoint(
-        &self,
-        address: &ManagedAddress<Self::Api>,
-    ) -> SingleValueMapper<bool>;
-
     #[storage_mapper("item_of_token")]
     fn get_item_from_token(
         &self,
         token: &TokenIdentifier,
         nonce: u64,
     ) -> SingleValueMapper<Item<Self::Api>>;
+
+    #[storage_mapper("whitelist_set_uris_of_attributes_endpoint")]
+    fn whitelist_set_uris_of_attributes_endpoint(
+        &self,
+        address: &ManagedAddress<Self::Api>,
+    ) -> SingleValueMapper<bool>;
 
     #[storage_mapper("__images_to_render")]
     fn images_to_render(&self) -> UnorderedSetMapper<EquippableNftAttributes<Self::Api>>;

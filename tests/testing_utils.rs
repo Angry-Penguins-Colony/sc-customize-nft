@@ -4,6 +4,7 @@ elrond_wasm::derive_imports!();
 use std::ops::Deref;
 use std::u8;
 
+use customize_nft::libs::customize::CustomizeModule;
 use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
 use customize_nft::structs::item::Item;
 use customize_nft::structs::slot::Slot;

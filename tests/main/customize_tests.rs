@@ -1,8 +1,7 @@
 use customize_nft::{
     constants::ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
-    libs::storage::StorageModule,
+    libs::{customize::CustomizeModule, storage::StorageModule},
     structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot},
-    Equip,
 };
 use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::{ManagedBuffer, MultiValueEncoded};

@@ -187,17 +187,13 @@ pub trait Equip:
 
                 let (item_id, item_nonce) = storage_token.get();
 
-                if self.blockchain().get_sc_balance(
-                    &EgldOrEsdtTokenIdentifier::esdt(item_id.clone()),
-                    item_nonce,
-                ) <= BigUint::from(1u64)
-                {
-                    sc_panic!(
-                        "No token {} with nonce {:x} on the smart contract wallet. Please contact an administrator.", // TODO: extract to constant
-                        item_id,
-                        item_nonce,
-                    );
-                }
+                require!(
+                    self.blockchain().get_sc_balance(
+                        &EgldOrEsdtTokenIdentifier::esdt(item_id.clone()),
+                        item_nonce
+                    ) > 0,
+                    "Can't send unequipped items to the user. There is no SFT remaining."
+                );
 
                 self.send().direct_esdt(
                     &self.blockchain().get_caller(),

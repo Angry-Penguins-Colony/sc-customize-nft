@@ -1,8 +1,11 @@
-use customize_nft::constants::ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM;
+use customize_nft::constants::{
+    ERR_CANNOT_OVERRIDE_REGISTERED_ITEM, ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM,
+};
 use customize_nft::libs::storage::StorageModule;
+use customize_nft::structs::item::Item;
 use customize_nft::structs::slot::Slot;
 use customize_nft::*;
-use elrond_wasm::types::{EsdtLocalRole, ManagedBuffer, MultiValueEncoded, TokenIdentifier};
+use elrond_wasm::types::{ManagedBuffer, MultiValueEncoded, TokenIdentifier};
 use elrond_wasm_debug::{managed_buffer, managed_token_id};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
@@ -15,19 +18,32 @@ fn test_register_item() {
     let slot = b"hat";
     const TOKEN_ID: &[u8] = b"ITEM-a1a1a1";
     const TOKEN_NONCE: u64 = 42;
+    const ITEM_NAME: &[u8] = b"Pirate Hat";
 
     DebugApi::dummy();
 
-    setup.register_and_fill_item(slot, TOKEN_ID, TOKEN_NONCE, &TestItemAttributes {});
+    setup.register_and_fill_item(
+        slot,
+        ITEM_NAME,
+        TOKEN_ID,
+        TOKEN_NONCE,
+        &TestItemAttributes {},
+    );
 
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             let result = sc
-                .slot_of_item(&TokenIdentifier::from_esdt_bytes(TOKEN_ID))
+                .get_item_from_token(&TokenIdentifier::from_esdt_bytes(TOKEN_ID), TOKEN_NONCE)
                 .get();
 
-            assert_eq!(result, Slot::new_from_buffer(managed_buffer!(slot)));
+            assert_eq!(
+                result,
+                Item {
+                    slot: Slot::new_from_buffer(managed_buffer!(slot)),
+                    name: managed_buffer!(ITEM_NAME)
+                }
+            );
         })
         .assert_ok();
 }
@@ -39,20 +55,25 @@ fn register_another_item_on_slot() {
 
     const FIRST_TOKEN_ID: &[u8] = b"a";
     const FIRST_TOKEN_NONCE: u64 = 42;
+    const FIRST_ITEM_NAME: &[u8] = b"first item";
+
     const SECOND_TOKEN_ID: &[u8] = b"A";
     const SECOND_TOKEN_NONCE: u64 = 43;
+    const SECOND_ITEM_NAME: &[u8] = b"second item";
 
-    let slot = b"slot";
+    const COMMON_SLOT: &[u8] = b"slot";
 
     DebugApi::dummy();
     setup.register_and_fill_item(
-        slot,
+        COMMON_SLOT,
+        FIRST_ITEM_NAME,
         FIRST_TOKEN_ID,
         FIRST_TOKEN_NONCE,
         &TestItemAttributes {},
     );
     setup.register_and_fill_item(
-        slot,
+        COMMON_SLOT,
+        SECOND_ITEM_NAME,
         SECOND_TOKEN_ID,
         SECOND_TOKEN_NONCE,
         &TestItemAttributes {},
@@ -62,168 +83,38 @@ fn register_another_item_on_slot() {
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             assert_eq!(
-                sc.slot_of_item(&managed_token_id!(FIRST_TOKEN_ID)).get(),
-                Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot))
+                sc.get_item_from_token(&managed_token_id!(FIRST_TOKEN_ID), FIRST_TOKEN_NONCE)
+                    .get(),
+                Item {
+                    slot: Slot::new_from_bytes(COMMON_SLOT),
+                    name: managed_buffer!(FIRST_ITEM_NAME)
+                }
             );
+
             assert_eq!(
-                sc.slot_of_item(&managed_token_id!(SECOND_TOKEN_ID)).get(),
-                Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot))
+                sc.get_item_from_token(&managed_token_id!(SECOND_TOKEN_ID), SECOND_TOKEN_NONCE)
+                    .get(),
+                Item {
+                    slot: Slot::new_from_bytes(COMMON_SLOT),
+                    name: managed_buffer!(SECOND_ITEM_NAME)
+                }
             );
         })
         .assert_ok();
 }
 
 #[test]
-fn register_unmintable_item() {
-    let mut setup = testing_utils::setup(customize_nft::contract_obj);
-    setup
-        .blockchain_wrapper
-        .execute_tx(
-            &setup.owner_address,
-            &setup.cf_wrapper,
-            &rust_biguint!(0),
-            |sc| {
-                let slot = Slot::new_from_buffer(ManagedBuffer::new_from_bytes(b"hat"));
-
-                let mut managed_items_ids =
-                    MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
-                managed_items_ids.push(managed_token_id!(b"a token without minting rights"));
-
-                let _ = sc.register_item(slot, managed_items_ids);
-            },
-        )
-        .assert_ok();
-}
-
-#[test]
-fn register_unburnable_item() {
+fn panic_if_override() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let slot = b"hat";
-    const UNBURNABLE: &[u8] = b"a token without minting rights";
-
-    let b_wrapper = &mut setup.blockchain_wrapper;
-
-    b_wrapper.set_esdt_local_roles(
-        setup.cf_wrapper.address_ref(),
-        UNBURNABLE,
-        &[EsdtLocalRole::NftAddQuantity],
-    );
-
-    b_wrapper
-        .execute_tx(
-            &setup.owner_address,
-            &setup.cf_wrapper,
-            &rust_biguint!(0),
-            |sc| {
-                let mut managed_items_ids =
-                    MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
-                managed_items_ids.push(managed_token_id!(UNBURNABLE));
-
-                let _ = sc.register_item(
-                    Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot)),
-                    managed_items_ids,
-                );
-            },
-        )
-        .assert_ok();
-}
-
-#[test]
-fn change_item_slot() {
-    let mut setup = testing_utils::setup(customize_nft::contract_obj);
-
-    let new_slot = b"hat";
-    let old_slot = b"background";
-    const ITEM_ID: &[u8] = b"ITEM-a1a1a1";
-    const ITEM_NONCE: u64 = 42;
-
-    DebugApi::dummy();
-
-    // register to old_slot
-    {
-        setup.set_all_permissions_on_token(ITEM_ID);
-
-        setup
-            .blockchain_wrapper
-            .execute_tx(
-                &setup.owner_address,
-                &setup.cf_wrapper,
-                &rust_biguint!(0u64),
-                |sc| {
-                    let mut managed_items_ids =
-                        MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
-                    managed_items_ids.push(managed_token_id!(ITEM_ID));
-
-                    sc.register_item(
-                        Slot::new_from_buffer(ManagedBuffer::new_from_bytes(old_slot)),
-                        managed_items_ids,
-                    );
-                },
-            )
-            .assert_ok();
-
-        setup.blockchain_wrapper.set_nft_balance(
-            &setup.owner_address,
-            &ITEM_ID,
-            ITEM_NONCE,
-            &rust_biguint!(2u64),
-            &TestItemAttributes {},
-        );
-    }
-
-    // register to new_slot
-    {
-        {
-            setup.set_all_permissions_on_token(ITEM_ID);
-
-            setup
-                .blockchain_wrapper
-                .execute_tx(
-                    &setup.owner_address,
-                    &setup.cf_wrapper,
-                    &rust_biguint!(0u64),
-                    |sc| {
-                        let mut managed_items_ids =
-                            MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
-                        managed_items_ids.push(managed_token_id!(ITEM_ID));
-
-                        sc.register_item(
-                            Slot::new_from_buffer(ManagedBuffer::new_from_bytes(new_slot)),
-                            managed_items_ids,
-                        );
-                    },
-                )
-                .assert_ok();
-
-            setup.blockchain_wrapper.set_nft_balance(
-                &setup.owner_address,
-                &ITEM_ID,
-                ITEM_NONCE,
-                &rust_biguint!(2u64),
-                &TestItemAttributes {},
-            );
-        }
-    }
-    let b_wrapper = &mut setup.blockchain_wrapper;
-
-    b_wrapper
-        .execute_query(&setup.cf_wrapper, |sc| {
-            let result = sc.slot_of_item(&managed_token_id!(ITEM_ID)).get();
-            assert_eq!(result, Slot::new_from_buffer(managed_buffer!(new_slot)));
-        })
-        .assert_ok();
-}
-
-#[test]
-fn register_to_slot_with_different_case() {
-    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+    const TOKEN_ID: &[u8] = b"HAT-a1a1a1";
+    const TOKEN_NONCE: u64 = 1;
 
     let first_slot = b"hat";
-    let first_slot_item = b"pirate hat";
+    let first_slot_item_name = b"pirate hat";
 
-    let second_slot = b"Hat";
-    let second_slot_item = b"Cap";
+    let second_slot = b"clothes";
+    let second_slot_item_name = b"Golden Chain";
 
     setup
         .blockchain_wrapper
@@ -232,34 +123,32 @@ fn register_to_slot_with_different_case() {
             &setup.cf_wrapper,
             &rust_biguint!(0u64),
             |sc| {
-                let mut first_slot_items =
-                    MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
-                first_slot_items.push(managed_token_id!(first_slot_item));
-
                 sc.register_item(
                     Slot::new_from_buffer(ManagedBuffer::new_from_bytes(first_slot)),
-                    first_slot_items,
-                );
-
-                let mut second_slot_items =
-                    MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
-                second_slot_items.push(managed_token_id!(second_slot_item));
-                sc.register_item(
-                    Slot::new_from_buffer(ManagedBuffer::new_from_bytes(second_slot)),
-                    second_slot_items,
-                );
-
-                assert_eq!(
-                    sc.get_slot_of(&managed_token_id!(second_slot_item)),
-                    Slot::new_from_buffer(managed_buffer!(&second_slot.to_ascii_lowercase()))
-                );
-                assert_eq!(
-                    sc.get_slot_of(&managed_token_id!(first_slot_item)),
-                    Slot::new_from_buffer(managed_buffer!(&first_slot.to_ascii_lowercase()))
+                    managed_buffer!(first_slot_item_name),
+                    managed_token_id!(TOKEN_ID),
+                    TOKEN_NONCE,
                 );
             },
         )
         .assert_ok();
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                sc.register_item(
+                    Slot::new_from_buffer(ManagedBuffer::new_from_bytes(second_slot)),
+                    managed_buffer!(second_slot_item_name),
+                    managed_token_id!(TOKEN_ID),
+                    TOKEN_NONCE,
+                );
+            },
+        )
+        .assert_user_error(ERR_CANNOT_OVERRIDE_REGISTERED_ITEM);
 }
 
 #[test]
@@ -281,7 +170,9 @@ fn panic_if_register_equippable() {
 
                 let _ = sc.register_item(
                     Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot)),
-                    managed_items_ids,
+                    managed_buffer!(b"My Equippable"),
+                    managed_token_id!(testing_utils::EQUIPPABLE_TOKEN_ID),
+                    1,
                 );
             },
         )

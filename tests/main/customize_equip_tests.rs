@@ -1,7 +1,7 @@
 use crate::testing_utils::{New, TestItemAttributes};
 use customize_nft::constants::{
-    ERR_FIRST_PAYMENT_IS_EQUIPPABLE, ERR_MORE_THAN_ONE_ITEM_RECEIVED,
-    ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
+    ERR_CANNOT_EQUIP_UNREGISTED_ITEM, ERR_FIRST_PAYMENT_IS_EQUIPPABLE,
+    ERR_MORE_THAN_ONE_ITEM_RECEIVED, ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
 };
 use customize_nft::libs::storage::StorageModule;
 use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
@@ -36,12 +36,12 @@ fn test_equip() {
 
     setup.register_and_fill_items_all_properties(
         slot,
+        ITEM_TO_EQUIP_NAME,
         ITEM_TO_EQUIP_ID,
         ITEM_TO_EQUIP_NONCE,
         &TestItemAttributes {},
         0,
         Option::None,
-        Option::Some(ITEM_TO_EQUIP_NAME),
         Option::None,
         &[],
     );
@@ -89,7 +89,7 @@ fn test_equip() {
                 let attributes_before_custom = EquippableNftAttributes::<DebugApi>::empty();
 
                 let attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
-                    name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework force us to do this
+                    name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
                     slot: Slot::new_from_buffer(managed_buffer!(slot)),
                 }]);
 
@@ -137,7 +137,7 @@ fn test_equip() {
         1u64,
         &rust_biguint!(1),
         Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[Item {
-            name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework force us to do this
+            name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
             slot: Slot::new_from_buffer(managed_buffer!(slot)),
         }])),
     );
@@ -149,20 +149,16 @@ fn test_equip() {
     )
 }
 
-/**
- * This test if failing because of a bug in the testing framework, the attributes are the same.
- * And so, we trigger "Another URI has been set previously.".
- *
- * It will be fixed when we add name params to register_item (instead of querying the name from the blockchain)
- */
 #[test]
-fn equip_item_while_another_item_equipped_on_slot() {
+fn should_replace_item() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     DebugApi::dummy();
 
     const INIT_NONCE: u64 = 65535;
-    const ITEM_ID: &[u8] = b"ITEM-a1a1a1";
+
+    const SHARED_SLOT: &[u8] = b"hat";
+    const SHARED_ITEM_ID: &[u8] = b"ITEM-a1a1a1";
 
     const ITEM_TO_EQUIP_NONCE: u64 = 30;
     const ITEM_TO_EQUIP_NAME: &[u8] = b"pirate hat";
@@ -170,37 +166,28 @@ fn equip_item_while_another_item_equipped_on_slot() {
     const ITEM_TO_UNEQUIP_NAME: &[u8] = b"cap";
     const ITEM_TO_UNEQUIP_NONCE: u64 = 33u64;
 
-    let slot = b"hat";
-
     // Register hat to remove
-    setup.register_and_fill_items_all_properties(
-        slot,
-        ITEM_ID,
+    setup.create_equippable_with_registered_item(
+        INIT_NONCE,
+        SHARED_ITEM_ID,
         ITEM_TO_UNEQUIP_NONCE,
-        &TestItemAttributes {},
-        0u64,
-        Option::None,
-        Option::Some(ITEM_TO_UNEQUIP_NAME),
-        Option::None,
-        &[],
+        SHARED_SLOT,
+        TestItemAttributes {},
+        ITEM_TO_UNEQUIP_NAME,
     );
 
-    // Give the user an equippable NFT equiped with the hat to remove
-    setup.blockchain_wrapper.set_nft_balance(
-        &setup.first_user_address,
-        EQUIPPABLE_TOKEN_ID,
-        INIT_NONCE,
-        &rust_biguint!(1),
-        &EquippableNftAttributes::<DebugApi>::new(&[Item {
-            name: ManagedBuffer::new_from_bytes(ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in Elrond mocking force us to do this
-            slot: Slot::new_from_buffer(managed_buffer!(slot)),
-        }]),
+    setup.register_and_fill_item(
+        SHARED_SLOT,
+        ITEM_TO_EQUIP_NAME,
+        SHARED_ITEM_ID,
+        ITEM_TO_EQUIP_NONCE,
+        &TestItemAttributes {},
     );
 
     // Give the user a hat to equip
     setup.blockchain_wrapper.set_nft_balance_all_properties(
         &setup.first_user_address,
-        ITEM_ID,
+        SHARED_ITEM_ID,
         ITEM_TO_EQUIP_NONCE,
         &rust_biguint!(1),
         &TestItemAttributes {},
@@ -220,13 +207,13 @@ fn equip_item_while_another_item_equipped_on_slot() {
             &rust_biguint!(0),
             |sc| {
                 let attributes_before_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
-                    name: ManagedBuffer::new_from_bytes(ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in Elrond mocking force us to do this
-                    slot: Slot::new_from_buffer(managed_buffer!(slot)),
+                    name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
+                    slot: Slot::new_from_buffer(managed_buffer!(SHARED_SLOT)),
                 }]);
 
                 let attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
-                    name: ManagedBuffer::new_from_bytes(ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
-                    slot: Slot::new_from_buffer(managed_buffer!(slot)),
+                    name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
+                    slot: Slot::new_from_buffer(managed_buffer!(SHARED_SLOT)),
                 }]);
 
                 sc.set_uri_of_attributes(args_set_cid_of!(
@@ -244,7 +231,11 @@ fn equip_item_while_another_item_equipped_on_slot() {
 
     let (esdt_transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[
         (EQUIPPABLE_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
-        (ITEM_ID, ITEM_TO_EQUIP_NONCE, EsdtTokenType::SemiFungible),
+        (
+            SHARED_ITEM_ID,
+            ITEM_TO_EQUIP_NONCE,
+            EsdtTokenType::SemiFungible,
+        ),
     ]);
 
     let (sc_result, tx_result) = setup.equip(esdt_transfers);
@@ -258,13 +249,21 @@ fn equip_item_while_another_item_equipped_on_slot() {
     let b_wrapper = &mut setup.blockchain_wrapper;
 
     assert_eq!(
-        b_wrapper.get_esdt_balance(&setup.first_user_address, ITEM_ID, ITEM_TO_EQUIP_NONCE),
+        b_wrapper.get_esdt_balance(
+            &setup.first_user_address,
+            SHARED_ITEM_ID,
+            ITEM_TO_EQUIP_NONCE
+        ),
         rust_biguint!(0),
         "User should not have the hat he sended"
     );
 
     assert_eq!(
-        b_wrapper.get_esdt_balance(&setup.first_user_address, ITEM_ID, ITEM_TO_UNEQUIP_NONCE),
+        b_wrapper.get_esdt_balance(
+            &setup.first_user_address,
+            SHARED_ITEM_ID,
+            ITEM_TO_UNEQUIP_NONCE
+        ),
         rust_biguint!(1),
         "User should have received the hat he unequipped.",
     );
@@ -282,8 +281,8 @@ fn equip_item_while_another_item_equipped_on_slot() {
         1,
         &rust_biguint!(1),
         Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[Item {
-            name: ManagedBuffer::new_from_bytes(ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
-            slot: Slot::new_from_buffer(managed_buffer!(slot)),
+            name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
+            slot: Slot::new_from_buffer(managed_buffer!(SHARED_SLOT)),
         }])),
     );
 
@@ -395,7 +394,7 @@ fn panic_if_token_is_not_an_item() {
 
     let (_, tx_result) = setup.equip(transfers);
 
-    tx_result.assert_error(4, "No slot found for NOT-AN-ITEM-a.");
+    tx_result.assert_error(4, ERR_CANNOT_EQUIP_UNREGISTED_ITEM);
 }
 
 #[test]
@@ -404,12 +403,14 @@ fn test_equip_while_sending_two_as_value_of_sft() {
 
     let slot = b"hat";
     const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
+    const ITEM_TO_EQUIP_NAME: &[u8] = b"Pirate Hat";
     const ITEM_TO_EQUIP_NONCE: u64 = 31;
     const EQUIPPABLE_NONCE: u64 = 30;
 
     DebugApi::dummy();
     setup.register_and_fill_item(
         slot,
+        ITEM_TO_EQUIP_NAME,
         ITEM_TO_EQUIP_ID,
         ITEM_TO_EQUIP_NONCE,
         &TestItemAttributes {},
@@ -452,9 +453,11 @@ fn equip_while_sending_twice_same_items() {
     const SLOT: &[u8] = b"hat";
     const ITEM_TO_EQUIP_ID: &[u8] = b"ITEM-a1a1a1";
     const ITEM_TO_EQUIP_NONCE: u64 = 55;
+    const ITEM_TO_EQUIP_NAME: &[u8] = b"Pirate Hat";
 
     setup.register_and_fill_item(
         SLOT,
+        ITEM_TO_EQUIP_NAME,
         ITEM_TO_EQUIP_ID,
         ITEM_TO_EQUIP_NONCE,
         &TestItemAttributes {},
@@ -482,8 +485,8 @@ fn equip_while_sending_twice_same_items() {
                 let attributes_before_custom = EquippableNftAttributes::<DebugApi>::empty();
 
                 let attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
-                    name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
-                    slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
+                    name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
+                    slot: Slot::new_from_bytes(SLOT),
                 }]);
 
                 sc.set_uri_of_attributes(args_set_cid_of!(
@@ -550,7 +553,7 @@ fn equip_while_sending_twice_same_items() {
         1,
         &rust_biguint!(1),
         Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[Item {
-            name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
+            name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
             slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
         }])),
     );
@@ -571,14 +574,18 @@ fn equip_while_sending_two_items_of_same_slot() {
     const SLOT: &[u8] = b"hat";
     const FIRST_ITEM_ID: &[u8] = b"FIRST-000000";
     const FIRST_ITEM_NONCE: u64 = 33;
+    const FIRST_ITEM_NAME: &[u8] = b"First Item";
+
     const SECOND_ITEM_ID: &[u8] = b"SECOND-ffffff";
     const SECOND_ITEM_NONCE: u64 = 35;
+    const SECOND_ITEM_NAME: &[u8] = b"Second Item";
 
     setup.create_empty_equippable(EQUIPPABLE_NONCE);
 
     // Give the user the first item
     setup.register_and_fill_item(
         SLOT,
+        FIRST_ITEM_NAME,
         FIRST_ITEM_ID,
         FIRST_ITEM_NONCE,
         &TestItemAttributes {},
@@ -594,6 +601,7 @@ fn equip_while_sending_two_items_of_same_slot() {
     // Give the user the second item
     setup.register_and_fill_item(
         SLOT,
+        SECOND_ITEM_NAME,
         SECOND_ITEM_ID,
         SECOND_ITEM_NONCE,
         &TestItemAttributes {},
@@ -615,7 +623,7 @@ fn equip_while_sending_two_items_of_same_slot() {
             &rust_biguint!(0),
             |sc| {
                 let attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
-                    name: ManagedBuffer::new_from_bytes(SECOND_ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
+                    name: ManagedBuffer::new_from_bytes(SECOND_ITEM_NAME),
                     slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
                 }]);
 
@@ -701,7 +709,7 @@ fn equip_while_sending_two_items_of_same_slot() {
         1,
         &rust_biguint!(1),
         Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[Item {
-            name: ManagedBuffer::new_from_bytes(SECOND_ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
+            name: ManagedBuffer::new_from_bytes(SECOND_ITEM_NAME),
             slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
         }])),
     );

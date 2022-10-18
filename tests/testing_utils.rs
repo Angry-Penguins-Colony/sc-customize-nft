@@ -109,17 +109,18 @@ where
     pub fn register_and_fill_item(
         &mut self,
         slot: &[u8],
+        item_name: &[u8],
         item_id: &[u8],
         item_nonce: u64,
         attributes: &TestItemAttributes,
     ) {
         self.register_and_fill_items_all_properties(
             slot,
+            item_name,
             item_id,
             item_nonce,
             attributes,
             0u64,
-            Option::None,
             Option::None,
             Option::None,
             &[],
@@ -129,12 +130,12 @@ where
     pub fn register_and_fill_items_all_properties(
         &mut self,
         slot: &[u8],
+        item_name: &[u8],
         item_id: &[u8],
         item_nonce: u64,
         attributes: &TestItemAttributes,
         royalties: u64,
         creator: Option<&Address>,
-        name: Option<&[u8]>,
         hash: Option<&[u8]>,
         uri: &[Vec<u8>],
     ) {
@@ -146,11 +147,12 @@ where
                 &self.cf_wrapper,
                 &rust_biguint!(0u64),
                 |sc| {
-                    let mut managed_items_ids =
-                        MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
-                    managed_items_ids.push(managed_token_id!(item_id));
-
-                    sc.register_item(Slot::new_from_bytes(slot), managed_items_ids);
+                    sc.register_item(
+                        Slot::new_from_bytes(slot),
+                        managed_buffer!(item_name),
+                        managed_token_id!(item_id),
+                        item_nonce,
+                    );
                 },
             )
             .assert_ok();
@@ -163,7 +165,7 @@ where
             &attributes,
             royalties,
             creator,
-            name,
+            Option::Some(item_name),
             hash,
             uri,
         );
@@ -182,7 +184,7 @@ where
             .assert_ok();
 
         println!(
-            "Item {:?} created and register with nonce {:x}",
+            "Item {:?} created and register with nonce {}",
             std::str::from_utf8(item_id).unwrap(),
             item_nonce
         );
@@ -230,13 +232,12 @@ where
         item_nonce: u64,
         slot: &[u8],
         attributes: TestItemAttributes,
+        item_name: &[u8],
     ) {
-        self.register_and_fill_item(slot, item_identifier, item_nonce, &attributes);
+        self.register_and_fill_item(slot, item_name, item_identifier, item_nonce, &attributes);
 
         let attributes = EquippableNftAttributes::<DebugApi>::new(&[Item {
-            name: ManagedBuffer::new_from_bytes(
-                item_identifier, // sadly, bug in the mock force us to use the item identifier as its name
-            ),
+            name: ManagedBuffer::new_from_bytes(item_name),
             slot: Slot::new_from_bytes(slot),
         }]);
 

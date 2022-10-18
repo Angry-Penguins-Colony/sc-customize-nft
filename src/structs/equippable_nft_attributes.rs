@@ -21,24 +21,41 @@ struct EquippableNftAttribute<M: ManagedTypeApi> {
 }
 
 impl<M: ManagedTypeApi> EquippableNftAttribute<M> {
-    pub fn to_kvp_buffer(&self) -> ManagedBuffer<M> {
+    pub fn top_encode(&self) -> ManagedBuffer<M> {
         let item_name = match &self.name {
-            Some(item) => item.clone(),
+            Some(name) => name.clone(),
             None => ManagedBuffer::new_from_bytes(UNEQUIPPED_ITEM_NAME),
         };
 
-        let item = &Item {
-            name: item_name,
-            slot: self.slot.clone(),
+        let mut output = ManagedBuffer::<M>::new();
+
+        // build buffer
+        output.append(&self.slot.capitalized());
+        output.append_bytes(b":");
+        output.append(&item_name);
+
+        return output;
+    }
+
+    pub fn top_decode(input: ManagedBuffer<M>) -> Self {
+        let parts = input.split(b':');
+
+        if parts.len() != 2 {
+            sc_panic_self!(M, "Cannot decode EquippableNftAttribute");
+        }
+
+        let name = parts.get(1).deref().clone();
+
+        let opt_name = if name == ManagedBuffer::<M>::new_from_bytes(UNEQUIPPED_ITEM_NAME) {
+            None
+        } else {
+            Some(name)
         };
 
-        let mut output_buffer = ManagedBuffer::<M>::new();
-        let mut item_buffer = ManagedBuffer::new();
-
-        item.top_encode(&mut item_buffer).unwrap();
-        output_buffer.append(&item_buffer);
-
-        return output_buffer;
+        return Self {
+            slot: Slot::new_from_buffer(parts.get(0).deref().clone()),
+            name: opt_name,
+        };
     }
 }
 
@@ -103,15 +120,9 @@ impl<M: ManagedTypeApi> TopDecode for EquippableNftAttributes<M> {
         let items_raw = buffer.split(b';');
 
         for item_raw in items_raw.iter() {
-            let item = Item::top_decode(item_raw.deref()).unwrap();
-            let slot = item.slot.clone();
+            let attribute = EquippableNftAttribute::top_decode(item_raw.deref().clone());
 
-            if &item.name == &ManagedBuffer::new_from_bytes(UNEQUIPPED_ITEM_NAME) {
-                equippable_attributes.set_item_if_empty(&slot, None);
-                continue;
-            } else {
-                equippable_attributes.set_item_if_empty(&slot, Some(item.name));
-            }
+            equippable_attributes.set_item_if_empty(&attribute.slot, attribute.name);
         }
 
         return Result::Ok(equippable_attributes);
@@ -126,7 +137,7 @@ impl<M: ManagedTypeApi> TopEncode for EquippableNftAttributes<M> {
         let mut managed_buffer = ManagedBuffer::<M>::new();
 
         for (i, kvp) in self.items.iter().enumerate() {
-            managed_buffer.append(&kvp.to_kvp_buffer());
+            managed_buffer.append(&kvp.top_encode());
 
             // add comma, except for the last line
             if i < self.items.len() - 1 {

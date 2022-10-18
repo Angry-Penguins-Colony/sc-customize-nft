@@ -25,10 +25,12 @@ fn customize_complete_flow() {
     const ITEM_TO_UNEQUIP_SLOT: &[u8] = b"background";
     const ITEM_TO_UNEQUIP_ID: &[u8] = b"ITEM-a1a1a1";
     const ITEM_TO_UNEQUIP_NONCE: u64 = 30;
+    const ITEM_TO_UNEQUIP_NAME: &[u8] = b"Turquoise Background";
 
     const ITEM_TO_EQUIP_SLOT: &[u8] = b"hat";
     const ITEM_TO_EQUIP_ID: &[u8] = b"HAT-b2b2b2";
     const ITEM_TO_EQUIP_NONCE: u64 = 42;
+    const ITEM_TO_EQUIP_NAME: &[u8] = b"Pirate Hat";
 
     DebugApi::dummy();
 
@@ -39,11 +41,13 @@ fn customize_complete_flow() {
         ITEM_TO_UNEQUIP_NONCE,
         ITEM_TO_UNEQUIP_SLOT,
         TestItemAttributes {},
+        ITEM_TO_UNEQUIP_NAME,
     );
 
     // Register item to equip
     setup.register_and_fill_item(
         ITEM_TO_EQUIP_SLOT,
+        ITEM_TO_EQUIP_NAME,
         ITEM_TO_EQUIP_ID,
         ITEM_TO_EQUIP_NONCE,
         &TestItemAttributes {},
@@ -66,7 +70,7 @@ fn customize_complete_flow() {
             &rust_biguint!(0),
             |sc| {
                 let attributes_before_custom = EquippableNftAttributes::new(&[Item {
-                    name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_ID),
+                    name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
                     slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(
                         ITEM_TO_UNEQUIP_SLOT,
                     )),
@@ -78,7 +82,7 @@ fn customize_complete_flow() {
                 ));
                 attributes_after_custom.set_item_if_empty(
                     &Slot::new_from_buffer(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT)),
-                    Some(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID)),
+                    Some(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME)),
                 );
 
                 sc.set_uri_of_attributes(args_set_cid_of!(
@@ -140,7 +144,7 @@ fn customize_complete_flow() {
     );
 
     let mut attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
-        name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_ID),
+        name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
         slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT)),
     }]);
     attributes_after_custom.empty_slot(&Slot::new_from_buffer(ManagedBuffer::new_from_bytes(
@@ -148,7 +152,7 @@ fn customize_complete_flow() {
     )));
     attributes_after_custom.set_item_if_empty(
         &Slot::new_from_buffer(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT)),
-        Some(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID)),
+        Some(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME)),
     );
 
     setup.blockchain_wrapper.check_nft_balance(

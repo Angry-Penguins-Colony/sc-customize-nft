@@ -7,22 +7,32 @@ elrond_wasm::derive_imports!();
 
 pub const ERR_UNSUPPORTED_CHARACTERS: &str = "A slot can't contains colon or semicolon characters.";
 
-#[derive(ManagedVecItem, NestedEncode, NestedDecode, TypeAbi, Clone, Debug)]
+#[derive(ManagedVecItem, TypeAbi, Clone, Debug)]
 pub struct Slot<M: ManagedTypeApi> {
     slot: ManagedBuffer<M>,
 }
 
-impl<M: ManagedTypeApi> PartialEq for Slot<M> {
-    fn eq(&self, other: &Self) -> bool {
-        self.slot == other.slot
+impl<M: ManagedTypeApi> TopDecode for Slot<M> {
+    fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
+        let result = ManagedBuffer::top_decode(input);
+
+        return match result {
+            Result::Err(err) => Result::Err(err),
+            Result::Ok(decoded_buffer) => Result::Ok(Slot::new_from_buffer(decoded_buffer)),
+        };
     }
 }
 
-impl<M: ManagedTypeApi> TopDecode for Slot<M> {
-    fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
-        let input_buffer = <ManagedBuffer<M> as TopDecode>::top_decode(input).unwrap();
+impl<M: ManagedTypeApi> NestedDecode for Slot<M> {
+    const TYPE_INFO: elrond_codec::TypeInfo = elrond_codec::TypeInfo::Unknown;
 
-        return Result::Ok(Slot::new_from_buffer(input_buffer));
+    fn dep_decode<I: elrond_codec::NestedDecodeInput>(input: &mut I) -> Result<Self, DecodeError> {
+        let result = ManagedBuffer::dep_decode(input);
+
+        return match result {
+            Result::Err(err) => Result::Err(err),
+            Result::Ok(decoded_buffer) => Result::Ok(Slot::new_from_buffer(decoded_buffer)),
+        };
     }
 }
 
@@ -31,12 +41,28 @@ impl<M: ManagedTypeApi> TopEncode for Slot<M> {
         &self,
         output: O,
     ) -> Result<(), elrond_codec::EncodeError> {
-        let managed_buffer = &self.slot;
+        let slot_lowercase = &self.slot.to_lowercase();
 
-        let bytes = managed_buffer.load_512_bytes();
-        output.set_slice_u8(&bytes[..managed_buffer.len()]);
+        return slot_lowercase.top_encode(output);
+    }
+}
 
-        return Result::Ok(());
+impl<M: ManagedTypeApi> NestedEncode for Slot<M> {
+    const TYPE_INFO: elrond_codec::TypeInfo = elrond_codec::TypeInfo::Unknown;
+
+    fn dep_encode<O: elrond_codec::NestedEncodeOutput>(
+        &self,
+        dest: &mut O,
+    ) -> Result<(), elrond_codec::EncodeError> {
+        let slot_lowercase = &self.slot.to_lowercase();
+
+        return slot_lowercase.dep_encode(dest);
+    }
+}
+
+impl<M: ManagedTypeApi> PartialEq for Slot<M> {
+    fn eq(&self, other: &Self) -> bool {
+        self.slot == other.slot
     }
 }
 
@@ -61,5 +87,9 @@ impl<M: ManagedTypeApi> Slot<M> {
 
     pub fn compare(&self, other: &Self) -> Ordering {
         self.slot.compare(&other.slot)
+    }
+
+    pub fn get(&self) -> ManagedBuffer<M> {
+        self.slot.clone()
     }
 }

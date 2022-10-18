@@ -15,7 +15,7 @@ pub trait StorageModule {
     fn equippable_token_id(&self) -> SingleValueMapper<TokenIdentifier>;
 
     #[storage_mapper("items_token")]
-    fn token_of_item(
+    fn get_token_from_item(
         &self,
         item: &Item<Self::Api>,
     ) -> SingleValueMapper<(TokenIdentifier<Self::Api>, u64)>;
@@ -26,8 +26,12 @@ pub trait StorageModule {
         address: &ManagedAddress<Self::Api>,
     ) -> SingleValueMapper<bool>;
 
-    #[storage_mapper("slot_of_items")]
-    fn slot_of_item(&self, token: &TokenIdentifier) -> SingleValueMapper<Slot<Self::Api>>;
+    #[storage_mapper("item_of_token")]
+    fn get_item_from_token(
+        &self,
+        token: &TokenIdentifier,
+        nonce: u64,
+    ) -> SingleValueMapper<Item<Self::Api>>;
 
     #[storage_mapper("__images_to_render")]
     fn images_to_render(&self) -> UnorderedSetMapper<EquippableNftAttributes<Self::Api>>;
@@ -97,20 +101,15 @@ pub trait StorageModule {
 
     // ===
     // SLOTS
-
-    fn set_slot_of(&self, token: &TokenIdentifier, slot: Slot<Self::Api>) {
-        self.slot_of_item(token).set(&slot);
-    }
-
     #[view(hasSlot)]
-    fn has_slot(&self, token: &TokenIdentifier) -> bool {
-        return self.slot_of_item(token).is_empty() == false;
+    fn has_slot(&self, token: &TokenIdentifier, nonce: u64) -> bool {
+        return self.get_item_from_token(token, nonce).is_empty() == false;
     }
 
-    #[view(getItemType)]
-    fn get_slot_of(&self, item_id: &TokenIdentifier) -> Slot<Self::Api> {
-        if self.has_slot(item_id) {
-            return self.slot_of_item(item_id).get();
+    #[view(getSlotOf)]
+    fn get_slot_of(&self, item_id: &TokenIdentifier, nonce: u64) -> Slot<Self::Api> {
+        if self.has_slot(item_id, nonce) {
+            return self.get_item_from_token(item_id, nonce).get().slot;
         } else {
             sc_panic!("No slot found for {}.", item_id);
         }

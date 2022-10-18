@@ -1,16 +1,65 @@
 use crate::testing_utils::{self, TestItemAttributes};
 use customize_nft::{
+    constants::ERR_CANNOT_FILL_UNREGISTERED_ITEM,
     libs::storage::StorageModule,
     structs::{item::Item, slot::Slot},
     EndpointWrappers, Equip,
 };
-use elrond_wasm::types::{MultiValueEncoded, TokenIdentifier};
-use elrond_wasm_debug::{managed_buffer, managed_token_id, rust_biguint, DebugApi};
+use elrond_wasm_debug::{managed_buffer, managed_token_id, rust_biguint};
 
 #[test]
 fn works_if_is_the_owner() {
     const TOKEN_ID: &[u8] = b"ITEM-a1a1a1";
     const TOKEN_SLOT: &[u8] = b"hat";
+    const TOKEN_NONCE: u64 = 654;
+    const TOKEN_NAME: &[u8] = b"Pirate Hat";
+
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    setup.blockchain_wrapper.set_nft_balance(
+        &setup.owner_address,
+        &TOKEN_ID,
+        TOKEN_NONCE,
+        &rust_biguint!(1u64),
+        &TestItemAttributes {},
+    );
+
+    let b_wrapper = &mut setup.blockchain_wrapper;
+
+    b_wrapper
+        .execute_esdt_transfer(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            TOKEN_ID,
+            TOKEN_NONCE,
+            &rust_biguint!(1),
+            |sc| {
+                sc.register_item(
+                    Slot::new_from_buffer(managed_buffer!(TOKEN_SLOT)),
+                    managed_buffer!(TOKEN_NAME),
+                    managed_token_id!(TOKEN_ID),
+                    TOKEN_NONCE,
+                );
+
+                sc.call_fill();
+
+                let (item_id, item_nonce) = sc
+                    .get_token_from_item(&Item {
+                        name: managed_buffer!(TOKEN_NAME),
+                        slot: Slot::new_from_bytes(TOKEN_SLOT),
+                    })
+                    .get();
+
+                assert_eq!(item_id, managed_token_id!(TOKEN_ID));
+                assert_eq!(item_nonce, TOKEN_NONCE);
+            },
+        )
+        .assert_ok();
+}
+
+#[test]
+fn panic_if_not_registered() {
+    const TOKEN_ID: &[u8] = b"ITEM-a1a1a1";
     const TOKEN_NONCE: u64 = 654;
 
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
@@ -33,106 +82,10 @@ fn works_if_is_the_owner() {
             TOKEN_NONCE,
             &rust_biguint!(1),
             |sc| {
-                let mut managed_items_ids =
-                    MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
-                managed_items_ids.push(managed_token_id!(TOKEN_ID));
-
-                sc.register_item(
-                    Slot::new_from_buffer(managed_buffer!(TOKEN_SLOT)),
-                    managed_items_ids,
-                );
-
                 sc.call_fill();
-
-                let (item_id, item_nonce) = sc
-                    .token_of_item(&Item {
-                        name: managed_buffer!(TOKEN_ID),
-                        slot: Slot::new_from_buffer(managed_buffer!(TOKEN_SLOT)),
-                    })
-                    .get();
-
-                assert_eq!(item_id, managed_token_id!(TOKEN_ID));
-                assert_eq!(item_nonce, TOKEN_NONCE);
             },
         )
-        .assert_ok();
-}
-
-#[test]
-fn panic_if_override() {
-    const TOKEN_A_ID: &[u8] = b"ITEM-a1a1a1";
-    const TOKEN_A_NONCE: u64 = 654;
-    const TOKEN_A_SLOT: &[u8] = b"hat";
-
-    const TOKEN_B_ID: &[u8] = TOKEN_A_ID;
-    const TOKEN_B_NONCE: u64 = 1;
-
-    let mut setup = testing_utils::setup(customize_nft::contract_obj);
-
-    setup.blockchain_wrapper.set_nft_balance(
-        &setup.owner_address,
-        &TOKEN_A_ID,
-        TOKEN_A_NONCE,
-        &rust_biguint!(1u64),
-        &Option::Some({}),
-    );
-
-    setup.blockchain_wrapper.set_nft_balance(
-        &setup.owner_address,
-        &TOKEN_B_ID,
-        TOKEN_B_NONCE,
-        &rust_biguint!(1u64),
-        &Option::Some({}),
-    );
-
-    setup
-        .blockchain_wrapper
-        .execute_esdt_transfer(
-            &setup.owner_address,
-            &setup.cf_wrapper,
-            TOKEN_A_ID,
-            TOKEN_A_NONCE,
-            &rust_biguint!(1),
-            |sc| {
-                let mut managed_items_ids =
-                    MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
-                managed_items_ids.push(managed_token_id!(TOKEN_B_ID));
-
-                sc.register_item(
-                    Slot::new_from_buffer(managed_buffer!(TOKEN_A_SLOT)),
-                    managed_items_ids,
-                );
-
-                sc.call_fill();
-
-                let (item_id, item_nonce) = sc
-                    .token_of_item(&Item {
-                        name: managed_buffer!(TOKEN_A_ID),
-                        slot: Slot::new_from_buffer(managed_buffer!(TOKEN_A_SLOT)),
-                    })
-                    .get();
-
-                assert_eq!(item_id, managed_token_id!(TOKEN_A_ID));
-                assert_eq!(item_nonce, TOKEN_A_NONCE);
-            },
-        )
-        .assert_ok();
-
-    setup
-        .blockchain_wrapper
-        .execute_esdt_transfer(
-            &setup.owner_address,
-            &setup.cf_wrapper,
-            TOKEN_B_ID,
-            TOKEN_B_NONCE,
-            &rust_biguint!(1),
-            |sc| {
-                sc.fill();
-            },
-        )
-        .assert_user_error(
-            "The item with name ITEM-a1a1a1 is already registered. Please, use another name.",
-        );
+        .assert_user_error(ERR_CANNOT_FILL_UNREGISTERED_ITEM);
 }
 
 #[test]

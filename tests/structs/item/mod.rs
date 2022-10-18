@@ -1,2 +1,1 @@
-mod decode_tests;
-mod encode_tests;
+mod encoding_test;

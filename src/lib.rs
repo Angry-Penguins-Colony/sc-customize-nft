@@ -27,47 +27,43 @@ pub trait Equip:
     #[only_owner]
     fn register_item(
         &self,
-        item_slot: Slot<Self::Api>,
-        items_id_to_add: MultiValueEncoded<TokenIdentifier>,
+        slot: Slot<Self::Api>,
+        name: ManagedBuffer<Self::Api>,
+        token_id: TokenIdentifier<Self::Api>,
+        token_nonce: u64,
     ) {
-        for item_id in items_id_to_add {
-            require!(
-                item_id != self.equippable_token_id().get(),
-                ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM
-            );
+        require!(
+            token_id != self.equippable_token_id().get(),
+            ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM
+        );
 
-            self.set_slot_of(&item_id, item_slot.clone());
-        }
+        let item = &Item { name, slot };
+
+        let storage_item = self.get_item_from_token(&token_id, token_nonce);
+        let storage_token = self.get_token_from_item(item);
+
+        require!(storage_item.is_empty(), ERR_CANNOT_OVERRIDE_REGISTERED_ITEM);
+        require!(
+            storage_token.is_empty(),
+            ERR_CANNOT_OVERRIDE_REGISTERED_ITEM
+        );
+
+        storage_item.set(item);
+        storage_token.set((token_id, token_nonce));
     }
 
     #[payable("*")]
     #[endpoint]
     #[only_owner]
     fn fill(&self) {
-        // TODO: require! to only send registered SFT
-
         let payment = self.call_value().single_esdt();
-        let token_id = payment.token_identifier;
-        let token_nonce = payment.token_nonce;
-
-        // TODO: extract to Item.fromId()
-        let item_name = self
-            .blockchain()
-            .get_esdt_token_data(&self.blockchain().get_sc_address(), &token_id, token_nonce)
-            .name;
-
-        let item = &Item {
-            name: item_name.clone(),
-            slot: self.get_slot_of(&token_id),
-        };
 
         require!(
-            self.token_of_item(item).is_empty(),
-            "The item with name {} is already registered. Please, use another name.",
-            item_name
-        );
-        self.token_of_item(item)
-            .set((token_id.clone(), token_nonce));
+            self.get_item_from_token(&payment.token_identifier, payment.token_nonce)
+                .is_empty()
+                == false,
+            ERR_CANNOT_FILL_UNREGISTERED_ITEM
+        )
     }
 
     /**
@@ -126,12 +122,22 @@ pub trait Equip:
                 ERR_MORE_THAN_ONE_ITEM_RECEIVED
             );
 
-            let item = Item {
-                name: self.get_token_name(&payment.token_identifier, payment.token_nonce),
-                slot: self.get_slot_of(&payment.token_identifier),
-            };
+            let opt_item = self.get_item_from_token(&payment.token_identifier, payment.token_nonce);
 
-            self.equip_slot(&mut attributes, &item);
+            if opt_item.is_empty() {
+                sc_print!(
+                    "Not registered {}-{}",
+                    payment.token_identifier,
+                    payment.token_nonce
+                );
+            }
+
+            require!(
+                opt_item.is_empty() == false,
+                ERR_CANNOT_EQUIP_UNREGISTED_ITEM
+            );
+
+            self.equip_slot(&mut attributes, &opt_item.get());
         }
 
         return self.update_equippable(&equippable_token_id, equippable_nonce, &attributes);
@@ -148,49 +154,17 @@ pub trait Equip:
             .direct_egld(&self.blockchain().get_owner_address(), &balance, b"");
     }
 
-    fn get_token_name(&self, item_id: &TokenIdentifier, nonce: u64) -> ManagedBuffer {
-        let item_name = self
-            .blockchain()
-            .get_esdt_token_data(&self.blockchain().get_sc_address(), item_id, nonce)
-            .name;
-
-        return item_name;
-    }
-
     fn equip_slot(
         &self,
         attributes: &mut EquippableNftAttributes<Self::Api>,
         item: &Item<Self::Api>,
     ) {
-        let n = item.clone().name;
-
-        require!(
-            self.token_of_item(&item).is_empty() == false,
-            "Trying to equip '{}' but is not considered as an item", // TODO: extract to constant
-            n
-        );
-
-        let (item_id, _) = self.token_of_item(&item).get();
-
-        require!(
-            self.has_slot(&item_id) == true,
-            "Trying to equip {} but is not considered as an item", // TODO: extract to constant
-            item_id
-        );
-
-        require!(
-            item_id != self.equippable_token_id().get(),
-            ERR_CANNOT_EQUIP_EQUIPPABLE
-        );
-
-        let item_slot = self.get_slot_of(&item_id);
-
         // unequip slot if any
-        if attributes.is_slot_empty(&item_slot) == false {
-            self.unequip_slot(attributes, &item_slot);
+        if attributes.is_slot_empty(&item.slot) == false {
+            self.unequip_slot(attributes, &item.slot);
         }
 
-        attributes.set_item_if_empty(&item_slot, Option::Some(item.name.clone()));
+        attributes.set_item_if_empty(&item.slot, Option::Some(item.name.clone()));
     }
 
     /// Empty the item at the slot provided and sent it to the caller.
@@ -199,26 +173,19 @@ pub trait Equip:
         attributes: &mut EquippableNftAttributes<Self::Api>,
         slot: &Slot<Self::Api>,
     ) {
-        let caller = self.blockchain().get_caller();
-
         let opt_item = attributes.get_item(&slot);
 
         match opt_item {
             Some(item) => {
-                let n = item.clone().name;
+                let storage_token = self.get_token_from_item(&item);
 
-                require!(
-                    self.token_of_item(&item).is_empty() == false,
-                    "{} token is empty, while it should be filled.",
-                    n
-                );
+                if storage_token.is_empty() {
+                    sc_print!("Not registered {}-{}", item.slot.get(), item.name);
+                }
 
-                let (item_id, item_nonce) = self.token_of_item(&item).get();
+                require!(!storage_token.is_empty(), ERR_CANNOT_EQUIP_UNREGISTED_ITEM,);
 
-                require!(
-                    self.has_slot(&item_id) == true,
-                    ERR_ITEM_TO_UNEQUIP_HAS_NO_SLOT
-                );
+                let (item_id, item_nonce) = storage_token.get();
 
                 if self.blockchain().get_sc_balance(
                     &EgldOrEsdtTokenIdentifier::esdt(item_id.clone()),
@@ -232,8 +199,13 @@ pub trait Equip:
                     );
                 }
 
-                self.send()
-                    .direct_esdt(&caller, &item_id, item_nonce, &BigUint::from(1u32), &[]);
+                self.send().direct_esdt(
+                    &self.blockchain().get_caller(),
+                    &item_id,
+                    item_nonce,
+                    &BigUint::from(1u32),
+                    &[],
+                );
 
                 attributes.empty_slot(&slot);
             }

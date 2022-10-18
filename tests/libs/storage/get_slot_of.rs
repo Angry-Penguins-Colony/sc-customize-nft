@@ -14,14 +14,20 @@ fn should_returns_some() {
     const ITEM_NONCE: u64 = 1u64;
 
     DebugApi::dummy();
-    setup.register_and_fill_item(SLOT, HAT_TOKEN_ID, ITEM_NONCE, &TestItemAttributes {});
+    setup.register_and_fill_item(
+        SLOT,
+        b"pirate hat",
+        HAT_TOKEN_ID,
+        ITEM_NONCE,
+        &TestItemAttributes {},
+    );
 
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             let hat_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID);
 
-            let actual_slot = sc.get_slot_of(&hat_token);
+            let actual_slot = sc.get_slot_of(&hat_token, ITEM_NONCE);
             assert_eq!(actual_slot, Slot::new_from_buffer(managed_buffer!(SLOT)));
         })
         .assert_ok();
@@ -37,7 +43,7 @@ fn should_returns_none() {
         .execute_query(&setup.cf_wrapper, |sc| {
             let not_existing_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(b"NOT_TOKEN_ID");
 
-            let _ = sc.get_slot_of(&not_existing_token);
+            let _ = sc.get_slot_of(&not_existing_token, 1);
         })
         .assert_user_error("No slot found for NOT_TOKEN_ID.");
 }

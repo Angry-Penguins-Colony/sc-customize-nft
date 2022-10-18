@@ -34,6 +34,7 @@ fn customize_only_unequip() {
         ITEM_TO_UNEQUIP_NONCE,
         slot,
         TestItemAttributes {},
+        ITEM_TO_UNEQUIP_NAME,
     );
 
     setup
@@ -45,12 +46,11 @@ fn customize_only_unequip() {
             |sc| {
                 let attributes_before_custom = EquippableNftAttributes::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
-                    slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot)),
+                    slot: Slot::new_from_bytes(slot),
                 }]);
 
                 let mut attributes_after_custom = attributes_before_custom.clone();
-                attributes_after_custom
-                    .empty_slot(&Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot)));
+                attributes_after_custom.empty_slot(&Slot::new_from_bytes(slot));
 
                 sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes_before_custom,
@@ -138,6 +138,7 @@ fn unequip_should_ignore_case_of_slot() {
         ITEM_TO_UNEQUIP_NONCE,
         SLOT_LOWERCASE,
         TestItemAttributes {},
+        ITEM_TO_UNEQUIP_NAME,
     );
 
     setup
@@ -243,6 +244,7 @@ fn panic_when_unequip_twice_the_same_slot() {
         ITEM_TO_UNEQUIP_NONCE,
         slot,
         TestItemAttributes {},
+        ITEM_TO_UNEQUIP_NAME,
     );
 
     // setup CID

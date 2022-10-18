@@ -1,7 +1,5 @@
-pub const EQUIPPABLE_NAME_FORMAT_NUMBER: &[u8] = b"{number}";
 pub const ENQUEUE_PRICE: u64 = 1_000_000_000_000_000; // 0.001 EGLD
 
-pub const ERR_INIT_MISSING_NUMBER_FORMAT: &str = "The name format require {number} somewhere.";
 pub const ERR_NOT_OWNER: &str = "Only the owner can call this method.";
 pub const ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM: &str =
     "You cannot register an equippable NFT as an item.";

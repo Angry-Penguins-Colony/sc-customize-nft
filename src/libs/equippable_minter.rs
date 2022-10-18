@@ -3,11 +3,7 @@ elrond_wasm::derive_imports!();
 
 use elrond_wasm::types::ManagedVec;
 
-use crate::{
-    constants::EQUIPPABLE_NAME_FORMAT_NUMBER,
-    structs::equippable_nft_attributes::EquippableNftAttributes,
-    utils::{managed_buffer_utils::ManagedBufferUtils, u64_utils::UtilsU64},
-};
+use crate::structs::equippable_nft_attributes::EquippableNftAttributes;
 
 #[elrond_wasm::module]
 pub trait MintEquippableModule:
@@ -84,20 +80,5 @@ pub trait MintEquippableModule:
     fn calculate_hash(&self, _attributes: &EquippableNftAttributes<Self::Api>) -> ManagedBuffer {
         // we disabled hash calculating for now
         return ManagedBuffer::new();
-    }
-
-    fn get_next_equippable_name(&self) -> ManagedBuffer {
-        let index = self.blockchain().get_current_esdt_nft_nonce(
-            &self.blockchain().get_sc_address(),
-            &self.equippable_token_id().get(),
-        ) + 1;
-
-        let token_index = index.to_ascii();
-        let token_name = self
-            .equippable_name_format()
-            .get()
-            .replace(EQUIPPABLE_NAME_FORMAT_NUMBER, &token_index);
-
-        return token_name;
     }
 }

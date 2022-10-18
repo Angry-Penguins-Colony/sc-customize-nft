@@ -20,26 +20,11 @@ pub trait Equip:
     equippable_minter::MintEquippableModule + parser::ParserModule + storage::StorageModule
 {
     #[init]
-    fn init(
-        &self,
-        equippable_token_id: TokenIdentifier,
-        gateway: ManagedBuffer,
-        equippable_name_format: ManagedBuffer,
-    ) {
-        self.equippable_token_id().set(&equippable_token_id);
-
-        // if the user forgot the backslash, we add it silently
-        let valid_gateway = &gateway.append_trailing_character_if_missing(b'/');
-        self.ipfs_gateway().set(valid_gateway);
-
+    fn init(&self, equippable_token_id: TokenIdentifier, gateway: ManagedBuffer) {
         require!(gateway.get_last_char() == b'/', ERR_GATEWAY_NEEDS_SLASH);
 
-        require!(
-            equippable_name_format.contains(EQUIPPABLE_NAME_FORMAT_NUMBER),
-            ERR_INIT_MISSING_NUMBER_FORMAT
-        );
-
-        self.equippable_name_format().set(equippable_name_format);
+        self.equippable_token_id().set(&equippable_token_id);
+        self.ipfs_gateway().set(gateway);
     }
 
     #[endpoint(registerItem)]

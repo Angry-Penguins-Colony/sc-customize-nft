@@ -14,9 +14,6 @@ pub trait StorageModule {
     #[storage_mapper("equippable_token_id")]
     fn equippable_token_id(&self) -> SingleValueMapper<TokenIdentifier>;
 
-    #[storage_mapper("equippable_name_format")]
-    fn equippable_name_format(&self) -> SingleValueMapper<ManagedBuffer<Self::Api>>;
-
     #[storage_mapper("ipfs_gateway")]
     fn ipfs_gateway(&self) -> SingleValueMapper<ManagedBuffer<Self::Api>>;
 
@@ -35,7 +32,7 @@ pub trait StorageModule {
     #[storage_mapper("slot_of_items")]
     fn __slot_of(&self, token: &TokenIdentifier) -> SingleValueMapper<ManagedBuffer>;
 
-    #[storage_mapper("equippable_name_format")]
+    #[storage_mapper("__images_to_render")]
     fn __images_to_render(&self) -> VecMapper<EquippableNftAttributes<Self::Api>>;
 
     #[storage_mapper("cid_of_equippable")]

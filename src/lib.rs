@@ -183,11 +183,7 @@ pub trait Equip: equippable_minter::MintEquippableModule + storage::StorageModul
             Some(item) => {
                 let storage_token = self.get_token_from_item(&item);
 
-                if storage_token.is_empty() {
-                    sc_print!("Not registered {}-{}", item.slot.get(), item.name);
-                }
-
-                require!(!storage_token.is_empty(), ERR_CANNOT_EQUIP_UNREGISTED_ITEM,);
+                require!(!storage_token.is_empty(), ERR_CANNOT_EQUIP_UNREGISTED_ITEM);
 
                 let (item_id, item_nonce) = storage_token.get();
 

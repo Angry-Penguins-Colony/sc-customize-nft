@@ -32,6 +32,8 @@ pub trait Equip:
         let valid_gateway = &gateway.append_trailing_character_if_missing(b'/');
         self.ipfs_gateway().set(valid_gateway);
 
+        require!(gateway.get_last_char() == b'/', ERR_GATEWAY_NEEDS_SLASH);
+
         require!(
             equippable_name_format.contains(EQUIPPABLE_NAME_FORMAT_NUMBER),
             ERR_INIT_MISSING_NUMBER_FORMAT

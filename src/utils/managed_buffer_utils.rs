@@ -26,6 +26,7 @@ pub trait ManagedBufferUtils<M: ManagedTypeApi> {
     fn replace(&self, old_buffer: &[u8], new_buffer: &ManagedBuffer<M>) -> ManagedBuffer<M>;
     fn contains(&self, to_find: &[u8]) -> bool;
     fn to_lowercase(&self) -> ManagedBuffer<M>;
+    fn get_last_char(&self) -> u8;
 
     /// Returns 0 if equals. Return 1 if self is after other in the alphabetically order. Returns 0 if self is before other in the alphabetically order.
     fn compare(&self, other: &Self) -> Ordering;
@@ -83,6 +84,12 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
         }
 
         sc_panic_self!(M, "no occurence of char {:x} in bytes {:x}", char, self);
+    }
+
+    fn get_last_char(&self) -> u8 {
+        let bytes = self.load_512_bytes();
+
+        return bytes[self.len() - 1];
     }
 
     fn remove_first_char(&self) -> ManagedBuffer<M> {

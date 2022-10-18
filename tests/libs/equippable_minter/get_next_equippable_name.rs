@@ -24,7 +24,7 @@ fn should_work() {
         .execute_tx(&owner_address, &cf_wrapper, &rust_zero, |sc| {
             sc.init(
                 managed_token_id!(b"PEN-a1a1a1"),
-                managed_buffer!(b"https://ipfs.io/ipfs"),
+                managed_buffer!(b"https://ipfs.io/ipfs/"),
                 managed_buffer!(b"Equippable #{number}"),
             );
         })

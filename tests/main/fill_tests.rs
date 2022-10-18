@@ -38,7 +38,7 @@ fn works_if_is_the_owner() {
                 sc.call_fill();
 
                 let (item_id, item_nonce) = sc
-                    .token_of(&Item {
+                    .token_of_item(&Item {
                         name: managed_buffer!(TOKEN_ID),
                         slot: managed_buffer!(TOKEN_SLOT),
                     })
@@ -96,7 +96,7 @@ fn panic_if_override() {
                 sc.call_fill();
 
                 let (item_id, item_nonce) = sc
-                    .token_of(&Item {
+                    .token_of_item(&Item {
                         name: managed_buffer!(TOKEN_A_ID),
                         slot: managed_buffer!(TOKEN_A_SLOT),
                     })

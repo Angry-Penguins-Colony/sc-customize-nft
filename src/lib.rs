@@ -65,11 +65,12 @@ pub trait Equip:
         };
 
         require!(
-            self.token_of(item).is_empty(),
+            self.token_of_item(item).is_empty(),
             "The item with name {} is already registered. Please, use another name.",
             item_name
         );
-        self.token_of(item).set((token_id.clone(), token_nonce));
+        self.token_of_item(item)
+            .set((token_id.clone(), token_nonce));
     }
 
     /**
@@ -167,12 +168,12 @@ pub trait Equip:
         let n = item.clone().name;
 
         require!(
-            self.token_of(&item).is_empty() == false,
+            self.token_of_item(&item).is_empty() == false,
             "Trying to equip '{}' but is not considered as an item", // TODO: extract to constant
             n
         );
 
-        let (item_id, _) = self.token_of(&item).get();
+        let (item_id, _) = self.token_of_item(&item).get();
 
         require!(
             self.has_slot(&item_id) == true,
@@ -210,12 +211,12 @@ pub trait Equip:
                 let n = item.clone().name;
 
                 require!(
-                    self.token_of(&item).is_empty() == false,
+                    self.token_of_item(&item).is_empty() == false,
                     "{} token is empty, while it should be filled.",
                     n
                 );
 
-                let (item_id, item_nonce) = self.token_of(&item).get();
+                let (item_id, item_nonce) = self.token_of_item(&item).get();
 
                 require!(
                     self.has_slot(&item_id) == true,

@@ -18,12 +18,12 @@ pub trait StorageModule {
     fn ipfs_gateway(&self) -> SingleValueMapper<ManagedBuffer<Self::Api>>;
 
     #[storage_mapper("items_token")]
-    fn token_of(
+    fn token_of_item(
         &self,
         item: &Item<Self::Api>,
     ) -> SingleValueMapper<(TokenIdentifier<Self::Api>, u64)>;
 
-    #[storage_mapper("permissions")]
+    #[storage_mapper("whitelist_set_cid_of_endpoint")]
     fn whitelist_set_cid_of_endpoint(
         &self,
         address: &ManagedAddress<Self::Api>,

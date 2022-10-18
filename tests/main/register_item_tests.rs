@@ -1,12 +1,11 @@
 use customize_nft::constants::ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM;
 use customize_nft::libs::storage::StorageModule;
-use customize_nft::structs::item_attributes::ItemAttributes;
 use customize_nft::*;
 use elrond_wasm::types::{EsdtLocalRole, ManagedBuffer, MultiValueEncoded, TokenIdentifier};
 use elrond_wasm_debug::{managed_buffer, managed_token_id};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
-use crate::testing_utils;
+use crate::testing_utils::{self, TestItemAttributes};
 
 #[test]
 fn test_register_item() {
@@ -18,7 +17,7 @@ fn test_register_item() {
 
     DebugApi::dummy();
 
-    setup.register_and_fill_item(slot, TOKEN_ID, TOKEN_NONCE, &ItemAttributes {});
+    setup.register_and_fill_item(slot, TOKEN_ID, TOKEN_NONCE, &TestItemAttributes {});
 
     setup
         .blockchain_wrapper
@@ -45,12 +44,17 @@ fn register_another_item_on_slot() {
     let slot = b"slot";
 
     DebugApi::dummy();
-    setup.register_and_fill_item(slot, FIRST_TOKEN_ID, FIRST_TOKEN_NONCE, &ItemAttributes {});
+    setup.register_and_fill_item(
+        slot,
+        FIRST_TOKEN_ID,
+        FIRST_TOKEN_NONCE,
+        &TestItemAttributes {},
+    );
     setup.register_and_fill_item(
         slot,
         SECOND_TOKEN_ID,
         SECOND_TOKEN_NONCE,
-        &ItemAttributes {},
+        &TestItemAttributes {},
     );
 
     setup
@@ -157,7 +161,7 @@ fn change_item_slot() {
             &ITEM_ID,
             ITEM_NONCE,
             &rust_biguint!(2u64),
-            &ItemAttributes {},
+            &TestItemAttributes {},
         );
     }
 
@@ -190,7 +194,7 @@ fn change_item_slot() {
                 &ITEM_ID,
                 ITEM_NONCE,
                 &rust_biguint!(2u64),
-                &ItemAttributes {},
+                &TestItemAttributes {},
             );
         }
     }

@@ -1,11 +1,12 @@
+elrond_wasm::imports!();
+elrond_wasm::derive_imports!();
+
 use std::ops::Deref;
 use std::u8;
 
 use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
 use customize_nft::structs::item::Item;
-use customize_nft::structs::item_attributes::ItemAttributes;
 use customize_nft::*;
-use elrond_wasm::contract_base::ContractBase;
 use elrond_wasm::types::MultiValueEncoded;
 use elrond_wasm::types::{
     Address, BigUint, EsdtLocalRole, EsdtTokenPayment, EsdtTokenType, ManagedBuffer, ManagedVec,
@@ -20,6 +21,9 @@ pub const WASM_PATH: &'static str = "sc-customize-nft/output/customize_nft.wasm"
 pub const EQUIPPABLE_TOKEN_ID: &[u8] = b"PENG-ae5a";
 
 pub const HAT_TOKEN_ID: &[u8] = b"HAT-a";
+
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Debug)]
+pub struct TestItemAttributes {}
 
 #[macro_export]
 macro_rules! assert_eq_symetry {
@@ -106,7 +110,7 @@ where
         slot: &[u8],
         item_id: &[u8],
         item_nonce: u64,
-        attributes: &ItemAttributes,
+        attributes: &TestItemAttributes,
     ) {
         self.register_and_fill_items_all_properties(
             slot,
@@ -126,7 +130,7 @@ where
         slot: &[u8],
         item_id: &[u8],
         item_nonce: u64,
-        attributes: &ItemAttributes,
+        attributes: &TestItemAttributes,
         royalties: u64,
         creator: Option<&Address>,
         name: Option<&[u8]>,
@@ -189,7 +193,7 @@ where
             token_id,
             nonce,
             &rust_biguint!(quantity),
-            &ItemAttributes {},
+            &TestItemAttributes {},
         );
     }
 
@@ -224,7 +228,7 @@ where
         item_identifier: &[u8],
         item_nonce: u64,
         slot: &[u8],
-        attributes: ItemAttributes,
+        attributes: TestItemAttributes,
     ) {
         self.register_and_fill_item(slot, item_identifier, item_nonce, &attributes);
 

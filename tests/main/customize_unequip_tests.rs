@@ -1,17 +1,17 @@
 use customize_nft::{
     constants::ERR_CANNOT_UNEQUIP_EMPTY_SLOT,
     libs::storage::StorageModule,
-    structs::{
-        equippable_nft_attributes::EquippableNftAttributes, item::Item,
-        item_attributes::ItemAttributes,
-    },
+    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item},
 };
 use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm::types::MultiValueEncoded;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
-use crate::{args_set_cid_of, testing_utils};
+use crate::{
+    args_set_cid_of,
+    testing_utils::{self, TestItemAttributes},
+};
 
 const EQUIPPABLE_TOKEN_ID: &[u8] = testing_utils::EQUIPPABLE_TOKEN_ID;
 
@@ -33,7 +33,7 @@ fn customize_only_unequip() {
         ITEM_TO_UNEQUIP_ID,
         ITEM_TO_UNEQUIP_NONCE,
         slot,
-        ItemAttributes {},
+        TestItemAttributes {},
     );
 
     setup
@@ -137,7 +137,7 @@ fn unequip_should_ignore_case_of_slot() {
         ITEM_TO_UNEQUIP_ID,
         ITEM_TO_UNEQUIP_NONCE,
         SLOT_LOWERCASE,
-        ItemAttributes {},
+        TestItemAttributes {},
     );
 
     setup
@@ -239,7 +239,7 @@ fn panic_when_unequip_twice_the_same_slot() {
         ITEM_TO_UNEQUIP_ID,
         ITEM_TO_UNEQUIP_NONCE,
         slot,
-        ItemAttributes {},
+        TestItemAttributes {},
     );
 
     // setup CID

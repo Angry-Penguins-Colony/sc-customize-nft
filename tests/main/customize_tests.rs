@@ -1,17 +1,17 @@
 use customize_nft::{
     constants::ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
     libs::storage::StorageModule,
-    structs::{
-        equippable_nft_attributes::EquippableNftAttributes, item::Item,
-        item_attributes::ItemAttributes,
-    },
+    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item},
     Equip,
 };
 use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::{ManagedBuffer, MultiValueEncoded};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
-use crate::{args_set_cid_of, testing_utils};
+use crate::{
+    args_set_cid_of,
+    testing_utils::{self, TestItemAttributes},
+};
 
 const EQUIPPABLE_TOKEN_ID: &[u8] = testing_utils::EQUIPPABLE_TOKEN_ID;
 
@@ -38,7 +38,7 @@ fn customize_complete_flow() {
         ITEM_TO_UNEQUIP_ID,
         ITEM_TO_UNEQUIP_NONCE,
         ITEM_TO_UNEQUIP_SLOT,
-        ItemAttributes {},
+        TestItemAttributes {},
     );
 
     // Register item to equip
@@ -46,7 +46,7 @@ fn customize_complete_flow() {
         ITEM_TO_EQUIP_SLOT,
         ITEM_TO_EQUIP_ID,
         ITEM_TO_EQUIP_NONCE,
-        &ItemAttributes {},
+        &TestItemAttributes {},
     );
 
     // Add to user an item to equip
@@ -55,7 +55,7 @@ fn customize_complete_flow() {
         ITEM_TO_EQUIP_ID,
         ITEM_TO_EQUIP_NONCE,
         &rust_biguint!(1),
-        &ItemAttributes {},
+        &TestItemAttributes {},
     );
 
     setup

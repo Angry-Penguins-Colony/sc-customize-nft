@@ -1,9 +1,5 @@
-use crate::testing_utils;
-use customize_nft::{
-    libs::storage::StorageModule,
-    structs::{item::Item, item_attributes::ItemAttributes},
-    EndpointWrappers, Equip,
-};
+use crate::testing_utils::{self, TestItemAttributes};
+use customize_nft::{libs::storage::StorageModule, structs::item::Item, EndpointWrappers, Equip};
 use elrond_wasm::types::{MultiValueEncoded, TokenIdentifier};
 use elrond_wasm_debug::{managed_buffer, managed_token_id, rust_biguint, DebugApi};
 
@@ -20,7 +16,7 @@ fn works_if_is_the_owner() {
         &TOKEN_ID,
         TOKEN_NONCE,
         &rust_biguint!(1u64),
-        &ItemAttributes {},
+        &TestItemAttributes {},
     );
 
     let b_wrapper = &mut setup.blockchain_wrapper;

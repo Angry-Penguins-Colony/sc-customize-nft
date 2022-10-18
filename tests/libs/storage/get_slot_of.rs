@@ -1,8 +1,8 @@
-use customize_nft::{libs::storage::StorageModule, structs::item_attributes::ItemAttributes};
+use customize_nft::libs::storage::StorageModule;
 use elrond_wasm::types::TokenIdentifier;
 use elrond_wasm_debug::{managed_buffer, DebugApi};
 
-use crate::testing_utils;
+use crate::testing_utils::{self, TestItemAttributes};
 
 const HAT_TOKEN_ID: &[u8] = testing_utils::HAT_TOKEN_ID;
 
@@ -14,7 +14,7 @@ fn should_returns_some() {
     const ITEM_NONCE: u64 = 1u64;
 
     DebugApi::dummy();
-    setup.register_and_fill_item(SLOT, HAT_TOKEN_ID, ITEM_NONCE, &ItemAttributes {});
+    setup.register_and_fill_item(SLOT, HAT_TOKEN_ID, ITEM_NONCE, &TestItemAttributes {});
 
     setup
         .blockchain_wrapper

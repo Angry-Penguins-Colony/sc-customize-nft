@@ -1,3 +1,4 @@
+use crate::testing_utils::TestItemAttributes;
 use customize_nft::constants::{
     ERR_FIRST_PAYMENT_IS_EQUIPPABLE, ERR_MORE_THAN_ONE_ITEM_RECEIVED,
     ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
@@ -5,7 +6,6 @@ use customize_nft::constants::{
 use customize_nft::libs::storage::StorageModule;
 use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
 use customize_nft::structs::item::Item;
-use customize_nft::structs::item_attributes::ItemAttributes;
 use elrond_wasm::contract_base::ContractBase;
 use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::MultiValueEncoded;
@@ -37,7 +37,7 @@ fn test_equip() {
         slot,
         ITEM_TO_EQUIP_ID,
         ITEM_TO_EQUIP_NONCE,
-        &ItemAttributes {},
+        &TestItemAttributes {},
         0,
         Option::None,
         Option::Some(ITEM_TO_EQUIP_NAME),
@@ -74,7 +74,7 @@ fn test_equip() {
         ITEM_TO_EQUIP_ID,
         ITEM_TO_EQUIP_NONCE,
         &rust_biguint!(1),
-        &ItemAttributes {},
+        &TestItemAttributes {},
     );
 
     // set cid
@@ -170,7 +170,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
         slot,
         ITEM_ID,
         ITEM_TO_UNEQUIP_NONCE,
-        &ItemAttributes {},
+        &TestItemAttributes {},
         0u64,
         Option::None,
         Option::Some(ITEM_TO_UNEQUIP_NAME),
@@ -196,7 +196,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
         ITEM_ID,
         ITEM_TO_EQUIP_NONCE,
         &rust_biguint!(1),
-        &ItemAttributes {},
+        &TestItemAttributes {},
         0,
         Option::Some(&setup.owner_address),
         Option::Some(ITEM_TO_EQUIP_NAME),
@@ -336,7 +336,7 @@ fn equip_while_nft_to_equip_is_not_an_equippable() {
         HAT_TOKEN_ID,
         INIT_NONCE,
         &rust_biguint!(1),
-        &ItemAttributes {},
+        &TestItemAttributes {},
     );
 
     let (esdt_transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[
@@ -378,7 +378,7 @@ fn panic_if_token_is_not_an_item() {
         ITEM_TO_EQUIP_ID,
         INIT_NONCE,
         &rust_biguint!(1),
-        &ItemAttributes {},
+        &TestItemAttributes {},
     );
 
     let (transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[
@@ -405,7 +405,7 @@ fn test_equip_while_sending_two_as_value_of_sft() {
         slot,
         ITEM_TO_EQUIP_ID,
         ITEM_TO_EQUIP_NONCE,
-        &ItemAttributes {},
+        &TestItemAttributes {},
     );
 
     // add empty equippable to the USER
@@ -450,7 +450,7 @@ fn equip_while_sending_twice_same_items() {
         SLOT,
         ITEM_TO_EQUIP_ID,
         ITEM_TO_EQUIP_NONCE,
-        &ItemAttributes {},
+        &TestItemAttributes {},
     );
 
     setup.create_empty_equippable(EQUIPPABLE_NONCE);
@@ -461,7 +461,7 @@ fn equip_while_sending_twice_same_items() {
         ITEM_TO_EQUIP_ID,
         ITEM_TO_EQUIP_NONCE,
         &rust_biguint!(2),
-        &ItemAttributes {},
+        &TestItemAttributes {},
     );
 
     // set CID
@@ -570,23 +570,33 @@ fn equip_while_sending_two_items_of_same_slot() {
     setup.create_empty_equippable(EQUIPPABLE_NONCE);
 
     // Give the user the first item
-    setup.register_and_fill_item(SLOT, FIRST_ITEM_ID, FIRST_ITEM_NONCE, &ItemAttributes {});
+    setup.register_and_fill_item(
+        SLOT,
+        FIRST_ITEM_ID,
+        FIRST_ITEM_NONCE,
+        &TestItemAttributes {},
+    );
     setup.blockchain_wrapper.set_nft_balance(
         &setup.first_user_address,
         FIRST_ITEM_ID,
         FIRST_ITEM_NONCE,
         &rust_biguint!(1),
-        &ItemAttributes {},
+        &TestItemAttributes {},
     );
 
     // Give the user the second item
-    setup.register_and_fill_item(SLOT, SECOND_ITEM_ID, SECOND_ITEM_NONCE, &ItemAttributes {});
+    setup.register_and_fill_item(
+        SLOT,
+        SECOND_ITEM_ID,
+        SECOND_ITEM_NONCE,
+        &TestItemAttributes {},
+    );
     setup.blockchain_wrapper.set_nft_balance(
         &setup.first_user_address,
         SECOND_ITEM_ID,
         SECOND_ITEM_NONCE,
         &rust_biguint!(1),
-        &ItemAttributes {},
+        &TestItemAttributes {},
     );
 
     // set CID

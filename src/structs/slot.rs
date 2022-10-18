@@ -7,10 +7,15 @@ use elrond_wasm::elrond_codec::{TopDecodeInput, TopEncode};
 
 use core::{cmp::Ordering, ops::Deref, str::FromStr};
 
-use crate::utils::{managed_buffer_utils::ManagedBufferUtils, u64_utils::UtilsU64};
+use crate::{
+    sc_panic_self,
+    utils::{managed_buffer_utils::ManagedBufferUtils, u64_utils::UtilsU64},
+};
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
+
+pub const ERR_UNSUPPORTED_CHARACTERS: &str = "A slot can't contains colon or semicolon characters.";
 
 #[derive(ManagedVecItem, NestedEncode, NestedDecode, TypeAbi, Clone, Debug)]
 pub struct Slot<M: ManagedTypeApi> {
@@ -47,6 +52,10 @@ impl<M: ManagedTypeApi> TopEncode for Slot<M> {
 
 impl<M: ManagedTypeApi> Slot<M> {
     pub fn new_from_buffer(slot: ManagedBuffer<M>) -> Self {
+        if slot.contains(b";") || slot.contains(b":") {
+            sc_panic_self!(M, ERR_UNSUPPORTED_CHARACTERS)
+        }
+
         Self {
             slot: slot.to_lowercase(),
         }

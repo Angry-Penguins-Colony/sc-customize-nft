@@ -7,17 +7,17 @@
 elrond_wasm_node::wasm_endpoints! {
     customize_nft
     (
-        addPermissionSetCid
+        addPermissionToSetUris
         claim
         customize
         fill
-        getCidOf
         getImagesToRender
-        getItemType
+        getSlotOf
+        getUriOf
         hasSlot
         registerItem
         renderImage
-        setCidOf
+        setUriOfAttributes
     )
 }
 

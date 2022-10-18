@@ -15,9 +15,7 @@ use structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, sl
 use crate::constants::*;
 
 #[elrond_wasm::derive::contract]
-pub trait Equip:
-    equippable_minter::MintEquippableModule + parser::ParserModule + storage::StorageModule
-{
+pub trait Equip: equippable_minter::MintEquippableModule + storage::StorageModule {
     #[init]
     fn init(&self, equippable_token_id: TokenIdentifier) {
         self.equippable_token_id().set(&equippable_token_id);
@@ -106,8 +104,14 @@ pub trait Equip:
             ERR_MORE_THAN_ONE_EQUIPPABLE_RECEIVED
         );
 
-        let mut attributes =
-            self.parse_equippable_attributes(&equippable_token_id, equippable_nonce);
+        let mut attributes = self
+            .blockchain()
+            .get_esdt_token_data(
+                &self.blockchain().get_sc_address(),
+                &equippable_token_id,
+                equippable_nonce,
+            )
+            .decode_attributes::<EquippableNftAttributes<Self::Api>>();
 
         // first unequip
         for slot in to_unequip_slots {
@@ -140,7 +144,7 @@ pub trait Equip:
             self.equip_slot(&mut attributes, &opt_item.get());
         }
 
-        return self.update_equippable(&equippable_token_id, equippable_nonce, &attributes);
+        return self.update_equippable(equippable_nonce, &attributes);
     }
 
     #[only_owner]

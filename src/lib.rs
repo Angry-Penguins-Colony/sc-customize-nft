@@ -12,18 +12,15 @@ pub mod utils;
 use libs::*;
 use structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot};
 
-use crate::{constants::*, utils::managed_buffer_utils::ManagedBufferUtils};
+use crate::constants::*;
 
 #[elrond_wasm::derive::contract]
 pub trait Equip:
     equippable_minter::MintEquippableModule + parser::ParserModule + storage::StorageModule
 {
     #[init]
-    fn init(&self, equippable_token_id: TokenIdentifier, gateway: ManagedBuffer) {
-        require!(gateway.get_last_char() == b'/', ERR_GATEWAY_NEEDS_SLASH);
-
+    fn init(&self, equippable_token_id: TokenIdentifier) {
         self.equippable_token_id().set(&equippable_token_id);
-        self.ipfs_gateway().set(gateway);
     }
 
     #[endpoint(registerItem)]

@@ -1,6 +1,6 @@
 use customize_nft::{
     constants::{
-        ENQUEUE_PRICE, ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_CID_ALREADY_RENDERER,
+        ENQUEUE_PRICE, ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED,
         ERR_RENDER_ALREADY_IN_QUEUE,
     },
     libs::storage::StorageModule,
@@ -96,9 +96,9 @@ fn panic_if_already_rendererer() {
                 {
                     let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
-                    sc.set_cid_of(args_set_cid_of!(
+                    sc.set_uri_of_attributes(args_set_cid_of!(
                         attributes.clone(),
-                        managed_buffer!(b"cid")
+                        managed_buffer!(b"https://ipfs.io/ipfs/cid")
                     ));
 
                     sc.enqueue_image_to_render(&attributes);
@@ -106,7 +106,7 @@ fn panic_if_already_rendererer() {
                 assert_eq!(sc.images_to_render().len(), 0);
             },
         )
-        .assert_user_error(ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_CID_ALREADY_RENDERER);
+        .assert_user_error(ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED);
 }
 
 #[test]

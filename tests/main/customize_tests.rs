@@ -81,14 +81,14 @@ fn customize_complete_flow() {
                     Some(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID)),
                 );
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes_before_custom,
-                    ManagedBuffer::new_from_bytes(b"cid before custom")
+                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom")
                 ));
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes_after_custom,
-                    ManagedBuffer::new_from_bytes(b"cid after custom")
+                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid after custom")
                 ));
             },
         )

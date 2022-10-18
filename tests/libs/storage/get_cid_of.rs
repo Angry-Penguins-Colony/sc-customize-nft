@@ -16,7 +16,7 @@ use crate::{
 fn should_return_cid() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let cid_bytes = b"some cid";
+    let cid_bytes = b"https://ipfs.io/ipfs/some cid";
 
     setup
         .blockchain_wrapper
@@ -28,9 +28,9 @@ fn should_return_cid() {
                 let cid_buffer = managed_buffer!(cid_bytes);
 
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
-                sc.set_cid_of(args_set_cid_of!(attributes.clone(), cid_buffer.clone()));
+                sc.set_uri_of_attributes(args_set_cid_of!(attributes.clone(), cid_buffer.clone()));
 
-                assert_eq!(sc.get_cid_of(&attributes), cid_buffer)
+                assert_eq!(sc.get_uri_of(&attributes), cid_buffer)
             },
         )
         .assert_ok();
@@ -40,7 +40,7 @@ fn should_return_cid() {
 fn should_return_cid_from_equivalent_but_not_exact_attr() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let cid_bytes = b"some cid";
+    let cid_bytes = b"https://ipfs.io/ipfs/some cid";
 
     let a_slot = b"hat";
     let a_value = b"Pirate Hat";
@@ -68,9 +68,9 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
                         slot: Slot::new_from_buffer(managed_buffer!(b_slot)),
                     },
                 ]);
-                sc.set_cid_of(args_set_cid_of!(attributes.clone(), cid_buffer.clone()));
+                sc.set_uri_of_attributes(args_set_cid_of!(attributes.clone(), cid_buffer.clone()));
 
-                assert_eq!(sc.get_cid_of(&attributes), cid_buffer)
+                assert_eq!(sc.get_uri_of(&attributes), cid_buffer)
             },
         )
         .assert_ok();
@@ -90,7 +90,7 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
                 },
             ]);
 
-            assert_eq!(sc.get_cid_of(&attributes), managed_buffer!(cid_bytes));
+            assert_eq!(sc.get_uri_of(&attributes), managed_buffer!(cid_bytes));
         })
         .assert_ok();
 }

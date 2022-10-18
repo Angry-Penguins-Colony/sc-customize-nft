@@ -1,7 +1,5 @@
 use crate::{
-    constants::{
-        ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_CID_ALREADY_RENDERER, ERR_RENDER_ALREADY_IN_QUEUE,
-    },
+    constants::{ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED, ERR_RENDER_ALREADY_IN_QUEUE},
     structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot},
 };
 
@@ -13,17 +11,14 @@ pub trait StorageModule {
     #[storage_mapper("equippable_token_id")]
     fn equippable_token_id(&self) -> SingleValueMapper<TokenIdentifier>;
 
-    #[storage_mapper("ipfs_gateway")]
-    fn ipfs_gateway(&self) -> SingleValueMapper<ManagedBuffer<Self::Api>>;
-
     #[storage_mapper("items_token")]
     fn token_of_item(
         &self,
         item: &Item<Self::Api>,
     ) -> SingleValueMapper<(TokenIdentifier<Self::Api>, u64)>;
 
-    #[storage_mapper("whitelist_set_cid_of_endpoint")]
-    fn whitelist_set_cid_of_endpoint(
+    #[storage_mapper("whitelist_set_uris_of_attributes_endpoint")]
+    fn whitelist_set_uris_of_attributes_endpoint(
         &self,
         address: &ManagedAddress<Self::Api>,
     ) -> SingleValueMapper<bool>;
@@ -34,25 +29,25 @@ pub trait StorageModule {
     #[storage_mapper("__images_to_render")]
     fn images_to_render(&self) -> UnorderedSetMapper<EquippableNftAttributes<Self::Api>>;
 
-    #[storage_mapper("cid_of_equippable")]
-    fn cid_of_attribute(
+    #[storage_mapper("uris_of_attributes")]
+    fn uris_of_attributes(
         &self,
         attributes: &EquippableNftAttributes<Self::Api>,
     ) -> SingleValueMapper<ManagedBuffer>;
 
     // STORAGE MODIFIERS
-    // CID
 
-    #[endpoint(addPermissionSetCid)]
+    #[endpoint(addPermissionToSetUris)]
     #[only_owner]
-    fn add_permission_set_cid(&self, address: ManagedAddress) {
-        self.whitelist_set_cid_of_endpoint(&address).set(true);
+    fn add_permission_to_set_uris_attributes(&self, address: ManagedAddress) {
+        self.whitelist_set_uris_of_attributes_endpoint(&address)
+            .set(true);
     }
 
-    #[endpoint(setCidOf)]
-    fn set_cid_of(
+    #[endpoint(setUriOfAttributes)]
+    fn set_uri_of_attributes(
         &self,
-        cid_kvp: MultiValueEncoded<
+        uri_kvp: MultiValueEncoded<
             MultiValue2<EquippableNftAttributes<Self::Api>, ManagedBuffer<Self::Api>>,
         >,
     ) {
@@ -60,46 +55,36 @@ pub trait StorageModule {
 
         require!(
             &self.blockchain().get_owner_address() == caller
-                || self.whitelist_set_cid_of_endpoint(caller).get() == true,
+                || self.whitelist_set_uris_of_attributes_endpoint(caller).get() == true,
             "You don't have the permission to call this endpoint."
         );
 
-        for kvp in cid_kvp {
-            let (attributes, cid) = kvp.into_tuple();
+        for kvp in uri_kvp {
+            let (attributes, uri) = kvp.into_tuple();
 
-            self.cid_of_attribute(&attributes).set(cid);
+            self.uris_of_attributes(&attributes).set(uri);
             self.images_to_render().swap_remove(&attributes);
         }
     }
 
-    #[view(getCidOf)]
-    fn get_cid_of(
-        &self,
-        attributes: &EquippableNftAttributes<Self::Api>,
-    ) -> ManagedBuffer<Self::Api> {
-        return self.cid_of_attribute(attributes).get();
-    }
-
-    fn cid_of_exist(&self, attributes: &EquippableNftAttributes<Self::Api>) -> bool {
-        return !self.cid_of_attribute(attributes).is_empty();
-    }
-
+    #[view(getUriOf)]
     fn get_uri_of(
         &self,
         attributes: &EquippableNftAttributes<Self::Api>,
     ) -> ManagedBuffer<Self::Api> {
-        let cid = self.cid_of_attribute(attributes);
+        let uri = self.uris_of_attributes(attributes);
 
         require!(
-            cid.is_empty() == false,
-            "There is no CID associated to the attributes {}.",
+            uri.is_empty() == false,
+            "There is no URI associated to the attributes {}.",
             attributes
         );
 
-        let mut url = self.ipfs_gateway().get();
-        url.append(&cid.get());
+        return uri.get();
+    }
 
-        return url;
+    fn do_uri_exists_for(&self, attributes: &EquippableNftAttributes<Self::Api>) -> bool {
+        return !self.uris_of_attributes(attributes).is_empty();
     }
 
     // ===
@@ -127,8 +112,8 @@ pub trait StorageModule {
     // IMAGES
     fn enqueue_image_to_render(&self, attributes: &EquippableNftAttributes<Self::Api>) {
         require!(
-            self.cid_of_exist(attributes) == false,
-            ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_CID_ALREADY_RENDERER
+            self.do_uri_exists_for(attributes) == false,
+            ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED
         );
         require!(
             self.images_to_render().contains(attributes) == false,

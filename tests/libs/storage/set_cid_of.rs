@@ -12,7 +12,7 @@ use crate::{args_set_cid_of, testing_utils};
 fn should_set_if_empty() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let cid_bytes = b"some cid";
+    let cid_bytes = b"https://ipfs.io/ipfs/some cid";
 
     setup
         .blockchain_wrapper
@@ -22,13 +22,13 @@ fn should_set_if_empty() {
             &rust_biguint!(0),
             |sc| {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes.clone(),
                     managed_buffer!(cid_bytes)
                 ));
 
                 assert_eq!(
-                    sc.cid_of_attribute(&attributes).get(),
+                    sc.uris_of_attributes(&attributes).get(),
                     managed_buffer!(cid_bytes)
                 );
             },
@@ -40,8 +40,8 @@ fn should_set_if_empty() {
 fn should_set_if_not_emtpy() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let first_cid_bytes = b"some cid";
-    let second_cid_bytes = b"another cid";
+    let first_cid_bytes = b"https://ipfs.io/ipfs/some cid";
+    let second_cid_bytes = b"https://ipfs.io/ipfs/another cid";
 
     setup
         .blockchain_wrapper
@@ -52,21 +52,21 @@ fn should_set_if_not_emtpy() {
             |sc| {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes.clone(),
                     managed_buffer!(first_cid_bytes)
                 ));
                 assert_eq!(
-                    sc.cid_of_attribute(&attributes).get(),
+                    sc.uris_of_attributes(&attributes).get(),
                     managed_buffer!(first_cid_bytes)
                 );
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes.clone(),
                     managed_buffer!(second_cid_bytes)
                 ));
                 assert_eq!(
-                    sc.cid_of_attribute(&attributes).get(),
+                    sc.uris_of_attributes(&attributes).get(),
                     managed_buffer!(second_cid_bytes),
                     "first_cid_bytes should be overwrited by second_cid_bytes"
                 );
@@ -86,7 +86,7 @@ fn should_fail_if_not_owner() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                sc.call_set_cid_of();
+                sc.call_set_uri_of_attributes();
             },
         )
         .assert_user_error("You don't have the permission to call this endpoint.");
@@ -96,7 +96,7 @@ fn should_fail_if_not_owner() {
 fn should_remove_enqueued_image_to_render() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let first_cid_bytes = b"some cid";
+    let first_cid_bytes = b"https://ipfs.io/ipfs/some cid";
 
     setup
         .blockchain_wrapper
@@ -111,7 +111,7 @@ fn should_remove_enqueued_image_to_render() {
                 assert_eq!(sc.images_to_render().len(), 1);
                 assert_eq!(sc.images_to_render().contains(&attributes), true);
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes.clone(),
                     managed_buffer!(first_cid_bytes)
                 ));

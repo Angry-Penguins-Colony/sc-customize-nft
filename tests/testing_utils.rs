@@ -353,10 +353,7 @@ where
     // deploy contract
     blockchain_wrapper
         .execute_tx(&owner_address, &cf_wrapper, &rust_zero, |sc| {
-            sc.init(
-                managed_token_id!(EQUIPPABLE_TOKEN_ID),
-                managed_buffer!(b"https://ipfs.io/ipfs/"),
-            );
+            sc.init(managed_token_id!(EQUIPPABLE_TOKEN_ID));
         })
         .assert_ok();
     blockchain_wrapper.add_mandos_set_account(cf_wrapper.address_ref());

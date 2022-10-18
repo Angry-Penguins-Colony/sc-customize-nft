@@ -93,14 +93,14 @@ fn test_equip() {
                     slot: Slot::new_from_buffer(managed_buffer!(slot)),
                 }]);
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes_before_custom,
-                    ManagedBuffer::new_from_bytes(b"cid before custom")
+                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom")
                 ));
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes_after_custom,
-                    ManagedBuffer::new_from_bytes(b"after custom")
+                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/after custom")
                 ));
             },
         )
@@ -223,14 +223,14 @@ fn equip_item_while_another_item_equipped_on_slot() {
                     slot: Slot::new_from_buffer(managed_buffer!(slot)),
                 }]);
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes_before_custom,
-                    ManagedBuffer::new_from_bytes(b"cid before custom")
+                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom")
                 ));
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes_after_custom,
-                    ManagedBuffer::new_from_bytes(b"cid after custom")
+                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid after custom")
                 ));
             },
         )
@@ -480,14 +480,14 @@ fn equip_while_sending_twice_same_items() {
                     slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
                 }]);
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes_before_custom,
-                    ManagedBuffer::new_from_bytes(b"cid before custom")
+                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom")
                 ));
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes_after_custom,
-                    ManagedBuffer::new_from_bytes(b"cid after custom")
+                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid after custom")
                 ));
             },
         )
@@ -613,14 +613,14 @@ fn equip_while_sending_two_items_of_same_slot() {
                     slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
                 }]);
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes_after_custom,
-                    ManagedBuffer::new_from_bytes(b"cid after custom")
+                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid after custom")
                 ));
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     EquippableNftAttributes::<DebugApi>::empty(),
-                    ManagedBuffer::new_from_bytes(b"cid before custom")
+                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom")
                 ));
             },
         )

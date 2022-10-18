@@ -43,9 +43,6 @@ fn customize_only_unequip() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                sc.ipfs_gateway()
-                    .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/"));
-
                 let attributes_before_custom = EquippableNftAttributes::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
                     slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot)),
@@ -55,14 +52,16 @@ fn customize_only_unequip() {
                 attributes_after_custom
                     .empty_slot(&Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot)));
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes_before_custom,
-                    ManagedBuffer::<DebugApi>::new_from_bytes(b"this is a cid")
+                    ManagedBuffer::<DebugApi>::new_from_bytes(
+                        b"https://ipfs.io/ipfs/this is a cid"
+                    )
                 ));
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes_after_custom,
-                    ManagedBuffer::new_from_bytes(b"empty")
+                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty")
                 ));
             },
         )
@@ -148,9 +147,6 @@ fn unequip_should_ignore_case_of_slot() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                sc.ipfs_gateway()
-                    .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/"));
-
                 let attributes_before_custom = EquippableNftAttributes::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
                     slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(SLOT_LOWERCASE)),
@@ -161,14 +157,16 @@ fn unequip_should_ignore_case_of_slot() {
                     ManagedBuffer::new_from_bytes(SLOT_LOWERCASE),
                 ));
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes_before_custom,
-                    ManagedBuffer::<DebugApi>::new_from_bytes(b"this is a cid")
+                    ManagedBuffer::<DebugApi>::new_from_bytes(
+                        b"https://ipfs.io/ipfs/this is a cid"
+                    )
                 ));
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes_after_custom,
-                    ManagedBuffer::new_from_bytes(b"empty")
+                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty")
                 ));
             },
         )
@@ -260,14 +258,16 @@ fn panic_when_unequip_twice_the_same_slot() {
                     slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot)),
                 }]);
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes_before_custom,
-                    ManagedBuffer::<DebugApi>::new_from_bytes(b"this is a cid")
+                    ManagedBuffer::<DebugApi>::new_from_bytes(
+                        b"https://ipfs.io/ipfs/this is a cid"
+                    )
                 ));
 
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     EquippableNftAttributes::<DebugApi>::empty(),
-                    ManagedBuffer::new_from_bytes(b"empty")
+                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty")
                 ));
             },
         )
@@ -300,9 +300,9 @@ fn panic_when_unequip_on_empty_slot() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                sc.set_cid_of(args_set_cid_of!(
+                sc.set_uri_of_attributes(args_set_cid_of!(
                     EquippableNftAttributes::<DebugApi>::empty(),
-                    ManagedBuffer::new_from_bytes(b"empty")
+                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty")
                 ));
             },
         )

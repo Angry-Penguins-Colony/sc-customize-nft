@@ -1,4 +1,4 @@
-use customize_nft::libs::storage::StorageModule;
+use customize_nft::{libs::storage::StorageModule, structs::slot::Slot};
 use elrond_wasm::types::TokenIdentifier;
 use elrond_wasm_debug::{managed_buffer, DebugApi};
 
@@ -22,7 +22,7 @@ fn should_returns_some() {
             let hat_token = TokenIdentifier::<DebugApi>::from_esdt_bytes(HAT_TOKEN_ID);
 
             let actual_slot = sc.get_slot_of(&hat_token);
-            assert_eq!(actual_slot, managed_buffer!(SLOT));
+            assert_eq!(actual_slot, Slot::new_from_buffer(managed_buffer!(SLOT)));
         })
         .assert_ok();
 }

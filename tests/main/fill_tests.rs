@@ -1,5 +1,9 @@
 use crate::testing_utils::{self, TestItemAttributes};
-use customize_nft::{libs::storage::StorageModule, structs::item::Item, EndpointWrappers, Equip};
+use customize_nft::{
+    libs::storage::StorageModule,
+    structs::{item::Item, slot::Slot},
+    EndpointWrappers, Equip,
+};
 use elrond_wasm::types::{MultiValueEncoded, TokenIdentifier};
 use elrond_wasm_debug::{managed_buffer, managed_token_id, rust_biguint, DebugApi};
 
@@ -33,14 +37,17 @@ fn works_if_is_the_owner() {
                     MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                 managed_items_ids.push(managed_token_id!(TOKEN_ID));
 
-                sc.register_item(managed_buffer!(TOKEN_SLOT), managed_items_ids);
+                sc.register_item(
+                    Slot::new_from_buffer(managed_buffer!(TOKEN_SLOT)),
+                    managed_items_ids,
+                );
 
                 sc.call_fill();
 
                 let (item_id, item_nonce) = sc
                     .token_of_item(&Item {
                         name: managed_buffer!(TOKEN_ID),
-                        slot: managed_buffer!(TOKEN_SLOT),
+                        slot: Slot::new_from_buffer(managed_buffer!(TOKEN_SLOT)),
                     })
                     .get();
 
@@ -91,14 +98,17 @@ fn panic_if_override() {
                     MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                 managed_items_ids.push(managed_token_id!(TOKEN_B_ID));
 
-                sc.register_item(managed_buffer!(TOKEN_A_SLOT), managed_items_ids);
+                sc.register_item(
+                    Slot::new_from_buffer(managed_buffer!(TOKEN_A_SLOT)),
+                    managed_items_ids,
+                );
 
                 sc.call_fill();
 
                 let (item_id, item_nonce) = sc
                     .token_of_item(&Item {
                         name: managed_buffer!(TOKEN_A_ID),
-                        slot: managed_buffer!(TOKEN_A_SLOT),
+                        slot: Slot::new_from_buffer(managed_buffer!(TOKEN_A_SLOT)),
                     })
                     .get();
 

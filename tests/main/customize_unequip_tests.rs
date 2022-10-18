@@ -1,7 +1,7 @@
 use customize_nft::{
     constants::ERR_CANNOT_UNEQUIP_EMPTY_SLOT,
     libs::storage::StorageModule,
-    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item},
+    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot},
 };
 use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::ManagedBuffer;
@@ -48,11 +48,12 @@ fn customize_only_unequip() {
 
                 let attributes_before_custom = EquippableNftAttributes::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
-                    slot: ManagedBuffer::new_from_bytes(slot),
+                    slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot)),
                 }]);
 
                 let mut attributes_after_custom = attributes_before_custom.clone();
-                attributes_after_custom.empty_slot(&ManagedBuffer::new_from_bytes(slot));
+                attributes_after_custom
+                    .empty_slot(&Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot)));
 
                 sc.set_cid_of(args_set_cid_of!(
                     attributes_before_custom,
@@ -102,9 +103,9 @@ fn customize_only_unequip() {
 
     let mut attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
         name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
-        slot: ManagedBuffer::new_from_bytes(slot),
+        slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot)),
     }]);
-    attributes_after_custom.empty_slot(&ManagedBuffer::new_from_bytes(slot));
+    attributes_after_custom.empty_slot(&Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot)));
 
     // is equippable empty
     setup.blockchain_wrapper.check_nft_balance(
@@ -152,11 +153,13 @@ fn unequip_should_ignore_case_of_slot() {
 
                 let attributes_before_custom = EquippableNftAttributes::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
-                    slot: ManagedBuffer::new_from_bytes(SLOT_LOWERCASE),
+                    slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(SLOT_LOWERCASE)),
                 }]);
 
                 let mut attributes_after_custom = attributes_before_custom.clone();
-                attributes_after_custom.empty_slot(&ManagedBuffer::new_from_bytes(SLOT_LOWERCASE));
+                attributes_after_custom.empty_slot(&Slot::new_from_buffer(
+                    ManagedBuffer::new_from_bytes(SLOT_LOWERCASE),
+                ));
 
                 sc.set_cid_of(args_set_cid_of!(
                     attributes_before_custom,
@@ -207,9 +210,11 @@ fn unequip_should_ignore_case_of_slot() {
     // is equippable empty
     let mut attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
         name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
-        slot: ManagedBuffer::new_from_bytes(SLOT_LOWERCASE),
+        slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(SLOT_LOWERCASE)),
     }]);
-    attributes_after_custom.empty_slot(&ManagedBuffer::new_from_bytes(SLOT_LOWERCASE));
+    attributes_after_custom.empty_slot(&Slot::new_from_buffer(ManagedBuffer::new_from_bytes(
+        SLOT_LOWERCASE,
+    )));
 
     setup.blockchain_wrapper.check_nft_balance(
         &setup.first_user_address,
@@ -252,7 +257,7 @@ fn panic_when_unequip_twice_the_same_slot() {
             |sc| {
                 let attributes_before_custom = EquippableNftAttributes::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
-                    slot: ManagedBuffer::new_from_bytes(slot),
+                    slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot)),
                 }]);
 
                 sc.set_cid_of(args_set_cid_of!(

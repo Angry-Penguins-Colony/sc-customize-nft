@@ -1,4 +1,4 @@
-use customize_nft::{libs::storage::StorageModule, Equip};
+use customize_nft::{libs::storage::StorageModule, structs::slot::Slot, Equip};
 use elrond_wasm::types::{ManagedBuffer, MultiValueEncoded, TokenIdentifier};
 use elrond_wasm_debug::{managed_token_id, rust_biguint, DebugApi};
 
@@ -22,7 +22,7 @@ fn should_return_true() {
                     MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                 managed_items_ids.push(token_id.clone());
 
-                let _ = sc.register_item(slot, managed_items_ids);
+                let _ = sc.register_item(Slot::new_from_buffer(slot), managed_items_ids);
 
                 assert_eq!(sc.has_slot(&token_id), true);
             },

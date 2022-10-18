@@ -4,7 +4,7 @@ use customize_nft::{
         ERR_RENDER_ALREADY_IN_QUEUE,
     },
     libs::storage::StorageModule,
-    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item},
+    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot},
 };
 use elrond_wasm::{elrond_codec::multi_types::MultiValue2, types::MultiValueEncoded};
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
@@ -55,7 +55,7 @@ fn enqueue_two_differents_attributes() {
                 let attributes_a = EquippableNftAttributes::<DebugApi>::empty();
                 let attributes_b = EquippableNftAttributes::<DebugApi>::new(&[Item {
                     name: managed_buffer!(b"pirate hat"),
-                    slot: managed_buffer!(b"hat"),
+                    slot: Slot::new_from_buffer(managed_buffer!(b"hat")),
                 }]);
 
                 sc.enqueue_image_to_render(&attributes_a);

@@ -1,7 +1,7 @@
 use customize_nft::{
     constants::ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
     libs::storage::StorageModule,
-    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item},
+    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot},
     Equip,
 };
 use elrond_wasm::elrond_codec::multi_types::MultiValue2;
@@ -67,14 +67,17 @@ fn customize_complete_flow() {
             |sc| {
                 let attributes_before_custom = EquippableNftAttributes::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_ID),
-                    slot: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT),
+                    slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(
+                        ITEM_TO_UNEQUIP_SLOT,
+                    )),
                 }]);
 
                 let mut attributes_after_custom = attributes_before_custom.clone();
-                attributes_after_custom
-                    .empty_slot(&ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT));
+                attributes_after_custom.empty_slot(&Slot::new_from_buffer(
+                    ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT),
+                ));
                 attributes_after_custom.set_item_if_empty(
-                    &ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT),
+                    &Slot::new_from_buffer(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT)),
                     Some(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID)),
                 );
 
@@ -138,11 +141,13 @@ fn customize_complete_flow() {
 
     let mut attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
         name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_ID),
-        slot: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT),
+        slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT)),
     }]);
-    attributes_after_custom.empty_slot(&ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT));
+    attributes_after_custom.empty_slot(&Slot::new_from_buffer(ManagedBuffer::new_from_bytes(
+        ITEM_TO_UNEQUIP_SLOT,
+    )));
     attributes_after_custom.set_item_if_empty(
-        &ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT),
+        &Slot::new_from_buffer(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT)),
         Some(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID)),
     );
 
@@ -179,7 +184,7 @@ fn customize_nothing_to_unequip_and_equip() {
         &setup.cf_wrapper,
         &transfers,
         |sc| {
-            let managed_slots = MultiValueEncoded::<DebugApi, ManagedBuffer<DebugApi>>::new();
+            let managed_slots = MultiValueEncoded::<DebugApi, Slot<DebugApi>>::new();
 
             let _ = sc.customize(managed_slots);
         },

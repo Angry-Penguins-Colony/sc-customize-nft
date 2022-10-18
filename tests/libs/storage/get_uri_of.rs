@@ -1,5 +1,6 @@
 use crate::{args_set_cid_of, testing_utils};
 use customize_nft::libs::storage::StorageModule;
+use customize_nft::structs::slot::Slot;
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm::types::MultiValueEncoded;
 use elrond_wasm_debug::DebugApi;
@@ -19,7 +20,7 @@ fn build_url_with_no_associated_cid() {
             let equippable_attributes =
                 EquippableNftAttributes::<DebugApi>::new(&[Item::<DebugApi> {
                     name: ManagedBuffer::new_from_bytes(b"item name"),
-                    slot: ManagedBuffer::new_from_bytes(b"hat"),
+                    slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(b"hat")),
                 }]);
 
             let _ = sc.get_uri_of(&equippable_attributes);
@@ -41,7 +42,7 @@ fn build_url_with_associated_cid() {
                 let penguin_attributes =
                     EquippableNftAttributes::<DebugApi>::new(&[Item::<DebugApi> {
                         name: ManagedBuffer::new_from_bytes(b"item name"),
-                        slot: ManagedBuffer::new_from_bytes(b"hat"),
+                        slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(b"hat")),
                     }]);
 
                 sc.set_cid_of(args_set_cid_of!(

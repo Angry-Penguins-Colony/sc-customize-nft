@@ -1,4 +1,4 @@
-use customize_nft::structs::item::Item;
+use customize_nft::structs::{item::Item, slot::Slot};
 use elrond_wasm::elrond_codec::TopEncode;
 use elrond_wasm_debug::{managed_buffer, DebugApi};
 
@@ -8,7 +8,7 @@ fn encode_item() {
 
     let item = Item::<DebugApi> {
         name: managed_buffer!(b"Pirate Hat"),
-        slot: managed_buffer!(b"hat"),
+        slot: Slot::new_from_buffer(managed_buffer!(b"hat")),
     };
 
     let expected = b"Hat:Pirate Hat";

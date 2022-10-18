@@ -1,4 +1,6 @@
-use customize_nft::structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item};
+use customize_nft::structs::{
+    equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot,
+};
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm_debug::DebugApi;
 
@@ -10,7 +12,7 @@ fn get_empty_item() {
 
     let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
-    let slot = ManagedBuffer::<DebugApi>::new_from_bytes(b"hat");
+    let slot = Slot::<DebugApi>::new_from_bytes(b"hat");
 
     assert_eq!(attributes.get_item(&slot).is_none(), true);
 }
@@ -20,7 +22,7 @@ fn should_return_none_if_emptied() {
     let setup = testing_utils::setup(customize_nft::contract_obj);
 
     setup.blockchain_wrapper.execute_in_managed_environment(|| {
-        let slot = &ManagedBuffer::<DebugApi>::new_from_bytes(b"hat");
+        let slot = &Slot::new_from_bytes(b"hat");
         let name = &ManagedBuffer::<DebugApi>::new_from_bytes(b"pirate hat");
 
         let item = Item {
@@ -41,8 +43,8 @@ fn should_return_some_with_slot_different_case() {
     let setup = testing_utils::setup(customize_nft::contract_obj);
 
     setup.blockchain_wrapper.execute_in_managed_environment(|| {
-        let registered_slot = &ManagedBuffer::<DebugApi>::new_from_bytes(b"hat");
-        let query_slot = &ManagedBuffer::<DebugApi>::new_from_bytes(b"HAT");
+        let registered_slot = &Slot::new_from_bytes(b"hat");
+        let query_slot = &Slot::new_from_bytes(b"HAT");
         let name = &ManagedBuffer::<DebugApi>::new_from_bytes(b"pirate hat");
 
         let item = Item {
@@ -61,7 +63,7 @@ fn should_return_some_with_slot_different_case() {
 fn get_item() {
     DebugApi::dummy();
 
-    let slot = ManagedBuffer::<DebugApi>::new_from_bytes(b"hat");
+    let slot = Slot::new_from_bytes(b"hat");
     let item = Item {
         name: ManagedBuffer::<DebugApi>::new_from_bytes(b"hat"),
         slot: slot.clone(),

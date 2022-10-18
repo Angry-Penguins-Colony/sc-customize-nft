@@ -15,14 +15,14 @@ use crate::{
     utils::{self, managed_buffer_utils::ManagedBufferUtils, managed_vec_utils::EqUtils},
 };
 
-use super::item::Item;
+use super::{item::Item, slot::Slot};
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
 #[derive(ManagedVecItem, NestedEncode, NestedDecode, PartialEq, TypeAbi, Clone, Debug)]
 struct EquippableNftAttribute<M: ManagedTypeApi> {
-    pub slot: ManagedBuffer<M>,
+    pub slot: Slot<M>,
     pub name: Option<ManagedBuffer<M>>,
 }
 
@@ -165,11 +165,11 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
         };
     }
 
-    pub fn get_item(&self, slot: &ManagedBuffer<M>) -> Option<Item<M>> {
-        if let Some(index) = self.__get_index(slot) {
+    pub fn get_item(&self, slot: &Slot<M>) -> Option<Item<M>> {
+        if let Some(index) = self.__get_index(&slot) {
             if let Some(name) = self.items.get(index).name {
                 return Option::<Item<M>>::Some(Item {
-                    slot: slot.to_lowercase(),
+                    slot: slot.clone(),
                     name,
                 });
             }
@@ -178,7 +178,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
         return Option::None;
     }
 
-    pub fn set_item_if_empty(&mut self, slot: &ManagedBuffer<M>, name: Option<ManagedBuffer<M>>) {
+    pub fn set_item_if_empty(&mut self, slot: &Slot<M>, name: Option<ManagedBuffer<M>>) {
         if self.is_slot_empty(slot) == false {
             sc_panic_self!(
                 M,
@@ -189,11 +189,13 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
         return self.set_item(slot, name);
     }
 
-    pub fn set_item(&mut self, slot_ref: &ManagedBuffer<M>, name: Option<ManagedBuffer<M>>) {
-        let slot = slot_ref.to_lowercase();
+    pub fn set_item(&mut self, slot: &Slot<M>, name: Option<ManagedBuffer<M>>) {
         let index = self.__get_index(&slot);
 
-        let new_equippable_attribute = EquippableNftAttribute { slot, name };
+        let new_equippable_attribute = EquippableNftAttribute {
+            slot: slot.clone(),
+            name,
+        };
 
         match index {
             Some(index) => {
@@ -226,20 +228,18 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
         return count;
     }
 
-    pub fn is_slot_empty(&self, slot: &ManagedBuffer<M>) -> bool {
+    pub fn is_slot_empty(&self, slot: &Slot<M>) -> bool {
         match self.get_item(slot) {
             Some(_) => false,
             None => true,
         }
     }
 
-    pub fn empty_slot(&mut self, slot: &ManagedBuffer<M>) {
+    pub fn empty_slot(&mut self, slot: &Slot<M>) {
         return self.set_item(&slot, Option::None);
     }
 
-    fn __get_index(&self, slot: &ManagedBuffer<M>) -> Option<usize> {
-        let slot = slot.to_lowercase();
-
-        return self.items.iter().position(|kvp| kvp.slot == slot);
+    fn __get_index(&self, slot: &Slot<M>) -> Option<usize> {
+        return self.items.iter().position(|kvp| &kvp.slot == slot);
     }
 }

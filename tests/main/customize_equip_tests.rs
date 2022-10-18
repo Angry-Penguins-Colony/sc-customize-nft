@@ -6,6 +6,7 @@ use customize_nft::constants::{
 use customize_nft::libs::storage::StorageModule;
 use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
 use customize_nft::structs::item::Item;
+use customize_nft::structs::slot::Slot;
 use elrond_wasm::contract_base::ContractBase;
 use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::MultiValueEncoded;
@@ -89,7 +90,7 @@ fn test_equip() {
 
                 let attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework force us to do this
-                    slot: managed_buffer!(slot),
+                    slot: Slot::new_from_buffer(managed_buffer!(slot)),
                 }]);
 
                 sc.set_cid_of(args_set_cid_of!(
@@ -137,7 +138,7 @@ fn test_equip() {
         &rust_biguint!(1),
         Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[Item {
             name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework force us to do this
-            slot: managed_buffer!(slot),
+            slot: Slot::new_from_buffer(managed_buffer!(slot)),
         }])),
     );
 
@@ -186,7 +187,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
         &rust_biguint!(1),
         &EquippableNftAttributes::<DebugApi>::new(&[Item {
             name: ManagedBuffer::new_from_bytes(ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in Elrond mocking force us to do this
-            slot: managed_buffer!(slot),
+            slot: Slot::new_from_buffer(managed_buffer!(slot)),
         }]),
     );
 
@@ -214,12 +215,12 @@ fn equip_item_while_another_item_equipped_on_slot() {
             |sc| {
                 let attributes_before_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in Elrond mocking force us to do this
-                    slot: managed_buffer!(slot),
+                    slot: Slot::new_from_buffer(managed_buffer!(slot)),
                 }]);
 
                 let attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
-                    slot: managed_buffer!(slot),
+                    slot: Slot::new_from_buffer(managed_buffer!(slot)),
                 }]);
 
                 sc.set_cid_of(args_set_cid_of!(
@@ -276,7 +277,7 @@ fn equip_item_while_another_item_equipped_on_slot() {
         &rust_biguint!(1),
         Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[Item {
             name: ManagedBuffer::new_from_bytes(ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
-            slot: managed_buffer!(slot),
+            slot: Slot::new_from_buffer(managed_buffer!(slot)),
         }])),
     );
 
@@ -476,7 +477,7 @@ fn equip_while_sending_twice_same_items() {
 
                 let attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
-                    slot: managed_buffer!(SLOT),
+                    slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
                 }]);
 
                 sc.set_cid_of(args_set_cid_of!(
@@ -544,7 +545,7 @@ fn equip_while_sending_twice_same_items() {
         &rust_biguint!(1),
         Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[Item {
             name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
-            slot: managed_buffer!(SLOT),
+            slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
         }])),
     );
 
@@ -609,7 +610,7 @@ fn equip_while_sending_two_items_of_same_slot() {
             |sc| {
                 let attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(SECOND_ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
-                    slot: managed_buffer!(SLOT),
+                    slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
                 }]);
 
                 sc.set_cid_of(args_set_cid_of!(
@@ -695,7 +696,7 @@ fn equip_while_sending_two_items_of_same_slot() {
         &rust_biguint!(1),
         Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[Item {
             name: ManagedBuffer::new_from_bytes(SECOND_ITEM_ID), // the name should be ITEM_TO_EQUIP_NAME but a bug in rust testing framework 0.32.0 force us to do this
-            slot: managed_buffer!(SLOT),
+            slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
         }])),
     );
 

@@ -1,5 +1,6 @@
 use customize_nft::constants::ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM;
 use customize_nft::libs::storage::StorageModule;
+use customize_nft::structs::slot::Slot;
 use customize_nft::*;
 use elrond_wasm::types::{EsdtLocalRole, ManagedBuffer, MultiValueEncoded, TokenIdentifier};
 use elrond_wasm_debug::{managed_buffer, managed_token_id};
@@ -26,7 +27,7 @@ fn test_register_item() {
                 .slot_of_item(&TokenIdentifier::from_esdt_bytes(TOKEN_ID))
                 .get();
 
-            assert_eq!(result, managed_buffer!(slot));
+            assert_eq!(result, Slot::new_from_buffer(managed_buffer!(slot)));
         })
         .assert_ok();
 }
@@ -62,11 +63,11 @@ fn register_another_item_on_slot() {
         .execute_query(&setup.cf_wrapper, |sc| {
             assert_eq!(
                 sc.slot_of_item(&managed_token_id!(FIRST_TOKEN_ID)).get(),
-                ManagedBuffer::new_from_bytes(slot)
+                Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot))
             );
             assert_eq!(
                 sc.slot_of_item(&managed_token_id!(SECOND_TOKEN_ID)).get(),
-                ManagedBuffer::new_from_bytes(slot)
+                Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot))
             );
         })
         .assert_ok();
@@ -82,7 +83,7 @@ fn register_unmintable_item() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let slot = ManagedBuffer::new_from_bytes(b"hat");
+                let slot = Slot::new_from_buffer(ManagedBuffer::new_from_bytes(b"hat"));
 
                 let mut managed_items_ids =
                     MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
@@ -119,7 +120,10 @@ fn register_unburnable_item() {
                     MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                 managed_items_ids.push(managed_token_id!(UNBURNABLE));
 
-                let _ = sc.register_item(ManagedBuffer::new_from_bytes(slot), managed_items_ids);
+                let _ = sc.register_item(
+                    Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot)),
+                    managed_items_ids,
+                );
             },
         )
         .assert_ok();
@@ -151,7 +155,10 @@ fn change_item_slot() {
                         MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                     managed_items_ids.push(managed_token_id!(ITEM_ID));
 
-                    sc.register_item(ManagedBuffer::new_from_bytes(old_slot), managed_items_ids);
+                    sc.register_item(
+                        Slot::new_from_buffer(ManagedBuffer::new_from_bytes(old_slot)),
+                        managed_items_ids,
+                    );
                 },
             )
             .assert_ok();
@@ -182,7 +189,7 @@ fn change_item_slot() {
                         managed_items_ids.push(managed_token_id!(ITEM_ID));
 
                         sc.register_item(
-                            ManagedBuffer::new_from_bytes(new_slot),
+                            Slot::new_from_buffer(ManagedBuffer::new_from_bytes(new_slot)),
                             managed_items_ids,
                         );
                     },
@@ -203,7 +210,7 @@ fn change_item_slot() {
     b_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             let result = sc.slot_of_item(&managed_token_id!(ITEM_ID)).get();
-            assert_eq!(result, managed_buffer!(new_slot));
+            assert_eq!(result, Slot::new_from_buffer(managed_buffer!(new_slot)));
         })
         .assert_ok();
 }
@@ -229,23 +236,26 @@ fn register_to_slot_with_different_case() {
                     MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                 first_slot_items.push(managed_token_id!(first_slot_item));
 
-                sc.register_item(ManagedBuffer::new_from_bytes(first_slot), first_slot_items);
+                sc.register_item(
+                    Slot::new_from_buffer(ManagedBuffer::new_from_bytes(first_slot)),
+                    first_slot_items,
+                );
 
                 let mut second_slot_items =
                     MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                 second_slot_items.push(managed_token_id!(second_slot_item));
                 sc.register_item(
-                    ManagedBuffer::new_from_bytes(second_slot),
+                    Slot::new_from_buffer(ManagedBuffer::new_from_bytes(second_slot)),
                     second_slot_items,
                 );
 
                 assert_eq!(
                     sc.get_slot_of(&managed_token_id!(second_slot_item)),
-                    managed_buffer!(&second_slot.to_ascii_lowercase())
+                    Slot::new_from_buffer(managed_buffer!(&second_slot.to_ascii_lowercase()))
                 );
                 assert_eq!(
                     sc.get_slot_of(&managed_token_id!(first_slot_item)),
-                    managed_buffer!(&first_slot.to_ascii_lowercase())
+                    Slot::new_from_buffer(managed_buffer!(&first_slot.to_ascii_lowercase()))
                 );
             },
         )
@@ -269,7 +279,10 @@ fn panic_if_register_equippable() {
                     MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                 managed_items_ids.push(managed_token_id!(testing_utils::EQUIPPABLE_TOKEN_ID));
 
-                let _ = sc.register_item(ManagedBuffer::new_from_bytes(slot), managed_items_ids);
+                let _ = sc.register_item(
+                    Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot)),
+                    managed_items_ids,
+                );
             },
         )
         .assert_user_error(ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM);

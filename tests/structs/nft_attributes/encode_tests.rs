@@ -1,4 +1,6 @@
-use customize_nft::structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item};
+use customize_nft::structs::{
+    equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot,
+};
 use elrond_wasm::elrond_codec::TopEncode;
 use elrond_wasm_debug::{managed_buffer, DebugApi};
 
@@ -8,7 +10,7 @@ fn should_top_encode() {
 
     let equippable_nft_attributes = EquippableNftAttributes::new(&[Item::<DebugApi> {
         name: managed_buffer!(b"Pirate Hat"),
-        slot: managed_buffer!(b"hat"),
+        slot: Slot::new_from_bytes(b"hat"),
     }]);
 
     let expected = b"Hat:Pirate Hat";
@@ -24,22 +26,22 @@ fn should_top_encode_two() {
     let attributes_order_one = EquippableNftAttributes::new(&[
         Item::<DebugApi> {
             name: managed_buffer!(b"Gun"),
-            slot: managed_buffer!(b"weapon"),
+            slot: Slot::new_from_bytes(b"weapon"),
         },
         Item::<DebugApi> {
             name: managed_buffer!(b"Pirate Hat"),
-            slot: managed_buffer!(b"hat"),
+            slot: Slot::new_from_bytes(b"hat"),
         },
     ]);
 
     let attributes_order_two = EquippableNftAttributes::new(&[
         Item::<DebugApi> {
             name: managed_buffer!(b"Pirate Hat"),
-            slot: managed_buffer!(b"hat"),
+            slot: Slot::new_from_bytes(b"hat"),
         },
         Item::<DebugApi> {
             name: managed_buffer!(b"Gun"),
-            slot: managed_buffer!(b"weapon"),
+            slot: Slot::new_from_bytes(b"weapon"),
         },
     ]);
 
@@ -53,9 +55,9 @@ fn should_top_encode_after_emptying() {
 
     let mut equippable_nft_attributes = EquippableNftAttributes::new(&[Item::<DebugApi> {
         name: managed_buffer!(b"Pirate Hat"),
-        slot: managed_buffer!(b"hat"),
+        slot: Slot::new_from_bytes(b"hat"),
     }]);
-    equippable_nft_attributes.empty_slot(&managed_buffer!(b"hat"));
+    equippable_nft_attributes.empty_slot(&Slot::new_from_bytes(b"hat"));
 
     let expected = b"Hat:unequipped";
 

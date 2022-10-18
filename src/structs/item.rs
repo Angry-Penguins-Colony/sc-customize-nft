@@ -9,13 +9,15 @@ use core::{ops::Deref, str::FromStr};
 
 use crate::utils::{managed_buffer_utils::ManagedBufferUtils, u64_utils::UtilsU64};
 
+use super::slot::Slot;
+
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
 #[derive(ManagedVecItem, NestedEncode, NestedDecode, PartialEq, TypeAbi, Clone, Debug)]
 pub struct Item<M: ManagedTypeApi> {
     pub name: ManagedBuffer<M>,
-    pub slot: ManagedBuffer<M>,
+    pub slot: Slot<M>,
 }
 
 impl<M: ManagedTypeApi> elrond_codec::TopEncode for Item<M> {
@@ -28,7 +30,7 @@ impl<M: ManagedTypeApi> elrond_codec::TopEncode for Item<M> {
         let mut managed_buffer = ManagedBuffer::<M>::new();
 
         // build buffer
-        managed_buffer.append(&self.slot.capitalize());
+        managed_buffer.append(&self.slot.capitalized());
         managed_buffer.append_bytes(b":");
         managed_buffer.append(&self.name);
 
@@ -50,7 +52,7 @@ impl<M: ManagedTypeApi> Item<M> {
         }
 
         return Result::Ok(Self {
-            slot: parts.get(0).to_lowercase(),
+            slot: Slot::new_from_buffer(parts.get(0).deref().clone()),
             name: parts.get(1).deref().clone(),
         });
     }

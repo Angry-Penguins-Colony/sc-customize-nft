@@ -1,6 +1,6 @@
 use customize_nft::{
     libs::storage::StorageModule,
-    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item},
+    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot},
 };
 use elrond_wasm::{elrond_codec::multi_types::MultiValue2, types::MultiValueEncoded};
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
@@ -58,11 +58,11 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
                 let attributes = EquippableNftAttributes::<DebugApi>::new(&[
                     Item::<DebugApi> {
                         name: managed_buffer!(a_value),
-                        slot: managed_buffer!(a_slot),
+                        slot: Slot::new_from_buffer(managed_buffer!(a_slot)),
                     },
                     Item::<DebugApi> {
                         name: managed_buffer!(b_value),
-                        slot: managed_buffer!(b_slot),
+                        slot: Slot::new_from_buffer(managed_buffer!(b_slot)),
                     },
                 ]);
                 sc.set_cid_of(args_set_cid_of!(attributes.clone(), cid_buffer.clone()));
@@ -79,11 +79,11 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
             let attributes = EquippableNftAttributes::<DebugApi>::new(&[
                 Item::<DebugApi> {
                     name: managed_buffer!(b_value),
-                    slot: managed_buffer!(b_slot),
+                    slot: Slot::new_from_buffer(managed_buffer!(b_slot)),
                 },
                 Item::<DebugApi> {
                     name: managed_buffer!(a_value),
-                    slot: managed_buffer!(a_slot),
+                    slot: Slot::new_from_buffer(managed_buffer!(a_slot)),
                 },
             ]);
 

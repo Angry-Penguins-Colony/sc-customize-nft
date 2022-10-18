@@ -6,6 +6,7 @@ use std::u8;
 
 use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
 use customize_nft::structs::item::Item;
+use customize_nft::structs::slot::Slot;
 use customize_nft::*;
 use elrond_wasm::types::MultiValueEncoded;
 use elrond_wasm::types::{
@@ -149,7 +150,7 @@ where
                         MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
                     managed_items_ids.push(managed_token_id!(item_id));
 
-                    sc.register_item(ManagedBuffer::new_from_bytes(slot), managed_items_ids);
+                    sc.register_item(Slot::new_from_bytes(slot), managed_items_ids);
                 },
             )
             .assert_ok();
@@ -236,7 +237,7 @@ where
             name: ManagedBuffer::new_from_bytes(
                 item_identifier, // sadly, bug in the mock force us to use the item identifier as its name
             ),
-            slot: ManagedBuffer::new_from_bytes(slot),
+            slot: Slot::new_from_bytes(slot),
         }]);
 
         self.blockchain_wrapper.set_nft_balance(
@@ -261,10 +262,10 @@ where
             &transfers,
             |sc| {
                 let mut unequip_slots_managed =
-                    MultiValueEncoded::<DebugApi, ManagedBuffer<DebugApi>>::new();
+                    MultiValueEncoded::<DebugApi, Slot<DebugApi>>::new();
 
                 for s in unequip_slots {
-                    unequip_slots_managed.push(managed_buffer!(s));
+                    unequip_slots_managed.push(Slot::new_from_bytes(s));
                 }
 
                 let result = sc.customize(unequip_slots_managed);
@@ -323,8 +324,7 @@ where
             &self.cf_wrapper,
             &transfers,
             |sc| {
-                let result =
-                    sc.customize(MultiValueEncoded::<DebugApi, ManagedBuffer<DebugApi>>::new());
+                let result = sc.customize(MultiValueEncoded::<DebugApi, Slot<DebugApi>>::new());
 
                 opt_sc_result = Option::Some(result);
             },

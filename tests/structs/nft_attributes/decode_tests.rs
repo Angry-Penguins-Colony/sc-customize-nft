@@ -1,4 +1,6 @@
-use customize_nft::structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item};
+use customize_nft::structs::{
+    equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot,
+};
 use elrond_wasm::{elrond_codec::TopDecode, types::ManagedBuffer};
 use elrond_wasm_debug::{managed_buffer, DebugApi};
 
@@ -11,7 +13,7 @@ fn decode_equippable_nft() {
 
     let expected_output = EquippableNftAttributes::new(&[Item::<DebugApi> {
         name: managed_buffer!(b"Pirate Hat"),
-        slot: managed_buffer!(b"hat"),
+        slot: Slot::new_from_buffer(managed_buffer!(b"hat")),
     }]);
 
     let actual_output = EquippableNftAttributes::top_decode(input_buffer).unwrap();

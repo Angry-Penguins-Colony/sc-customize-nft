@@ -2,8 +2,8 @@ use crate::{
     constants::{
         ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_CID_ALREADY_RENDERER, ERR_RENDER_ALREADY_IN_QUEUE,
     },
-    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item},
-    utils::{managed_buffer_utils::ManagedBufferUtils, vec_mapper_utils::VecMapperUtils},
+    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot},
+    utils::vec_mapper_utils::VecMapperUtils,
 };
 
 elrond_wasm::imports!();
@@ -30,7 +30,7 @@ pub trait StorageModule {
     ) -> SingleValueMapper<bool>;
 
     #[storage_mapper("slot_of_items")]
-    fn slot_of_item(&self, token: &TokenIdentifier) -> SingleValueMapper<ManagedBuffer>;
+    fn slot_of_item(&self, token: &TokenIdentifier) -> SingleValueMapper<Slot<Self::Api>>;
 
     #[storage_mapper("__images_to_render")]
     fn images_to_render(&self) -> VecMapper<EquippableNftAttributes<Self::Api>>;
@@ -106,8 +106,8 @@ pub trait StorageModule {
     // ===
     // SLOTS
 
-    fn set_slot_of(&self, token: &TokenIdentifier, slot: ManagedBuffer) {
-        self.slot_of_item(token).set(&slot.to_lowercase());
+    fn set_slot_of(&self, token: &TokenIdentifier, slot: Slot<Self::Api>) {
+        self.slot_of_item(token).set(&slot);
     }
 
     #[view(hasSlot)]
@@ -116,7 +116,7 @@ pub trait StorageModule {
     }
 
     #[view(getItemType)]
-    fn get_slot_of(&self, item_id: &TokenIdentifier) -> ManagedBuffer {
+    fn get_slot_of(&self, item_id: &TokenIdentifier) -> Slot<Self::Api> {
         if self.has_slot(item_id) {
             return self.slot_of_item(item_id).get();
         } else {

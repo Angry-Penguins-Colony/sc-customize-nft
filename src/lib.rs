@@ -10,7 +10,7 @@ pub mod structs;
 pub mod utils;
 
 use libs::*;
-use structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item};
+use structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot};
 
 use crate::{constants::*, utils::managed_buffer_utils::ManagedBufferUtils};
 
@@ -30,7 +30,7 @@ pub trait Equip:
     #[only_owner]
     fn register_item(
         &self,
-        item_slot: ManagedBuffer,
+        item_slot: Slot<Self::Api>,
         items_id_to_add: MultiValueEncoded<TokenIdentifier>,
     ) {
         for item_id in items_id_to_add {
@@ -89,7 +89,7 @@ pub trait Equip:
 
     #[payable("*")]
     #[endpoint(customize)]
-    fn customize(&self, to_unequip_slots: MultiValueEncoded<ManagedBuffer>) -> u64 {
+    fn customize(&self, to_unequip_slots: MultiValueEncoded<Slot<Self::Api>>) -> u64 {
         let payments = self.call_value().all_esdt_transfers();
 
         self.require_equippable_collection_roles_set();
@@ -200,7 +200,7 @@ pub trait Equip:
     fn unequip_slot(
         &self,
         attributes: &mut EquippableNftAttributes<Self::Api>,
-        slot: &ManagedBuffer,
+        slot: &Slot<Self::Api>,
     ) {
         let caller = self.blockchain().get_caller();
 
@@ -209,8 +209,6 @@ pub trait Equip:
         match opt_item {
             Some(item) => {
                 let n = item.clone().name;
-
-                sc_print!("{}:{}", item.slot, item.name);
 
                 require!(
                     self.token_of_item(&item).is_empty() == false,

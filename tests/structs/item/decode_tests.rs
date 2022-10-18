@@ -1,4 +1,4 @@
-use customize_nft::structs::item::Item;
+use customize_nft::structs::{item::Item, slot::Slot};
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm_debug::{managed_buffer, DebugApi};
 
@@ -12,7 +12,7 @@ fn decode_item() {
 
     let expected_output = Item::<DebugApi> {
         name: managed_buffer!(b"Pirate Hat"),
-        slot: managed_buffer!(b"hat"),
+        slot: Slot::new_from_buffer(managed_buffer!(b"hat")),
     };
 
     let actual_output = Item::top_decode(&input_buffer).unwrap();

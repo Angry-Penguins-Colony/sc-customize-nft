@@ -34,7 +34,7 @@ pub trait ManagedBufferUtils<M: ManagedTypeApi> {
 
 impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
     fn load_512_bytes(&self) -> [u8; 512] {
-        if (self.len() as usize) > 512 {
+        if self.len() > 512 {
             sc_panic_self!(M, "ManagedBuffer is too big");
         }
 

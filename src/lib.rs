@@ -89,7 +89,6 @@ pub trait Equip:
     #[endpoint(renderImage)]
     #[payable("EGLD")]
     fn render_image(&self, attributes: &EquippableNftAttributes<Self::Api>) {
-        sc_print!("egld {}", self.call_value().egld_value());
         require!(
             self.call_value().egld_value() == BigUint::from(ENQUEUE_PRICE),
             ERR_PAY_0001_EGLD

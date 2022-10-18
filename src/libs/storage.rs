@@ -3,7 +3,6 @@ use crate::{
         ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_CID_ALREADY_RENDERER, ERR_RENDER_ALREADY_IN_QUEUE,
     },
     structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot},
-    utils::vec_mapper_utils::VecMapperUtils,
 };
 
 elrond_wasm::imports!();
@@ -33,7 +32,7 @@ pub trait StorageModule {
     fn slot_of_item(&self, token: &TokenIdentifier) -> SingleValueMapper<Slot<Self::Api>>;
 
     #[storage_mapper("__images_to_render")]
-    fn images_to_render(&self) -> VecMapper<EquippableNftAttributes<Self::Api>>;
+    fn images_to_render(&self) -> UnorderedSetMapper<EquippableNftAttributes<Self::Api>>;
 
     #[storage_mapper("cid_of_equippable")]
     fn cid_of_attribute(
@@ -69,7 +68,7 @@ pub trait StorageModule {
             let (attributes, cid) = kvp.into_tuple();
 
             self.cid_of_attribute(&attributes).set(cid);
-            self.images_to_render().remove_item(&attributes);
+            self.images_to_render().swap_remove(&attributes);
         }
     }
 
@@ -126,17 +125,17 @@ pub trait StorageModule {
 
     // ===
     // IMAGES
-    fn enqueue_image_to_render(&self, attributes: &EquippableNftAttributes<Self::Api>) -> usize {
+    fn enqueue_image_to_render(&self, attributes: &EquippableNftAttributes<Self::Api>) {
         require!(
             self.cid_of_exist(attributes) == false,
             ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_CID_ALREADY_RENDERER
         );
         require!(
-            self.images_to_render().has_item(attributes) == false,
+            self.images_to_render().contains(attributes) == false,
             ERR_RENDER_ALREADY_IN_QUEUE
         );
 
-        self.images_to_render().push(attributes)
+        self.images_to_render().insert(attributes.clone());
     }
 
     #[view(getImagesToRender)]

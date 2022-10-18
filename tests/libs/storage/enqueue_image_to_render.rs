@@ -31,7 +31,7 @@ fn works() {
                 sc.enqueue_image_to_render(&attributes);
 
                 assert_eq!(sc.images_to_render().len(), 1);
-                assert_eq!(sc.images_to_render().get(1), attributes);
+                assert_eq!(sc.images_to_render().contains(&attributes), true);
             },
         )
         .assert_ok();
@@ -62,8 +62,8 @@ fn enqueue_two_differents_attributes() {
                 sc.enqueue_image_to_render(&attributes_b);
 
                 assert_eq!(sc.images_to_render().len(), 2);
-                assert_eq!(sc.images_to_render().get(1), attributes_a);
-                assert_eq!(sc.images_to_render().get(2), attributes_b);
+                assert_eq!(sc.images_to_render().contains(&attributes_a), true);
+                assert_eq!(sc.images_to_render().contains(&attributes_b), true);
 
                 let mut iter = sc.get_images_to_render().into_iter();
                 assert_eq!(iter.next(), Some(attributes_a));
@@ -127,7 +127,7 @@ fn panic_if_already_in_queue() {
                 sc.enqueue_image_to_render(&attributes);
 
                 assert_eq!(sc.images_to_render().len(), 1);
-                assert_eq!(sc.images_to_render().get(1), attributes);
+                assert_eq!(sc.images_to_render().contains(&attributes), true);
             },
         )
         .assert_user_error(ERR_RENDER_ALREADY_IN_QUEUE);

@@ -1,6 +1,5 @@
 use customize_nft::{
     libs::storage::StorageModule, structs::equippable_nft_attributes::EquippableNftAttributes,
-    utils::vec_mapper_utils::VecMapperUtils,
 };
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
@@ -39,7 +38,7 @@ fn returns_one_after_one_enqueue() {
 
                 sc.enqueue_image_to_render(&attributes);
                 assert_eq!(sc.images_to_render().len(), 1);
-                assert_eq!(&sc.images_to_render().get(1), &attributes);
+                assert_eq!(sc.images_to_render().contains(&attributes), true);
 
                 let enqueued = sc.get_images_to_render();
                 assert_eq!(enqueued.len(), 1);
@@ -66,7 +65,7 @@ fn returns_zero_after_one_dequeue() {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
                 sc.enqueue_image_to_render(&attributes);
-                sc.images_to_render().remove_item(&attributes);
+                sc.images_to_render().swap_remove(&attributes);
 
                 assert_eq!(sc.get_images_to_render().len(), 0);
             },

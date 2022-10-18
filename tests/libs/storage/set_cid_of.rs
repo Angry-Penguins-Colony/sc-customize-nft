@@ -109,7 +109,7 @@ fn should_remove_enqueued_image_to_render() {
 
                 sc.enqueue_image_to_render(&attributes);
                 assert_eq!(sc.images_to_render().len(), 1);
-                assert_eq!(&sc.images_to_render().get(1), &attributes);
+                assert_eq!(sc.images_to_render().contains(&attributes), true);
 
                 sc.set_cid_of(args_set_cid_of!(
                     attributes.clone(),

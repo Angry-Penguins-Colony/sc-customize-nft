@@ -1,4 +1,4 @@
-use customize_nft::{constants::ERR_NOT_OWNER, Equip};
+use customize_nft::{EndpointWrappers, Equip};
 use elrond_wasm_debug::rust_biguint;
 
 use crate::testing_utils;
@@ -44,8 +44,8 @@ fn panic_if_not_owner() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                sc.claim();
+                sc.call_claim();
             },
         )
-        .assert_user_error(ERR_NOT_OWNER);
+        .assert_user_error("Endpoint can only be called by owner");
 }

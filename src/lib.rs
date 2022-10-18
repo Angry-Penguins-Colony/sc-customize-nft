@@ -34,11 +34,6 @@ pub trait Equip:
         item_slot: ManagedBuffer,
         items_id_to_add: MultiValueEncoded<TokenIdentifier>,
     ) {
-        require!(
-            self.blockchain().get_caller() == self.blockchain().get_owner_address(),
-            ERR_NOT_OWNER
-        );
-
         for item_id in items_id_to_add {
             require!(
                 item_id != self.equippable_token_id().get(),
@@ -53,11 +48,6 @@ pub trait Equip:
     #[endpoint]
     #[only_owner]
     fn fill(&self) {
-        require!(
-            self.blockchain().get_caller() == self.blockchain().get_owner_address(),
-            ERR_NOT_OWNER
-        );
-
         // TODO: require! to only send registered SFT
 
         let payment = self.call_value().single_esdt();
@@ -153,11 +143,6 @@ pub trait Equip:
     #[only_owner]
     #[endpoint(claim)]
     fn claim(&self) {
-        require!(
-            self.blockchain().get_caller() == self.blockchain().get_owner_address(),
-            ERR_NOT_OWNER
-        );
-
         let balance = self
             .blockchain()
             .get_balance(&self.blockchain().get_sc_address());

@@ -2,7 +2,7 @@ use crate::testing_utils;
 use customize_nft::{
     libs::storage::StorageModule,
     structs::{item::Item, item_attributes::ItemAttributes},
-    Equip,
+    EndpointWrappers, Equip,
 };
 use elrond_wasm::types::{MultiValueEncoded, TokenIdentifier};
 use elrond_wasm_debug::{managed_buffer, managed_token_id, rust_biguint, DebugApi};
@@ -39,7 +39,7 @@ fn works_if_is_the_owner() {
 
                 sc.register_item(managed_buffer!(TOKEN_SLOT), managed_items_ids);
 
-                sc.fill();
+                sc.call_fill();
 
                 let (item_id, item_nonce) = sc
                     .token_of(&Item {
@@ -97,7 +97,7 @@ fn panic_if_override() {
 
                 sc.register_item(managed_buffer!(TOKEN_A_SLOT), managed_items_ids);
 
-                sc.fill();
+                sc.call_fill();
 
                 let (item_id, item_nonce) = sc
                     .token_of(&Item {
@@ -154,8 +154,8 @@ fn panic_if_not_the_owner() {
             TOKEN_NONCE,
             &rust_biguint!(1),
             |sc| {
-                sc.fill();
+                sc.call_fill();
             },
         )
-        .assert_user_error("Only the owner can call this method.");
+        .assert_user_error("Endpoint can only be called by owner");
 }

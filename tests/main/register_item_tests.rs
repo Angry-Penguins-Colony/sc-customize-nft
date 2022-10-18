@@ -1,4 +1,4 @@
-use customize_nft::constants::{ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM, ERR_NOT_OWNER};
+use customize_nft::constants::ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM;
 use customize_nft::libs::storage::StorageModule;
 use customize_nft::structs::item_attributes::ItemAttributes;
 use customize_nft::*;
@@ -275,8 +275,6 @@ fn panic_if_register_equippable() {
 fn panic_if_not_the_owner() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let slot = b"hat";
-
     setup
         .blockchain_wrapper
         .execute_tx(
@@ -284,12 +282,8 @@ fn panic_if_not_the_owner() {
             &setup.cf_wrapper,
             &rust_biguint!(0u64),
             |sc| {
-                let mut managed_items_ids =
-                    MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
-                managed_items_ids.push(managed_token_id!(b"ITEM-a1a1a1"));
-
-                let _ = sc.register_item(ManagedBuffer::new_from_bytes(slot), managed_items_ids);
+                sc.call_register_item();
             },
         )
-        .assert_user_error(ERR_NOT_OWNER);
+        .assert_user_error("Endpoint can only be called by owner");
 }

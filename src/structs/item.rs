@@ -7,7 +7,7 @@ use elrond_wasm::elrond_codec::TopDecodeInput;
 
 use core::{ops::Deref, str::FromStr};
 
-use crate::utils::{managed_buffer_utils::ManagedBufferUtils, u64_utils::UtilsU64};
+use crate::utils::managed_buffer_utils::ManagedBufferUtils;
 
 use super::slot::Slot;
 

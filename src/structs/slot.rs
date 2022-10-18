@@ -7,10 +7,7 @@ use elrond_wasm::elrond_codec::{TopDecodeInput, TopEncode};
 
 use core::{cmp::Ordering, ops::Deref, str::FromStr};
 
-use crate::{
-    sc_panic_self,
-    utils::{managed_buffer_utils::ManagedBufferUtils, u64_utils::UtilsU64},
-};
+use crate::{sc_panic_self, utils::managed_buffer_utils::ManagedBufferUtils};
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();

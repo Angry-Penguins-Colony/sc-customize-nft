@@ -77,7 +77,7 @@ pub trait Equip:
      */
     #[endpoint(renderImage)]
     #[payable("EGLD")]
-    fn render_image(&self, attributes: &EquippableNftAttributes<Self::Api>) {
+    fn add_image_to_render(&self, attributes: &EquippableNftAttributes<Self::Api>) {
         require!(
             self.call_value().egld_value() == BigUint::from(ENQUEUE_PRICE),
             ERR_PAY_0001_EGLD
@@ -192,7 +192,7 @@ pub trait Equip:
             self.unequip_slot(attributes, &item_slot);
         }
 
-        attributes.set_item(&item_slot, Option::Some(item.clone()));
+        attributes.set_item_if_empty(&item_slot, Option::Some(item.clone()));
     }
 
     /// Empty the item at the slot provided and sent it to the caller.

@@ -21,12 +21,12 @@ elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
 #[derive(ManagedVecItem, NestedEncode, NestedDecode, PartialEq, TypeAbi, Clone, Debug)]
-struct Kvp<M: ManagedTypeApi> {
+struct EquippableNftAttribute<M: ManagedTypeApi> {
     pub slot: ManagedBuffer<M>,
     pub item: Option<Item<M>>,
 }
 
-impl<M: ManagedTypeApi> Kvp<M> {
+impl<M: ManagedTypeApi> EquippableNftAttribute<M> {
     pub fn to_kvp_buffer(&self) -> ManagedBuffer<M> {
         let mut output_buffer = ManagedBuffer::<M>::new();
 
@@ -52,7 +52,7 @@ impl<M: ManagedTypeApi> Kvp<M> {
 
 #[derive(NestedEncode, NestedDecode, TypeAbi, Debug, Clone)]
 pub struct EquippableNftAttributes<M: ManagedTypeApi> {
-    kvp: ManagedVec<M, Kvp<M>>,
+    kvp: ManagedVec<M, EquippableNftAttribute<M>>,
 }
 
 pub trait SortUtils<M>
@@ -61,7 +61,7 @@ where
 {
     fn sort_alphabetically(&self) -> Self;
 }
-impl<M> SortUtils<M> for ManagedVec<M, Kvp<M>>
+impl<M> SortUtils<M> for ManagedVec<M, EquippableNftAttribute<M>>
 where
     M: ManagedTypeApi,
 {
@@ -115,10 +115,10 @@ impl<M: ManagedTypeApi> TopDecode for EquippableNftAttributes<M> {
             let slot = item.slot.clone();
 
             if &item.name == &ManagedBuffer::new_from_bytes(b"unequipped") {
-                equippable_attributes.set_item(&slot, None);
+                equippable_attributes.set_item_if_empty(&slot, None);
                 continue;
             } else {
-                equippable_attributes.set_item(&slot, Some(item));
+                equippable_attributes.set_item_if_empty(&slot, Some(item));
             }
         }
 
@@ -155,7 +155,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
         let mut attributes = Self::empty();
 
         for item in items_by_slot {
-            attributes.set_item(&item.slot, Option::Some(item.clone()));
+            attributes.set_item_if_empty(&item.slot, Option::Some(item.clone()));
         }
 
         return attributes;
@@ -168,7 +168,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
         }
     }
 
-    pub fn set_item(&mut self, slot: &ManagedBuffer<M>, item: Option<Item<M>>) {
+    pub fn set_item_if_empty(&mut self, slot: &ManagedBuffer<M>, item: Option<Item<M>>) {
         if self.is_slot_empty(slot) == false {
             sc_panic_self!(
                 M,
@@ -176,7 +176,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
             );
         }
 
-        return self.__set_item_no_check(slot, item);
+        return self.set_item(slot, item);
     }
 
     pub fn get_count(&self) -> usize {
@@ -201,7 +201,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
     }
 
     pub fn empty_slot(&mut self, slot: &ManagedBuffer<M>) {
-        return self.__set_item_no_check(&slot, Option::None);
+        return self.set_item(&slot, Option::None);
     }
 
     pub fn empty() -> Self {
@@ -217,8 +217,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
             .position(|kvp| kvp.slot.equals_ignore_case(slot));
     }
 
-    /// Set an item on a slot, without checking if the slot is empty.
-    fn __set_item_no_check(&mut self, slot: &ManagedBuffer<M>, item: Option<Item<M>>) {
+    fn set_item(&mut self, slot: &ManagedBuffer<M>, item: Option<Item<M>>) {
         let slot = slot.to_lowercase();
         let index = self.__get_index(&slot);
 
@@ -228,7 +227,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
 
         match index {
             Some(index) => {
-                let result = self.kvp.set(index, &Kvp { item, slot });
+                let result = self.kvp.set(index, &EquippableNftAttribute { item, slot });
 
                 if result.is_err() {
                     sc_panic_self!(
@@ -238,7 +237,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
                 }
             }
             None => {
-                self.kvp.push(Kvp { slot, item });
+                self.kvp.push(EquippableNftAttribute { slot, item });
             }
         }
 

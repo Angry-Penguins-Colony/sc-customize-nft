@@ -30,8 +30,8 @@ fn works() {
 
                 sc.enqueue_image_to_render(&attributes);
 
-                assert_eq!(sc.__images_to_render().len(), 1);
-                assert_eq!(sc.__images_to_render().get(1), attributes);
+                assert_eq!(sc.images_to_render().len(), 1);
+                assert_eq!(sc.images_to_render().get(1), attributes);
             },
         )
         .assert_ok();
@@ -61,9 +61,9 @@ fn enqueue_two_differents_attributes() {
                 sc.enqueue_image_to_render(&attributes_a);
                 sc.enqueue_image_to_render(&attributes_b);
 
-                assert_eq!(sc.__images_to_render().len(), 2);
-                assert_eq!(sc.__images_to_render().get(1), attributes_a);
-                assert_eq!(sc.__images_to_render().get(2), attributes_b);
+                assert_eq!(sc.images_to_render().len(), 2);
+                assert_eq!(sc.images_to_render().get(1), attributes_a);
+                assert_eq!(sc.images_to_render().get(2), attributes_b);
 
                 let mut iter = sc.get_images_to_render().into_iter();
                 assert_eq!(iter.next(), Some(attributes_a));
@@ -89,7 +89,7 @@ fn panic_if_already_rendererer() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                assert_eq!(sc.__images_to_render().len(), 0);
+                assert_eq!(sc.images_to_render().len(), 0);
                 {
                     let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
@@ -100,7 +100,7 @@ fn panic_if_already_rendererer() {
 
                     sc.enqueue_image_to_render(&attributes);
                 }
-                assert_eq!(sc.__images_to_render().len(), 0);
+                assert_eq!(sc.images_to_render().len(), 0);
             },
         )
         .assert_user_error(ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_CID_ALREADY_RENDERER);
@@ -126,8 +126,8 @@ fn panic_if_already_in_queue() {
                 sc.enqueue_image_to_render(&attributes);
                 sc.enqueue_image_to_render(&attributes);
 
-                assert_eq!(sc.__images_to_render().len(), 1);
-                assert_eq!(sc.__images_to_render().get(1), attributes);
+                assert_eq!(sc.images_to_render().len(), 1);
+                assert_eq!(sc.images_to_render().get(1), attributes);
             },
         )
         .assert_user_error(ERR_RENDER_ALREADY_IN_QUEUE);

@@ -25,10 +25,10 @@ fn works() {
             |sc| {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
-                sc.render_image(&attributes);
+                sc.add_image_to_render(&attributes);
 
-                assert_eq!(sc.__images_to_render().len(), 1);
-                assert_eq!(sc.__images_to_render().get(1), attributes);
+                assert_eq!(sc.images_to_render().len(), 1);
+                assert_eq!(sc.images_to_render().get(1), attributes);
             },
         )
         .assert_ok();
@@ -47,10 +47,10 @@ fn panic_if_dont_send_egld() {
             |sc| {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
-                sc.render_image(&attributes);
+                sc.add_image_to_render(&attributes);
 
-                assert_eq!(sc.__images_to_render().len(), 1);
-                assert_eq!(sc.__images_to_render().get(1), attributes);
+                assert_eq!(sc.images_to_render().len(), 1);
+                assert_eq!(sc.images_to_render().get(1), attributes);
             },
         )
         .assert_user_error(ERR_PAY_0001_EGLD);
@@ -73,10 +73,10 @@ fn panic_if_send_lesser_amount_of_egld() {
             |sc| {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
-                sc.render_image(&attributes);
+                sc.add_image_to_render(&attributes);
 
-                assert_eq!(sc.__images_to_render().len(), 1);
-                assert_eq!(sc.__images_to_render().get(1), attributes);
+                assert_eq!(sc.images_to_render().len(), 1);
+                assert_eq!(sc.images_to_render().get(1), attributes);
             },
         )
         .assert_user_error(ERR_PAY_0001_EGLD);
@@ -99,10 +99,10 @@ fn panic_if_send_greater_amount_of_egld() {
             |sc| {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
-                sc.render_image(&attributes);
+                sc.add_image_to_render(&attributes);
 
-                assert_eq!(sc.__images_to_render().len(), 1);
-                assert_eq!(sc.__images_to_render().get(1), attributes);
+                assert_eq!(sc.images_to_render().len(), 1);
+                assert_eq!(sc.images_to_render().get(1), attributes);
             },
         )
         .assert_user_error(ERR_PAY_0001_EGLD);

@@ -23,7 +23,7 @@ fn test_register_item() {
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             let result = sc
-                .__slot_of(&TokenIdentifier::from_esdt_bytes(TOKEN_ID))
+                .slot_of_item(&TokenIdentifier::from_esdt_bytes(TOKEN_ID))
                 .get();
 
             assert_eq!(result, managed_buffer!(slot));
@@ -61,11 +61,11 @@ fn register_another_item_on_slot() {
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             assert_eq!(
-                sc.__slot_of(&managed_token_id!(FIRST_TOKEN_ID)).get(),
+                sc.slot_of_item(&managed_token_id!(FIRST_TOKEN_ID)).get(),
                 ManagedBuffer::new_from_bytes(slot)
             );
             assert_eq!(
-                sc.__slot_of(&managed_token_id!(SECOND_TOKEN_ID)).get(),
+                sc.slot_of_item(&managed_token_id!(SECOND_TOKEN_ID)).get(),
                 ManagedBuffer::new_from_bytes(slot)
             );
         })
@@ -202,7 +202,7 @@ fn change_item_slot() {
 
     b_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
-            let result = sc.__slot_of(&managed_token_id!(ITEM_ID)).get();
+            let result = sc.slot_of_item(&managed_token_id!(ITEM_ID)).get();
             assert_eq!(result, managed_buffer!(new_slot));
         })
         .assert_ok();

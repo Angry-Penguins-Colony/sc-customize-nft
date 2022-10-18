@@ -27,7 +27,10 @@ fn should_set_if_empty() {
                     managed_buffer!(cid_bytes)
                 ));
 
-                assert_eq!(sc.__cid_of(&attributes).get(), managed_buffer!(cid_bytes));
+                assert_eq!(
+                    sc.cid_of_attribute(&attributes).get(),
+                    managed_buffer!(cid_bytes)
+                );
             },
         )
         .assert_ok();
@@ -54,7 +57,7 @@ fn should_set_if_not_emtpy() {
                     managed_buffer!(first_cid_bytes)
                 ));
                 assert_eq!(
-                    sc.__cid_of(&attributes).get(),
+                    sc.cid_of_attribute(&attributes).get(),
                     managed_buffer!(first_cid_bytes)
                 );
 
@@ -63,7 +66,7 @@ fn should_set_if_not_emtpy() {
                     managed_buffer!(second_cid_bytes)
                 ));
                 assert_eq!(
-                    sc.__cid_of(&attributes).get(),
+                    sc.cid_of_attribute(&attributes).get(),
                     managed_buffer!(second_cid_bytes),
                     "first_cid_bytes should be overwrited by second_cid_bytes"
                 );
@@ -105,8 +108,8 @@ fn should_remove_enqueued_image_to_render() {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
                 sc.enqueue_image_to_render(&attributes);
-                assert_eq!(sc.__images_to_render().len(), 1);
-                assert_eq!(&sc.__images_to_render().get(1), &attributes);
+                assert_eq!(sc.images_to_render().len(), 1);
+                assert_eq!(&sc.images_to_render().get(1), &attributes);
 
                 sc.set_cid_of(args_set_cid_of!(
                     attributes.clone(),
@@ -114,7 +117,7 @@ fn should_remove_enqueued_image_to_render() {
                 ));
 
                 assert_eq!(
-                    sc.__images_to_render().len(),
+                    sc.images_to_render().len(),
                     0,
                     "The enqueud image to render should be has been removed."
                 );

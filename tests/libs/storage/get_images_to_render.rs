@@ -38,8 +38,8 @@ fn returns_one_after_one_enqueue() {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
                 sc.enqueue_image_to_render(&attributes);
-                assert_eq!(sc.__images_to_render().len(), 1);
-                assert_eq!(&sc.__images_to_render().get(1), &attributes);
+                assert_eq!(sc.images_to_render().len(), 1);
+                assert_eq!(&sc.images_to_render().get(1), &attributes);
 
                 let enqueued = sc.get_images_to_render();
                 assert_eq!(enqueued.len(), 1);
@@ -66,7 +66,7 @@ fn returns_zero_after_one_dequeue() {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
                 sc.enqueue_image_to_render(&attributes);
-                sc.__images_to_render().remove_item(&attributes);
+                sc.images_to_render().remove_item(&attributes);
 
                 assert_eq!(sc.get_images_to_render().len(), 0);
             },

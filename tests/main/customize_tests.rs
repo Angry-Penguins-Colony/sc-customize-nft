@@ -73,7 +73,7 @@ fn customize_complete_flow() {
                 let mut attributes_after_custom = attributes_before_custom.clone();
                 attributes_after_custom
                     .empty_slot(&ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT));
-                attributes_after_custom.set_item(
+                attributes_after_custom.set_item_if_empty(
                     &ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT),
                     Some(Item {
                         name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID),
@@ -144,7 +144,7 @@ fn customize_complete_flow() {
         slot: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT),
     }]);
     attributes_after_custom.empty_slot(&ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT));
-    attributes_after_custom.set_item(
+    attributes_after_custom.set_item_if_empty(
         &ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT),
         Some(Item {
             name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_ID),

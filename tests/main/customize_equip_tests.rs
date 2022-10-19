@@ -294,7 +294,7 @@ fn should_replace_item() {
 }
 
 #[test]
-fn customize_nft_without_items() {
+fn panic_if_customize_nft_without_items() {
     const INIT_NONCE: u64 = 65535;
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
@@ -320,7 +320,7 @@ fn customize_nft_without_items() {
 }
 
 #[test]
-fn equip_while_nft_to_equip_is_not_an_equippable() {
+fn panic_if_equip_while_nft_to_equip_is_not_an_equippable() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     const INIT_NONCE: u64 = 65535;
@@ -398,6 +398,72 @@ fn panic_if_equipped_token_is_not_an_item() {
         4,
         "The item you are equipping NOT-AN-ITEM-a 65535 is not registered.",
     );
+}
+
+#[test]
+fn panic_if_unequip_item_is_not_an_item() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    DebugApi::dummy();
+
+    const INIT_NONCE: u64 = 65535;
+
+    const SHARED_SLOT: &[u8] = b"hat";
+    const SHARED_ITEM_ID: &[u8] = b"ITEM-a1a1a1";
+
+    const ITEM_TO_EQUIP_NONCE: u64 = 30;
+    const ITEM_TO_EQUIP_NAME: &[u8] = b"pirate hat";
+
+    const ITEM_TO_UNEQUIP_NAME: &[u8] = b"cap";
+
+    // Register penguins w/ hat to remove
+    let attributes = EquippableNftAttributes::<DebugApi>::new(&[Item {
+        name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
+        slot: Slot::new_from_bytes(SHARED_SLOT),
+    }]);
+
+    setup.blockchain_wrapper.set_nft_balance(
+        &setup.first_user_address,
+        EQUIPPABLE_TOKEN_ID,
+        INIT_NONCE,
+        &rust_biguint!(1),
+        &attributes,
+    );
+
+    setup.register_and_fill_item(
+        SHARED_SLOT,
+        ITEM_TO_EQUIP_NAME,
+        SHARED_ITEM_ID,
+        ITEM_TO_EQUIP_NONCE,
+        &TestItemAttributes {},
+    );
+
+    // Give the user a hat to equip
+    setup.blockchain_wrapper.set_nft_balance_all_properties(
+        &setup.first_user_address,
+        SHARED_ITEM_ID,
+        ITEM_TO_EQUIP_NONCE,
+        &rust_biguint!(1),
+        &TestItemAttributes {},
+        0,
+        Option::Some(&setup.owner_address),
+        Option::Some(ITEM_TO_EQUIP_NAME),
+        Option::None,
+        &[],
+    );
+
+    let (esdt_transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[
+        (EQUIPPABLE_TOKEN_ID, INIT_NONCE, EsdtTokenType::NonFungible),
+        (
+            SHARED_ITEM_ID,
+            ITEM_TO_EQUIP_NONCE,
+            EsdtTokenType::SemiFungible,
+        ),
+    ]);
+
+    let (_, tx_result) = setup.equip(esdt_transfers);
+
+    tx_result.assert_user_error("The item you are unequipping at slot Hat is not registered.");
 }
 
 #[test]

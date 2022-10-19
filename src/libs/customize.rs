@@ -122,7 +122,11 @@ pub trait CustomizeModule: super::storage::StorageModule {
                 }
 
                 None => {
-                    sc_panic!("The item {} is not registed by the admin of the contract");
+                    let slot_name = slot.capitalized();
+                    sc_panic!(
+                        "The item you are unequipping at slot {} is not registered.",
+                        slot_name
+                    );
                 }
             },
 

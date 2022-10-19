@@ -12,9 +12,7 @@ elrond_wasm_node::wasm_endpoints! {
         customize
         fill
         getImagesToRender
-        getSlotOf
         getUriOf
-        hasSlot
         registerItem
         renderImage
         setUriOfAttributes

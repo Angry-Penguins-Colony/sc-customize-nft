@@ -1,7 +1,7 @@
 use crate::testing_utils::{New, TestItemAttributes};
 use customize_nft::constants::{
-    ERR_CANNOT_EQUIP_UNREGISTED_ITEM, ERR_FIRST_PAYMENT_IS_EQUIPPABLE,
-    ERR_MORE_THAN_ONE_ITEM_RECEIVED, ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
+    ERR_FIRST_PAYMENT_IS_EQUIPPABLE, ERR_MORE_THAN_ONE_ITEM_RECEIVED,
+    ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
 };
 use customize_nft::libs::storage::StorageModule;
 use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
@@ -362,7 +362,7 @@ fn equip_while_nft_to_equip_is_not_an_equippable() {
 }
 
 #[test]
-fn panic_if_token_is_not_an_item() {
+fn panic_if_equipped_token_is_not_an_item() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     const INIT_NONCE: u64 = 65535;
@@ -394,7 +394,10 @@ fn panic_if_token_is_not_an_item() {
 
     let (_, tx_result) = setup.equip(transfers);
 
-    tx_result.assert_error(4, ERR_CANNOT_EQUIP_UNREGISTED_ITEM);
+    tx_result.assert_error(
+        4,
+        "The item you are equipping NOT-AN-ITEM-a 65535 is not registered.",
+    );
 }
 
 #[test]

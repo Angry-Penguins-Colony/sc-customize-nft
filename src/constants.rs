@@ -29,5 +29,3 @@ pub const ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE: &str = "Another URI has been set
 pub const ERR_CANNOT_OVERRIDE_REGISTERED_ITEM: &str = "Item is already registered.";
 pub const ERR_CANNOT_FILL_UNREGISTERED_ITEM: &str =
     "An item must be registered before calling the fill endpoint.";
-pub const ERR_CANNOT_EQUIP_UNREGISTED_ITEM: &str =
-    "The item you are equipping is not registed by the admin of the contract";

@@ -58,9 +58,16 @@ pub trait CustomizeModule: super::storage::StorageModule {
                 ERR_MORE_THAN_ONE_ITEM_RECEIVED
             );
 
-            let token = Token::new(payment.token_identifier, payment.token_nonce);
+            let token = Token::new(payment.token_identifier.clone(), payment.token_nonce);
 
-            require!(self.has_token(&token), ERR_CANNOT_EQUIP_UNREGISTED_ITEM);
+            let printable_token_identifier = payment.token_identifier.as_managed_buffer();
+            let printable_token_nonce = payment.token_nonce;
+            require!(
+                self.has_token(&token),
+                "The item you are equipping {} {} is not registered.",
+                printable_token_identifier,
+                printable_token_nonce
+            );
 
             self.equip_slot(&mut attributes, &self.map_items_tokens().get_id(&token));
         }
@@ -115,7 +122,7 @@ pub trait CustomizeModule: super::storage::StorageModule {
                 }
 
                 None => {
-                    sc_panic!(ERR_CANNOT_EQUIP_UNREGISTED_ITEM);
+                    sc_panic!("The item {} is not registed by the admin of the contract");
                 }
             },
 

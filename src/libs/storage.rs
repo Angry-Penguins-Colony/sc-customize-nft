@@ -3,7 +3,7 @@ use crate::{
         ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED, ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE,
         ERR_RENDER_ALREADY_IN_QUEUE,
     },
-    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot},
+    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, token::Token},
 };
 
 elrond_wasm::imports!();
@@ -14,18 +14,8 @@ pub trait StorageModule {
     #[storage_mapper("equippable_token_id")]
     fn equippable_token_id(&self) -> SingleValueMapper<TokenIdentifier>;
 
-    #[storage_mapper("items_token")]
-    fn get_token_from_item(
-        &self,
-        item: &Item<Self::Api>,
-    ) -> SingleValueMapper<(TokenIdentifier<Self::Api>, u64)>;
-
-    #[storage_mapper("item_of_token")]
-    fn get_item_from_token(
-        &self,
-        token: &TokenIdentifier,
-        nonce: u64,
-    ) -> SingleValueMapper<Item<Self::Api>>;
+    #[storage_mapper("mapper_items_token")]
+    fn map_items_tokens(&self) -> BiDiMapper<Self::Api, Item<Self::Api>, Token<Self::Api>>;
 
     #[storage_mapper("whitelist_set_uris_of_attributes_endpoint")]
     fn whitelist_set_uris_of_attributes_endpoint(
@@ -42,6 +32,29 @@ pub trait StorageModule {
         attributes: &EquippableNftAttributes<Self::Api>,
     ) -> SingleValueMapper<ManagedBuffer>;
 
+    fn has_item(&self, item: &Item<Self::Api>) -> bool {
+        return self.map_items_tokens().iter().any(|i| &i.0 == item);
+    }
+
+    fn has_token(&self, token: &Token<Self::Api>) -> bool {
+        return self.map_items_tokens().iter().any(|i| &i.1 == token);
+    }
+
+    fn get_item(&self, token: &Token<Self::Api>) -> Option<Item<Self::Api>> {
+        if self.has_token(token) == false {
+            return None;
+        } else {
+            return Some(self.map_items_tokens().get_id(token));
+        }
+    }
+
+    fn get_token(&self, item: &Item<Self::Api>) -> Option<Token<Self::Api>> {
+        if self.has_item(item) == false {
+            return None;
+        } else {
+            return Some(self.map_items_tokens().get_value(item));
+        }
+    }
     // STORAGE MODIFIERS
 
     #[endpoint(addPermissionToSetUris)]
@@ -97,22 +110,6 @@ pub trait StorageModule {
 
     fn is_uri_set_for_attributes(&self, attributes: &EquippableNftAttributes<Self::Api>) -> bool {
         return !self.get_uri_from_attributes(attributes).is_empty();
-    }
-
-    // ===
-    // SLOTS
-    #[view(hasSlot)]
-    fn has_slot(&self, token: &TokenIdentifier, nonce: u64) -> bool {
-        return self.get_item_from_token(token, nonce).is_empty() == false;
-    }
-
-    #[view(getSlotOf)]
-    fn get_slot_of(&self, item_id: &TokenIdentifier, nonce: u64) -> Slot<Self::Api> {
-        if self.has_slot(item_id, nonce) {
-            return self.get_item_from_token(item_id, nonce).get().slot;
-        } else {
-            sc_panic!("No slot found for {}.", item_id);
-        }
     }
 
     // ===

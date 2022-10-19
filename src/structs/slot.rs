@@ -12,6 +12,14 @@ pub struct Slot<M: ManagedTypeApi> {
     slot: ManagedBuffer<M>,
 }
 
+impl<M: ManagedTypeApi> Default for Slot<M> {
+    fn default() -> Self {
+        Self {
+            slot: Default::default(),
+        }
+    }
+}
+
 impl<M: ManagedTypeApi> TopDecode for Slot<M> {
     fn top_decode<I: elrond_codec::TopDecodeInput>(input: I) -> Result<Self, DecodeError> {
         let result = ManagedBuffer::top_decode(input);

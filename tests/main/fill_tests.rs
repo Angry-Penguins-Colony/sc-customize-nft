@@ -43,15 +43,21 @@ fn works_if_is_the_owner() {
 
                 sc.call_fill();
 
-                let (item_id, item_nonce) = sc
-                    .get_token_from_item(&Item {
-                        name: managed_buffer!(TOKEN_NAME),
-                        slot: Slot::new_from_bytes(TOKEN_SLOT),
-                    })
-                    .get();
+                let opt_token = sc.get_token(&Item {
+                    name: managed_buffer!(TOKEN_NAME),
+                    slot: Slot::new_from_bytes(TOKEN_SLOT),
+                });
 
-                assert_eq!(item_id, managed_token_id!(TOKEN_ID));
-                assert_eq!(item_nonce, TOKEN_NONCE);
+                match opt_token {
+                    Some(token) => {
+                        assert_eq!(token.token, managed_token_id!(TOKEN_ID));
+                        assert_eq!(token.nonce, TOKEN_NONCE);
+                    }
+
+                    None => {
+                        panic!("Received token must be Some, but we got a None.")
+                    }
+                }
             },
         )
         .assert_ok();

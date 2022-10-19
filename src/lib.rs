@@ -12,7 +12,7 @@ pub mod utils;
 use libs::*;
 use structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot};
 
-use crate::constants::*;
+use crate::{constants::*, structs::token::Token};
 
 #[elrond_wasm::derive::contract]
 pub trait Equip: customize::CustomizeModule + storage::StorageModule {
@@ -35,19 +35,19 @@ pub trait Equip: customize::CustomizeModule + storage::StorageModule {
             ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM
         );
 
-        let item = &Item { name, slot };
+        let item = Item { name, slot };
+        let token = Token::new(token_id, token_nonce);
 
-        let storage_item = self.get_item_from_token(&token_id, token_nonce);
-        let storage_token = self.get_token_from_item(item);
-
-        require!(storage_item.is_empty(), ERR_CANNOT_OVERRIDE_REGISTERED_ITEM);
         require!(
-            storage_token.is_empty(),
+            self.has_item(&item) == false,
+            ERR_CANNOT_OVERRIDE_REGISTERED_ITEM
+        );
+        require!(
+            self.has_token(&token) == false,
             ERR_CANNOT_OVERRIDE_REGISTERED_ITEM
         );
 
-        storage_item.set(item);
-        storage_token.set((token_id, token_nonce));
+        self.map_items_tokens().insert(item, token);
     }
 
     #[payable("*")]
@@ -57,9 +57,7 @@ pub trait Equip: customize::CustomizeModule + storage::StorageModule {
         let payment = self.call_value().single_esdt();
 
         require!(
-            self.get_item_from_token(&payment.token_identifier, payment.token_nonce)
-                .is_empty()
-                == false,
+            self.has_token(&Token::new(payment.token_identifier, payment.token_nonce)),
             ERR_CANNOT_FILL_UNREGISTERED_ITEM
         )
     }

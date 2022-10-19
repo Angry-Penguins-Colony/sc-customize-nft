@@ -18,3 +18,12 @@ pub struct Item<M: ManagedTypeApi> {
     pub name: ManagedBuffer<M>,
     pub slot: Slot<M>,
 }
+
+impl<M: ManagedTypeApi> Default for Item<M> {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            slot: Default::default(),
+        }
+    }
+}

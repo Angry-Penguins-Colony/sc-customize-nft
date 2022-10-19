@@ -4,6 +4,7 @@ use customize_nft::constants::{
 use customize_nft::libs::storage::StorageModule;
 use customize_nft::structs::item::Item;
 use customize_nft::structs::slot::Slot;
+use customize_nft::structs::token::Token;
 use customize_nft::*;
 use elrond_wasm::types::{ManagedBuffer, MultiValueEncoded, TokenIdentifier};
 use elrond_wasm_debug::{managed_buffer, managed_token_id};
@@ -33,12 +34,14 @@ fn test_register_item() {
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
-            let result = sc
-                .get_item_from_token(&TokenIdentifier::from_esdt_bytes(TOKEN_ID), TOKEN_NONCE)
-                .get();
+            let result = sc.get_item(&Token::new(
+                TokenIdentifier::from_esdt_bytes(TOKEN_ID),
+                TOKEN_NONCE,
+            ));
 
+            assert_eq!(result.is_some(), true);
             assert_eq!(
-                result,
+                result.unwrap(),
                 Item {
                     slot: Slot::new_from_buffer(managed_buffer!(slot)),
                     name: managed_buffer!(ITEM_NAME)
@@ -83,8 +86,11 @@ fn register_another_item_on_slot() {
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             assert_eq!(
-                sc.get_item_from_token(&managed_token_id!(FIRST_TOKEN_ID), FIRST_TOKEN_NONCE)
-                    .get(),
+                sc.get_item(&Token::new(
+                    managed_token_id!(FIRST_TOKEN_ID),
+                    FIRST_TOKEN_NONCE
+                ))
+                .unwrap(),
                 Item {
                     slot: Slot::new_from_bytes(COMMON_SLOT),
                     name: managed_buffer!(FIRST_ITEM_NAME)
@@ -92,8 +98,11 @@ fn register_another_item_on_slot() {
             );
 
             assert_eq!(
-                sc.get_item_from_token(&managed_token_id!(SECOND_TOKEN_ID), SECOND_TOKEN_NONCE)
-                    .get(),
+                sc.get_item(&Token::new(
+                    managed_token_id!(SECOND_TOKEN_ID),
+                    SECOND_TOKEN_NONCE
+                ))
+                .unwrap(),
                 Item {
                     slot: Slot::new_from_bytes(COMMON_SLOT),
                     name: managed_buffer!(SECOND_ITEM_NAME)

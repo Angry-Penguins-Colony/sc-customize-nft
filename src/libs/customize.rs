@@ -1,6 +1,8 @@
 use crate::{
     constants::*,
-    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot},
+    structs::{
+        equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot, token::Token,
+    },
 };
 
 elrond_wasm::imports!();
@@ -56,14 +58,11 @@ pub trait CustomizeModule: super::storage::StorageModule {
                 ERR_MORE_THAN_ONE_ITEM_RECEIVED
             );
 
-            let opt_item = self.get_item_from_token(&payment.token_identifier, payment.token_nonce);
+            let token = Token::new(payment.token_identifier, payment.token_nonce);
 
-            require!(
-                opt_item.is_empty() == false,
-                ERR_CANNOT_EQUIP_UNREGISTED_ITEM
-            );
+            require!(self.has_token(&token), ERR_CANNOT_EQUIP_UNREGISTED_ITEM);
 
-            self.equip_slot(&mut attributes, &opt_item.get());
+            self.equip_slot(&mut attributes, &self.map_items_tokens().get_id(&token));
         }
 
         return self.update_equippable(equippable_nonce, &attributes);
@@ -91,31 +90,34 @@ pub trait CustomizeModule: super::storage::StorageModule {
         let opt_item = attributes.get_item(&slot);
 
         match opt_item {
-            Some(item) => {
-                let storage_token = self.get_token_from_item(&item);
+            Some(item) => match self.get_token(&item) {
+                Some(token) => {
+                    let item_id = token.token;
+                    let item_nonce = token.nonce;
 
-                require!(!storage_token.is_empty(), ERR_CANNOT_EQUIP_UNREGISTED_ITEM);
+                    require!(
+                        self.blockchain().get_sc_balance(
+                            &EgldOrEsdtTokenIdentifier::esdt(item_id.clone()),
+                            item_nonce
+                        ) > 0,
+                        "Can't send unequipped items to the user. There is no SFT remaining."
+                    );
 
-                let (item_id, item_nonce) = storage_token.get();
+                    self.send().direct_esdt(
+                        &self.blockchain().get_caller(),
+                        &item_id,
+                        item_nonce,
+                        &BigUint::from(1u32),
+                        &[],
+                    );
 
-                require!(
-                    self.blockchain().get_sc_balance(
-                        &EgldOrEsdtTokenIdentifier::esdt(item_id.clone()),
-                        item_nonce
-                    ) > 0,
-                    "Can't send unequipped items to the user. There is no SFT remaining."
-                );
+                    attributes.empty_slot(&slot);
+                }
 
-                self.send().direct_esdt(
-                    &self.blockchain().get_caller(),
-                    &item_id,
-                    item_nonce,
-                    &BigUint::from(1u32),
-                    &[],
-                );
-
-                attributes.empty_slot(&slot);
-            }
+                None => {
+                    sc_panic!(ERR_CANNOT_EQUIP_UNREGISTED_ITEM);
+                }
+            },
 
             None => {
                 sc_panic!(ERR_CANNOT_UNEQUIP_EMPTY_SLOT);

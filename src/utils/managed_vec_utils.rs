@@ -3,16 +3,12 @@ use elrond_wasm::{
     types::{ManagedVec, ManagedVecItem},
 };
 
-pub trait EqUtils<M, T>
-where
-    M: ManagedTypeApi,
-    T: ManagedVecItem,
-{
+pub trait EqUtils {
     /// Check if two unordered vec are equals
     fn eq_unorder(&self, other: &Self) -> bool;
 }
 
-impl<M, T> EqUtils<M, T> for ManagedVec<M, T>
+impl EqUtils for ManagedVec<M, T>
 where
     M: ManagedTypeApi,
     T: ManagedVecItem + PartialEq + Clone,

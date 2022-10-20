@@ -34,3 +34,27 @@ fn after_insert_should_returns_valid_values() {
         )
         .assert_ok();
 }
+
+#[test]
+fn empty_storage_should_returns_false() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                let token = Token::new(managed_token_id!(b"HAT-a1a1a1"), 1);
+                let item = Item {
+                    name: managed_buffer!(b"Pirate Hat"),
+                    slot: Slot::new_from_bytes(b"Hat"),
+                };
+
+                assert_eq!(sc.has_item(&item), false);
+                assert_eq!(sc.has_token(&token), false);
+            },
+        )
+        .assert_ok();
+}

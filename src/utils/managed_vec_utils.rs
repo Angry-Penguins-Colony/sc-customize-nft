@@ -8,7 +8,7 @@ pub trait EqUtils {
     fn eq_unorder(&self, other: &Self) -> bool;
 }
 
-impl EqUtils for ManagedVec<M, T>
+impl<M, T> EqUtils for ManagedVec<M, T>
 where
     M: ManagedTypeApi,
     T: ManagedVecItem + PartialEq + Clone,

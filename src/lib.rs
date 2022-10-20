@@ -35,19 +35,11 @@ pub trait Equip: customize::CustomizeModule + storage::StorageModule {
             ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM
         );
 
-        let item = Item { name, slot };
-        let token = Token::new(token_id, token_nonce);
+        let is_insert_successful = self
+            .map_items_tokens()
+            .insert(Item { name, slot }, Token::new(token_id, token_nonce));
 
-        require!(
-            self.has_item(&item) == false,
-            ERR_CANNOT_OVERRIDE_REGISTERED_ITEM
-        );
-        require!(
-            self.has_token(&token) == false,
-            ERR_CANNOT_OVERRIDE_REGISTERED_ITEM
-        );
-
-        self.map_items_tokens().insert(item, token);
+        require!(is_insert_successful, ERR_CANNOT_OVERRIDE_REGISTERED_ITEM);
     }
 
     #[payable("*")]

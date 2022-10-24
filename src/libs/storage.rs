@@ -1,5 +1,5 @@
 use crate::{
-    constants::ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE,
+    constants::{ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE, ERR_IMAGE_NOT_IN_RENDER_QUEUE},
     structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, token::Token},
 };
 
@@ -81,6 +81,11 @@ pub trait StorageModule {
             require!(
                 self.uris_of_attributes(&attributes).is_empty(),
                 ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE
+            );
+
+            require!(
+                self.images_to_render().contains(&attributes),
+                ERR_IMAGE_NOT_IN_RENDER_QUEUE
             );
 
             self.uris_of_attributes(&attributes).set(uri);

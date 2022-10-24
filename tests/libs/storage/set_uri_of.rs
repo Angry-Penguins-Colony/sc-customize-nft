@@ -1,5 +1,7 @@
 use customize_nft::{
-    constants::{ENQUEUE_PRICE, ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE},
+    constants::{
+        ENQUEUE_PRICE, ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE, ERR_IMAGE_NOT_IN_RENDER_QUEUE,
+    },
     libs::storage::{EndpointWrappers, StorageModule},
     structs::equippable_nft_attributes::EquippableNftAttributes,
     Equip,
@@ -12,9 +14,13 @@ use crate::{args_set_cid_of, testing_utils};
 
 #[test]
 fn should_set_if_empty() {
+    DebugApi::dummy();
+
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     let cid_bytes = b"https://ipfs.io/ipfs/some cid";
+
+    setup.enqueue_attributes_to_render(&|| EquippableNftAttributes::<DebugApi>::empty());
 
     setup
         .blockchain_wrapper
@@ -39,11 +45,10 @@ fn should_set_if_empty() {
 }
 
 #[test]
-fn panic_if_override_previously_set_uri() {
+fn panic_if_not_in_render_queue() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let first_cid_bytes = b"https://ipfs.io/ipfs/some cid";
-    let second_cid_bytes = b"https://ipfs.io/ipfs/another cid";
+    let cid_bytes = b"https://ipfs.io/ipfs/some cid";
 
     setup
         .blockchain_wrapper
@@ -53,6 +58,39 @@ fn panic_if_override_previously_set_uri() {
             &rust_biguint!(0),
             |sc| {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
+                sc.set_uri_of_attributes(args_set_cid_of!(
+                    attributes.clone(),
+                    managed_buffer!(cid_bytes)
+                ));
+
+                assert_eq!(
+                    sc.uris_of_attributes(&attributes).get(),
+                    managed_buffer!(cid_bytes)
+                );
+            },
+        )
+        .assert_user_error(ERR_IMAGE_NOT_IN_RENDER_QUEUE);
+}
+
+#[test]
+fn panic_if_override_previously_set_uri() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    let first_cid_bytes = b"https://ipfs.io/ipfs/some cid";
+    let second_cid_bytes = b"https://ipfs.io/ipfs/another cid";
+
+    let get_attributes = || EquippableNftAttributes::<DebugApi>::empty();
+
+    setup.enqueue_attributes_to_render(&get_attributes);
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                let attributes = get_attributes();
 
                 sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes.clone(),
@@ -73,7 +111,7 @@ fn panic_if_override_previously_set_uri() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes = EquippableNftAttributes::<DebugApi>::empty();
+                let attributes = get_attributes();
 
                 sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes.clone(),

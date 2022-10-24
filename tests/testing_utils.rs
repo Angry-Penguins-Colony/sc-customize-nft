@@ -4,7 +4,9 @@ elrond_wasm::derive_imports!();
 use std::ops::Deref;
 use std::u8;
 
+use customize_nft::constants::ENQUEUE_PRICE;
 use customize_nft::libs::customize::CustomizeModule;
+use customize_nft::libs::storage::StorageModule;
 use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
 use customize_nft::structs::item::Item;
 use customize_nft::structs::slot::Slot;
@@ -336,6 +338,55 @@ where
         );
 
         return (opt_sc_result, tx_result);
+    }
+
+    pub fn enqueue_attributes_to_render(
+        &mut self,
+        get_attributes: &dyn Fn() -> EquippableNftAttributes<DebugApi>,
+    ) {
+        self.add_enqueue_price_balance_to_owner();
+
+        self.blockchain_wrapper
+            .execute_tx(
+                &self.owner_address,
+                &self.cf_wrapper,
+                &rust_biguint!(ENQUEUE_PRICE),
+                |sc| {
+                    sc.enqueue_image_to_render(&get_attributes());
+                },
+            )
+            .assert_ok();
+    }
+
+    pub fn add_enqueue_price_balance_to_owner(&mut self) {
+        let new_balance = &rust_biguint!(ENQUEUE_PRICE)
+            + self
+                .blockchain_wrapper
+                .get_egld_balance(&self.owner_address);
+        self.blockchain_wrapper
+            .set_egld_balance(&self.owner_address, &new_balance);
+    }
+
+    pub fn enqueue_and_set_cid_of(
+        &mut self,
+        get_attributes: &dyn Fn() -> EquippableNftAttributes<DebugApi>,
+        uri: &[u8],
+    ) {
+        self.enqueue_attributes_to_render(get_attributes);
+
+        self.blockchain_wrapper
+            .execute_tx(
+                &self.owner_address,
+                &self.cf_wrapper,
+                &rust_biguint!(0),
+                |sc| {
+                    sc.set_uri_of_attributes(args_set_cid_of!(
+                        get_attributes(),
+                        managed_buffer!(uri)
+                    ));
+                },
+            )
+            .assert_ok();
     }
 }
 

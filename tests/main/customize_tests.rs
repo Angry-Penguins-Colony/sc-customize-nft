@@ -3,14 +3,10 @@ use customize_nft::{
     libs::{customize::CustomizeModule, storage::StorageModule},
     structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot},
 };
-use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::{ManagedBuffer, MultiValueEncoded};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
-use crate::{
-    args_set_cid_of,
-    testing_utils::{self, New, TestItemAttributes},
-};
+use crate::testing_utils::{self, New, TestItemAttributes};
 
 const EQUIPPABLE_TOKEN_ID: &[u8] = testing_utils::EQUIPPABLE_TOKEN_ID;
 
@@ -84,15 +80,13 @@ fn customize_complete_flow() {
                     Some(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME)),
                 );
 
-                sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes_before_custom,
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom")
-                ));
-
-                sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes_after_custom,
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid after custom")
-                ));
+                sc.uris_of_attributes(&attributes_before_custom).set(
+                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom"),
+                );
+                sc.uris_of_attributes(&attributes_after_custom)
+                    .set(ManagedBuffer::new_from_bytes(
+                        b"https://ipfs.io/ipfs/cid after custom",
+                    ));
             },
         )
         .assert_ok();

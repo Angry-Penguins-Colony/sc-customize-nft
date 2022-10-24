@@ -7,13 +7,9 @@ use customize_nft::{
     structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot},
     Equip,
 };
-use elrond_wasm::{elrond_codec::multi_types::MultiValue2, types::MultiValueEncoded};
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
-use crate::{
-    args_set_cid_of,
-    testing_utils::{self, New},
-};
+use crate::testing_utils::{self, New};
 
 #[test]
 fn works() {
@@ -82,6 +78,11 @@ fn enqueue_two_differents_attributes() {
 fn panic_if_already_rendererer() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
+    setup.enqueue_and_set_cid_of(
+        &|| EquippableNftAttributes::<DebugApi>::empty(),
+        b"https://ipfs.io/ipfs/cid",
+    );
+
     setup
         .blockchain_wrapper
         .set_egld_balance(&setup.owner_address, &rust_biguint!(ENQUEUE_PRICE));
@@ -93,18 +94,7 @@ fn panic_if_already_rendererer() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                assert_eq!(sc.images_to_render().len(), 0);
-                {
-                    let attributes = EquippableNftAttributes::<DebugApi>::empty();
-
-                    sc.set_uri_of_attributes(args_set_cid_of!(
-                        attributes.clone(),
-                        managed_buffer!(b"https://ipfs.io/ipfs/cid")
-                    ));
-
-                    sc.enqueue_image_to_render(&attributes);
-                }
-                assert_eq!(sc.images_to_render().len(), 0);
+                sc.enqueue_image_to_render(&EquippableNftAttributes::<DebugApi>::empty());
             },
         )
         .assert_user_error(ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED);

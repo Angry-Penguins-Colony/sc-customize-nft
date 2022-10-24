@@ -8,14 +8,12 @@ use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
 use customize_nft::structs::item::Item;
 use customize_nft::structs::slot::Slot;
 use elrond_wasm::contract_base::ContractBase;
-use elrond_wasm::elrond_codec::multi_types::MultiValue2;
-use elrond_wasm::types::MultiValueEncoded;
 use elrond_wasm::types::{EsdtTokenType, ManagedBuffer, TokenIdentifier};
 use elrond_wasm_debug::managed_buffer;
 use elrond_wasm_debug::tx_mock::TxInputESDT;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
-use crate::{args_set_cid_of, testing_utils};
+use crate::testing_utils;
 
 const EQUIPPABLE_TOKEN_ID: &[u8] = testing_utils::EQUIPPABLE_TOKEN_ID;
 const HAT_TOKEN_ID: &[u8] = testing_utils::HAT_TOKEN_ID;
@@ -88,20 +86,19 @@ fn test_equip() {
             |sc| {
                 let attributes_before_custom = EquippableNftAttributes::<DebugApi>::empty();
 
+                sc.uris_of_attributes(&attributes_before_custom).set(
+                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom"),
+                );
+
                 let attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
                     slot: Slot::new_from_buffer(managed_buffer!(slot)),
                 }]);
 
-                sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes_before_custom,
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom")
-                ));
-
-                sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes_after_custom,
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/after custom")
-                ));
+                sc.uris_of_attributes(&attributes_after_custom)
+                    .set(ManagedBuffer::new_from_bytes(
+                        b"https://ipfs.io/ipfs/after custom",
+                    ));
             },
         )
         .assert_ok();
@@ -211,20 +208,19 @@ fn should_replace_item() {
                     slot: Slot::new_from_buffer(managed_buffer!(SHARED_SLOT)),
                 }]);
 
+                sc.uris_of_attributes(&attributes_before_custom).set(
+                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom"),
+                );
+
                 let attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
                     slot: Slot::new_from_buffer(managed_buffer!(SHARED_SLOT)),
                 }]);
 
-                sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes_before_custom,
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom")
-                ));
-
-                sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes_after_custom,
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid after custom")
-                ));
+                sc.uris_of_attributes(&attributes_after_custom)
+                    .set(ManagedBuffer::new_from_bytes(
+                        b"https://ipfs.io/ipfs/cid after custom",
+                    ));
             },
         )
         .assert_ok();
@@ -558,15 +554,13 @@ fn equip_while_sending_twice_same_items() {
                     slot: Slot::new_from_bytes(SLOT),
                 }]);
 
-                sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes_before_custom,
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom")
-                ));
+                sc.uris_of_attributes(&attributes_before_custom).set(
+                    &ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom"),
+                );
 
-                sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes_after_custom,
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid after custom")
-                ));
+                sc.uris_of_attributes(&attributes_after_custom).set(
+                    &ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid after custom"),
+                );
             },
         )
         .assert_ok();
@@ -691,20 +685,20 @@ fn equip_while_sending_two_items_of_same_slot() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
+                let attributes_before_custom = EquippableNftAttributes::<DebugApi>::empty();
                 let attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(SECOND_ITEM_NAME),
                     slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
                 }]);
 
-                sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes_after_custom,
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid after custom")
-                ));
+                sc.uris_of_attributes(&attributes_before_custom).set(
+                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom"),
+                );
 
-                sc.set_uri_of_attributes(args_set_cid_of!(
-                    EquippableNftAttributes::<DebugApi>::empty(),
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom")
-                ));
+                sc.uris_of_attributes(&attributes_after_custom)
+                    .set(ManagedBuffer::new_from_bytes(
+                        b"https://ipfs.io/ipfs/cid after custom",
+                    ));
             },
         )
         .assert_ok();

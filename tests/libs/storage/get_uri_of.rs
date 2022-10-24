@@ -33,6 +33,15 @@ fn build_url_with_no_associated_cid() {
 fn build_url_with_associated_cid() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
+    let get_attributes = || {
+        EquippableNftAttributes::<DebugApi>::new(&[Item::<DebugApi> {
+            name: ManagedBuffer::new_from_bytes(b"item name"),
+            slot: Slot::new_from_bytes(b"hat"),
+        }])
+    };
+
+    setup.enqueue_attributes_to_render(&get_attributes);
+
     setup
         .blockchain_wrapper
         .execute_tx(
@@ -40,11 +49,7 @@ fn build_url_with_associated_cid() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let penguin_attributes =
-                    EquippableNftAttributes::<DebugApi>::new(&[Item::<DebugApi> {
-                        name: ManagedBuffer::new_from_bytes(b"item name"),
-                        slot: Slot::new_from_bytes(b"hat"),
-                    }]);
+                let penguin_attributes = get_attributes();
 
                 sc.set_uri_of_attributes(args_set_cid_of!(
                     penguin_attributes.clone(),

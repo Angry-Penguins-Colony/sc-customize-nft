@@ -7,15 +7,10 @@ use customize_nft::{
         slot::{Slot, ERR_MUST_BE_LOWERCASE},
     },
 };
-use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::ManagedBuffer;
-use elrond_wasm::types::MultiValueEncoded;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
-use crate::{
-    args_set_cid_of,
-    testing_utils::{self, New, TestItemAttributes},
-};
+use crate::testing_utils::{self, New, TestItemAttributes};
 
 const EQUIPPABLE_TOKEN_ID: &[u8] = testing_utils::EQUIPPABLE_TOKEN_ID;
 
@@ -56,17 +51,14 @@ fn customize_only_unequip() {
                 let mut attributes_after_custom = attributes_before_custom.clone();
                 attributes_after_custom.empty_slot(&Slot::new_from_bytes(slot));
 
-                sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes_before_custom,
+                sc.uris_of_attributes(&attributes_before_custom).set(
                     ManagedBuffer::<DebugApi>::new_from_bytes(
-                        b"https://ipfs.io/ipfs/this is a cid"
-                    )
-                ));
+                        b"https://ipfs.io/ipfs/this is a cid",
+                    ),
+                );
 
-                sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes_after_custom,
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty")
-                ));
+                sc.uris_of_attributes(&attributes_after_custom)
+                    .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty"));
             },
         )
         .assert_ok();
@@ -162,17 +154,14 @@ fn panic_if_uppercase_slot() {
                     ManagedBuffer::new_from_bytes(SLOT_LOWERCASE),
                 ));
 
-                sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes_before_custom,
+                sc.uris_of_attributes(&attributes_before_custom).set(
                     ManagedBuffer::<DebugApi>::new_from_bytes(
-                        b"https://ipfs.io/ipfs/this is a cid"
-                    )
-                ));
+                        b"https://ipfs.io/ipfs/this is a cid",
+                    ),
+                );
 
-                sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes_after_custom,
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty")
-                ));
+                sc.uris_of_attributes(&attributes_after_custom)
+                    .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty"));
             },
         )
         .assert_ok();
@@ -218,20 +207,16 @@ fn panic_when_unequip_twice_the_same_slot() {
             |sc| {
                 let attributes_before_custom = EquippableNftAttributes::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
-                    slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot)),
+                    slot: Slot::new_from_bytes(slot),
                 }]);
+                sc.uris_of_attributes(&attributes_before_custom).set(
+                    ManagedBuffer::<DebugApi>::new_from_bytes(b"https://ipfs.io/ipfs/before"),
+                );
 
-                sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes_before_custom,
-                    ManagedBuffer::<DebugApi>::new_from_bytes(
-                        b"https://ipfs.io/ipfs/this is a cid"
-                    )
-                ));
-
-                sc.set_uri_of_attributes(args_set_cid_of!(
-                    EquippableNftAttributes::<DebugApi>::empty(),
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty")
-                ));
+                let attributes_after_custom = EquippableNftAttributes::<DebugApi>::empty();
+                sc.uris_of_attributes(&attributes_after_custom).set(
+                    ManagedBuffer::<DebugApi>::new_from_bytes(b"https://ipfs.io/ipfs/after"),
+                );
             },
         )
         .assert_ok();
@@ -263,10 +248,8 @@ fn panic_when_unequip_on_empty_slot() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                sc.set_uri_of_attributes(args_set_cid_of!(
-                    EquippableNftAttributes::<DebugApi>::empty(),
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty")
-                ));
+                sc.uris_of_attributes(&EquippableNftAttributes::<DebugApi>::empty())
+                    .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty"));
             },
         )
         .assert_ok();

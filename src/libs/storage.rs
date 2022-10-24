@@ -23,7 +23,7 @@ pub trait StorageModule {
         address: &ManagedAddress<Self::Api>,
     ) -> SingleValueMapper<bool>;
 
-    #[storage_mapper("__images_to_render")]
+    #[storage_mapper("images_to_render")]
     fn images_to_render(&self) -> UnorderedSetMapper<EquippableNftAttributes<Self::Api>>;
 
     #[storage_mapper("uris_of_attributes")]

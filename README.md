@@ -256,3 +256,9 @@ cargo test -p customize_nft --test lib
 ```
 
 > The units and integrations tests are written with the Rust testing framework. So `erdpy contract test` will not work. 
+
+## What can be improved ?
+
+- [ ] (optimization) RETAKE the sorting in EquippableNftAttributes to be more efficient. For the moment, we sort the entire array each time.
+    - could we sort only in top_decode and top_encode ?
+    - in `set_item`, could we insert the new item in the right index

@@ -108,15 +108,11 @@ pub trait StorageModule {
         return uri.get();
     }
 
-    fn is_uri_set_for_attributes(&self, attributes: &EquippableNftAttributes<Self::Api>) -> bool {
-        return !self.uris_of_attributes(attributes).is_empty();
-    }
-
     // ===
     // IMAGES
     fn enqueue_image_to_render(&self, attributes: &EquippableNftAttributes<Self::Api>) {
         require!(
-            self.is_uri_set_for_attributes(attributes) == false,
+            self.uris_of_attributes(attributes).is_empty(),
             ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED
         );
         require!(

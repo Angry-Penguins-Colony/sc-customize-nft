@@ -5,6 +5,7 @@ use customize_nft::{
     structs::{item::Item, slot::Slot},
     EndpointWrappers, Equip,
 };
+use elrond_wasm::{elrond_codec::multi_types::MultiValue4, types::MultiValueEncoded};
 use elrond_wasm_debug::{managed_buffer, managed_token_id, rust_biguint};
 
 #[test]
@@ -34,12 +35,15 @@ fn works_if_is_the_owner() {
             TOKEN_NONCE,
             &rust_biguint!(1),
             |sc| {
-                sc.register_item(
-                    Slot::new_from_buffer(managed_buffer!(TOKEN_SLOT)),
+                let mut items = MultiValueEncoded::new();
+                items.push(MultiValue4::from((
+                    Slot::new_from_bytes(TOKEN_SLOT),
                     managed_buffer!(TOKEN_NAME),
                     managed_token_id!(TOKEN_ID),
                     TOKEN_NONCE,
-                );
+                )));
+
+                sc.register_item(items);
 
                 sc.call_fill();
 

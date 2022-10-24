@@ -6,7 +6,8 @@ use customize_nft::structs::item::Item;
 use customize_nft::structs::slot::Slot;
 use customize_nft::structs::token::Token;
 use customize_nft::*;
-use elrond_wasm::types::{ManagedBuffer, MultiValueEncoded, TokenIdentifier};
+use elrond_wasm::elrond_codec::multi_types::MultiValue4;
+use elrond_wasm::types::{MultiValueEncoded, TokenIdentifier};
 use elrond_wasm_debug::{managed_buffer, managed_token_id};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
@@ -132,12 +133,15 @@ fn panic_if_override() {
             &setup.cf_wrapper,
             &rust_biguint!(0u64),
             |sc| {
-                sc.register_item(
-                    Slot::new_from_buffer(ManagedBuffer::new_from_bytes(first_slot)),
+                let mut items = MultiValueEncoded::new();
+                items.push(MultiValue4::from((
+                    Slot::new_from_bytes(first_slot),
                     managed_buffer!(first_slot_item_name),
                     managed_token_id!(TOKEN_ID),
                     TOKEN_NONCE,
-                );
+                )));
+
+                sc.register_item(items);
             },
         )
         .assert_ok();
@@ -149,12 +153,15 @@ fn panic_if_override() {
             &setup.cf_wrapper,
             &rust_biguint!(0u64),
             |sc| {
-                sc.register_item(
-                    Slot::new_from_buffer(ManagedBuffer::new_from_bytes(second_slot)),
+                let mut items = MultiValueEncoded::new();
+                items.push(MultiValue4::from((
+                    Slot::new_from_bytes(second_slot),
                     managed_buffer!(second_slot_item_name),
                     managed_token_id!(TOKEN_ID),
                     TOKEN_NONCE,
-                );
+                )));
+
+                sc.register_item(items);
             },
         )
         .assert_user_error(ERR_CANNOT_OVERRIDE_REGISTERED_ITEM);
@@ -173,16 +180,15 @@ fn panic_if_register_equippable() {
             &setup.cf_wrapper,
             &rust_biguint!(0u64),
             |sc| {
-                let mut managed_items_ids =
-                    MultiValueEncoded::<DebugApi, TokenIdentifier<DebugApi>>::new();
-                managed_items_ids.push(managed_token_id!(testing_utils::EQUIPPABLE_TOKEN_ID));
-
-                let _ = sc.register_item(
-                    Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot)),
+                let mut items = MultiValueEncoded::new();
+                items.push(MultiValue4::from((
+                    Slot::new_from_bytes(slot),
                     managed_buffer!(b"My Equippable"),
                     managed_token_id!(testing_utils::EQUIPPABLE_TOKEN_ID),
                     1,
-                );
+                )));
+
+                sc.register_item(items);
             },
         )
         .assert_user_error(ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM);

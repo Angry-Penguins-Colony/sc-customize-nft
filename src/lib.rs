@@ -25,21 +25,25 @@ pub trait Equip: customize::CustomizeModule + storage::StorageModule {
     #[only_owner]
     fn register_item(
         &self,
-        slot: Slot<Self::Api>,
-        name: ManagedBuffer<Self::Api>,
-        token_id: TokenIdentifier<Self::Api>,
-        token_nonce: u64,
+        items: MultiValueEncoded<
+            Self::Api,
+            MultiValue4<Slot<Self::Api>, ManagedBuffer, TokenIdentifier, u64>,
+        >,
     ) {
-        require!(
-            token_id != self.equippable_token_id().get(),
-            ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM
-        );
+        for item in items.into_iter() {
+            let (slot, name, token_id, token_nonce) = item.into_tuple();
 
-        let is_insert_successful = self
-            .map_items_tokens()
-            .insert(Item { name, slot }, Token::new(token_id, token_nonce));
+            require!(
+                token_id != self.equippable_token_id().get(),
+                ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM
+            );
 
-        require!(is_insert_successful, ERR_CANNOT_OVERRIDE_REGISTERED_ITEM);
+            let is_insert_successful = self
+                .map_items_tokens()
+                .insert(Item { name, slot }, Token::new(token_id, token_nonce));
+
+            require!(is_insert_successful, ERR_CANNOT_OVERRIDE_REGISTERED_ITEM);
+        }
     }
 
     #[payable("*")]

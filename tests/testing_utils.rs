@@ -148,12 +148,15 @@ where
                 &self.cf_wrapper,
                 &rust_biguint!(0u64),
                 |sc| {
-                    sc.register_item(
+                    let mut items = MultiValueEncoded::new();
+                    items.push(MultiValue4::from((
                         Slot::new_from_bytes(slot),
                         managed_buffer!(item_name),
                         managed_token_id!(item_id),
                         item_nonce,
-                    );
+                    )));
+
+                    sc.register_item(items);
                 },
             )
             .assert_ok();

@@ -16,7 +16,7 @@ pub trait ManagedBufferUtils<M: ManagedTypeApi> {
     fn capitalize(&self) -> ManagedBuffer<M>;
 
     /// The replace method use new_buffer as ManagedBuffer because is it the easier way to implement    
-    fn contains(&self, to_find: &[u8]) -> bool;
+    fn contains_char(&self, to_find: u8) -> bool;
     fn to_lowercase(&self) -> ManagedBuffer<M>;
     fn get_last_char(&self) -> u8;
 
@@ -81,22 +81,12 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
         return o;
     }
 
-    fn contains(&self, to_find: &[u8]) -> bool {
+    fn contains_char(&self, to_find: u8) -> bool {
         let bytes = self.load_512_bytes();
 
-        // naive implementation of includes() algorithm
-        // An upgrade could be the KMP algorithm
         for i in 0..self.len() {
-            if bytes[i] == to_find[0] {
-                for j in 0..to_find.len() {
-                    if bytes[i + j] != to_find[j] {
-                        break;
-                    }
-
-                    if j == to_find.len() - 1 {
-                        return true;
-                    }
-                }
+            if bytes[i] == to_find {
+                return true;
             }
         }
 

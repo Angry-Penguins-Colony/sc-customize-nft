@@ -7,7 +7,7 @@ fn return_true_if_exact_equals() {
     DebugApi::dummy();
 
     assert_eq!(
-        ManagedBuffer::<DebugApi>::new_from_bytes(b"abc").contains(b"abc"),
+        ManagedBuffer::<DebugApi>::new_from_bytes(b"a").contains_char(b'a'),
         true
     );
 }
@@ -17,27 +17,17 @@ fn return_true_if_contains() {
     DebugApi::dummy();
 
     assert_eq!(
-        ManagedBuffer::<DebugApi>::new_from_bytes(b"some_prefixabcsome_suffix").contains(b"abc"),
+        ManagedBuffer::<DebugApi>::new_from_bytes(b"some_prefixabcsome_suffix").contains_char(b'a'),
         true
     );
 }
 
 #[test]
-fn return_false_because_to_find_is_separated() {
+fn return_false_if_not_found() {
     DebugApi::dummy();
 
     assert_eq!(
-        ManagedBuffer::<DebugApi>::new_from_bytes(b"ab_c").contains(b"abc"),
-        false
-    );
-}
-
-#[test]
-fn return_false_because_partial_contains() {
-    DebugApi::dummy();
-
-    assert_eq!(
-        ManagedBuffer::<DebugApi>::new_from_bytes(b"ab").contains(b"abcde"),
+        ManagedBuffer::<DebugApi>::new_from_bytes(b"blabla").contains_char(b'z'),
         false
     );
 }

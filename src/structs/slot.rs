@@ -76,7 +76,7 @@ impl<M: ManagedTypeApi> PartialEq for Slot<M> {
 
 impl<M: ManagedTypeApi> Slot<M> {
     pub fn new_from_buffer(slot: ManagedBuffer<M>) -> Self {
-        if slot.contains(b";") || slot.contains(b":") {
+        if slot.contains_char(b';') || slot.contains_char(b':') {
             sc_panic_self!(M, ERR_UNSUPPORTED_CHARACTERS)
         }
 

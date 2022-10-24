@@ -1,5 +1,6 @@
 use customize_nft::{
-    libs::storage::StorageModule, structs::equippable_nft_attributes::EquippableNftAttributes,
+    constants::ENQUEUE_PRICE, libs::storage::StorageModule,
+    structs::equippable_nft_attributes::EquippableNftAttributes, Equip,
 };
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
@@ -29,10 +30,14 @@ fn returns_one_after_one_enqueue() {
 
     setup
         .blockchain_wrapper
+        .set_egld_balance(&setup.owner_address, &rust_biguint!(ENQUEUE_PRICE));
+
+    setup
+        .blockchain_wrapper
         .execute_tx(
             &setup.owner_address,
             &setup.cf_wrapper,
-            &rust_biguint!(0),
+            &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
@@ -57,10 +62,14 @@ fn returns_zero_after_one_dequeue() {
 
     setup
         .blockchain_wrapper
+        .set_egld_balance(&setup.owner_address, &rust_biguint!(ENQUEUE_PRICE));
+
+    setup
+        .blockchain_wrapper
         .execute_tx(
             &setup.owner_address,
             &setup.cf_wrapper,
-            &rust_biguint!(0),
+            &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 

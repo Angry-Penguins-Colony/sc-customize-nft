@@ -1,8 +1,5 @@
 use crate::{
-    constants::{
-        ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED, ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE,
-        ERR_RENDER_ALREADY_IN_QUEUE,
-    },
+    constants::ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE,
     structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, token::Token},
 };
 
@@ -109,19 +106,6 @@ pub trait StorageModule {
 
     // ===
     // IMAGES
-    fn enqueue_image_to_render(&self, attributes: &EquippableNftAttributes<Self::Api>) {
-        require!(
-            self.uris_of_attributes(attributes).is_empty(),
-            ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED
-        );
-        require!(
-            self.images_to_render().contains(attributes) == false,
-            ERR_RENDER_ALREADY_IN_QUEUE
-        );
-
-        self.images_to_render().insert(attributes.clone());
-    }
-
     #[view(getImagesToRender)]
     fn get_images_to_render(&self) -> MultiValueEncoded<EquippableNftAttributes<Self::Api>> {
         let mut o = MultiValueEncoded::new();

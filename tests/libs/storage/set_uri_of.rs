@@ -1,7 +1,8 @@
 use customize_nft::{
-    constants::ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE,
+    constants::{ENQUEUE_PRICE, ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE},
     libs::storage::{EndpointWrappers, StorageModule},
     structs::equippable_nft_attributes::EquippableNftAttributes,
+    Equip,
 };
 use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::MultiValueEncoded;
@@ -108,10 +109,14 @@ fn should_remove_enqueued_image_to_render() {
 
     setup
         .blockchain_wrapper
+        .set_egld_balance(&setup.owner_address, &rust_biguint!(ENQUEUE_PRICE));
+
+    setup
+        .blockchain_wrapper
         .execute_tx(
             &setup.owner_address,
             &setup.cf_wrapper,
-            &rust_biguint!(0),
+            &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 

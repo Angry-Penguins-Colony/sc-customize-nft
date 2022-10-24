@@ -7,7 +7,7 @@
 elrond_wasm_node::wasm_endpoints! {
     customize_nft
     (
-        addPermissionToSetUris
+        authorizeAddressToSetUris
         claim
         customize
         fill

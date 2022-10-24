@@ -25,7 +25,7 @@ fn works() {
             |sc| {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
-                sc.add_image_to_render(&attributes);
+                sc.enqueue_image_to_render(&attributes);
 
                 assert_eq!(sc.images_to_render().len(), 1);
                 assert_eq!(sc.images_to_render().contains(&attributes), true);
@@ -47,7 +47,7 @@ fn panic_if_dont_send_egld() {
             |sc| {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
-                sc.add_image_to_render(&attributes);
+                sc.enqueue_image_to_render(&attributes);
 
                 assert_eq!(sc.images_to_render().len(), 1);
                 assert_eq!(sc.images_to_render().contains(&attributes), true);
@@ -73,7 +73,7 @@ fn panic_if_send_lesser_amount_of_egld() {
             |sc| {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
-                sc.add_image_to_render(&attributes);
+                sc.enqueue_image_to_render(&attributes);
 
                 assert_eq!(sc.images_to_render().len(), 1);
                 assert_eq!(sc.images_to_render().contains(&attributes), true);
@@ -99,7 +99,7 @@ fn panic_if_send_greater_amount_of_egld() {
             |sc| {
                 let attributes = EquippableNftAttributes::<DebugApi>::empty();
 
-                sc.add_image_to_render(&attributes);
+                sc.enqueue_image_to_render(&attributes);
 
                 assert_eq!(sc.images_to_render().len(), 1);
                 assert_eq!(sc.images_to_render().contains(&attributes), true);

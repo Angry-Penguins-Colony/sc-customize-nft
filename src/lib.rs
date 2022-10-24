@@ -63,13 +63,22 @@ pub trait Equip: customize::CustomizeModule + storage::StorageModule {
      */
     #[endpoint(renderImage)]
     #[payable("EGLD")]
-    fn add_image_to_render(&self, attributes: &EquippableNftAttributes<Self::Api>) {
+    fn enqueue_image_to_render(&self, attributes: &EquippableNftAttributes<Self::Api>) {
         require!(
             self.call_value().egld_value() == BigUint::from(ENQUEUE_PRICE),
             ERR_PAY_0001_EGLD
         );
 
-        self.enqueue_image_to_render(&attributes);
+        require!(
+            self.uris_of_attributes(attributes).is_empty(),
+            ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED
+        );
+        require!(
+            self.images_to_render().contains(attributes) == false,
+            ERR_RENDER_ALREADY_IN_QUEUE
+        );
+
+        self.images_to_render().insert(attributes.clone());
     }
 
     #[only_owner]

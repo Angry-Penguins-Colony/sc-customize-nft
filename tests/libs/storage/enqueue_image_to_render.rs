@@ -5,6 +5,7 @@ use customize_nft::{
     },
     libs::storage::StorageModule,
     structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot},
+    Equip,
 };
 use elrond_wasm::{elrond_codec::multi_types::MultiValue2, types::MultiValueEncoded};
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};

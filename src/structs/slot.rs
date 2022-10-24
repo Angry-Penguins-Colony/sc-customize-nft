@@ -1,11 +1,12 @@
-use crate::{sc_panic_self, utils::managed_buffer_utils::ManagedBufferUtils};
+use crate::utils::managed_buffer_utils::ManagedBufferUtils;
 use core::cmp::Ordering;
 use elrond_wasm::elrond_codec::TopEncode;
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
-pub const ERR_UNSUPPORTED_CHARACTERS: &str = "A slot can't contains colon or semicolon characters.";
+pub const ERR_UNSUPPORTED_CHARACTERS: &[u8] =
+    b"A slot can't contains colon or semicolon characters.";
 
 #[derive(ManagedVecItem, TypeAbi, Clone, Debug)]
 pub struct Slot<M: ManagedTypeApi> {
@@ -77,7 +78,7 @@ impl<M: ManagedTypeApi> PartialEq for Slot<M> {
 impl<M: ManagedTypeApi> Slot<M> {
     pub fn new_from_buffer(slot: ManagedBuffer<M>) -> Self {
         if slot.contains_char(b';') || slot.contains_char(b':') {
-            sc_panic_self!(M, ERR_UNSUPPORTED_CHARACTERS)
+            M::error_api_impl().signal_error(ERR_UNSUPPORTED_CHARACTERS)
         }
 
         Self {

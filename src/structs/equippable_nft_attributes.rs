@@ -1,6 +1,5 @@
 use crate::{
     constants::UNEQUIPPED_ITEM_NAME,
-    sc_panic_self,
     utils::{managed_buffer_utils::ManagedBufferUtils, managed_vec_utils::EqUtils},
 };
 use core::ops::Deref;
@@ -8,10 +7,10 @@ use elrond_wasm::{elrond_codec::TopEncode, formatter::SCDisplay};
 
 use super::slot::Slot;
 
-pub const ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS: &str =
-    "A name can't contains colon or semicolons";
+pub const ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS: &[u8] =
+    b"A name can't contains colon or semicolons";
 
-pub const ERR_NAME_CANNOT_BE_UNEQUIPPED: &str = "The name cannot be 'unequipped'.";
+pub const ERR_NAME_CANNOT_BE_UNEQUIPPED: &[u8] = b"The name cannot be 'unequipped'.";
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
@@ -43,7 +42,7 @@ impl<M: ManagedTypeApi> EquippableNftAttribute<M> {
         let parts = input.split(b':');
 
         if parts.len() != 2 {
-            sc_panic_self!(M, "Cannot decode EquippableNftAttribute");
+            M::error_api_impl().signal_error(b"Cannot decode EquippableNftAttribute");
         }
 
         let name = parts.get(1).deref().clone();
@@ -172,10 +171,8 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
 
     pub fn set_item_if_empty(&mut self, slot: &Slot<M>, name: Option<ManagedBuffer<M>>) {
         if self.is_slot_empty(slot) == false {
-            sc_panic_self!(
-                M,
-                "The slot is not empty. Please free it, before setting an item."
-            );
+            M::error_api_impl()
+                .signal_error(b"The slot is not empty. Please free it, before setting an item.");
         }
 
         return self.set_item(slot, name);
@@ -196,10 +193,8 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
                 let result = self.items.set(index, &new_equippable_attribute);
 
                 if result.is_err() {
-                    sc_panic_self!(
-                        M,
-                        "Failed to set item, InvalidSliceError exception happened."
-                    );
+                    M::error_api_impl()
+                        .signal_error(b"Failed to set item, InvalidSliceError exception happened.");
                 }
             }
             None => {
@@ -231,11 +226,11 @@ fn panic_if_name_contains_unsupported_characters<M: ManagedTypeApi>(
 ) {
     if let Some(name) = opt_name.clone() {
         if name.contains_char(b';') || name.contains_char(b':') {
-            sc_panic_self!(M, ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS);
+            M::error_api_impl().signal_error(ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS);
         }
 
         if name == ManagedBuffer::new_from_bytes(UNEQUIPPED_ITEM_NAME) {
-            sc_panic_self!(M, ERR_NAME_CANNOT_BE_UNEQUIPPED);
+            M::error_api_impl().signal_error(ERR_NAME_CANNOT_BE_UNEQUIPPED);
         }
     }
 }

@@ -1,11 +1,9 @@
 use core::cmp::Ordering;
 
 use elrond_wasm::{
-    api::ManagedTypeApi,
+    api::{ErrorApiImpl, ManagedTypeApi},
     types::{ManagedBuffer, ManagedVec},
 };
-
-use crate::sc_panic_self;
 
 pub trait ManagedBufferUtils<M: ManagedTypeApi> {
     fn load_512_bytes(&self) -> [u8; 512];
@@ -27,7 +25,7 @@ pub trait ManagedBufferUtils<M: ManagedTypeApi> {
 impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
     fn load_512_bytes(&self) -> [u8; 512] {
         if self.len() > 512 {
-            sc_panic_self!(M, "ManagedBuffer is too big");
+            M::error_api_impl().signal_error(b"ManagedBuffer is too big");
         }
 
         let mut bytes: [u8; 512] = [0; 512];

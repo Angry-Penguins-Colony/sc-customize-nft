@@ -8,6 +8,7 @@ use customize_nft::structs::{
 };
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm_debug::DebugApi;
+use std::str;
 
 use crate::testing_utils::{self, New};
 
@@ -62,7 +63,7 @@ fn panic_if_name_contains_semicolon() {
                 slot: Slot::new_from_bytes(b"hat"),
             }]);
         })
-        .assert_user_error(ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS);
+        .assert_user_error(str::from_utf8(ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS).unwrap());
 }
 
 #[test]
@@ -77,7 +78,7 @@ fn panic_if_name_contains_colon() {
                 slot: Slot::new_from_bytes(b"hat"),
             }]);
         })
-        .assert_user_error(ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS);
+        .assert_user_error(str::from_utf8(ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS).unwrap());
 }
 
 #[test]
@@ -92,5 +93,5 @@ fn panic_if_name_is_unequipped() {
                 slot: Slot::new_from_bytes(b"hat"),
             }]);
         })
-        .assert_user_error(ERR_NAME_CANNOT_BE_UNEQUIPPED);
+        .assert_user_error(str::from_utf8(ERR_NAME_CANNOT_BE_UNEQUIPPED).unwrap());
 }

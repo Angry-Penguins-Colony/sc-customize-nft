@@ -50,8 +50,8 @@ fn should_equals() {
 fn should_not_equals() {
     DebugApi::dummy();
 
-    let a_bytes = ManagedBuffer::<DebugApi>::new_from_bytes(b"Hat:Pirate Hat;Badge:1");
-    let b_bytes = ManagedBuffer::<DebugApi>::new_from_bytes(b"Badge:10;Hat:Pirate Hat");
+    let a_bytes = ManagedBuffer::<DebugApi>::new_from_bytes(b"hat:Pirate Hat;badge:1");
+    let b_bytes = ManagedBuffer::<DebugApi>::new_from_bytes(b"badge:10;hat:Pirate Hat");
 
     let a = EquippableNftAttributes::<DebugApi>::top_decode(a_bytes).unwrap();
     let b = EquippableNftAttributes::<DebugApi>::top_decode(b_bytes).unwrap();

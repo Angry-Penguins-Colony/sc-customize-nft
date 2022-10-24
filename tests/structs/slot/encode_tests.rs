@@ -3,10 +3,10 @@ use elrond_wasm::elrond_codec::TopEncode;
 use elrond_wasm_debug::DebugApi;
 
 #[test]
-fn should_force_lowercase() {
+fn works() {
     DebugApi::dummy();
 
-    let slot = Slot::<DebugApi>::new_from_bytes(b"HAT");
+    let slot = Slot::<DebugApi>::new_from_bytes(b"hat");
 
     let expected = b"hat";
 

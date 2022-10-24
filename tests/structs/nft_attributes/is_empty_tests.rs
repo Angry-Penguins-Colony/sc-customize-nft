@@ -4,7 +4,7 @@ use customize_nft::structs::{
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm_debug::DebugApi;
 
-use crate::testing_utils::{self, New};
+use crate::testing_utils::New;
 
 #[test]
 fn is_empty_while_not_empty() {
@@ -27,24 +27,4 @@ fn is_empty_while_empty() {
     let equippable_nft_attributes = EquippableNftAttributes::<DebugApi>::empty();
 
     assert_eq!(equippable_nft_attributes.is_slot_empty(slot), true);
-}
-
-#[test]
-fn should_return_is_empty_with_different_case() {
-    let setup = testing_utils::setup(customize_nft::contract_obj);
-
-    setup.blockchain_wrapper.execute_in_managed_environment(|| {
-        let slot_lowercase = &Slot::new_from_bytes(b"hat");
-        let slot_uppercase = &Slot::new_from_bytes(b"HAT");
-
-        let equippable_nft_attributes = EquippableNftAttributes::<DebugApi>::new(&[Item {
-            name: ManagedBuffer::new_from_bytes(b"item name"),
-            slot: slot_lowercase.clone(),
-        }]);
-
-        assert_eq!(
-            equippable_nft_attributes.is_slot_empty(slot_uppercase),
-            false
-        );
-    });
 }

@@ -1,7 +1,11 @@
 use customize_nft::{
     constants::ERR_CANNOT_UNEQUIP_EMPTY_SLOT,
     libs::storage::StorageModule,
-    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot},
+    structs::{
+        equippable_nft_attributes::EquippableNftAttributes,
+        item::Item,
+        slot::{Slot, ERR_MUST_BE_LOWERCASE},
+    },
 };
 use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::ManagedBuffer;
@@ -119,7 +123,7 @@ fn customize_only_unequip() {
 }
 
 #[test]
-fn unequip_should_ignore_case_of_slot() {
+fn panic_if_uppercase_slot() {
     // 1. ARRANGE
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
@@ -177,53 +181,10 @@ fn unequip_should_ignore_case_of_slot() {
         testing_utils::create_esdt_transfers(&[(EQUIPPABLE_TOKEN_ID, EQUIPPABLE_NONCE)]);
 
     // 2. ACT
-    let (sc_result, tx_result) = setup.customize(transfers, &[SLOT_UPPERCASE]);
+    let (_, tx_result) = setup.customize(transfers, &[SLOT_UPPERCASE]);
 
     // 3. ASSERT
-    tx_result.assert_ok();
-    assert_eq!(sc_result.unwrap(), 1u64);
-
-    // equippable & items sent burned
-    setup.assert_is_burn(EQUIPPABLE_TOKEN_ID, EQUIPPABLE_NONCE);
-
-    assert_eq!(
-        setup.blockchain_wrapper.get_esdt_balance(
-            &setup.first_user_address,
-            ITEM_TO_UNEQUIP_ID,
-            ITEM_TO_UNEQUIP_NONCE
-        ),
-        rust_biguint!(1),
-        "Item unequipped should be received"
-    );
-
-    assert_eq!(
-        setup.blockchain_wrapper.get_esdt_balance(
-            &setup.first_user_address,
-            EQUIPPABLE_TOKEN_ID,
-            1u64
-        ),
-        rust_biguint!(1),
-        "Equippable NFT should be received"
-    );
-
-    // is equippable empty
-    let mut attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
-        name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
-        slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(SLOT_LOWERCASE)),
-    }]);
-    attributes_after_custom.empty_slot(&Slot::new_from_buffer(ManagedBuffer::new_from_bytes(
-        SLOT_LOWERCASE,
-    )));
-
-    setup.blockchain_wrapper.check_nft_balance(
-        &setup.first_user_address,
-        EQUIPPABLE_TOKEN_ID,
-        1,
-        &rust_biguint!(1),
-        Option::Some(&attributes_after_custom),
-    );
-
-    setup.assert_uris(EQUIPPABLE_TOKEN_ID, 1, &[b"https://ipfs.io/ipfs/empty"]);
+    tx_result.assert_user_error(std::str::from_utf8(ERR_MUST_BE_LOWERCASE).unwrap())
 }
 
 #[test]
@@ -289,7 +250,7 @@ fn panic_when_unequip_twice_the_same_slot() {
 fn panic_when_unequip_on_empty_slot() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let slot = b"Background";
+    let slot = b"background";
     const NONCE: u64 = 30;
 
     setup.create_empty_equippable(NONCE);

@@ -59,7 +59,7 @@ fn enqueue_two_differents_attributes() {
                 let attributes_a = EquippableNftAttributes::<DebugApi>::empty();
                 let attributes_b = EquippableNftAttributes::<DebugApi>::new(&[Item {
                     name: managed_buffer!(b"pirate hat"),
-                    slot: Slot::new_from_buffer(managed_buffer!(b"hat")),
+                    slot: Slot::new_from_bytes(b"hat"),
                 }]);
 
                 sc.enqueue_image_to_render(&attributes_a);

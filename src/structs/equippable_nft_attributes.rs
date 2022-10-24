@@ -31,7 +31,7 @@ impl<M: ManagedTypeApi> EquippableNftAttribute<M> {
         let mut output = ManagedBuffer::<M>::new();
 
         // build buffer
-        output.append(&self.slot.capitalized());
+        output.append(&self.slot.get());
         output.append_bytes(b":");
         output.append(&item_name);
 
@@ -54,7 +54,7 @@ impl<M: ManagedTypeApi> EquippableNftAttribute<M> {
         };
 
         return Self {
-            slot: Slot::new_from_buffer(parts.get(0).deref().clone()),
+            slot: Slot::new_from_buffer(parts.get(0).deref().to_lowercase()),
             name: opt_name,
         };
     }

@@ -39,27 +39,6 @@ fn should_return_none_if_emptied() {
 }
 
 #[test]
-fn should_return_some_with_slot_different_case() {
-    let setup = testing_utils::setup(customize_nft::contract_obj);
-
-    setup.blockchain_wrapper.execute_in_managed_environment(|| {
-        let registered_slot = &Slot::new_from_bytes(b"hat");
-        let query_slot = &Slot::new_from_bytes(b"HAT");
-        let name = &ManagedBuffer::<DebugApi>::new_from_bytes(b"pirate hat");
-
-        let item = Item {
-            slot: registered_slot.clone(),
-            name: name.clone(),
-        };
-
-        let attributes = EquippableNftAttributes::<DebugApi>::new(&[item.clone()]);
-
-        assert_eq!(attributes.get_name(&query_slot).is_some(), true);
-        assert_eq!(attributes.get_name(&query_slot).unwrap(), item.name);
-    })
-}
-
-#[test]
 fn get_item() {
     DebugApi::dummy();
 

@@ -10,9 +10,6 @@ pub trait ManagedBufferUtils<M: ManagedTypeApi> {
 
     fn split(&self, char: u8) -> ManagedVec<M, ManagedBuffer<M>>;
 
-    /// Set the first character to uppercase
-    fn capitalize(&self) -> ManagedBuffer<M>;
-
     /// The replace method use new_buffer as ManagedBuffer because is it the easier way to implement    
     fn contains_char(&self, to_find: u8) -> bool;
     fn to_lowercase(&self) -> ManagedBuffer<M>;
@@ -66,18 +63,6 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
         let bytes = self.load_512_bytes();
 
         return bytes[self.len() - 1];
-    }
-
-    fn capitalize(&self) -> ManagedBuffer<M> {
-        let bytes = self.load_512_bytes();
-
-        let mut o = ManagedBuffer::<M>::new();
-
-        // uppercase first letter
-        o.append_bytes(&[bytes[0].to_ascii_uppercase()]);
-        o.append_bytes(&bytes[1..self.len()]);
-
-        return o;
     }
 
     fn contains_char(&self, to_find: u8) -> bool {

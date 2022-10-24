@@ -21,12 +21,12 @@ fn build_url_with_no_associated_cid() {
             let equippable_attributes =
                 EquippableNftAttributes::<DebugApi>::new(&[Item::<DebugApi> {
                     name: ManagedBuffer::new_from_bytes(b"item name"),
-                    slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(b"hat")),
+                    slot: Slot::new_from_bytes(b"hat"),
                 }]);
 
             let _ = sc.get_uri_of(&equippable_attributes);
         })
-        .assert_user_error("There is no URI associated to the attributes Hat:item name.");
+        .assert_user_error("There is no URI associated to the attributes hat:item name.");
 }
 
 #[test]
@@ -43,7 +43,7 @@ fn build_url_with_associated_cid() {
                 let penguin_attributes =
                     EquippableNftAttributes::<DebugApi>::new(&[Item::<DebugApi> {
                         name: ManagedBuffer::new_from_bytes(b"item name"),
-                        slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(b"hat")),
+                        slot: Slot::new_from_bytes(b"hat"),
                     }]);
 
                 sc.set_uri_of_attributes(args_set_cid_of!(

@@ -128,7 +128,7 @@ pub trait CustomizeModule: super::storage::StorageModule {
                     }
 
                     None => {
-                        let slot_name = slot.capitalized();
+                        let slot_name = slot.get();
                         sc_panic!(
                             "The item you are unequipping at slot {} is not registered.",
                             slot_name

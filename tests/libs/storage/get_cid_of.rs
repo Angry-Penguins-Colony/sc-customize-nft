@@ -61,11 +61,11 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
                 let attributes = EquippableNftAttributes::<DebugApi>::new(&[
                     Item::<DebugApi> {
                         name: managed_buffer!(a_value),
-                        slot: Slot::new_from_buffer(managed_buffer!(a_slot)),
+                        slot: Slot::new_from_bytes(a_slot),
                     },
                     Item::<DebugApi> {
                         name: managed_buffer!(b_value),
-                        slot: Slot::new_from_buffer(managed_buffer!(b_slot)),
+                        slot: Slot::new_from_bytes(b_slot),
                     },
                 ]);
                 sc.set_uri_of_attributes(args_set_cid_of!(attributes.clone(), cid_buffer.clone()));

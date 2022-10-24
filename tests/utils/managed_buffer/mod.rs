@@ -1,4 +1,3 @@
-mod capitalize;
 mod compare;
 mod contains;
 mod is_lowercase;

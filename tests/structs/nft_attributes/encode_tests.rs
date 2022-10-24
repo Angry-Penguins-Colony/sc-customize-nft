@@ -15,7 +15,7 @@ fn should_top_encode() {
         slot: Slot::new_from_bytes(b"hat"),
     }]);
 
-    let expected = b"Hat:Pirate Hat";
+    let expected = b"hat:Pirate Hat";
 
     assert_equippable_encode_eq(equippable_nft_attributes, expected);
 }
@@ -47,8 +47,8 @@ fn should_top_encode_two() {
         },
     ]);
 
-    assert_equippable_encode_eq(attributes_order_one, b"Hat:Pirate Hat;Weapon:Gun");
-    assert_equippable_encode_eq(attributes_order_two, b"Hat:Pirate Hat;Weapon:Gun");
+    assert_equippable_encode_eq(attributes_order_one, b"hat:Pirate Hat;weapon:Gun");
+    assert_equippable_encode_eq(attributes_order_two, b"hat:Pirate Hat;weapon:Gun");
 }
 
 #[test]
@@ -61,7 +61,7 @@ fn should_top_encode_after_emptying() {
     }]);
     equippable_nft_attributes.empty_slot(&Slot::new_from_bytes(b"hat"));
 
-    let expected = b"Hat:unequipped";
+    let expected = b"hat:unequipped";
 
     assert_equippable_encode_eq(equippable_nft_attributes, expected);
 }

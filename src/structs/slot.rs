@@ -8,6 +8,8 @@ elrond_wasm::derive_imports!();
 pub const ERR_UNSUPPORTED_CHARACTERS: &[u8] =
     b"A slot can't contains colon or semicolon characters.";
 
+pub const ERR_MUST_BE_LOWERCASE: &[u8] = b"The slot must be in lowercase";
+
 #[derive(ManagedVecItem, TypeAbi, Clone, Debug)]
 pub struct Slot<M: ManagedTypeApi> {
     slot: ManagedBuffer<M>,
@@ -78,7 +80,11 @@ impl<M: ManagedTypeApi> PartialEq for Slot<M> {
 impl<M: ManagedTypeApi> Slot<M> {
     pub fn new_from_buffer(slot: ManagedBuffer<M>) -> Self {
         if slot.contains_char(b';') || slot.contains_char(b':') {
-            M::error_api_impl().signal_error(ERR_UNSUPPORTED_CHARACTERS)
+            M::error_api_impl().signal_error(ERR_UNSUPPORTED_CHARACTERS);
+        }
+
+        if slot.is_lowercase() == false {
+            M::error_api_impl().signal_error(ERR_MUST_BE_LOWERCASE);
         }
 
         Self {
@@ -88,10 +94,6 @@ impl<M: ManagedTypeApi> Slot<M> {
 
     pub fn new_from_bytes(bytes: &[u8]) -> Self {
         Self::new_from_buffer(ManagedBuffer::new_from_bytes(bytes))
-    }
-
-    pub fn capitalized(&self) -> ManagedBuffer<M> {
-        self.slot.capitalize()
     }
 
     pub fn compare(&self, other: &Self) -> Ordering {

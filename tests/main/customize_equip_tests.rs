@@ -463,7 +463,7 @@ fn panic_if_unequip_item_is_not_an_item() {
 
     let (_, tx_result) = setup.equip(esdt_transfers);
 
-    tx_result.assert_user_error("The item you are unequipping at slot Hat is not registered.");
+    tx_result.assert_user_error("The item you are unequipping at slot hat is not registered.");
 }
 
 #[test]

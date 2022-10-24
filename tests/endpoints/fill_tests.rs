@@ -1,5 +1,6 @@
 use crate::testing_utils::{self, TestItemAttributes};
 use customize_nft::{
+    constants::ERR_CANNOT_FILL_UNREGISTERED_ITEM,
     libs::storage::StorageModule,
     structs::{item::Item, slot::Slot},
     EndpointWrappers, Equip,
@@ -94,8 +95,7 @@ fn panic_if_not_registered() {
                 sc.call_fill();
             },
         )
-        .assert_ok();
-    // .assert_user_error(ERR_CANNOT_FILL_UNREGISTERED_ITEM);
+        .assert_user_error(ERR_CANNOT_FILL_UNREGISTERED_ITEM);
 }
 
 #[test]

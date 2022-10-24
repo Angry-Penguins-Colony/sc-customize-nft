@@ -50,12 +50,12 @@ pub trait Equip: customize::CustomizeModule + storage::StorageModule {
     #[endpoint]
     #[only_owner]
     fn fill(&self) {
-        let payment = self.call_value().single_esdt();
+        // let payment = self.call_value().single_esdt();
 
-        require!(
-            self.has_token(&Token::new(payment.token_identifier, payment.token_nonce)),
-            ERR_CANNOT_FILL_UNREGISTERED_ITEM
-        )
+        // require!(
+        //     self.has_token(&Token::new(payment.token_identifier, payment.token_nonce)),
+        //     ERR_CANNOT_FILL_UNREGISTERED_ITEM
+        // )
     }
 
     /**

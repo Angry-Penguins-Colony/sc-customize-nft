@@ -6,7 +6,7 @@ use crate::{
 use core::ops::Deref;
 use elrond_wasm::{elrond_codec::TopEncode, formatter::SCDisplay};
 
-use super::{item::Item, slot::Slot};
+use super::slot::Slot;
 
 pub const ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS: &str =
     "A name can't contains colon or semicolons";
@@ -160,17 +160,12 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
         };
     }
 
-    pub fn get_item(&self, slot: &Slot<M>) -> Option<Item<M>> {
+    pub fn get_name(&self, slot: &Slot<M>) -> Option<ManagedBuffer<M>> {
         if let Some(index) = self.get_index(&slot) {
-            if let Some(name) = self.items.get(index).name {
-                return Option::<Item<M>>::Some(Item {
-                    slot: slot.clone(),
-                    name,
-                });
-            }
+            return self.items.get(index).name;
+        } else {
+            return Option::None;
         }
-
-        return Option::None;
     }
 
     pub fn set_item_if_empty(&mut self, slot: &Slot<M>, name: Option<ManagedBuffer<M>>) {
@@ -214,7 +209,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
     }
 
     pub fn is_slot_empty(&self, slot: &Slot<M>) -> bool {
-        match self.get_item(slot) {
+        match self.get_name(slot) {
             Some(_) => false,
             None => true,
         }

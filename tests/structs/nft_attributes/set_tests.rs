@@ -23,9 +23,9 @@ fn set_item_on_empty_slot() {
         Option::Some(ManagedBuffer::new_from_bytes(b"item name")),
     );
 
-    let item = equippable_nft_attributes.get_item(slot).unwrap();
+    let name = equippable_nft_attributes.get_name(slot).unwrap();
 
-    assert_eq!(item.name, b"item name");
+    assert_eq!(name, b"item name");
 }
 
 #[test]

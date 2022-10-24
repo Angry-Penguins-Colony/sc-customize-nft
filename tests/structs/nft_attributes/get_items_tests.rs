@@ -14,7 +14,7 @@ fn get_empty_item() {
 
     let slot = Slot::<DebugApi>::new_from_bytes(b"hat");
 
-    assert_eq!(attributes.get_item(&slot).is_none(), true);
+    assert_eq!(attributes.get_name(&slot).is_none(), true);
 }
 
 #[test]
@@ -34,7 +34,7 @@ fn should_return_none_if_emptied() {
 
         attributes.empty_slot(slot);
 
-        assert_eq!(attributes.get_item(&slot).is_none(), true);
+        assert_eq!(attributes.get_name(&slot).is_none(), true);
     })
 }
 
@@ -54,8 +54,8 @@ fn should_return_some_with_slot_different_case() {
 
         let attributes = EquippableNftAttributes::<DebugApi>::new(&[item.clone()]);
 
-        assert_eq!(attributes.get_item(&query_slot).is_some(), true);
-        assert_eq!(attributes.get_item(&query_slot).unwrap(), item);
+        assert_eq!(attributes.get_name(&query_slot).is_some(), true);
+        assert_eq!(attributes.get_name(&query_slot).unwrap(), item.name);
     })
 }
 
@@ -71,6 +71,6 @@ fn get_item() {
 
     let attributes = EquippableNftAttributes::<DebugApi>::new(&[item.clone()]);
 
-    assert_eq!(attributes.get_item(&slot).is_some(), true);
-    assert_eq!(attributes.get_item(&slot).unwrap(), item);
+    assert_eq!(attributes.get_name(&slot).is_some(), true);
+    assert_eq!(attributes.get_name(&slot).unwrap(), item.name);
 }

@@ -94,41 +94,48 @@ pub trait CustomizeModule: super::storage::StorageModule {
         attributes: &mut EquippableNftAttributes<Self::Api>,
         slot: &Slot<Self::Api>,
     ) {
-        let opt_item = attributes.get_item(&slot);
+        let opt_name = attributes.get_name(&slot);
 
-        match opt_item {
-            Some(item) => match self.get_token(&item) {
-                Some(token) => {
-                    let item_id = token.token;
-                    let item_nonce = token.nonce;
+        match opt_name {
+            Some(name) => {
+                let item = Item {
+                    slot: slot.clone(),
+                    name,
+                };
 
-                    require!(
-                        self.blockchain().get_sc_balance(
-                            &EgldOrEsdtTokenIdentifier::esdt(item_id.clone()),
-                            item_nonce
-                        ) > 0,
-                        "Can't send unequipped items to the user. There is no SFT remaining."
-                    );
+                match self.get_token(&item) {
+                    Some(token) => {
+                        let item_id = token.token;
+                        let item_nonce = token.nonce;
 
-                    self.send().direct_esdt(
-                        &self.blockchain().get_caller(),
-                        &item_id,
-                        item_nonce,
-                        &BigUint::from(1u32),
-                        &[],
-                    );
+                        require!(
+                            self.blockchain().get_sc_balance(
+                                &EgldOrEsdtTokenIdentifier::esdt(item_id.clone()),
+                                item_nonce
+                            ) > 0,
+                            "Can't send unequipped items to the user. There is no SFT remaining."
+                        );
 
-                    attributes.empty_slot(&slot);
+                        self.send().direct_esdt(
+                            &self.blockchain().get_caller(),
+                            &item_id,
+                            item_nonce,
+                            &BigUint::from(1u32),
+                            &[],
+                        );
+
+                        attributes.empty_slot(&slot);
+                    }
+
+                    None => {
+                        let slot_name = slot.capitalized();
+                        sc_panic!(
+                            "The item you are unequipping at slot {} is not registered.",
+                            slot_name
+                        );
+                    }
                 }
-
-                None => {
-                    let slot_name = slot.capitalized();
-                    sc_panic!(
-                        "The item you are unequipping at slot {} is not registered.",
-                        slot_name
-                    );
-                }
-            },
+            }
 
             None => {
                 sc_panic!(ERR_CANNOT_UNEQUIP_EMPTY_SLOT);

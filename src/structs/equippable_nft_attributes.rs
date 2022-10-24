@@ -161,7 +161,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
     }
 
     pub fn get_item(&self, slot: &Slot<M>) -> Option<Item<M>> {
-        if let Some(index) = self.__get_index(&slot) {
+        if let Some(index) = self.get_index(&slot) {
             if let Some(name) = self.items.get(index).name {
                 return Option::<Item<M>>::Some(Item {
                     slot: slot.clone(),
@@ -185,7 +185,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
     }
 
     pub fn set_item(&mut self, slot: &Slot<M>, opt_name: Option<ManagedBuffer<M>>) {
-        let index = self.__get_index(&slot);
+        let index = self.get_index(&slot);
 
         panic_if_name_contains_unsupported_characters::<M>(&opt_name);
 
@@ -224,7 +224,7 @@ impl<M: ManagedTypeApi> EquippableNftAttributes<M> {
         return self.set_item(&slot, Option::None);
     }
 
-    fn __get_index(&self, slot: &Slot<M>) -> Option<usize> {
+    fn get_index(&self, slot: &Slot<M>) -> Option<usize> {
         return self.items.iter().position(|kvp| &kvp.slot == slot);
     }
 }

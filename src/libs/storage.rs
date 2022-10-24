@@ -17,8 +17,8 @@ pub trait StorageModule {
     #[storage_mapper("mapper_items_token")]
     fn map_items_tokens(&self) -> BiDiMapper<Self::Api, Item<Self::Api>, Token<Self::Api>>;
 
-    #[storage_mapper("whitelist_set_uris_of_attributes_endpoint")]
-    fn whitelist_set_uris_of_attributes_endpoint(
+    #[storage_mapper("authorized_addresses_to_set_uris")]
+    fn authorized_addresses_to_set_uris(
         &self,
         address: &ManagedAddress<Self::Api>,
     ) -> SingleValueMapper<bool>;
@@ -60,8 +60,7 @@ pub trait StorageModule {
     #[endpoint(addPermissionToSetUris)]
     #[only_owner]
     fn add_permission_to_set_uris_attributes(&self, address: ManagedAddress) {
-        self.whitelist_set_uris_of_attributes_endpoint(&address)
-            .set(true);
+        self.authorized_addresses_to_set_uris(&address).set(true);
     }
 
     #[endpoint(setUriOfAttributes)]
@@ -75,7 +74,7 @@ pub trait StorageModule {
 
         require!(
             &self.blockchain().get_owner_address() == caller
-                || self.whitelist_set_uris_of_attributes_endpoint(caller).get() == true,
+                || self.authorized_addresses_to_set_uris(caller).get() == true,
             "You don't have the permission to call this endpoint."
         );
 

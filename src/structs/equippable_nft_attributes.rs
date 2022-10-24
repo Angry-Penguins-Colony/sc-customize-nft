@@ -11,6 +11,8 @@ use super::slot::Slot;
 pub const ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS: &str =
     "A name can't contains colon or semicolons";
 
+pub const ERR_NAME_CANNOT_BE_UNEQUIPPED: &str = "The name cannot be 'unequipped'.";
+
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
@@ -230,6 +232,10 @@ fn panic_if_name_contains_unsupported_characters<M: ManagedTypeApi>(
     if let Some(name) = opt_name.clone() {
         if name.contains_char(b';') || name.contains_char(b':') {
             sc_panic_self!(M, ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS);
+        }
+
+        if name == ManagedBuffer::new_from_bytes(UNEQUIPPED_ITEM_NAME) {
+            sc_panic_self!(M, ERR_NAME_CANNOT_BE_UNEQUIPPED);
         }
     }
 }

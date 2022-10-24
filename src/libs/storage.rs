@@ -27,7 +27,7 @@ pub trait StorageModule {
     fn images_to_render(&self) -> UnorderedSetMapper<EquippableNftAttributes<Self::Api>>;
 
     #[storage_mapper("uris_of_attributes")]
-    fn get_uri_from_attributes(
+    fn uris_of_attributes(
         &self,
         attributes: &EquippableNftAttributes<Self::Api>,
     ) -> SingleValueMapper<ManagedBuffer>;
@@ -83,11 +83,11 @@ pub trait StorageModule {
             let (attributes, uri) = kvp.into_tuple();
 
             require!(
-                self.get_uri_from_attributes(&attributes).is_empty(),
+                self.uris_of_attributes(&attributes).is_empty(),
                 ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE
             );
 
-            self.get_uri_from_attributes(&attributes).set(uri);
+            self.uris_of_attributes(&attributes).set(uri);
             self.images_to_render().swap_remove(&attributes);
         }
     }
@@ -97,7 +97,7 @@ pub trait StorageModule {
         &self,
         attributes: &EquippableNftAttributes<Self::Api>,
     ) -> ManagedBuffer<Self::Api> {
-        let uri = self.get_uri_from_attributes(attributes);
+        let uri = self.uris_of_attributes(attributes);
 
         require!(
             uri.is_empty() == false,
@@ -109,7 +109,7 @@ pub trait StorageModule {
     }
 
     fn is_uri_set_for_attributes(&self, attributes: &EquippableNftAttributes<Self::Api>) -> bool {
-        return !self.get_uri_from_attributes(attributes).is_empty();
+        return !self.uris_of_attributes(attributes).is_empty();
     }
 
     // ===

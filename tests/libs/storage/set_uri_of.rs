@@ -29,7 +29,7 @@ fn should_set_if_empty() {
                 ));
 
                 assert_eq!(
-                    sc.get_uri_from_attributes(&attributes).get(),
+                    sc.uris_of_attributes(&attributes).get(),
                     managed_buffer!(cid_bytes)
                 );
             },
@@ -58,7 +58,7 @@ fn panic_if_override_previously_set_uri() {
                     managed_buffer!(first_cid_bytes)
                 ));
                 assert_eq!(
-                    sc.get_uri_from_attributes(&attributes).get(),
+                    sc.uris_of_attributes(&attributes).get(),
                     managed_buffer!(first_cid_bytes)
                 );
             },

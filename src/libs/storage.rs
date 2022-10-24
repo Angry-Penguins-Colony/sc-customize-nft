@@ -57,9 +57,9 @@ pub trait StorageModule {
     }
     // STORAGE MODIFIERS
 
-    #[endpoint(addPermissionToSetUris)]
+    #[endpoint(authorizeAddressToSetUris)]
     #[only_owner]
-    fn add_permission_to_set_uris_attributes(&self, address: ManagedAddress) {
+    fn authorize_address_to_set_uris(&self, address: ManagedAddress) {
         self.authorized_addresses_to_set_uris(&address).set(true);
     }
 

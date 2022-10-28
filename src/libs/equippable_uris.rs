@@ -103,8 +103,16 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
     }
 
     #[view(getUriOf)]
-    fn get_uri_of(&self, attributes: &ImageToRender<Self::Api>) -> ManagedBuffer<Self::Api> {
-        let uri = self.uris_of_attributes(attributes);
+    fn get_uri_of(
+        &self,
+        attributes: &EquippableAttributes<Self::Api>,
+        name: &ManagedBuffer<Self::Api>,
+    ) -> ManagedBuffer<Self::Api> {
+        let image_to_render = &ImageToRender {
+            attributes: attributes.clone(),
+            name: name.clone(),
+        };
+        let uri = self.uris_of_attributes(image_to_render);
 
         require!(
             uri.is_empty() == false,

@@ -1,9 +1,6 @@
 use crate::{
     constants::*,
-    structs::{
-        equippable_attributes::EquippableAttributes, image_to_render::ImageToRender, item::Item,
-        slot::Slot, token::Token,
-    },
+    structs::{equippable_attributes::EquippableAttributes, item::Item, slot::Slot, token::Token},
 };
 
 elrond_wasm::imports!();
@@ -177,13 +174,7 @@ pub trait CustomizeModule:
             .name;
 
         // mint
-        let token_nonce = self.mint_equippable(
-            &ImageToRender {
-                attributes: attributes.clone(),
-                name: equippable_name.clone(),
-            },
-            &equippable_name,
-        );
+        let token_nonce = self.mint_equippable(&attributes, &equippable_name);
 
         // burn the old one
         self.send()
@@ -201,9 +192,13 @@ pub trait CustomizeModule:
         return token_nonce;
     }
 
-    fn mint_equippable(&self, attributes: &ImageToRender<Self::Api>, name: &ManagedBuffer) -> u64 {
+    fn mint_equippable(
+        &self,
+        attributes: &EquippableAttributes<Self::Api>,
+        name: &ManagedBuffer,
+    ) -> u64 {
         let mut uris = ManagedVec::new();
-        let thumbnail = self.get_uri_of(&attributes);
+        let thumbnail = self.get_uri_of(&attributes, name);
         uris.push(thumbnail);
 
         let token_nonce = self
@@ -214,7 +209,7 @@ pub trait CustomizeModule:
                 &name,
                 &BigUint::zero(),
                 &ManagedBuffer::new(),
-                &attributes.attributes,
+                &attributes,
                 &uris,
             );
 

@@ -116,8 +116,9 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
 
         require!(
             uri.is_empty() == false,
-            "There is no URI associated to the attributes {}.",
-            attributes
+            "There is no URI associated to the attributes {} for {}.",
+            attributes,
+            name
         );
 
         return uri.get();

@@ -41,7 +41,10 @@ fn should_return_cid() {
                     cid_buffer.clone()
                 ));
 
-                assert_eq!(sc.get_uri_of(&get_attributes()), cid_buffer)
+                assert_eq!(
+                    sc.get_uri_of(&get_attributes().attributes, &get_attributes().name),
+                    cid_buffer
+                )
             },
         )
         .assert_ok();
@@ -106,7 +109,10 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
                     cid_buffer.clone()
                 ));
 
-                assert_eq!(sc.get_uri_of(&image_to_render), cid_buffer)
+                assert_eq!(
+                    sc.get_uri_of(&image_to_render.attributes, &image_to_render.name),
+                    cid_buffer
+                )
             },
         )
         .assert_ok();
@@ -116,7 +122,10 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             assert_eq!(
-                sc.get_uri_of(&get_attributes_reversed()),
+                sc.get_uri_of(
+                    &get_attributes_reversed().attributes,
+                    &get_attributes_reversed().name
+                ),
                 managed_buffer!(cid_bytes)
             );
         })

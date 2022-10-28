@@ -1,5 +1,3 @@
-use elrond_wasm::{elrond_codec::TopEncode, formatter::SCDisplay};
-
 use super::equippable_attributes::EquippableAttributes;
 
 elrond_wasm::imports!();
@@ -14,19 +12,5 @@ pub struct ImageToRender<M: ManagedTypeApi> {
 impl<M: ManagedTypeApi> ImageToRender<M> {
     pub fn to_multi_value_encoded(&self) -> MultiValue2<EquippableAttributes<M>, ManagedBuffer<M>> {
         return MultiValue2::from((self.attributes.clone(), self.name.clone()));
-    }
-}
-
-impl<M: ManagedTypeApi> SCDisplay for ImageToRender<M> {
-    fn fmt<F: elrond_wasm::formatter::FormatByteReceiver>(&self, f: &mut F) {
-        let mut attributes = ManagedBuffer::<F::Api>::new_from_bytes(b"");
-        let _ = self.attributes.top_encode(&mut attributes);
-
-        let mut name = ManagedBuffer::<F::Api>::new_from_bytes(b"");
-        let _ = self.name.top_encode(&mut name);
-
-        f.append_managed_buffer(&attributes);
-        f.append_bytes(b"@");
-        f.append_managed_buffer(&name);
     }
 }

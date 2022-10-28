@@ -22,12 +22,10 @@
             "verbose": true,
             "bytecode": "output/customize_nft.wasm",
             "recall-nonce": true,
-            "pem": "wallets/erd1ntrngjctevjnylqgjua9lz0292a2luclmkspz040y46ldlr4wptq47lfdx.pem",
+            "pem": "wallets/erd1p2aa6n7pezz6m77dm90z6zyuqmh44thqt3qlvvyh3dzvhcr5mt7quz6thg.pem",
             "gas-limit": 600000000,
             "arguments": [
-                "0x50454e4755494e532d306132633332",
-                "0x68747470733a2f2f697066732e696f2f697066732f",
-                "0x50656e6775696e207b6e756d6265727d"
+                "0x50454E4755494E532D386263326333"
             ],
             "send": true,
             "outfile": "interactions/upgrade-devnet.interaction.json"

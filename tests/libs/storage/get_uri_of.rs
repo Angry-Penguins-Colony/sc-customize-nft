@@ -20,7 +20,7 @@ fn build_url_with_no_associated_cid() {
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
-            let equippable_attributes = ImageToRender {
+            let image_to_render = ImageToRender {
                 attributes: EquippableAttributes::<DebugApi>::new(&[Item::<DebugApi> {
                     name: ManagedBuffer::new_from_bytes(b"item name"),
                     slot: Slot::new_from_bytes(b"hat"),
@@ -28,10 +28,10 @@ fn build_url_with_no_associated_cid() {
                 name: ManagedBuffer::new_from_bytes(b"Equippable #512"),
             };
 
-            let _ = sc.get_uri_of(&equippable_attributes);
+            let _ = sc.get_uri_of(&image_to_render.attributes, &image_to_render.name);
         })
         .assert_user_error(
-            "There is no URI associated to the attributes hat:item name@Equippable #512.",
+            "There is no URI associated to the attributes hat:item name for Equippable #512.",
         );
 }
 
@@ -64,7 +64,7 @@ fn build_url_with_associated_cid() {
                     ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/this is a CID")
                 ));
 
-                let url = sc.get_uri_of(&image_to_render);
+                let url = sc.get_uri_of(&image_to_render.attributes, &image_to_render.name);
 
                 assert_eq!(
                     url,

@@ -3,7 +3,10 @@ use customize_nft::{
         ENQUEUE_PRICE, ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE, ERR_IMAGE_NOT_IN_RENDER_QUEUE,
     },
     libs::storage::{EndpointWrappers, StorageModule},
-    structs::equippable_nft_attributes::EquippableNftAttributes,
+    structs::{
+        equippable_attributes_to_render::EquippableAttributesToRender,
+        equippable_nft_attributes::EquippableNftAttributes,
+    },
     Equip,
 };
 use elrond_wasm::elrond_codec::multi_types::MultiValue2;
@@ -20,7 +23,11 @@ fn should_set_if_empty() {
 
     let cid_bytes = b"https://ipfs.io/ipfs/some cid";
 
-    setup.enqueue_attributes_to_render(&|| EquippableNftAttributes::<DebugApi>::empty());
+    let get_attributes = || EquippableAttributesToRender {
+        attributes: EquippableNftAttributes::<DebugApi>::empty(),
+        name: managed_buffer!(b"Equippable #512"),
+    };
+    setup.enqueue_attributes_to_render(&get_attributes);
 
     setup
         .blockchain_wrapper
@@ -29,14 +36,13 @@ fn should_set_if_empty() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes = EquippableNftAttributes::<DebugApi>::empty();
                 sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes.clone(),
+                    get_attributes().clone(),
                     managed_buffer!(cid_bytes)
                 ));
 
                 assert_eq!(
-                    sc.uris_of_attributes(&attributes).get(),
+                    sc.uris_of_attributes(&get_attributes()).get(),
                     managed_buffer!(cid_bytes)
                 );
             },
@@ -57,7 +63,10 @@ fn panic_if_not_in_render_queue() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes = EquippableNftAttributes::<DebugApi>::empty();
+                let attributes = EquippableAttributesToRender {
+                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    name: managed_buffer!(b"Equippable #512"),
+                };
                 sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes.clone(),
                     managed_buffer!(cid_bytes)
@@ -79,7 +88,10 @@ fn panic_if_override_previously_set_uri() {
     let first_cid_bytes = b"https://ipfs.io/ipfs/some cid";
     let second_cid_bytes = b"https://ipfs.io/ipfs/another cid";
 
-    let get_attributes = || EquippableNftAttributes::<DebugApi>::empty();
+    let get_attributes = || EquippableAttributesToRender {
+        attributes: EquippableNftAttributes::<DebugApi>::empty(),
+        name: managed_buffer!(b"Equippable #512"),
+    };
 
     setup.enqueue_attributes_to_render(&get_attributes);
 
@@ -156,7 +168,10 @@ fn should_remove_enqueued_image_to_render() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let attributes = EquippableNftAttributes::<DebugApi>::empty();
+                let attributes = EquippableAttributesToRender {
+                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    name: managed_buffer!(b"Equippable #512"),
+                };
 
                 sc.enqueue_image_to_render(&attributes);
                 assert_eq!(sc.images_to_render().len(), 1);

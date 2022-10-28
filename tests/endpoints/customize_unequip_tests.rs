@@ -2,13 +2,14 @@ use customize_nft::{
     constants::ERR_CANNOT_UNEQUIP_EMPTY_SLOT,
     libs::storage::StorageModule,
     structs::{
+        equippable_attributes_to_render::EquippableAttributesToRender,
         equippable_nft_attributes::EquippableNftAttributes,
         item::Item,
         slot::{Slot, ERR_MUST_BE_LOWERCASE},
     },
 };
 use elrond_wasm::types::ManagedBuffer;
-use elrond_wasm_debug::{rust_biguint, DebugApi};
+use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
 use crate::testing_utils::{self, New, TestItemAttributes};
 
@@ -51,14 +52,19 @@ fn customize_only_unequip() {
                 let mut attributes_after_custom = attributes_before_custom.clone();
                 attributes_after_custom.empty_slot(&Slot::new_from_bytes(slot));
 
-                sc.uris_of_attributes(&attributes_before_custom).set(
-                    ManagedBuffer::<DebugApi>::new_from_bytes(
-                        b"https://ipfs.io/ipfs/this is a cid",
-                    ),
-                );
+                sc.uris_of_attributes(&EquippableAttributesToRender {
+                    attributes: attributes_before_custom,
+                    name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
+                })
+                .set(ManagedBuffer::<DebugApi>::new_from_bytes(
+                    b"https://ipfs.io/ipfs/this is a cid",
+                ));
 
-                sc.uris_of_attributes(&attributes_after_custom)
-                    .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty"));
+                sc.uris_of_attributes(&EquippableAttributesToRender {
+                    attributes: attributes_after_custom,
+                    name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
+                })
+                .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty"));
             },
         )
         .assert_ok();
@@ -98,9 +104,9 @@ fn customize_only_unequip() {
 
     let mut attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
         name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
-        slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot)),
+        slot: Slot::new_from_bytes(slot),
     }]);
-    attributes_after_custom.empty_slot(&Slot::new_from_buffer(ManagedBuffer::new_from_bytes(slot)));
+    attributes_after_custom.empty_slot(&Slot::new_from_bytes(slot));
 
     // is equippable empty
     setup.blockchain_wrapper.check_nft_balance(
@@ -146,22 +152,25 @@ fn panic_if_uppercase_slot() {
             |sc| {
                 let attributes_before_custom = EquippableNftAttributes::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
-                    slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(SLOT_LOWERCASE)),
+                    slot: Slot::new_from_bytes(SLOT_LOWERCASE),
                 }]);
 
                 let mut attributes_after_custom = attributes_before_custom.clone();
-                attributes_after_custom.empty_slot(&Slot::new_from_buffer(
-                    ManagedBuffer::new_from_bytes(SLOT_LOWERCASE),
+                attributes_after_custom.empty_slot(&Slot::new_from_bytes(SLOT_LOWERCASE));
+
+                sc.uris_of_attributes(&EquippableAttributesToRender {
+                    attributes: attributes_before_custom,
+                    name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
+                })
+                .set(ManagedBuffer::<DebugApi>::new_from_bytes(
+                    b"https://ipfs.io/ipfs/this is a cid",
                 ));
 
-                sc.uris_of_attributes(&attributes_before_custom).set(
-                    ManagedBuffer::<DebugApi>::new_from_bytes(
-                        b"https://ipfs.io/ipfs/this is a cid",
-                    ),
-                );
-
-                sc.uris_of_attributes(&attributes_after_custom)
-                    .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty"));
+                sc.uris_of_attributes(&EquippableAttributesToRender {
+                    attributes: attributes_after_custom,
+                    name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
+                })
+                .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty"));
             },
         )
         .assert_ok();
@@ -205,15 +214,21 @@ fn panic_when_unequip_twice_the_same_slot() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes_before_custom = EquippableNftAttributes::new(&[Item {
-                    name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
-                    slot: Slot::new_from_bytes(slot),
-                }]);
+                let attributes_before_custom = EquippableAttributesToRender {
+                    attributes: EquippableNftAttributes::new(&[Item {
+                        name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
+                        slot: Slot::new_from_bytes(slot),
+                    }]),
+                    name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
+                };
                 sc.uris_of_attributes(&attributes_before_custom).set(
                     ManagedBuffer::<DebugApi>::new_from_bytes(b"https://ipfs.io/ipfs/before"),
                 );
 
-                let attributes_after_custom = EquippableNftAttributes::<DebugApi>::empty();
+                let attributes_after_custom = EquippableAttributesToRender {
+                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
+                };
                 sc.uris_of_attributes(&attributes_after_custom).set(
                     ManagedBuffer::<DebugApi>::new_from_bytes(b"https://ipfs.io/ipfs/after"),
                 );
@@ -248,7 +263,11 @@ fn panic_when_unequip_on_empty_slot() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                sc.uris_of_attributes(&EquippableNftAttributes::<DebugApi>::empty())
+                let attributes = EquippableAttributesToRender {
+                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
+                };
+                sc.uris_of_attributes(&attributes)
                     .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty"));
             },
         )

@@ -1,7 +1,10 @@
 use customize_nft::{
     constants::ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
     libs::{customize::CustomizeModule, storage::StorageModule},
-    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot},
+    structs::{
+        equippable_attributes_to_render::EquippableAttributesToRender,
+        equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot,
+    },
 };
 use elrond_wasm::types::{ManagedBuffer, MultiValueEncoded};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
@@ -72,6 +75,7 @@ fn customize_complete_flow() {
                 }]);
 
                 let mut attributes_after_custom = attributes_before_custom.clone();
+
                 attributes_after_custom.empty_slot(&Slot::new_from_buffer(
                     ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT),
                 ));
@@ -80,13 +84,20 @@ fn customize_complete_flow() {
                     Some(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME)),
                 );
 
-                sc.uris_of_attributes(&attributes_before_custom).set(
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom"),
-                );
-                sc.uris_of_attributes(&attributes_after_custom)
-                    .set(ManagedBuffer::new_from_bytes(
-                        b"https://ipfs.io/ipfs/cid after custom",
-                    ));
+                sc.uris_of_attributes(&EquippableAttributesToRender {
+                    attributes: attributes_before_custom,
+                    name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
+                })
+                .set(ManagedBuffer::new_from_bytes(
+                    b"https://ipfs.io/ipfs/cid before custom",
+                ));
+                sc.uris_of_attributes(&EquippableAttributesToRender {
+                    attributes: attributes_after_custom,
+                    name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
+                })
+                .set(ManagedBuffer::new_from_bytes(
+                    b"https://ipfs.io/ipfs/cid after custom",
+                ));
             },
         )
         .assert_ok();

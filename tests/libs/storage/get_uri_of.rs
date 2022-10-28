@@ -1,6 +1,7 @@
 use crate::testing_utils::New;
 use crate::{args_set_cid_of, testing_utils};
 use customize_nft::libs::storage::StorageModule;
+use customize_nft::structs::equippable_attributes_to_render::EquippableAttributesToRender;
 use customize_nft::structs::slot::Slot;
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm::types::MultiValueEncoded;
@@ -18,26 +19,31 @@ fn build_url_with_no_associated_cid() {
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
-            let equippable_attributes =
-                EquippableNftAttributes::<DebugApi>::new(&[Item::<DebugApi> {
+            let equippable_attributes = EquippableAttributesToRender {
+                attributes: EquippableNftAttributes::<DebugApi>::new(&[Item::<DebugApi> {
                     name: ManagedBuffer::new_from_bytes(b"item name"),
                     slot: Slot::new_from_bytes(b"hat"),
-                }]);
+                }]),
+                name: ManagedBuffer::new_from_bytes(b"Equippable #512"),
+            };
 
             let _ = sc.get_uri_of(&equippable_attributes);
         })
-        .assert_user_error("There is no URI associated to the attributes hat:item name.");
+        .assert_user_error(
+            "There is no URI associated to the attributes hat:item name@Equippable #512.",
+        );
 }
 
 #[test]
 fn build_url_with_associated_cid() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let get_attributes = || {
-        EquippableNftAttributes::<DebugApi>::new(&[Item::<DebugApi> {
+    let get_attributes = || EquippableAttributesToRender {
+        attributes: EquippableNftAttributes::<DebugApi>::new(&[Item::<DebugApi> {
             name: ManagedBuffer::new_from_bytes(b"item name"),
             slot: Slot::new_from_bytes(b"hat"),
-        }])
+        }]),
+        name: ManagedBuffer::new_from_bytes(b"Equippable #512"),
     };
 
     setup.enqueue_attributes_to_render(&get_attributes);

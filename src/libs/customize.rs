@@ -1,6 +1,7 @@
 use crate::{
     constants::*,
     structs::{
+        equippable_attributes_to_render::EquippableAttributesToRender,
         equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot, token::Token,
     },
 };
@@ -178,7 +179,13 @@ pub trait CustomizeModule: super::storage::StorageModule {
             .name;
 
         // mint
-        let token_nonce = self.mint_equippable(attributes, &equippable_name);
+        let token_nonce = self.mint_equippable(
+            &EquippableAttributesToRender {
+                attributes: attributes.clone(),
+                name: equippable_name.clone(),
+            },
+            &equippable_name,
+        );
 
         // burn the old one
         self.send()
@@ -198,7 +205,7 @@ pub trait CustomizeModule: super::storage::StorageModule {
 
     fn mint_equippable(
         &self,
-        attributes: &EquippableNftAttributes<Self::Api>,
+        attributes: &EquippableAttributesToRender<Self::Api>,
         name: &ManagedBuffer,
     ) -> u64 {
         let mut uris = ManagedVec::new();
@@ -213,7 +220,7 @@ pub trait CustomizeModule: super::storage::StorageModule {
                 &name,
                 &BigUint::zero(),
                 &ManagedBuffer::new(),
-                &attributes,
+                &attributes.attributes,
                 &uris,
             );
 

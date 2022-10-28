@@ -1,10 +1,13 @@
 use customize_nft::{
     constants::{ENQUEUE_PRICE, ERR_PAY_0001_EGLD},
     libs::storage::StorageModule,
-    structs::equippable_nft_attributes::EquippableNftAttributes,
+    structs::{
+        equippable_attributes_to_render::EquippableAttributesToRender,
+        equippable_nft_attributes::EquippableNftAttributes,
+    },
     Equip,
 };
-use elrond_wasm_debug::{rust_biguint, DebugApi};
+use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
 use crate::testing_utils;
 
@@ -23,7 +26,10 @@ fn works() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let attributes = EquippableNftAttributes::<DebugApi>::empty();
+                let attributes = &EquippableAttributesToRender {
+                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    name: managed_buffer!(b"Equippable #512"),
+                };
 
                 sc.enqueue_image_to_render(&attributes);
 
@@ -45,7 +51,10 @@ fn panic_if_dont_send_egld() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes = EquippableNftAttributes::<DebugApi>::empty();
+                let attributes = &EquippableAttributesToRender {
+                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    name: managed_buffer!(b"Equippable #512"),
+                };
 
                 sc.enqueue_image_to_render(&attributes);
 
@@ -71,7 +80,10 @@ fn panic_if_send_lesser_amount_of_egld() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE - 5),
             |sc| {
-                let attributes = EquippableNftAttributes::<DebugApi>::empty();
+                let attributes = &EquippableAttributesToRender {
+                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    name: managed_buffer!(b"Equippable #512"),
+                };
 
                 sc.enqueue_image_to_render(&attributes);
 
@@ -97,7 +109,10 @@ fn panic_if_send_greater_amount_of_egld() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE * 2),
             |sc| {
-                let attributes = EquippableNftAttributes::<DebugApi>::empty();
+                let attributes = &EquippableAttributesToRender {
+                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    name: managed_buffer!(b"Equippable #512"),
+                };
 
                 sc.enqueue_image_to_render(&attributes);
 

@@ -4,7 +4,10 @@ use customize_nft::{
         ERR_RENDER_ALREADY_IN_QUEUE,
     },
     libs::storage::StorageModule,
-    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot},
+    structs::{
+        equippable_attributes_to_render::EquippableAttributesToRender,
+        equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot,
+    },
     Equip,
 };
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
@@ -26,7 +29,10 @@ fn works() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let attributes = EquippableNftAttributes::<DebugApi>::empty();
+                let attributes = EquippableAttributesToRender {
+                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    name: managed_buffer!(b"Equippable #512"),
+                };
 
                 sc.enqueue_image_to_render(&attributes);
 
@@ -52,11 +58,17 @@ fn enqueue_two_differents_attributes() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let attributes_a = EquippableNftAttributes::<DebugApi>::empty();
-                let attributes_b = EquippableNftAttributes::<DebugApi>::new(&[Item {
-                    name: managed_buffer!(b"pirate hat"),
-                    slot: Slot::new_from_bytes(b"hat"),
-                }]);
+                let attributes_a = EquippableAttributesToRender {
+                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    name: managed_buffer!(b"Equippable #512"),
+                };
+                let attributes_b = EquippableAttributesToRender {
+                    attributes: EquippableNftAttributes::<DebugApi>::new(&[Item {
+                        name: managed_buffer!(b"pirate hat"),
+                        slot: Slot::new_from_bytes(b"hat"),
+                    }]),
+                    name: managed_buffer!(b"Equippable #513"),
+                };
 
                 sc.enqueue_image_to_render(&attributes_a);
                 sc.enqueue_image_to_render(&attributes_b);
@@ -77,11 +89,12 @@ fn enqueue_two_differents_attributes() {
 #[test]
 fn panic_if_already_rendererer() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
+    let get_attributes = || EquippableAttributesToRender {
+        attributes: EquippableNftAttributes::<DebugApi>::empty(),
+        name: managed_buffer!(b"Equippable #512"),
+    };
 
-    setup.enqueue_and_set_cid_of(
-        &|| EquippableNftAttributes::<DebugApi>::empty(),
-        b"https://ipfs.io/ipfs/cid",
-    );
+    setup.enqueue_and_set_cid_of(&get_attributes, b"https://ipfs.io/ipfs/cid");
 
     setup
         .blockchain_wrapper
@@ -94,7 +107,7 @@ fn panic_if_already_rendererer() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                sc.enqueue_image_to_render(&EquippableNftAttributes::<DebugApi>::empty());
+                sc.enqueue_image_to_render(&get_attributes());
             },
         )
         .assert_user_error(ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED);
@@ -115,7 +128,10 @@ fn panic_if_already_in_queue() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let attributes = EquippableNftAttributes::<DebugApi>::empty();
+                let attributes = EquippableAttributesToRender {
+                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    name: managed_buffer!(b"Equippable #512"),
+                };
 
                 sc.enqueue_image_to_render(&attributes);
                 sc.enqueue_image_to_render(&attributes);

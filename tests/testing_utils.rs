@@ -7,6 +7,7 @@ use std::u8;
 use customize_nft::constants::ENQUEUE_PRICE;
 use customize_nft::libs::customize::CustomizeModule;
 use customize_nft::libs::storage::StorageModule;
+use customize_nft::structs::equippable_attributes_to_render::EquippableAttributesToRender;
 use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
 use customize_nft::structs::item::Item;
 use customize_nft::structs::slot::Slot;
@@ -342,7 +343,7 @@ where
 
     pub fn enqueue_attributes_to_render(
         &mut self,
-        get_attributes: &dyn Fn() -> EquippableNftAttributes<DebugApi>,
+        get_attributes: &dyn Fn() -> EquippableAttributesToRender<DebugApi>,
     ) {
         self.add_enqueue_price_balance_to_owner();
 
@@ -369,7 +370,7 @@ where
 
     pub fn enqueue_and_set_cid_of(
         &mut self,
-        get_attributes: &dyn Fn() -> EquippableNftAttributes<DebugApi>,
+        get_attributes: &dyn Fn() -> EquippableAttributesToRender<DebugApi>,
         uri: &[u8],
     ) {
         self.enqueue_attributes_to_render(get_attributes);

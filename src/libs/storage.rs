@@ -1,6 +1,8 @@
 use crate::{
     constants::{ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE, ERR_IMAGE_NOT_IN_RENDER_QUEUE},
-    structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, token::Token},
+    structs::{
+        equippable_attributes_to_render::EquippableAttributesToRender, item::Item, token::Token,
+    },
 };
 
 elrond_wasm::imports!();
@@ -21,12 +23,12 @@ pub trait StorageModule {
     ) -> SingleValueMapper<bool>;
 
     #[storage_mapper("images_to_render")]
-    fn images_to_render(&self) -> UnorderedSetMapper<EquippableNftAttributes<Self::Api>>;
+    fn images_to_render(&self) -> UnorderedSetMapper<EquippableAttributesToRender<Self::Api>>;
 
     #[storage_mapper("uris_of_attributes")]
     fn uris_of_attributes(
         &self,
-        attributes: &EquippableNftAttributes<Self::Api>,
+        attributes: &EquippableAttributesToRender<Self::Api>,
     ) -> SingleValueMapper<ManagedBuffer>;
 
     fn has_item(&self, item: &Item<Self::Api>) -> bool {
@@ -64,7 +66,7 @@ pub trait StorageModule {
     fn set_uri_of_attributes(
         &self,
         uri_kvp: MultiValueEncoded<
-            MultiValue2<EquippableNftAttributes<Self::Api>, ManagedBuffer<Self::Api>>,
+            MultiValue2<EquippableAttributesToRender<Self::Api>, ManagedBuffer<Self::Api>>,
         >,
     ) {
         let caller = &self.blockchain().get_caller();
@@ -96,7 +98,7 @@ pub trait StorageModule {
     #[view(getUriOf)]
     fn get_uri_of(
         &self,
-        attributes: &EquippableNftAttributes<Self::Api>,
+        attributes: &EquippableAttributesToRender<Self::Api>,
     ) -> ManagedBuffer<Self::Api> {
         let uri = self.uris_of_attributes(attributes);
 
@@ -112,11 +114,11 @@ pub trait StorageModule {
     // ===
     // IMAGES
     #[view(getImagesToRender)]
-    fn get_images_to_render(&self) -> MultiValueEncoded<EquippableNftAttributes<Self::Api>> {
+    fn get_images_to_render(&self) -> MultiValueEncoded<EquippableAttributesToRender<Self::Api>> {
         let mut o = MultiValueEncoded::new();
 
-        for attributes in self.images_to_render().iter() {
-            o.push(attributes.clone());
+        for image_to_render in self.images_to_render().iter() {
+            o.push(image_to_render.clone());
         }
 
         return o;

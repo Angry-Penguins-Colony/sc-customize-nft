@@ -10,7 +10,9 @@ pub mod structs;
 pub mod utils;
 
 use libs::*;
-use structs::{equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot};
+use structs::{
+    equippable_attributes_to_render::EquippableAttributesToRender, item::Item, slot::Slot,
+};
 
 use crate::{constants::*, structs::token::Token};
 
@@ -65,7 +67,7 @@ pub trait Equip: customize::CustomizeModule + storage::StorageModule {
      */
     #[endpoint(renderImage)]
     #[payable("EGLD")]
-    fn enqueue_image_to_render(&self, attributes: &EquippableNftAttributes<Self::Api>) {
+    fn enqueue_image_to_render(&self, attributes: &EquippableAttributesToRender<Self::Api>) {
         require!(
             self.call_value().egld_value() == BigUint::from(ENQUEUE_PRICE),
             ERR_PAY_0001_EGLD

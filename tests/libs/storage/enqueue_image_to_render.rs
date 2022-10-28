@@ -142,3 +142,64 @@ fn panic_if_already_in_queue() {
         )
         .assert_user_error(ERR_RENDER_ALREADY_IN_QUEUE);
 }
+
+#[test]
+fn panic_if_attributes_already_in_queue_but_in_another_order() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    let attributes_a = || EquippableAttributesToRender {
+        attributes: EquippableNftAttributes::<DebugApi>::new(&[
+            Item {
+                name: managed_buffer!(b"pirate hat"),
+                slot: Slot::new_from_bytes(b"hat"),
+            },
+            Item {
+                name: managed_buffer!(b"eel"),
+                slot: Slot::new_from_bytes(b"beak"),
+            },
+        ]),
+        name: managed_buffer!(b"Equippable #513"),
+    };
+
+    let attributes_b = || EquippableAttributesToRender {
+        attributes: EquippableNftAttributes::<DebugApi>::new(&[
+            Item {
+                name: managed_buffer!(b"eel"),
+                slot: Slot::new_from_bytes(b"beak"),
+            },
+            Item {
+                name: managed_buffer!(b"pirate hat"),
+                slot: Slot::new_from_bytes(b"hat"),
+            },
+        ]),
+        name: managed_buffer!(b"Equippable #513"),
+    };
+
+    setup
+        .blockchain_wrapper
+        .set_egld_balance(&setup.owner_address, &rust_biguint!(ENQUEUE_PRICE * 2));
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(ENQUEUE_PRICE),
+            |sc| {
+                sc.enqueue_image_to_render(&attributes_a());
+            },
+        )
+        .assert_ok();
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(ENQUEUE_PRICE),
+            |sc| {
+                sc.enqueue_image_to_render(&attributes_b());
+            },
+        )
+        .assert_user_error(ERR_RENDER_ALREADY_IN_QUEUE);
+}

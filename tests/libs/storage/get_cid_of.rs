@@ -5,7 +5,7 @@ use customize_nft::{
         slot::Slot,
     },
 };
-use elrond_wasm::{elrond_codec::multi_types::MultiValue2, types::MultiValueEncoded};
+use elrond_wasm::{elrond_codec::multi_types::MultiValue3, types::MultiValueEncoded};
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
 use crate::{
@@ -36,7 +36,8 @@ fn should_return_cid() {
             |sc| {
                 let cid_buffer = managed_buffer!(cid_bytes);
                 sc.set_uri_of_attributes(args_set_cid_of!(
-                    get_attributes().clone(),
+                    get_attributes().attributes,
+                    get_attributes().name,
                     cid_buffer.clone()
                 ));
 
@@ -98,10 +99,14 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
             |sc| {
                 let cid_buffer = managed_buffer!(cid_bytes);
 
-                let attributes = get_attributes();
-                sc.set_uri_of_attributes(args_set_cid_of!(attributes.clone(), cid_buffer.clone()));
+                let image_to_render = get_attributes();
+                sc.set_uri_of_attributes(args_set_cid_of!(
+                    image_to_render.attributes,
+                    image_to_render.name,
+                    cid_buffer.clone()
+                ));
 
-                assert_eq!(sc.get_uri_of(&attributes), cid_buffer)
+                assert_eq!(sc.get_uri_of(&image_to_render), cid_buffer)
             },
         )
         .assert_ok();

@@ -57,10 +57,10 @@ macro_rules! managed_vec [
 
 #[macro_export]
 macro_rules! args_set_cid_of {
-    ($attr: expr, $cid: expr) => {{
+    ($attr: expr, $name:expr, $cid: expr) => {{
         let mut _val = MultiValueEncoded::new();
 
-        let element = MultiValue2::from(($attr, $cid.clone()));
+        let element = MultiValue3::from(($attr.clone(), $name.clone(), $cid.clone()));
         _val.push(element);
 
         _val
@@ -343,7 +343,7 @@ where
 
     pub fn enqueue_attributes_to_render(
         &mut self,
-        get_attributes: &dyn Fn() -> ImageToRender<DebugApi>,
+        get_image_to_render: &dyn Fn() -> ImageToRender<DebugApi>,
     ) {
         self.add_enqueue_price_balance_to_owner();
 
@@ -353,7 +353,10 @@ where
                 &self.cf_wrapper,
                 &rust_biguint!(ENQUEUE_PRICE),
                 |sc| {
-                    sc.enqueue_image_to_render(&get_attributes());
+                    sc.enqueue_image_to_render(
+                        get_image_to_render().attributes,
+                        get_image_to_render().name,
+                    );
                 },
             )
             .assert_ok();
@@ -370,10 +373,10 @@ where
 
     pub fn enqueue_and_set_cid_of(
         &mut self,
-        get_attributes: &dyn Fn() -> ImageToRender<DebugApi>,
+        get_image_to_render: &dyn Fn() -> ImageToRender<DebugApi>,
         uri: &[u8],
     ) {
-        self.enqueue_attributes_to_render(get_attributes);
+        self.enqueue_attributes_to_render(get_image_to_render);
 
         self.blockchain_wrapper
             .execute_tx(
@@ -382,7 +385,8 @@ where
                 &rust_biguint!(0),
                 |sc| {
                     sc.set_uri_of_attributes(args_set_cid_of!(
-                        get_attributes(),
+                        get_image_to_render().attributes,
+                        get_image_to_render().name,
                         managed_buffer!(uri)
                     ));
                 },

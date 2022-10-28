@@ -28,15 +28,18 @@ fn works() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let attributes = ImageToRender {
+                let image_to_render = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
 
-                sc.enqueue_image_to_render(&attributes);
+                sc.enqueue_image_to_render(
+                    image_to_render.attributes.clone(),
+                    image_to_render.name.clone(),
+                );
 
                 assert_eq!(sc.images_to_render().len(), 1);
-                assert_eq!(sc.images_to_render().contains(&attributes), true);
+                assert_eq!(sc.images_to_render().contains(&image_to_render), true);
             },
         )
         .assert_ok();
@@ -57,11 +60,11 @@ fn enqueue_two_differents_attributes() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let attributes_a = ImageToRender {
+                let image_to_render_a = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
-                let attributes_b = ImageToRender {
+                let image_to_render_b = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::new(&[Item {
                         name: managed_buffer!(b"pirate hat"),
                         slot: Slot::new_from_bytes(b"hat"),
@@ -69,17 +72,29 @@ fn enqueue_two_differents_attributes() {
                     name: managed_buffer!(b"Equippable #513"),
                 };
 
-                sc.enqueue_image_to_render(&attributes_a);
-                sc.enqueue_image_to_render(&attributes_b);
+                sc.enqueue_image_to_render(
+                    image_to_render_a.attributes.clone(),
+                    image_to_render_a.name.clone(),
+                );
+                sc.enqueue_image_to_render(
+                    image_to_render_b.attributes.clone(),
+                    image_to_render_b.name.clone(),
+                );
 
                 assert_eq!(sc.images_to_render().len(), 2);
-                assert_eq!(sc.images_to_render().contains(&attributes_a), true);
-                assert_eq!(sc.images_to_render().contains(&attributes_b), true);
+                assert_eq!(sc.images_to_render().contains(&image_to_render_a), true);
+                assert_eq!(sc.images_to_render().contains(&image_to_render_b), true);
 
                 let mut iter = sc.get_images_to_render().into_iter();
-                assert_eq!(iter.next(), Some(attributes_a));
-                assert_eq!(iter.next(), Some(attributes_b));
-                assert_eq!(iter.next(), None);
+                assert_eq!(
+                    iter.next().unwrap().into_tuple(),
+                    image_to_render_a.to_multi_value_encoded().into_tuple()
+                );
+                assert_eq!(
+                    iter.next().unwrap().into_tuple(),
+                    image_to_render_b.to_multi_value_encoded().into_tuple()
+                );
+                assert_eq!(iter.next().is_none(), true);
             },
         )
         .assert_ok();
@@ -106,7 +121,7 @@ fn panic_if_already_rendererer() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                sc.enqueue_image_to_render(&get_attributes());
+                sc.enqueue_image_to_render(get_attributes().attributes, get_attributes().name);
             },
         )
         .assert_user_error(ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED);
@@ -127,16 +142,22 @@ fn panic_if_already_in_queue() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let attributes = ImageToRender {
+                let image_to_render = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
 
-                sc.enqueue_image_to_render(&attributes);
-                sc.enqueue_image_to_render(&attributes);
+                sc.enqueue_image_to_render(
+                    image_to_render.attributes.clone(),
+                    image_to_render.name.clone(),
+                );
+                sc.enqueue_image_to_render(
+                    image_to_render.attributes.clone(),
+                    image_to_render.name.clone(),
+                );
 
                 assert_eq!(sc.images_to_render().len(), 1);
-                assert_eq!(sc.images_to_render().contains(&attributes), true);
+                assert_eq!(sc.images_to_render().contains(&image_to_render), true);
             },
         )
         .assert_user_error(ERR_RENDER_ALREADY_IN_QUEUE);
@@ -146,7 +167,7 @@ fn panic_if_already_in_queue() {
 fn panic_if_attributes_already_in_queue_but_in_another_order() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let attributes_a = || ImageToRender {
+    let image_to_render_a = || ImageToRender {
         attributes: EquippableAttributes::<DebugApi>::new(&[
             Item {
                 name: managed_buffer!(b"pirate hat"),
@@ -160,7 +181,7 @@ fn panic_if_attributes_already_in_queue_but_in_another_order() {
         name: managed_buffer!(b"Equippable #513"),
     };
 
-    let attributes_b = || ImageToRender {
+    let image_to_render_b = || ImageToRender {
         attributes: EquippableAttributes::<DebugApi>::new(&[
             Item {
                 name: managed_buffer!(b"eel"),
@@ -185,7 +206,10 @@ fn panic_if_attributes_already_in_queue_but_in_another_order() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                sc.enqueue_image_to_render(&attributes_a());
+                sc.enqueue_image_to_render(
+                    image_to_render_a().attributes,
+                    image_to_render_a().name,
+                );
             },
         )
         .assert_ok();
@@ -197,7 +221,10 @@ fn panic_if_attributes_already_in_queue_but_in_another_order() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                sc.enqueue_image_to_render(&attributes_b());
+                sc.enqueue_image_to_render(
+                    image_to_render_b().attributes,
+                    image_to_render_b().name,
+                );
             },
         )
         .assert_user_error(ERR_RENDER_ALREADY_IN_QUEUE);

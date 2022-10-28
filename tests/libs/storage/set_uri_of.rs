@@ -5,7 +5,7 @@ use customize_nft::{
     libs::equippable_uris::{EndpointWrappers, EquippableUrisModule},
     structs::{equippable_attributes::EquippableAttributes, image_to_render::ImageToRender},
 };
-use elrond_wasm::elrond_codec::multi_types::MultiValue2;
+use elrond_wasm::elrond_codec::multi_types::MultiValue3;
 use elrond_wasm::types::MultiValueEncoded;
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
@@ -19,11 +19,11 @@ fn should_set_if_empty() {
 
     let cid_bytes = b"https://ipfs.io/ipfs/some cid";
 
-    let get_attributes = || ImageToRender {
+    let get_image_to_render = || ImageToRender {
         attributes: EquippableAttributes::<DebugApi>::empty(),
         name: managed_buffer!(b"Equippable #512"),
     };
-    setup.enqueue_attributes_to_render(&get_attributes);
+    setup.enqueue_attributes_to_render(&get_image_to_render);
 
     setup
         .blockchain_wrapper
@@ -33,12 +33,13 @@ fn should_set_if_empty() {
             &rust_biguint!(0),
             |sc| {
                 sc.set_uri_of_attributes(args_set_cid_of!(
-                    get_attributes().clone(),
+                    get_image_to_render().attributes,
+                    get_image_to_render().name,
                     managed_buffer!(cid_bytes)
                 ));
 
                 assert_eq!(
-                    sc.uris_of_attributes(&get_attributes()).get(),
+                    sc.uris_of_attributes(&get_image_to_render()).get(),
                     managed_buffer!(cid_bytes)
                 );
             },
@@ -59,17 +60,18 @@ fn panic_if_not_in_render_queue() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes = ImageToRender {
+                let image_to_render = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
                 sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes.clone(),
+                    image_to_render.attributes.clone(),
+                    image_to_render.name.clone(),
                     managed_buffer!(cid_bytes)
                 ));
 
                 assert_eq!(
-                    sc.uris_of_attributes(&attributes).get(),
+                    sc.uris_of_attributes(&image_to_render).get(),
                     managed_buffer!(cid_bytes)
                 );
             },
@@ -84,12 +86,12 @@ fn panic_if_override_previously_set_uri() {
     let first_cid_bytes = b"https://ipfs.io/ipfs/some cid";
     let second_cid_bytes = b"https://ipfs.io/ipfs/another cid";
 
-    let get_attributes = || ImageToRender {
+    let get_image_to_render = || ImageToRender {
         attributes: EquippableAttributes::<DebugApi>::empty(),
         name: managed_buffer!(b"Equippable #512"),
     };
 
-    setup.enqueue_attributes_to_render(&get_attributes);
+    setup.enqueue_attributes_to_render(&get_image_to_render);
 
     setup
         .blockchain_wrapper
@@ -98,14 +100,15 @@ fn panic_if_override_previously_set_uri() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes = get_attributes();
+                let image_to_render = get_image_to_render();
 
                 sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes.clone(),
+                    image_to_render.attributes.clone(),
+                    image_to_render.name.clone(),
                     managed_buffer!(first_cid_bytes)
                 ));
                 assert_eq!(
-                    sc.uris_of_attributes(&attributes).get(),
+                    sc.uris_of_attributes(&image_to_render).get(),
                     managed_buffer!(first_cid_bytes)
                 );
             },
@@ -119,10 +122,11 @@ fn panic_if_override_previously_set_uri() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes = get_attributes();
+                let image_to_render = get_image_to_render();
 
                 sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes.clone(),
+                    image_to_render.attributes,
+                    image_to_render.name,
                     managed_buffer!(second_cid_bytes)
                 ));
             },
@@ -164,17 +168,21 @@ fn should_remove_enqueued_image_to_render() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let attributes = ImageToRender {
+                let image_to_render = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
 
-                sc.enqueue_image_to_render(&attributes);
+                sc.enqueue_image_to_render(
+                    image_to_render.attributes.clone(),
+                    image_to_render.name.clone(),
+                );
                 assert_eq!(sc.images_to_render().len(), 1);
-                assert_eq!(sc.images_to_render().contains(&attributes), true);
+                assert_eq!(sc.images_to_render().contains(&image_to_render), true);
 
                 sc.set_uri_of_attributes(args_set_cid_of!(
-                    attributes.clone(),
+                    image_to_render.attributes.clone(),
+                    image_to_render.name.clone(),
                     managed_buffer!(first_cid_bytes)
                 ));
 

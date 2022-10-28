@@ -11,6 +11,12 @@ pub struct ImageToRender<M: ManagedTypeApi> {
     pub name: ManagedBuffer<M>,
 }
 
+impl<M: ManagedTypeApi> ImageToRender<M> {
+    pub fn to_multi_value_encoded(&self) -> MultiValue2<EquippableAttributes<M>, ManagedBuffer<M>> {
+        return MultiValue2::from((self.attributes.clone(), self.name.clone()));
+    }
+}
+
 impl<M: ManagedTypeApi> SCDisplay for ImageToRender<M> {
     fn fmt<F: elrond_wasm::formatter::FormatByteReceiver>(&self, f: &mut F) {
         let mut attributes = ManagedBuffer::<F::Api>::new_from_bytes(b"");

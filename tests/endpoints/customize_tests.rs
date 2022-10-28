@@ -2,8 +2,8 @@ use customize_nft::{
     constants::ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
     libs::{customize::CustomizeModule, storage::StorageModule},
     structs::{
-        equippable_attributes_to_render::EquippableAttributesToRender,
-        equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot,
+        equippable_attributes::EquippableAttributes,
+        equippable_attributes_to_render::EquippableAttributesToRender, item::Item, slot::Slot,
     },
 };
 use elrond_wasm::types::{ManagedBuffer, MultiValueEncoded};
@@ -67,7 +67,7 @@ fn customize_complete_flow() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes_before_custom = EquippableNftAttributes::new(&[Item {
+                let attributes_before_custom = EquippableAttributes::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
                     slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(
                         ITEM_TO_UNEQUIP_SLOT,
@@ -147,7 +147,7 @@ fn customize_complete_flow() {
         "The user should have received the penguin"
     );
 
-    let mut attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
+    let mut attributes_after_custom = EquippableAttributes::<DebugApi>::new(&[Item {
         name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
         slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT)),
     }]);

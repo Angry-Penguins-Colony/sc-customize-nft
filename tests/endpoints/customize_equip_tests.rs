@@ -4,8 +4,8 @@ use customize_nft::constants::{
     ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
 };
 use customize_nft::libs::storage::StorageModule;
+use customize_nft::structs::equippable_attributes::EquippableAttributes;
 use customize_nft::structs::equippable_attributes_to_render::EquippableAttributesToRender;
-use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
 use customize_nft::structs::item::Item;
 use customize_nft::structs::slot::Slot;
 use elrond_wasm::types::{EsdtTokenType, ManagedBuffer};
@@ -50,7 +50,7 @@ fn test_equip() {
         EQUIPPABLE_TOKEN_ID,
         EQUIPPABLE_TOKEN_NONCE,
         &rust_biguint!(1),
-        &EquippableNftAttributes::<DebugApi>::empty(),
+        &EquippableAttributes::<DebugApi>::empty(),
     );
 
     // add item_to_equip_id
@@ -71,7 +71,7 @@ fn test_equip() {
             &rust_biguint!(0),
             |sc| {
                 let attributes_before_custom = &EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
                 };
 
@@ -80,7 +80,7 @@ fn test_equip() {
                 );
 
                 let attributes_after_custom = EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::new(&[Item {
+                    attributes: EquippableAttributes::<DebugApi>::new(&[Item {
                         name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
                         slot: Slot::new_from_buffer(managed_buffer!(slot)),
                     }]),
@@ -125,7 +125,7 @@ fn test_equip() {
         EQUIPPABLE_TOKEN_ID,
         1u64,
         &rust_biguint!(1),
-        Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[Item {
+        Option::Some(&EquippableAttributes::<DebugApi>::new(&[Item {
             name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
             slot: Slot::new_from_buffer(managed_buffer!(slot)),
         }])),
@@ -196,7 +196,7 @@ fn should_replace_item() {
             &rust_biguint!(0),
             |sc| {
                 let attributes_before_custom = EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::new(&[Item {
+                    attributes: EquippableAttributes::<DebugApi>::new(&[Item {
                         name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
                         slot: Slot::new_from_buffer(managed_buffer!(SHARED_SLOT)),
                     }]),
@@ -208,7 +208,7 @@ fn should_replace_item() {
                 );
 
                 let attributes_after_custom = EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::new(&[Item {
+                    attributes: EquippableAttributes::<DebugApi>::new(&[Item {
                         name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
                         slot: Slot::new_from_buffer(managed_buffer!(SHARED_SLOT)),
                     }]),
@@ -274,7 +274,7 @@ fn should_replace_item() {
         EQUIPPABLE_TOKEN_ID,
         1,
         &rust_biguint!(1),
-        Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[Item {
+        Option::Some(&EquippableAttributes::<DebugApi>::new(&[Item {
             name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
             slot: Slot::new_from_buffer(managed_buffer!(SHARED_SLOT)),
         }])),
@@ -300,7 +300,7 @@ fn panic_if_customize_nft_without_items() {
         EQUIPPABLE_TOKEN_ID,
         INIT_NONCE,
         &rust_biguint!(1),
-        &EquippableNftAttributes::<DebugApi>::empty(),
+        &EquippableAttributes::<DebugApi>::empty(),
     );
 
     let (esdt_transfers, _) = testing_utils::create_paymens_and_esdt_transfers(&[(
@@ -363,7 +363,7 @@ fn panic_if_equipped_token_is_not_an_item() {
     const ITEM_TO_EQUIP_ID: &[u8] = b"NOT-AN-ITEM-a";
 
     DebugApi::dummy();
-    let equippable_nft_attributes = EquippableNftAttributes::<DebugApi>::empty();
+    let equippable_nft_attributes = EquippableAttributes::<DebugApi>::empty();
 
     setup.blockchain_wrapper.set_nft_balance(
         &setup.first_user_address,
@@ -411,7 +411,7 @@ fn panic_if_unequip_item_is_not_an_item() {
     const ITEM_TO_UNEQUIP_NAME: &[u8] = b"cap";
 
     // Register penguins w/ hat to remove
-    let attributes = EquippableNftAttributes::<DebugApi>::new(&[Item {
+    let attributes = EquippableAttributes::<DebugApi>::new(&[Item {
         name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
         slot: Slot::new_from_bytes(SHARED_SLOT),
     }]);
@@ -485,7 +485,7 @@ fn test_equip_while_sending_two_as_value_of_sft() {
         EQUIPPABLE_TOKEN_ID,
         EQUIPPABLE_NONCE,
         &rust_biguint!(1),
-        &EquippableNftAttributes::<DebugApi>::empty(),
+        &EquippableAttributes::<DebugApi>::empty(),
     );
 
     setup.add_random_item_to_user(ITEM_TO_EQUIP_ID, ITEM_TO_EQUIP_NONCE, 3);
@@ -546,12 +546,12 @@ fn equip_while_sending_twice_same_items() {
             &rust_biguint!(0),
             |sc| {
                 let attributes_before_custom = EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
                 };
 
                 let attributes_after_custom = EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::new(&[Item {
+                    attributes: EquippableAttributes::<DebugApi>::new(&[Item {
                         name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
                         slot: Slot::new_from_bytes(SLOT),
                     }]),
@@ -619,7 +619,7 @@ fn equip_while_sending_twice_same_items() {
         EQUIPPABLE_TOKEN_ID,
         1,
         &rust_biguint!(1),
-        Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[Item {
+        Option::Some(&EquippableAttributes::<DebugApi>::new(&[Item {
             name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
             slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
         }])),
@@ -690,11 +690,11 @@ fn equip_while_sending_two_items_of_same_slot() {
             &rust_biguint!(0),
             |sc| {
                 let attributes_before_custom = EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
                 };
                 let attributes_after_custom = EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::new(&[Item {
+                    attributes: EquippableAttributes::<DebugApi>::new(&[Item {
                         name: ManagedBuffer::new_from_bytes(SECOND_ITEM_NAME),
                         slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
                     }]),
@@ -781,7 +781,7 @@ fn equip_while_sending_two_items_of_same_slot() {
         EQUIPPABLE_TOKEN_ID,
         1,
         &rust_biguint!(1),
-        Option::Some(&EquippableNftAttributes::<DebugApi>::new(&[Item {
+        Option::Some(&EquippableAttributes::<DebugApi>::new(&[Item {
             name: ManagedBuffer::new_from_bytes(SECOND_ITEM_NAME),
             slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
         }])),

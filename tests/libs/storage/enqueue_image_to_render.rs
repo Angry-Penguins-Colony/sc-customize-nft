@@ -5,8 +5,8 @@ use customize_nft::{
     },
     libs::storage::StorageModule,
     structs::{
-        equippable_attributes_to_render::EquippableAttributesToRender,
-        equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot,
+        equippable_attributes::EquippableAttributes,
+        equippable_attributes_to_render::EquippableAttributesToRender, item::Item, slot::Slot,
     },
     Equip,
 };
@@ -30,7 +30,7 @@ fn works() {
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
                 let attributes = EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
 
@@ -59,11 +59,11 @@ fn enqueue_two_differents_attributes() {
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
                 let attributes_a = EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
                 let attributes_b = EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::new(&[Item {
+                    attributes: EquippableAttributes::<DebugApi>::new(&[Item {
                         name: managed_buffer!(b"pirate hat"),
                         slot: Slot::new_from_bytes(b"hat"),
                     }]),
@@ -90,7 +90,7 @@ fn enqueue_two_differents_attributes() {
 fn panic_if_already_rendererer() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
     let get_attributes = || EquippableAttributesToRender {
-        attributes: EquippableNftAttributes::<DebugApi>::empty(),
+        attributes: EquippableAttributes::<DebugApi>::empty(),
         name: managed_buffer!(b"Equippable #512"),
     };
 
@@ -129,7 +129,7 @@ fn panic_if_already_in_queue() {
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
                 let attributes = EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
 
@@ -148,7 +148,7 @@ fn panic_if_attributes_already_in_queue_but_in_another_order() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     let attributes_a = || EquippableAttributesToRender {
-        attributes: EquippableNftAttributes::<DebugApi>::new(&[
+        attributes: EquippableAttributes::<DebugApi>::new(&[
             Item {
                 name: managed_buffer!(b"pirate hat"),
                 slot: Slot::new_from_bytes(b"hat"),
@@ -162,7 +162,7 @@ fn panic_if_attributes_already_in_queue_but_in_another_order() {
     };
 
     let attributes_b = || EquippableAttributesToRender {
-        attributes: EquippableNftAttributes::<DebugApi>::new(&[
+        attributes: EquippableAttributes::<DebugApi>::new(&[
             Item {
                 name: managed_buffer!(b"eel"),
                 slot: Slot::new_from_bytes(b"beak"),

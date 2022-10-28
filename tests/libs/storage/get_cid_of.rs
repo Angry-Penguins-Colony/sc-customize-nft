@@ -1,8 +1,8 @@
 use customize_nft::{
     libs::storage::StorageModule,
     structs::{
-        equippable_attributes_to_render::EquippableAttributesToRender,
-        equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot,
+        equippable_attributes::EquippableAttributes,
+        equippable_attributes_to_render::EquippableAttributesToRender, item::Item, slot::Slot,
     },
 };
 use elrond_wasm::{elrond_codec::multi_types::MultiValue2, types::MultiValueEncoded};
@@ -22,7 +22,7 @@ fn should_return_cid() {
     let cid_bytes = b"https://ipfs.io/ipfs/some cid";
 
     let get_attributes = || EquippableAttributesToRender {
-        attributes: EquippableNftAttributes::<DebugApi>::empty(),
+        attributes: EquippableAttributes::<DebugApi>::empty(),
         name: managed_buffer!(b"Equippable #512"),
     };
     setup.enqueue_attributes_to_render(&get_attributes);
@@ -59,7 +59,7 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
     let b_value = b"1";
 
     let get_attributes = || EquippableAttributesToRender {
-        attributes: EquippableNftAttributes::<DebugApi>::new(&[
+        attributes: EquippableAttributes::<DebugApi>::new(&[
             Item::<DebugApi> {
                 name: managed_buffer!(a_value),
                 slot: Slot::new_from_bytes(a_slot),
@@ -73,7 +73,7 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
     };
 
     let get_attributes_reversed = || EquippableAttributesToRender {
-        attributes: EquippableNftAttributes::<DebugApi>::new(&[
+        attributes: EquippableAttributes::<DebugApi>::new(&[
             Item::<DebugApi> {
                 name: managed_buffer!(b_value),
                 slot: Slot::new_from_bytes(b_slot),

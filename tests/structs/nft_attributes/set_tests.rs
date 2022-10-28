@@ -1,6 +1,6 @@
 use customize_nft::structs::{
-    equippable_nft_attributes::{
-        EquippableNftAttributes, ERR_NAME_CANNOT_BE_UNEQUIPPED,
+    equippable_attributes::{
+        EquippableAttributes, ERR_NAME_CANNOT_BE_UNEQUIPPED,
         ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS,
     },
     item::Item,
@@ -18,7 +18,7 @@ fn set_item_on_empty_slot() {
 
     let slot = &Slot::new_from_bytes(b"hat");
 
-    let mut equippable_nft_attributes = EquippableNftAttributes::<DebugApi>::empty();
+    let mut equippable_nft_attributes = EquippableAttributes::<DebugApi>::empty();
 
     equippable_nft_attributes.set_item_if_empty(
         &slot,
@@ -38,7 +38,7 @@ fn set_item_on_not_empty_slot() {
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |_sc| {
             let slot = &Slot::new_from_bytes(b"hat");
-            let mut equippable_nft_attributes = EquippableNftAttributes::<DebugApi>::new(&[Item {
+            let mut equippable_nft_attributes = EquippableAttributes::<DebugApi>::new(&[Item {
                 name: ManagedBuffer::new_from_bytes(b"item name"),
                 slot: slot.clone(),
             }]);
@@ -58,7 +58,7 @@ fn panic_if_name_contains_semicolon() {
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |_sc| {
-            let _ = EquippableNftAttributes::<DebugApi>::new(&[Item {
+            let _ = EquippableAttributes::<DebugApi>::new(&[Item {
                 name: ManagedBuffer::new_from_bytes(b"item; name"),
                 slot: Slot::new_from_bytes(b"hat"),
             }]);
@@ -73,7 +73,7 @@ fn panic_if_name_contains_colon() {
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |_sc| {
-            let _ = EquippableNftAttributes::<DebugApi>::new(&[Item {
+            let _ = EquippableAttributes::<DebugApi>::new(&[Item {
                 name: ManagedBuffer::new_from_bytes(b"item: name"),
                 slot: Slot::new_from_bytes(b"hat"),
             }]);
@@ -88,7 +88,7 @@ fn panic_if_name_is_unequipped() {
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |_sc| {
-            let _ = EquippableNftAttributes::<DebugApi>::new(&[Item {
+            let _ = EquippableAttributes::<DebugApi>::new(&[Item {
                 name: ManagedBuffer::new_from_bytes(b"unequipped"),
                 slot: Slot::new_from_bytes(b"hat"),
             }]);

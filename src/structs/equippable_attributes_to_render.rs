@@ -1,13 +1,13 @@
 use elrond_wasm::{elrond_codec::TopEncode, formatter::SCDisplay};
 
-use super::equippable_nft_attributes::EquippableNftAttributes;
+use super::equippable_attributes::EquippableAttributes;
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
 #[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, TypeAbi, Clone, Debug)]
 pub struct EquippableAttributesToRender<M: ManagedTypeApi> {
-    pub attributes: EquippableNftAttributes<M>,
+    pub attributes: EquippableAttributes<M>,
     pub name: ManagedBuffer<M>,
 }
 

@@ -2,8 +2,8 @@ use customize_nft::{
     constants::ENQUEUE_PRICE,
     libs::storage::StorageModule,
     structs::{
+        equippable_attributes::EquippableAttributes,
         equippable_attributes_to_render::EquippableAttributesToRender,
-        equippable_nft_attributes::EquippableNftAttributes,
     },
     Equip,
 };
@@ -45,7 +45,7 @@ fn returns_one_after_one_enqueue() {
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
                 let attributes = EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
 
@@ -80,7 +80,7 @@ fn returns_zero_after_one_dequeue() {
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
                 let attributes = EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
 

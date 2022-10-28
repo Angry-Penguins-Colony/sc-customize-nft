@@ -7,8 +7,8 @@ use std::u8;
 use customize_nft::constants::ENQUEUE_PRICE;
 use customize_nft::libs::customize::CustomizeModule;
 use customize_nft::libs::storage::StorageModule;
+use customize_nft::structs::equippable_attributes::EquippableAttributes;
 use customize_nft::structs::equippable_attributes_to_render::EquippableAttributesToRender;
-use customize_nft::structs::equippable_nft_attributes::EquippableNftAttributes;
 use customize_nft::structs::item::Item;
 use customize_nft::structs::slot::Slot;
 use customize_nft::*;
@@ -228,7 +228,7 @@ where
             EQUIPPABLE_TOKEN_ID,
             nonce,
             &rust_biguint!(1),
-            &EquippableNftAttributes::<DebugApi>::empty(),
+            &EquippableAttributes::<DebugApi>::empty(),
         );
     }
 
@@ -243,7 +243,7 @@ where
     ) {
         self.register_and_fill_item(slot, item_name, item_identifier, item_nonce, &attributes);
 
-        let attributes = EquippableNftAttributes::<DebugApi>::new(&[Item {
+        let attributes = EquippableAttributes::<DebugApi>::new(&[Item {
             name: ManagedBuffer::new_from_bytes(item_name),
             slot: Slot::new_from_bytes(slot),
         }]);
@@ -485,7 +485,7 @@ pub trait New<M: ManagedTypeApi> {
     fn new(items_by_slot: &[Item<M>]) -> Self;
 }
 
-impl<M: ManagedTypeApi> New<M> for EquippableNftAttributes<M> {
+impl<M: ManagedTypeApi> New<M> for EquippableAttributes<M> {
     fn new(items_by_slot: &[Item<M>]) -> Self {
         let mut attributes = Self::empty();
 

@@ -1,8 +1,9 @@
 use crate::{
     constants::*,
     structs::{
-        equippable_attributes_to_render::EquippableAttributesToRender,
-        equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot, token::Token,
+        equippable_attributes::EquippableAttributes,
+        equippable_attributes_to_render::EquippableAttributesToRender, item::Item, slot::Slot,
+        token::Token,
     },
 };
 
@@ -44,7 +45,7 @@ pub trait CustomizeModule: super::storage::StorageModule {
                 &equippable_token_id,
                 equippable_nonce,
             )
-            .decode_attributes::<EquippableNftAttributes<Self::Api>>();
+            .decode_attributes::<EquippableAttributes<Self::Api>>();
 
         // first unequip
         for slot in to_unequip_slots {
@@ -76,11 +77,7 @@ pub trait CustomizeModule: super::storage::StorageModule {
         return self.update_equippable(equippable_nonce, &attributes);
     }
 
-    fn equip_slot(
-        &self,
-        attributes: &mut EquippableNftAttributes<Self::Api>,
-        item: &Item<Self::Api>,
-    ) {
+    fn equip_slot(&self, attributes: &mut EquippableAttributes<Self::Api>, item: &Item<Self::Api>) {
         // unequip slot if any
         if attributes.is_slot_empty(&item.slot) == false {
             self.unequip_slot(attributes, &item.slot);
@@ -92,7 +89,7 @@ pub trait CustomizeModule: super::storage::StorageModule {
     /// Empty the item at the slot provided and sent it to the caller.
     fn unequip_slot(
         &self,
-        attributes: &mut EquippableNftAttributes<Self::Api>,
+        attributes: &mut EquippableAttributes<Self::Api>,
         slot: &Slot<Self::Api>,
     ) {
         let opt_name = attributes.get_name(&slot);
@@ -164,7 +161,7 @@ pub trait CustomizeModule: super::storage::StorageModule {
     fn update_equippable(
         &self,
         equippable_nonce: u64,
-        attributes: &EquippableNftAttributes<Self::Api>,
+        attributes: &EquippableAttributes<Self::Api>,
     ) -> u64 {
         let equippable_token_id = self.equippable_token_id().get();
         let caller = self.blockchain().get_caller();
@@ -214,7 +211,7 @@ pub trait CustomizeModule: super::storage::StorageModule {
 
         let token_nonce = self
             .send()
-            .esdt_nft_create::<EquippableNftAttributes<Self::Api>>(
+            .esdt_nft_create::<EquippableAttributes<Self::Api>>(
                 &self.equippable_token_id().get(),
                 &BigUint::from(1u32),
                 &name,

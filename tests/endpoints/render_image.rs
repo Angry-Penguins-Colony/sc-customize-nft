@@ -2,8 +2,8 @@ use customize_nft::{
     constants::{ENQUEUE_PRICE, ERR_PAY_0001_EGLD},
     libs::storage::StorageModule,
     structs::{
+        equippable_attributes::EquippableAttributes,
         equippable_attributes_to_render::EquippableAttributesToRender,
-        equippable_nft_attributes::EquippableNftAttributes,
     },
     Equip,
 };
@@ -27,7 +27,7 @@ fn works() {
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
                 let attributes = &EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
 
@@ -52,7 +52,7 @@ fn panic_if_dont_send_egld() {
             &rust_biguint!(0),
             |sc| {
                 let attributes = &EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
 
@@ -81,7 +81,7 @@ fn panic_if_send_lesser_amount_of_egld() {
             &rust_biguint!(ENQUEUE_PRICE - 5),
             |sc| {
                 let attributes = &EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
 
@@ -110,7 +110,7 @@ fn panic_if_send_greater_amount_of_egld() {
             &rust_biguint!(ENQUEUE_PRICE * 2),
             |sc| {
                 let attributes = &EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
 

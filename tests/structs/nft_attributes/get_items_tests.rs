@@ -1,6 +1,4 @@
-use customize_nft::structs::{
-    equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot,
-};
+use customize_nft::structs::{equippable_attributes::EquippableAttributes, item::Item, slot::Slot};
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm_debug::DebugApi;
 
@@ -10,7 +8,7 @@ use crate::testing_utils::{self, New};
 fn get_empty_item() {
     DebugApi::dummy();
 
-    let attributes = EquippableNftAttributes::<DebugApi>::empty();
+    let attributes = EquippableAttributes::<DebugApi>::empty();
 
     let slot = Slot::<DebugApi>::new_from_bytes(b"hat");
 
@@ -30,7 +28,7 @@ fn should_return_none_if_emptied() {
             name: name.clone(),
         };
 
-        let mut attributes = EquippableNftAttributes::<DebugApi>::new(&[item.clone()]);
+        let mut attributes = EquippableAttributes::<DebugApi>::new(&[item.clone()]);
 
         attributes.empty_slot(slot);
 
@@ -48,7 +46,7 @@ fn get_item() {
         slot: slot.clone(),
     };
 
-    let attributes = EquippableNftAttributes::<DebugApi>::new(&[item.clone()]);
+    let attributes = EquippableAttributes::<DebugApi>::new(&[item.clone()]);
 
     assert_eq!(attributes.get_name(&slot).is_some(), true);
     assert_eq!(attributes.get_name(&slot).unwrap(), item.name);

@@ -1,6 +1,4 @@
-use customize_nft::structs::{
-    equippable_nft_attributes::EquippableNftAttributes, item::Item, slot::Slot,
-};
+use customize_nft::structs::{equippable_attributes::EquippableAttributes, item::Item, slot::Slot};
 use elrond_wasm::elrond_codec::TopEncode;
 use elrond_wasm_debug::{managed_buffer, DebugApi};
 
@@ -10,7 +8,7 @@ use crate::testing_utils::{self, New};
 fn should_top_encode() {
     DebugApi::dummy();
 
-    let equippable_nft_attributes = EquippableNftAttributes::new(&[Item::<DebugApi> {
+    let equippable_nft_attributes = EquippableAttributes::new(&[Item::<DebugApi> {
         name: managed_buffer!(b"Pirate Hat"),
         slot: Slot::new_from_bytes(b"hat"),
     }]);
@@ -25,7 +23,7 @@ fn should_top_encode() {
 fn should_top_encode_two() {
     DebugApi::dummy();
 
-    let attributes_order_one = EquippableNftAttributes::new(&[
+    let attributes_order_one = EquippableAttributes::new(&[
         Item::<DebugApi> {
             name: managed_buffer!(b"Gun"),
             slot: Slot::new_from_bytes(b"weapon"),
@@ -36,7 +34,7 @@ fn should_top_encode_two() {
         },
     ]);
 
-    let attributes_order_two = EquippableNftAttributes::new(&[
+    let attributes_order_two = EquippableAttributes::new(&[
         Item::<DebugApi> {
             name: managed_buffer!(b"Pirate Hat"),
             slot: Slot::new_from_bytes(b"hat"),
@@ -55,7 +53,7 @@ fn should_top_encode_two() {
 fn should_top_encode_after_emptying() {
     DebugApi::dummy();
 
-    let mut equippable_nft_attributes = EquippableNftAttributes::new(&[Item::<DebugApi> {
+    let mut equippable_nft_attributes = EquippableAttributes::new(&[Item::<DebugApi> {
         name: managed_buffer!(b"Pirate Hat"),
         slot: Slot::new_from_bytes(b"hat"),
     }]);
@@ -67,7 +65,7 @@ fn should_top_encode_after_emptying() {
 }
 
 fn assert_equippable_encode_eq(
-    equippable_nft_attributes: EquippableNftAttributes<elrond_wasm_debug::tx_mock::TxContextRef>,
+    equippable_nft_attributes: EquippableAttributes<elrond_wasm_debug::tx_mock::TxContextRef>,
     expected: &[u8],
 ) {
     let mut serialized_attributes = Vec::new();
@@ -103,7 +101,7 @@ fn panic_if_more_that_512_bytes() {
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |_| {
-            let equippable_nft_attributes = EquippableNftAttributes::new(&[Item::<DebugApi> {
+            let equippable_nft_attributes = EquippableAttributes::new(&[Item::<DebugApi> {
                 slot: Slot::new_from_bytes(b"lorem"),
                 name: managed_buffer!(NAME),
             }]);

@@ -2,8 +2,8 @@ use customize_nft::{
     constants::ERR_CANNOT_UNEQUIP_EMPTY_SLOT,
     libs::storage::StorageModule,
     structs::{
+        equippable_attributes::EquippableAttributes,
         equippable_attributes_to_render::EquippableAttributesToRender,
-        equippable_nft_attributes::EquippableNftAttributes,
         item::Item,
         slot::{Slot, ERR_MUST_BE_LOWERCASE},
     },
@@ -44,7 +44,7 @@ fn customize_only_unequip() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes_before_custom = EquippableNftAttributes::new(&[Item {
+                let attributes_before_custom = EquippableAttributes::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
                     slot: Slot::new_from_bytes(slot),
                 }]);
@@ -102,7 +102,7 @@ fn customize_only_unequip() {
         "Equippable NFT should be received"
     );
 
-    let mut attributes_after_custom = EquippableNftAttributes::<DebugApi>::new(&[Item {
+    let mut attributes_after_custom = EquippableAttributes::<DebugApi>::new(&[Item {
         name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
         slot: Slot::new_from_bytes(slot),
     }]);
@@ -150,7 +150,7 @@ fn panic_if_uppercase_slot() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes_before_custom = EquippableNftAttributes::new(&[Item {
+                let attributes_before_custom = EquippableAttributes::new(&[Item {
                     name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
                     slot: Slot::new_from_bytes(SLOT_LOWERCASE),
                 }]);
@@ -215,7 +215,7 @@ fn panic_when_unequip_twice_the_same_slot() {
             &rust_biguint!(0),
             |sc| {
                 let attributes_before_custom = EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::new(&[Item {
+                    attributes: EquippableAttributes::new(&[Item {
                         name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
                         slot: Slot::new_from_bytes(slot),
                     }]),
@@ -226,7 +226,7 @@ fn panic_when_unequip_twice_the_same_slot() {
                 );
 
                 let attributes_after_custom = EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
                 };
                 sc.uris_of_attributes(&attributes_after_custom).set(
@@ -264,7 +264,7 @@ fn panic_when_unequip_on_empty_slot() {
             &rust_biguint!(0),
             |sc| {
                 let attributes = EquippableAttributesToRender {
-                    attributes: EquippableNftAttributes::<DebugApi>::empty(),
+                    attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
                 };
                 sc.uris_of_attributes(&attributes)

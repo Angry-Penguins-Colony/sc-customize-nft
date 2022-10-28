@@ -3,7 +3,7 @@ use customize_nft::{
     libs::equippable_uris::EquippableUrisModule,
     structs::{
         equippable_attributes::EquippableAttributes,
-        equippable_attributes_to_render::EquippableAttributesToRender,
+        image_to_render::ImageToRender,
         item::Item,
         slot::{Slot, ERR_MUST_BE_LOWERCASE},
     },
@@ -52,7 +52,7 @@ fn customize_only_unequip() {
                 let mut attributes_after_custom = attributes_before_custom.clone();
                 attributes_after_custom.empty_slot(&Slot::new_from_bytes(slot));
 
-                sc.uris_of_attributes(&EquippableAttributesToRender {
+                sc.uris_of_attributes(&ImageToRender {
                     attributes: attributes_before_custom,
                     name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
                 })
@@ -60,7 +60,7 @@ fn customize_only_unequip() {
                     b"https://ipfs.io/ipfs/this is a cid",
                 ));
 
-                sc.uris_of_attributes(&EquippableAttributesToRender {
+                sc.uris_of_attributes(&ImageToRender {
                     attributes: attributes_after_custom,
                     name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
                 })
@@ -158,7 +158,7 @@ fn panic_if_uppercase_slot() {
                 let mut attributes_after_custom = attributes_before_custom.clone();
                 attributes_after_custom.empty_slot(&Slot::new_from_bytes(SLOT_LOWERCASE));
 
-                sc.uris_of_attributes(&EquippableAttributesToRender {
+                sc.uris_of_attributes(&ImageToRender {
                     attributes: attributes_before_custom,
                     name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
                 })
@@ -166,7 +166,7 @@ fn panic_if_uppercase_slot() {
                     b"https://ipfs.io/ipfs/this is a cid",
                 ));
 
-                sc.uris_of_attributes(&EquippableAttributesToRender {
+                sc.uris_of_attributes(&ImageToRender {
                     attributes: attributes_after_custom,
                     name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
                 })
@@ -214,7 +214,7 @@ fn panic_when_unequip_twice_the_same_slot() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes_before_custom = EquippableAttributesToRender {
+                let attributes_before_custom = ImageToRender {
                     attributes: EquippableAttributes::new(&[Item {
                         name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
                         slot: Slot::new_from_bytes(slot),
@@ -225,7 +225,7 @@ fn panic_when_unequip_twice_the_same_slot() {
                     ManagedBuffer::<DebugApi>::new_from_bytes(b"https://ipfs.io/ipfs/before"),
                 );
 
-                let attributes_after_custom = EquippableAttributesToRender {
+                let attributes_after_custom = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
                 };
@@ -263,7 +263,7 @@ fn panic_when_unequip_on_empty_slot() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes = EquippableAttributesToRender {
+                let attributes = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
                 };

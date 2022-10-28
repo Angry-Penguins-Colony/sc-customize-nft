@@ -1,9 +1,8 @@
 use crate::{
     constants::*,
     structs::{
-        equippable_attributes::EquippableAttributes,
-        equippable_attributes_to_render::EquippableAttributesToRender, item::Item, slot::Slot,
-        token::Token,
+        equippable_attributes::EquippableAttributes, image_to_render::ImageToRender, item::Item,
+        slot::Slot, token::Token,
     },
 };
 
@@ -179,7 +178,7 @@ pub trait CustomizeModule:
 
         // mint
         let token_nonce = self.mint_equippable(
-            &EquippableAttributesToRender {
+            &ImageToRender {
                 attributes: attributes.clone(),
                 name: equippable_name.clone(),
             },
@@ -202,11 +201,7 @@ pub trait CustomizeModule:
         return token_nonce;
     }
 
-    fn mint_equippable(
-        &self,
-        attributes: &EquippableAttributesToRender<Self::Api>,
-        name: &ManagedBuffer,
-    ) -> u64 {
+    fn mint_equippable(&self, attributes: &ImageToRender<Self::Api>, name: &ManagedBuffer) -> u64 {
         let mut uris = ManagedVec::new();
         let thumbnail = self.get_uri_of(&attributes);
         uris.push(thumbnail);

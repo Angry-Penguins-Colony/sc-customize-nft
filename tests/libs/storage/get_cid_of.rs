@@ -1,8 +1,8 @@
 use customize_nft::{
     libs::equippable_uris::EquippableUrisModule,
     structs::{
-        equippable_attributes::EquippableAttributes,
-        equippable_attributes_to_render::EquippableAttributesToRender, item::Item, slot::Slot,
+        equippable_attributes::EquippableAttributes, image_to_render::ImageToRender, item::Item,
+        slot::Slot,
     },
 };
 use elrond_wasm::{elrond_codec::multi_types::MultiValue2, types::MultiValueEncoded};
@@ -21,7 +21,7 @@ fn should_return_cid() {
 
     let cid_bytes = b"https://ipfs.io/ipfs/some cid";
 
-    let get_attributes = || EquippableAttributesToRender {
+    let get_attributes = || ImageToRender {
         attributes: EquippableAttributes::<DebugApi>::empty(),
         name: managed_buffer!(b"Equippable #512"),
     };
@@ -58,7 +58,7 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
     let b_slot = b"badge";
     let b_value = b"1";
 
-    let get_attributes = || EquippableAttributesToRender {
+    let get_attributes = || ImageToRender {
         attributes: EquippableAttributes::<DebugApi>::new(&[
             Item::<DebugApi> {
                 name: managed_buffer!(a_value),
@@ -72,7 +72,7 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
         name: managed_buffer!(b"Equippable #512"),
     };
 
-    let get_attributes_reversed = || EquippableAttributesToRender {
+    let get_attributes_reversed = || ImageToRender {
         attributes: EquippableAttributes::<DebugApi>::new(&[
             Item::<DebugApi> {
                 name: managed_buffer!(b_value),

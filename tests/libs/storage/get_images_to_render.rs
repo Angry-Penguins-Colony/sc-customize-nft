@@ -1,10 +1,7 @@
 use customize_nft::{
     constants::ENQUEUE_PRICE,
     libs::equippable_uris::EquippableUrisModule,
-    structs::{
-        equippable_attributes::EquippableAttributes,
-        equippable_attributes_to_render::EquippableAttributesToRender,
-    },
+    structs::{equippable_attributes::EquippableAttributes, image_to_render::ImageToRender},
 };
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
@@ -43,7 +40,7 @@ fn returns_one_after_one_enqueue() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let attributes = EquippableAttributesToRender {
+                let attributes = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
@@ -78,7 +75,7 @@ fn returns_zero_after_one_dequeue() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let attributes = EquippableAttributesToRender {
+                let attributes = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };

@@ -3,10 +3,7 @@ use customize_nft::{
         ENQUEUE_PRICE, ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE, ERR_IMAGE_NOT_IN_RENDER_QUEUE,
     },
     libs::equippable_uris::{EndpointWrappers, EquippableUrisModule},
-    structs::{
-        equippable_attributes::EquippableAttributes,
-        equippable_attributes_to_render::EquippableAttributesToRender,
-    },
+    structs::{equippable_attributes::EquippableAttributes, image_to_render::ImageToRender},
 };
 use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::MultiValueEncoded;
@@ -22,7 +19,7 @@ fn should_set_if_empty() {
 
     let cid_bytes = b"https://ipfs.io/ipfs/some cid";
 
-    let get_attributes = || EquippableAttributesToRender {
+    let get_attributes = || ImageToRender {
         attributes: EquippableAttributes::<DebugApi>::empty(),
         name: managed_buffer!(b"Equippable #512"),
     };
@@ -62,7 +59,7 @@ fn panic_if_not_in_render_queue() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes = EquippableAttributesToRender {
+                let attributes = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
@@ -87,7 +84,7 @@ fn panic_if_override_previously_set_uri() {
     let first_cid_bytes = b"https://ipfs.io/ipfs/some cid";
     let second_cid_bytes = b"https://ipfs.io/ipfs/another cid";
 
-    let get_attributes = || EquippableAttributesToRender {
+    let get_attributes = || ImageToRender {
         attributes: EquippableAttributes::<DebugApi>::empty(),
         name: managed_buffer!(b"Equippable #512"),
     };
@@ -167,7 +164,7 @@ fn should_remove_enqueued_image_to_render() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let attributes = EquippableAttributesToRender {
+                let attributes = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };

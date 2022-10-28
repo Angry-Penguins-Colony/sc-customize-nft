@@ -1,4 +1,4 @@
-use crate::{constants::*, structs::equippable_attributes_to_render::EquippableAttributesToRender};
+use crate::{constants::*, structs::image_to_render::ImageToRender};
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
@@ -6,12 +6,12 @@ elrond_wasm::derive_imports!();
 #[elrond_wasm::module]
 pub trait EquippableUrisModule: super::storage::StorageModule {
     #[storage_mapper("images_to_render")]
-    fn images_to_render(&self) -> UnorderedSetMapper<EquippableAttributesToRender<Self::Api>>;
+    fn images_to_render(&self) -> UnorderedSetMapper<ImageToRender<Self::Api>>;
 
     #[storage_mapper("uris_of_attributes")]
     fn uris_of_attributes(
         &self,
-        attributes: &EquippableAttributesToRender<Self::Api>,
+        attributes: &ImageToRender<Self::Api>,
     ) -> SingleValueMapper<ManagedBuffer>;
 
     #[endpoint(authorizeAddressToSetUris)]
@@ -25,7 +25,7 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
      */
     #[endpoint(renderImage)]
     #[payable("EGLD")]
-    fn enqueue_image_to_render(&self, attributes: &EquippableAttributesToRender<Self::Api>) {
+    fn enqueue_image_to_render(&self, attributes: &ImageToRender<Self::Api>) {
         require!(
             self.call_value().egld_value() == BigUint::from(ENQUEUE_PRICE),
             ERR_PAY_0001_EGLD
@@ -44,7 +44,7 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
     }
 
     #[view(getImagesToRender)]
-    fn get_images_to_render(&self) -> MultiValueEncoded<EquippableAttributesToRender<Self::Api>> {
+    fn get_images_to_render(&self) -> MultiValueEncoded<ImageToRender<Self::Api>> {
         let mut o = MultiValueEncoded::new();
 
         for image_to_render in self.images_to_render().iter() {
@@ -57,9 +57,7 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
     #[endpoint(setUriOfAttributes)]
     fn set_uri_of_attributes(
         &self,
-        uri_kvp: MultiValueEncoded<
-            MultiValue2<EquippableAttributesToRender<Self::Api>, ManagedBuffer<Self::Api>>,
-        >,
+        uri_kvp: MultiValueEncoded<MultiValue2<ImageToRender<Self::Api>, ManagedBuffer<Self::Api>>>,
     ) {
         let caller = &self.blockchain().get_caller();
 
@@ -88,10 +86,7 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
     }
 
     #[view(getUriOf)]
-    fn get_uri_of(
-        &self,
-        attributes: &EquippableAttributesToRender<Self::Api>,
-    ) -> ManagedBuffer<Self::Api> {
+    fn get_uri_of(&self, attributes: &ImageToRender<Self::Api>) -> ManagedBuffer<Self::Api> {
         let uri = self.uris_of_attributes(attributes);
 
         require!(

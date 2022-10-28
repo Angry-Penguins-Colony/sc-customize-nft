@@ -2,7 +2,7 @@ use crate::testing_utils::New;
 use crate::{args_set_cid_of, testing_utils};
 use customize_nft::libs::equippable_uris::EquippableUrisModule;
 
-use customize_nft::structs::equippable_attributes_to_render::EquippableAttributesToRender;
+use customize_nft::structs::image_to_render::ImageToRender;
 use customize_nft::structs::slot::Slot;
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm::types::MultiValueEncoded;
@@ -20,7 +20,7 @@ fn build_url_with_no_associated_cid() {
     setup
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
-            let equippable_attributes = EquippableAttributesToRender {
+            let equippable_attributes = ImageToRender {
                 attributes: EquippableAttributes::<DebugApi>::new(&[Item::<DebugApi> {
                     name: ManagedBuffer::new_from_bytes(b"item name"),
                     slot: Slot::new_from_bytes(b"hat"),
@@ -39,7 +39,7 @@ fn build_url_with_no_associated_cid() {
 fn build_url_with_associated_cid() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let get_attributes = || EquippableAttributesToRender {
+    let get_attributes = || ImageToRender {
         attributes: EquippableAttributes::<DebugApi>::new(&[Item::<DebugApi> {
             name: ManagedBuffer::new_from_bytes(b"item name"),
             slot: Slot::new_from_bytes(b"hat"),

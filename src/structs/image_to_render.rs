@@ -6,12 +6,12 @@ elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
 #[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, TypeAbi, Clone, Debug)]
-pub struct EquippableAttributesToRender<M: ManagedTypeApi> {
+pub struct ImageToRender<M: ManagedTypeApi> {
     pub attributes: EquippableAttributes<M>,
     pub name: ManagedBuffer<M>,
 }
 
-impl<M: ManagedTypeApi> SCDisplay for EquippableAttributesToRender<M> {
+impl<M: ManagedTypeApi> SCDisplay for ImageToRender<M> {
     fn fmt<F: elrond_wasm::formatter::FormatByteReceiver>(&self, f: &mut F) {
         let mut attributes = ManagedBuffer::<F::Api>::new_from_bytes(b"");
         let _ = self.attributes.top_encode(&mut attributes);

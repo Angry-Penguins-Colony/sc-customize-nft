@@ -5,8 +5,8 @@ use customize_nft::{
     },
     libs::equippable_uris::EquippableUrisModule,
     structs::{
-        equippable_attributes::EquippableAttributes,
-        equippable_attributes_to_render::EquippableAttributesToRender, item::Item, slot::Slot,
+        equippable_attributes::EquippableAttributes, image_to_render::ImageToRender, item::Item,
+        slot::Slot,
     },
 };
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
@@ -28,7 +28,7 @@ fn works() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let attributes = EquippableAttributesToRender {
+                let attributes = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
@@ -57,11 +57,11 @@ fn enqueue_two_differents_attributes() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let attributes_a = EquippableAttributesToRender {
+                let attributes_a = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
-                let attributes_b = EquippableAttributesToRender {
+                let attributes_b = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::new(&[Item {
                         name: managed_buffer!(b"pirate hat"),
                         slot: Slot::new_from_bytes(b"hat"),
@@ -88,7 +88,7 @@ fn enqueue_two_differents_attributes() {
 #[test]
 fn panic_if_already_rendererer() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
-    let get_attributes = || EquippableAttributesToRender {
+    let get_attributes = || ImageToRender {
         attributes: EquippableAttributes::<DebugApi>::empty(),
         name: managed_buffer!(b"Equippable #512"),
     };
@@ -127,7 +127,7 @@ fn panic_if_already_in_queue() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let attributes = EquippableAttributesToRender {
+                let attributes = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
@@ -146,7 +146,7 @@ fn panic_if_already_in_queue() {
 fn panic_if_attributes_already_in_queue_but_in_another_order() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let attributes_a = || EquippableAttributesToRender {
+    let attributes_a = || ImageToRender {
         attributes: EquippableAttributes::<DebugApi>::new(&[
             Item {
                 name: managed_buffer!(b"pirate hat"),
@@ -160,7 +160,7 @@ fn panic_if_attributes_already_in_queue_but_in_another_order() {
         name: managed_buffer!(b"Equippable #513"),
     };
 
-    let attributes_b = || EquippableAttributesToRender {
+    let attributes_b = || ImageToRender {
         attributes: EquippableAttributes::<DebugApi>::new(&[
             Item {
                 name: managed_buffer!(b"eel"),

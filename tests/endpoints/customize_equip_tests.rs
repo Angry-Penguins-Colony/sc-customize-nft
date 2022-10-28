@@ -5,7 +5,7 @@ use customize_nft::constants::{
 };
 use customize_nft::libs::equippable_uris::EquippableUrisModule;
 use customize_nft::structs::equippable_attributes::EquippableAttributes;
-use customize_nft::structs::equippable_attributes_to_render::EquippableAttributesToRender;
+use customize_nft::structs::image_to_render::ImageToRender;
 use customize_nft::structs::item::Item;
 use customize_nft::structs::slot::Slot;
 use elrond_wasm::types::{EsdtTokenType, ManagedBuffer};
@@ -70,7 +70,7 @@ fn test_equip() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes_before_custom = &EquippableAttributesToRender {
+                let attributes_before_custom = &ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
                 };
@@ -79,7 +79,7 @@ fn test_equip() {
                     ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom"),
                 );
 
-                let attributes_after_custom = EquippableAttributesToRender {
+                let attributes_after_custom = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::new(&[Item {
                         name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
                         slot: Slot::new_from_buffer(managed_buffer!(slot)),
@@ -195,7 +195,7 @@ fn should_replace_item() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes_before_custom = EquippableAttributesToRender {
+                let attributes_before_custom = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::new(&[Item {
                         name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
                         slot: Slot::new_from_buffer(managed_buffer!(SHARED_SLOT)),
@@ -207,7 +207,7 @@ fn should_replace_item() {
                     ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom"),
                 );
 
-                let attributes_after_custom = EquippableAttributesToRender {
+                let attributes_after_custom = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::new(&[Item {
                         name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
                         slot: Slot::new_from_buffer(managed_buffer!(SHARED_SLOT)),
@@ -545,12 +545,12 @@ fn equip_while_sending_twice_same_items() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes_before_custom = EquippableAttributesToRender {
+                let attributes_before_custom = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
                 };
 
-                let attributes_after_custom = EquippableAttributesToRender {
+                let attributes_after_custom = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::new(&[Item {
                         name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
                         slot: Slot::new_from_bytes(SLOT),
@@ -689,11 +689,11 @@ fn equip_while_sending_two_items_of_same_slot() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes_before_custom = EquippableAttributesToRender {
+                let attributes_before_custom = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
                 };
-                let attributes_after_custom = EquippableAttributesToRender {
+                let attributes_after_custom = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::new(&[Item {
                         name: ManagedBuffer::new_from_bytes(SECOND_ITEM_NAME),
                         slot: Slot::new_from_buffer(managed_buffer!(SLOT)),

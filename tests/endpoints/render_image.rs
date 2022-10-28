@@ -1,10 +1,7 @@
 use customize_nft::{
     constants::{ENQUEUE_PRICE, ERR_PAY_0001_EGLD},
     libs::equippable_uris::EquippableUrisModule,
-    structs::{
-        equippable_attributes::EquippableAttributes,
-        equippable_attributes_to_render::EquippableAttributesToRender,
-    },
+    structs::{equippable_attributes::EquippableAttributes, image_to_render::ImageToRender},
 };
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
@@ -25,7 +22,7 @@ fn works() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let attributes = &EquippableAttributesToRender {
+                let attributes = &ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
@@ -50,7 +47,7 @@ fn panic_if_dont_send_egld() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes = &EquippableAttributesToRender {
+                let attributes = &ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
@@ -79,7 +76,7 @@ fn panic_if_send_lesser_amount_of_egld() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE - 5),
             |sc| {
-                let attributes = &EquippableAttributesToRender {
+                let attributes = &ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };
@@ -108,7 +105,7 @@ fn panic_if_send_greater_amount_of_egld() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE * 2),
             |sc| {
-                let attributes = &EquippableAttributesToRender {
+                let attributes = &ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: managed_buffer!(b"Equippable #512"),
                 };

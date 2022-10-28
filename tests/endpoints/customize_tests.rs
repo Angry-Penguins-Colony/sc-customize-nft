@@ -2,8 +2,8 @@ use customize_nft::{
     constants::ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
     libs::{customize::CustomizeModule, equippable_uris::EquippableUrisModule},
     structs::{
-        equippable_attributes::EquippableAttributes,
-        equippable_attributes_to_render::EquippableAttributesToRender, item::Item, slot::Slot,
+        equippable_attributes::EquippableAttributes, image_to_render::ImageToRender, item::Item,
+        slot::Slot,
     },
 };
 use elrond_wasm::types::{ManagedBuffer, MultiValueEncoded};
@@ -84,14 +84,14 @@ fn customize_complete_flow() {
                     Some(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME)),
                 );
 
-                sc.uris_of_attributes(&EquippableAttributesToRender {
+                sc.uris_of_attributes(&ImageToRender {
                     attributes: attributes_before_custom,
                     name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
                 })
                 .set(ManagedBuffer::new_from_bytes(
                     b"https://ipfs.io/ipfs/cid before custom",
                 ));
-                sc.uris_of_attributes(&EquippableAttributesToRender {
+                sc.uris_of_attributes(&ImageToRender {
                     attributes: attributes_after_custom,
                     name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
                 })

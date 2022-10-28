@@ -11,7 +11,9 @@ elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
 #[elrond_wasm::module]
-pub trait CustomizeModule: super::storage::StorageModule {
+pub trait CustomizeModule:
+    super::storage::StorageModule + super::equippable_uris::EquippableUrisModule
+{
     #[payable("*")]
     #[endpoint(customize)]
     fn customize(&self, to_unequip_slots: MultiValueEncoded<Slot<Self::Api>>) -> u64 {

@@ -3,7 +3,7 @@ use customize_nft::constants::{
     ERR_FIRST_PAYMENT_IS_EQUIPPABLE, ERR_MORE_THAN_ONE_ITEM_RECEIVED,
     ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
 };
-use customize_nft::libs::storage::StorageModule;
+use customize_nft::libs::equippable_uris::EquippableUrisModule;
 use customize_nft::structs::equippable_attributes::EquippableAttributes;
 use customize_nft::structs::equippable_attributes_to_render::EquippableAttributesToRender;
 use customize_nft::structs::item::Item;

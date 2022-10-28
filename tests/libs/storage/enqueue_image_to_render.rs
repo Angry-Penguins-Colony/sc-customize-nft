@@ -3,12 +3,11 @@ use customize_nft::{
         ENQUEUE_PRICE, ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED,
         ERR_RENDER_ALREADY_IN_QUEUE,
     },
-    libs::storage::StorageModule,
+    libs::equippable_uris::EquippableUrisModule,
     structs::{
         equippable_attributes::EquippableAttributes,
         equippable_attributes_to_render::EquippableAttributesToRender, item::Item, slot::Slot,
     },
-    Equip,
 };
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 

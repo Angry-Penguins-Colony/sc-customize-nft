@@ -6,7 +6,7 @@ use std::u8;
 
 use customize_nft::constants::ENQUEUE_PRICE;
 use customize_nft::libs::customize::CustomizeModule;
-use customize_nft::libs::storage::StorageModule;
+use customize_nft::libs::equippable_uris::EquippableUrisModule;
 use customize_nft::structs::equippable_attributes::EquippableAttributes;
 use customize_nft::structs::equippable_attributes_to_render::EquippableAttributesToRender;
 use customize_nft::structs::item::Item;

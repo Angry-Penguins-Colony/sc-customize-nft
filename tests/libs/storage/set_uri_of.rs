@@ -2,12 +2,11 @@ use customize_nft::{
     constants::{
         ENQUEUE_PRICE, ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE, ERR_IMAGE_NOT_IN_RENDER_QUEUE,
     },
-    libs::storage::{EndpointWrappers, StorageModule},
+    libs::equippable_uris::{EndpointWrappers, EquippableUrisModule},
     structs::{
         equippable_attributes::EquippableAttributes,
         equippable_attributes_to_render::EquippableAttributesToRender,
     },
-    Equip,
 };
 use elrond_wasm::elrond_codec::multi_types::MultiValue2;
 use elrond_wasm::types::MultiValueEncoded;

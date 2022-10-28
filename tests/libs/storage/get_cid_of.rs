@@ -1,5 +1,5 @@
 use customize_nft::{
-    libs::storage::StorageModule,
+    libs::equippable_uris::EquippableUrisModule,
     structs::{
         equippable_attributes::EquippableAttributes,
         equippable_attributes_to_render::EquippableAttributesToRender, item::Item, slot::Slot,

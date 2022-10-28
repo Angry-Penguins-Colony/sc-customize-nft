@@ -10,14 +10,14 @@ pub mod structs;
 pub mod utils;
 
 use libs::*;
-use structs::{
-    equippable_attributes_to_render::EquippableAttributesToRender, item::Item, slot::Slot,
-};
+use structs::{item::Item, slot::Slot};
 
 use crate::{constants::*, structs::token::Token};
 
 #[elrond_wasm::derive::contract]
-pub trait Equip: customize::CustomizeModule + storage::StorageModule {
+pub trait Equip:
+    customize::CustomizeModule + storage::StorageModule + equippable_uris::EquippableUrisModule
+{
     #[init]
     fn init(&self, equippable_token_id: TokenIdentifier) {
         self.equippable_token_id().set(&equippable_token_id);
@@ -60,29 +60,6 @@ pub trait Equip: customize::CustomizeModule + storage::StorageModule {
                 ERR_CANNOT_FILL_UNREGISTERED_ITEM
             )
         }
-    }
-
-    /**
-     * Endpoint of enqueue_image_to_render
-     */
-    #[endpoint(renderImage)]
-    #[payable("EGLD")]
-    fn enqueue_image_to_render(&self, attributes: &EquippableAttributesToRender<Self::Api>) {
-        require!(
-            self.call_value().egld_value() == BigUint::from(ENQUEUE_PRICE),
-            ERR_PAY_0001_EGLD
-        );
-
-        require!(
-            self.uris_of_attributes(attributes).is_empty(),
-            ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED
-        );
-        require!(
-            self.images_to_render().contains(attributes) == false,
-            ERR_RENDER_ALREADY_IN_QUEUE
-        );
-
-        self.images_to_render().insert(attributes.clone());
     }
 
     #[only_owner]

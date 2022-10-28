@@ -1,6 +1,6 @@
 use customize_nft::{
     constants::ERR_CANNOT_UNEQUIP_EMPTY_SLOT,
-    libs::storage::StorageModule,
+    libs::equippable_uris::EquippableUrisModule,
     structs::{
         equippable_attributes::EquippableAttributes,
         equippable_attributes_to_render::EquippableAttributesToRender,

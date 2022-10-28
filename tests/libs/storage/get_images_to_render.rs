@@ -1,11 +1,10 @@
 use customize_nft::{
     constants::ENQUEUE_PRICE,
-    libs::storage::StorageModule,
+    libs::equippable_uris::EquippableUrisModule,
     structs::{
         equippable_attributes::EquippableAttributes,
         equippable_attributes_to_render::EquippableAttributesToRender,
     },
-    Equip,
 };
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 

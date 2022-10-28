@@ -1,6 +1,7 @@
 use crate::testing_utils::New;
 use crate::{args_set_cid_of, testing_utils};
-use customize_nft::libs::storage::StorageModule;
+use customize_nft::libs::equippable_uris::EquippableUrisModule;
+
 use customize_nft::structs::equippable_attributes_to_render::EquippableAttributesToRender;
 use customize_nft::structs::slot::Slot;
 use elrond_wasm::types::ManagedBuffer;

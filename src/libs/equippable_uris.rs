@@ -9,12 +9,13 @@ elrond_wasm::derive_imports!();
 #[elrond_wasm::module]
 pub trait EquippableUrisModule: super::storage::StorageModule {
     #[storage_mapper("images_to_render")]
-    fn images_to_render(&self) -> UnorderedSetMapper<ImageToRender<Self::Api>>;
+    fn images_to_render(&self) -> UnorderedSetMapper<ImageToRender<Self::Api>>; // TODO: remove this
 
     #[storage_mapper("uris_of_attributes")]
     fn uris_of_attributes(
         &self,
-        attributes: &ImageToRender<Self::Api>,
+        attributes: &EquippableAttributes<Self::Api>,
+        name: &ManagedBuffer<Self::Api>,
     ) -> SingleValueMapper<ManagedBuffer>;
 
     #[endpoint(authorizeAddressToSetUris)]
@@ -30,8 +31,8 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
     #[payable("EGLD")]
     fn enqueue_image_to_render(
         &self,
-        attributes: EquippableAttributes<Self::Api>,
-        name: ManagedBuffer<Self::Api>,
+        attributes: &EquippableAttributes<Self::Api>,
+        name: &ManagedBuffer<Self::Api>,
     ) {
         let image_to_render = &ImageToRender {
             attributes: attributes.clone(),
@@ -44,7 +45,7 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
         );
 
         require!(
-            self.uris_of_attributes(image_to_render).is_empty(),
+            self.uris_of_attributes(attributes, name).is_empty(),
             ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED
         );
         require!(
@@ -85,10 +86,14 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
 
         for kvp in uri_kvp {
             let (attributes, name, uri) = kvp.into_tuple();
-            let image_to_render = &ImageToRender { attributes, name };
+
+            let image_to_render = &ImageToRender {
+                attributes: attributes.clone(),
+                name: name.clone(),
+            };
 
             require!(
-                self.uris_of_attributes(&image_to_render).is_empty(),
+                self.uris_of_attributes(&attributes, &name).is_empty(),
                 ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE
             );
 
@@ -97,7 +102,7 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
                 ERR_IMAGE_NOT_IN_RENDER_QUEUE
             );
 
-            self.uris_of_attributes(&image_to_render).set(uri);
+            self.uris_of_attributes(&attributes, &name).set(uri);
             self.images_to_render().swap_remove(&image_to_render);
         }
     }
@@ -108,11 +113,7 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
         attributes: &EquippableAttributes<Self::Api>,
         name: &ManagedBuffer<Self::Api>,
     ) -> ManagedBuffer<Self::Api> {
-        let image_to_render = &ImageToRender {
-            attributes: attributes.clone(),
-            name: name.clone(),
-        };
-        let uri = self.uris_of_attributes(image_to_render);
+        let uri = self.uris_of_attributes(attributes, name);
 
         require!(
             uri.is_empty() == false,

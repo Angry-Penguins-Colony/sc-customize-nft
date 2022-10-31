@@ -34,8 +34,8 @@ fn works() {
                 };
 
                 sc.enqueue_image_to_render(
-                    image_to_render.attributes.clone(),
-                    image_to_render.name.clone(),
+                    &image_to_render.attributes.clone(),
+                    &image_to_render.name.clone(),
                 );
 
                 assert_eq!(sc.images_to_render().len(), 1);
@@ -73,12 +73,12 @@ fn enqueue_two_differents_attributes() {
                 };
 
                 sc.enqueue_image_to_render(
-                    image_to_render_a.attributes.clone(),
-                    image_to_render_a.name.clone(),
+                    &image_to_render_a.attributes.clone(),
+                    &image_to_render_a.name.clone(),
                 );
                 sc.enqueue_image_to_render(
-                    image_to_render_b.attributes.clone(),
-                    image_to_render_b.name.clone(),
+                    &image_to_render_b.attributes.clone(),
+                    &image_to_render_b.name.clone(),
                 );
 
                 assert_eq!(sc.images_to_render().len(), 2);
@@ -121,7 +121,7 @@ fn panic_if_already_rendererer() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                sc.enqueue_image_to_render(get_attributes().attributes, get_attributes().name);
+                sc.enqueue_image_to_render(&get_attributes().attributes, &get_attributes().name);
             },
         )
         .assert_user_error(ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED);
@@ -148,12 +148,12 @@ fn panic_if_already_in_queue() {
                 };
 
                 sc.enqueue_image_to_render(
-                    image_to_render.attributes.clone(),
-                    image_to_render.name.clone(),
+                    &image_to_render.attributes.clone(),
+                    &image_to_render.name.clone(),
                 );
                 sc.enqueue_image_to_render(
-                    image_to_render.attributes.clone(),
-                    image_to_render.name.clone(),
+                    &image_to_render.attributes.clone(),
+                    &image_to_render.name.clone(),
                 );
 
                 assert_eq!(sc.images_to_render().len(), 1);
@@ -207,8 +207,8 @@ fn panic_if_attributes_already_in_queue_but_in_another_order() {
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
                 sc.enqueue_image_to_render(
-                    image_to_render_a().attributes,
-                    image_to_render_a().name,
+                    &image_to_render_a().attributes,
+                    &image_to_render_a().name,
                 );
             },
         )
@@ -222,8 +222,8 @@ fn panic_if_attributes_already_in_queue_but_in_another_order() {
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
                 sc.enqueue_image_to_render(
-                    image_to_render_b().attributes,
-                    image_to_render_b().name,
+                    &image_to_render_b().attributes,
+                    &image_to_render_b().name,
                 );
             },
         )

@@ -75,9 +75,13 @@ fn test_equip() {
                     name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
                 };
 
-                sc.uris_of_attributes(&attributes_before_custom).set(
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom"),
-                );
+                sc.uris_of_attributes(
+                    &attributes_before_custom.attributes,
+                    &attributes_before_custom.name,
+                )
+                .set(ManagedBuffer::new_from_bytes(
+                    b"https://ipfs.io/ipfs/cid before custom",
+                ));
 
                 let attributes_after_custom = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::new(&[Item {
@@ -87,10 +91,13 @@ fn test_equip() {
                     name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
                 };
 
-                sc.uris_of_attributes(&attributes_after_custom)
-                    .set(ManagedBuffer::new_from_bytes(
-                        b"https://ipfs.io/ipfs/after custom",
-                    ));
+                sc.uris_of_attributes(
+                    &attributes_after_custom.attributes,
+                    &attributes_after_custom.name,
+                )
+                .set(ManagedBuffer::new_from_bytes(
+                    b"https://ipfs.io/ipfs/after custom",
+                ));
             },
         )
         .assert_ok();
@@ -203,9 +210,13 @@ fn should_replace_item() {
                     name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
                 };
 
-                sc.uris_of_attributes(&attributes_before_custom).set(
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom"),
-                );
+                sc.uris_of_attributes(
+                    &attributes_before_custom.attributes,
+                    &attributes_before_custom.name,
+                )
+                .set(ManagedBuffer::new_from_bytes(
+                    b"https://ipfs.io/ipfs/cid before custom",
+                ));
 
                 let attributes_after_custom = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::new(&[Item {
@@ -215,10 +226,13 @@ fn should_replace_item() {
                     name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
                 };
 
-                sc.uris_of_attributes(&attributes_after_custom)
-                    .set(ManagedBuffer::new_from_bytes(
-                        b"https://ipfs.io/ipfs/cid after custom",
-                    ));
+                sc.uris_of_attributes(
+                    &attributes_after_custom.attributes,
+                    &attributes_after_custom.name,
+                )
+                .set(ManagedBuffer::new_from_bytes(
+                    b"https://ipfs.io/ipfs/cid after custom",
+                ));
             },
         )
         .assert_ok();
@@ -558,13 +572,21 @@ fn equip_while_sending_twice_same_items() {
                     name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
                 };
 
-                sc.uris_of_attributes(&attributes_before_custom).set(
-                    &ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom"),
-                );
+                sc.uris_of_attributes(
+                    &attributes_before_custom.attributes,
+                    &attributes_before_custom.name,
+                )
+                .set(&ManagedBuffer::new_from_bytes(
+                    b"https://ipfs.io/ipfs/cid before custom",
+                ));
 
-                sc.uris_of_attributes(&attributes_after_custom).set(
-                    &ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid after custom"),
-                );
+                sc.uris_of_attributes(
+                    &attributes_after_custom.attributes,
+                    &attributes_after_custom.name,
+                )
+                .set(&ManagedBuffer::new_from_bytes(
+                    b"https://ipfs.io/ipfs/cid after custom",
+                ));
             },
         )
         .assert_ok();
@@ -701,14 +723,21 @@ fn equip_while_sending_two_items_of_same_slot() {
                     name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
                 };
 
-                sc.uris_of_attributes(&attributes_before_custom).set(
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/cid before custom"),
-                );
+                sc.uris_of_attributes(
+                    &attributes_before_custom.attributes,
+                    &attributes_before_custom.name,
+                )
+                .set(ManagedBuffer::new_from_bytes(
+                    b"https://ipfs.io/ipfs/cid before custom",
+                ));
 
-                sc.uris_of_attributes(&attributes_after_custom)
-                    .set(ManagedBuffer::new_from_bytes(
-                        b"https://ipfs.io/ipfs/cid after custom",
-                    ));
+                sc.uris_of_attributes(
+                    &attributes_after_custom.attributes,
+                    &attributes_after_custom.name,
+                )
+                .set(ManagedBuffer::new_from_bytes(
+                    b"https://ipfs.io/ipfs/cid after custom",
+                ));
             },
         )
         .assert_ok();

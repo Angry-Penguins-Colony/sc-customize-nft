@@ -39,7 +39,11 @@ fn should_set_if_empty() {
                 ));
 
                 assert_eq!(
-                    sc.uris_of_attributes(&get_image_to_render()).get(),
+                    sc.uris_of_attributes(
+                        &get_image_to_render().attributes,
+                        &get_image_to_render().name
+                    )
+                    .get(),
                     managed_buffer!(cid_bytes)
                 );
             },
@@ -71,7 +75,8 @@ fn panic_if_not_in_render_queue() {
                 ));
 
                 assert_eq!(
-                    sc.uris_of_attributes(&image_to_render).get(),
+                    sc.uris_of_attributes(&image_to_render.attributes, &image_to_render.name)
+                        .get(),
                     managed_buffer!(cid_bytes)
                 );
             },
@@ -108,7 +113,8 @@ fn panic_if_override_previously_set_uri() {
                     managed_buffer!(first_cid_bytes)
                 ));
                 assert_eq!(
-                    sc.uris_of_attributes(&image_to_render).get(),
+                    sc.uris_of_attributes(&image_to_render.attributes, &image_to_render.name)
+                        .get(),
                     managed_buffer!(first_cid_bytes)
                 );
             },
@@ -174,8 +180,8 @@ fn should_remove_enqueued_image_to_render() {
                 };
 
                 sc.enqueue_image_to_render(
-                    image_to_render.attributes.clone(),
-                    image_to_render.name.clone(),
+                    &image_to_render.attributes.clone(),
+                    &image_to_render.name.clone(),
                 );
                 assert_eq!(sc.images_to_render().len(), 1);
                 assert_eq!(sc.images_to_render().contains(&image_to_render), true);

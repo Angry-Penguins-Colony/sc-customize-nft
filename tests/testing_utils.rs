@@ -354,8 +354,8 @@ where
                 &rust_biguint!(ENQUEUE_PRICE),
                 |sc| {
                     sc.enqueue_image_to_render(
-                        get_image_to_render().attributes,
-                        get_image_to_render().name,
+                        &get_image_to_render().attributes,
+                        &get_image_to_render().name,
                     );
                 },
             )

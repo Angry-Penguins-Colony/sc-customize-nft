@@ -52,18 +52,18 @@ fn customize_only_unequip() {
                 let mut attributes_after_custom = attributes_before_custom.clone();
                 attributes_after_custom.empty_slot(&Slot::new_from_bytes(slot));
 
-                sc.uris_of_attributes(&ImageToRender {
-                    attributes: attributes_before_custom,
-                    name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
-                })
+                sc.uris_of_attributes(
+                    &attributes_before_custom,
+                    &managed_buffer!(EQUIPPABLE_TOKEN_ID),
+                )
                 .set(ManagedBuffer::<DebugApi>::new_from_bytes(
                     b"https://ipfs.io/ipfs/this is a cid",
                 ));
 
-                sc.uris_of_attributes(&ImageToRender {
-                    attributes: attributes_after_custom,
-                    name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
-                })
+                sc.uris_of_attributes(
+                    &attributes_after_custom,
+                    &managed_buffer!(EQUIPPABLE_TOKEN_ID),
+                )
                 .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty"));
             },
         )
@@ -158,18 +158,18 @@ fn panic_if_uppercase_slot() {
                 let mut attributes_after_custom = attributes_before_custom.clone();
                 attributes_after_custom.empty_slot(&Slot::new_from_bytes(SLOT_LOWERCASE));
 
-                sc.uris_of_attributes(&ImageToRender {
-                    attributes: attributes_before_custom,
-                    name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
-                })
+                sc.uris_of_attributes(
+                    &attributes_before_custom,
+                    &managed_buffer!(EQUIPPABLE_TOKEN_ID),
+                )
                 .set(ManagedBuffer::<DebugApi>::new_from_bytes(
                     b"https://ipfs.io/ipfs/this is a cid",
                 ));
 
-                sc.uris_of_attributes(&ImageToRender {
-                    attributes: attributes_after_custom,
-                    name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
-                })
+                sc.uris_of_attributes(
+                    &attributes_after_custom,
+                    &managed_buffer!(EQUIPPABLE_TOKEN_ID),
+                )
                 .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty"));
             },
         )
@@ -221,17 +221,25 @@ fn panic_when_unequip_twice_the_same_slot() {
                     }]),
                     name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
                 };
-                sc.uris_of_attributes(&attributes_before_custom).set(
-                    ManagedBuffer::<DebugApi>::new_from_bytes(b"https://ipfs.io/ipfs/before"),
-                );
+                sc.uris_of_attributes(
+                    &attributes_before_custom.attributes,
+                    &attributes_before_custom.name,
+                )
+                .set(ManagedBuffer::<DebugApi>::new_from_bytes(
+                    b"https://ipfs.io/ipfs/before",
+                ));
 
                 let attributes_after_custom = ImageToRender {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
                 };
-                sc.uris_of_attributes(&attributes_after_custom).set(
-                    ManagedBuffer::<DebugApi>::new_from_bytes(b"https://ipfs.io/ipfs/after"),
-                );
+                sc.uris_of_attributes(
+                    &attributes_after_custom.attributes,
+                    &attributes_after_custom.name,
+                )
+                .set(ManagedBuffer::<DebugApi>::new_from_bytes(
+                    b"https://ipfs.io/ipfs/after",
+                ));
             },
         )
         .assert_ok();
@@ -267,7 +275,7 @@ fn panic_when_unequip_on_empty_slot() {
                     attributes: EquippableAttributes::<DebugApi>::empty(),
                     name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
                 };
-                sc.uris_of_attributes(&attributes)
+                sc.uris_of_attributes(&attributes.attributes, &attributes.name)
                     .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty"));
             },
         )

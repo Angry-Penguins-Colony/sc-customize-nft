@@ -46,8 +46,8 @@ fn returns_one_after_one_enqueue() {
                 };
 
                 sc.enqueue_image_to_render(
-                    image_to_render.attributes.clone(),
-                    image_to_render.name.clone(),
+                    &image_to_render.attributes.clone(),
+                    &image_to_render.name.clone(),
                 );
                 assert_eq!(sc.images_to_render().len(), 1);
                 assert_eq!(sc.images_to_render().contains(&image_to_render), true);
@@ -87,8 +87,8 @@ fn returns_zero_after_one_dequeue() {
                 };
 
                 sc.enqueue_image_to_render(
-                    image_to_render.attributes.clone(),
-                    image_to_render.name.clone(),
+                    &image_to_render.attributes.clone(),
+                    &image_to_render.name.clone(),
                 );
                 sc.images_to_render().swap_remove(&image_to_render);
 

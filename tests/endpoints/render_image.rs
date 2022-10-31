@@ -28,8 +28,8 @@ fn works() {
                 };
 
                 sc.enqueue_image_to_render(
-                    image_to_render.attributes.clone(),
-                    image_to_render.name.clone(),
+                    &image_to_render.attributes.clone(),
+                    &image_to_render.name.clone(),
                 );
 
                 assert_eq!(sc.images_to_render().len(), 1);
@@ -56,8 +56,8 @@ fn panic_if_dont_send_egld() {
                 };
 
                 sc.enqueue_image_to_render(
-                    image_to_render.attributes.clone(),
-                    image_to_render.name.clone(),
+                    &image_to_render.attributes.clone(),
+                    &image_to_render.name.clone(),
                 );
 
                 assert_eq!(sc.images_to_render().len(), 1);
@@ -88,8 +88,8 @@ fn panic_if_send_lesser_amount_of_egld() {
                 };
 
                 sc.enqueue_image_to_render(
-                    image_to_render.attributes.clone(),
-                    image_to_render.name.clone(),
+                    &image_to_render.attributes.clone(),
+                    &image_to_render.name.clone(),
                 );
 
                 assert_eq!(sc.images_to_render().len(), 1);
@@ -120,8 +120,8 @@ fn panic_if_send_greater_amount_of_egld() {
                 };
 
                 sc.enqueue_image_to_render(
-                    image_to_render.attributes.clone(),
-                    image_to_render.name.clone(),
+                    &image_to_render.attributes.clone(),
+                    &image_to_render.name.clone(),
                 );
 
                 assert_eq!(sc.images_to_render().len(), 1);

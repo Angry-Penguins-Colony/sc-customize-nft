@@ -1,9 +1,6 @@
 use customize_nft::{
     libs::equippable_uris::EquippableUrisModule,
-    structs::{
-        equippable_attributes::EquippableAttributes, image_to_render::ImageToRender, item::Item,
-        slot::Slot,
-    },
+    structs::{equippable_attributes::EquippableAttributes, item::Item, slot::Slot},
 };
 use elrond_wasm::{elrond_codec::multi_types::MultiValue3, types::MultiValueEncoded};
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
@@ -21,9 +18,11 @@ fn should_return_cid() {
 
     let cid_bytes = b"https://ipfs.io/ipfs/some cid";
 
-    let get_attributes = || ImageToRender {
-        attributes: EquippableAttributes::<DebugApi>::empty(),
-        name: managed_buffer!(b"Equippable #512"),
+    let get_attributes = || {
+        (
+            EquippableAttributes::<DebugApi>::empty(),
+            managed_buffer!(b"Equippable #512"),
+        )
     };
     setup.enqueue_attributes_to_render(&get_attributes);
 
@@ -36,13 +35,13 @@ fn should_return_cid() {
             |sc| {
                 let cid_buffer = managed_buffer!(cid_bytes);
                 sc.set_uri_of_attributes(args_set_cid_of!(
-                    get_attributes().attributes,
-                    get_attributes().name,
+                    get_attributes().0,
+                    get_attributes().1,
                     cid_buffer.clone()
                 ));
 
                 assert_eq!(
-                    sc.get_uri_of(&get_attributes().attributes, &get_attributes().name),
+                    sc.get_uri_of(&get_attributes().0, &get_attributes().1),
                     cid_buffer
                 )
             },
@@ -62,32 +61,36 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
     let b_slot = b"badge";
     let b_value = b"1";
 
-    let get_attributes = || ImageToRender {
-        attributes: EquippableAttributes::<DebugApi>::new(&[
-            Item::<DebugApi> {
-                name: managed_buffer!(a_value),
-                slot: Slot::new_from_bytes(a_slot),
-            },
-            Item::<DebugApi> {
-                name: managed_buffer!(b_value),
-                slot: Slot::new_from_bytes(b_slot),
-            },
-        ]),
-        name: managed_buffer!(b"Equippable #512"),
+    let get_attributes = || {
+        (
+            EquippableAttributes::<DebugApi>::new(&[
+                Item::<DebugApi> {
+                    name: managed_buffer!(a_value),
+                    slot: Slot::new_from_bytes(a_slot),
+                },
+                Item::<DebugApi> {
+                    name: managed_buffer!(b_value),
+                    slot: Slot::new_from_bytes(b_slot),
+                },
+            ]),
+            managed_buffer!(b"Equippable #512"),
+        )
     };
 
-    let get_attributes_reversed = || ImageToRender {
-        attributes: EquippableAttributes::<DebugApi>::new(&[
-            Item::<DebugApi> {
-                name: managed_buffer!(b_value),
-                slot: Slot::new_from_bytes(b_slot),
-            },
-            Item::<DebugApi> {
-                name: managed_buffer!(a_value),
-                slot: Slot::new_from_bytes(a_slot),
-            },
-        ]),
-        name: managed_buffer!(b"Equippable #512"),
+    let get_attributes_reversed = || {
+        (
+            EquippableAttributes::<DebugApi>::new(&[
+                Item::<DebugApi> {
+                    name: managed_buffer!(b_value),
+                    slot: Slot::new_from_bytes(b_slot),
+                },
+                Item::<DebugApi> {
+                    name: managed_buffer!(a_value),
+                    slot: Slot::new_from_bytes(a_slot),
+                },
+            ]),
+            managed_buffer!(b"Equippable #512"),
+        )
     };
 
     setup.enqueue_attributes_to_render(&get_attributes);
@@ -104,13 +107,13 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
 
                 let image_to_render = get_attributes();
                 sc.set_uri_of_attributes(args_set_cid_of!(
-                    image_to_render.attributes,
-                    image_to_render.name,
+                    image_to_render.0,
+                    image_to_render.1,
                     cid_buffer.clone()
                 ));
 
                 assert_eq!(
-                    sc.get_uri_of(&image_to_render.attributes, &image_to_render.name),
+                    sc.get_uri_of(&image_to_render.0, &image_to_render.1),
                     cid_buffer
                 )
             },
@@ -122,10 +125,7 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             assert_eq!(
-                sc.get_uri_of(
-                    &get_attributes_reversed().attributes,
-                    &get_attributes_reversed().name
-                ),
+                sc.get_uri_of(&get_attributes_reversed().0, &get_attributes_reversed().1),
                 managed_buffer!(cid_bytes)
             );
         })

@@ -4,10 +4,7 @@ use customize_nft::{
         ERR_RENDER_ALREADY_IN_QUEUE,
     },
     libs::equippable_uris::EquippableUrisModule,
-    structs::{
-        equippable_attributes::EquippableAttributes, image_to_render::ImageToRender, item::Item,
-        slot::Slot,
-    },
+    structs::{equippable_attributes::EquippableAttributes, item::Item, slot::Slot},
 };
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
@@ -28,18 +25,13 @@ fn works() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let image_to_render = ImageToRender {
-                    attributes: EquippableAttributes::<DebugApi>::empty(),
-                    name: managed_buffer!(b"Equippable #512"),
-                };
+                let attributes = EquippableAttributes::<DebugApi>::empty();
+                let name = managed_buffer!(b"Equippable #512");
 
-                sc.enqueue_image_to_render(
-                    &image_to_render.attributes.clone(),
-                    &image_to_render.name.clone(),
-                );
+                sc.enqueue_image_to_render(&attributes, &name);
 
                 assert_eq!(sc.images_to_render().len(), 1);
-                assert_eq!(sc.images_to_render().contains(&image_to_render), true);
+                assert_eq!(sc.images_to_render().contains_key(&name), true);
             },
         )
         .assert_ok();
@@ -60,40 +52,25 @@ fn enqueue_two_differents_attributes() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let image_to_render_a = ImageToRender {
-                    attributes: EquippableAttributes::<DebugApi>::empty(),
-                    name: managed_buffer!(b"Equippable #512"),
-                };
-                let image_to_render_b = ImageToRender {
-                    attributes: EquippableAttributes::<DebugApi>::new(&[Item {
-                        name: managed_buffer!(b"pirate hat"),
-                        slot: Slot::new_from_bytes(b"hat"),
-                    }]),
-                    name: managed_buffer!(b"Equippable #513"),
-                };
+                let attributes_a = EquippableAttributes::<DebugApi>::empty();
+                let name_a = managed_buffer!(b"Equippable #512");
 
-                sc.enqueue_image_to_render(
-                    &image_to_render_a.attributes.clone(),
-                    &image_to_render_a.name.clone(),
-                );
-                sc.enqueue_image_to_render(
-                    &image_to_render_b.attributes.clone(),
-                    &image_to_render_b.name.clone(),
-                );
+                let attributes_b = EquippableAttributes::<DebugApi>::new(&[Item {
+                    name: managed_buffer!(b"pirate hat"),
+                    slot: Slot::new_from_bytes(b"hat"),
+                }]);
+                let name_b = managed_buffer!(b"Equippable #513");
+
+                sc.enqueue_image_to_render(&attributes_a, &name_a);
+                sc.enqueue_image_to_render(&attributes_b, &name_b);
 
                 assert_eq!(sc.images_to_render().len(), 2);
-                assert_eq!(sc.images_to_render().contains(&image_to_render_a), true);
-                assert_eq!(sc.images_to_render().contains(&image_to_render_b), true);
+                assert_eq!(sc.images_to_render().contains_key(&name_a), true);
+                assert_eq!(sc.images_to_render().contains_key(&name_b), true);
 
                 let mut iter = sc.get_images_to_render().into_iter();
-                assert_eq!(
-                    iter.next().unwrap().into_tuple(),
-                    image_to_render_a.to_multi_value_encoded().into_tuple()
-                );
-                assert_eq!(
-                    iter.next().unwrap().into_tuple(),
-                    image_to_render_b.to_multi_value_encoded().into_tuple()
-                );
+                assert_eq!(iter.next().unwrap().into_tuple(), (attributes_a, name_a));
+                assert_eq!(iter.next().unwrap().into_tuple(), (attributes_b, name_b));
                 assert_eq!(iter.next().is_none(), true);
             },
         )
@@ -103,9 +80,11 @@ fn enqueue_two_differents_attributes() {
 #[test]
 fn panic_if_already_rendererer() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
-    let get_attributes = || ImageToRender {
-        attributes: EquippableAttributes::<DebugApi>::empty(),
-        name: managed_buffer!(b"Equippable #512"),
+    let get_attributes = || {
+        (
+            EquippableAttributes::<DebugApi>::empty(),
+            managed_buffer!(b"Equippable #512"),
+        )
     };
 
     setup.enqueue_and_set_cid_of(&get_attributes, b"https://ipfs.io/ipfs/cid");
@@ -121,7 +100,7 @@ fn panic_if_already_rendererer() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                sc.enqueue_image_to_render(&get_attributes().attributes, &get_attributes().name);
+                sc.enqueue_image_to_render(&get_attributes().0, &get_attributes().1);
             },
         )
         .assert_user_error(ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED);
@@ -142,22 +121,14 @@ fn panic_if_already_in_queue() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                let image_to_render = ImageToRender {
-                    attributes: EquippableAttributes::<DebugApi>::empty(),
-                    name: managed_buffer!(b"Equippable #512"),
-                };
+                let attributes = EquippableAttributes::<DebugApi>::empty();
+                let name = managed_buffer!(b"Equippable #512");
 
-                sc.enqueue_image_to_render(
-                    &image_to_render.attributes.clone(),
-                    &image_to_render.name.clone(),
-                );
-                sc.enqueue_image_to_render(
-                    &image_to_render.attributes.clone(),
-                    &image_to_render.name.clone(),
-                );
+                sc.enqueue_image_to_render(&attributes, &name);
+                sc.enqueue_image_to_render(&attributes, &name);
 
                 assert_eq!(sc.images_to_render().len(), 1);
-                assert_eq!(sc.images_to_render().contains(&image_to_render), true);
+                assert_eq!(sc.images_to_render().contains_key(&name), true);
             },
         )
         .assert_user_error(ERR_RENDER_ALREADY_IN_QUEUE);
@@ -167,32 +138,36 @@ fn panic_if_already_in_queue() {
 fn panic_if_attributes_already_in_queue_but_in_another_order() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
-    let image_to_render_a = || ImageToRender {
-        attributes: EquippableAttributes::<DebugApi>::new(&[
-            Item {
-                name: managed_buffer!(b"pirate hat"),
-                slot: Slot::new_from_bytes(b"hat"),
-            },
-            Item {
-                name: managed_buffer!(b"eel"),
-                slot: Slot::new_from_bytes(b"beak"),
-            },
-        ]),
-        name: managed_buffer!(b"Equippable #513"),
+    let image_to_render_a = || {
+        (
+            EquippableAttributes::<DebugApi>::new(&[
+                Item {
+                    name: managed_buffer!(b"pirate hat"),
+                    slot: Slot::new_from_bytes(b"hat"),
+                },
+                Item {
+                    name: managed_buffer!(b"eel"),
+                    slot: Slot::new_from_bytes(b"beak"),
+                },
+            ]),
+            managed_buffer!(b"Equippable #513"),
+        )
     };
 
-    let image_to_render_b = || ImageToRender {
-        attributes: EquippableAttributes::<DebugApi>::new(&[
-            Item {
-                name: managed_buffer!(b"eel"),
-                slot: Slot::new_from_bytes(b"beak"),
-            },
-            Item {
-                name: managed_buffer!(b"pirate hat"),
-                slot: Slot::new_from_bytes(b"hat"),
-            },
-        ]),
-        name: managed_buffer!(b"Equippable #513"),
+    let image_to_render_b = || {
+        (
+            EquippableAttributes::<DebugApi>::new(&[
+                Item {
+                    name: managed_buffer!(b"eel"),
+                    slot: Slot::new_from_bytes(b"beak"),
+                },
+                Item {
+                    name: managed_buffer!(b"pirate hat"),
+                    slot: Slot::new_from_bytes(b"hat"),
+                },
+            ]),
+            managed_buffer!(b"Equippable #513"),
+        )
     };
 
     setup
@@ -206,10 +181,7 @@ fn panic_if_attributes_already_in_queue_but_in_another_order() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                sc.enqueue_image_to_render(
-                    &image_to_render_a().attributes,
-                    &image_to_render_a().name,
-                );
+                sc.enqueue_image_to_render(&image_to_render_a().0, &image_to_render_a().1);
             },
         )
         .assert_ok();
@@ -221,10 +193,7 @@ fn panic_if_attributes_already_in_queue_but_in_another_order() {
             &setup.cf_wrapper,
             &rust_biguint!(ENQUEUE_PRICE),
             |sc| {
-                sc.enqueue_image_to_render(
-                    &image_to_render_b().attributes,
-                    &image_to_render_b().name,
-                );
+                sc.enqueue_image_to_render(&image_to_render_b().0, &image_to_render_b().1);
             },
         )
         .assert_user_error(ERR_RENDER_ALREADY_IN_QUEUE);

@@ -3,7 +3,6 @@ use customize_nft::{
     libs::equippable_uris::EquippableUrisModule,
     structs::{
         equippable_attributes::EquippableAttributes,
-        image_to_render::ImageToRender,
         item::Item,
         slot::{Slot, ERR_MUST_BE_LOWERCASE},
     },
@@ -214,32 +213,24 @@ fn panic_when_unequip_twice_the_same_slot() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes_before_custom = ImageToRender {
-                    attributes: EquippableAttributes::new(&[Item {
-                        name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
-                        slot: Slot::new_from_bytes(slot),
-                    }]),
-                    name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
-                };
-                sc.uris_of_attributes(
-                    &attributes_before_custom.attributes,
-                    &attributes_before_custom.name,
-                )
-                .set(ManagedBuffer::<DebugApi>::new_from_bytes(
-                    b"https://ipfs.io/ipfs/before",
-                ));
+                let attributes_before_custom = EquippableAttributes::new(&[Item {
+                    name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
+                    slot: Slot::new_from_bytes(slot),
+                }]);
+                let name_before_custom = ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID);
 
-                let attributes_after_custom = ImageToRender {
-                    attributes: EquippableAttributes::<DebugApi>::empty(),
-                    name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
-                };
-                sc.uris_of_attributes(
-                    &attributes_after_custom.attributes,
-                    &attributes_after_custom.name,
-                )
-                .set(ManagedBuffer::<DebugApi>::new_from_bytes(
-                    b"https://ipfs.io/ipfs/after",
-                ));
+                sc.uris_of_attributes(&attributes_before_custom, &name_before_custom)
+                    .set(ManagedBuffer::<DebugApi>::new_from_bytes(
+                        b"https://ipfs.io/ipfs/before",
+                    ));
+
+                let attributes_after_custom = EquippableAttributes::<DebugApi>::empty();
+                let name_after_custom = ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID);
+
+                sc.uris_of_attributes(&attributes_after_custom, &name_after_custom)
+                    .set(ManagedBuffer::<DebugApi>::new_from_bytes(
+                        b"https://ipfs.io/ipfs/after",
+                    ));
             },
         )
         .assert_ok();
@@ -271,11 +262,10 @@ fn panic_when_unequip_on_empty_slot() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes = ImageToRender {
-                    attributes: EquippableAttributes::<DebugApi>::empty(),
-                    name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
-                };
-                sc.uris_of_attributes(&attributes.attributes, &attributes.name)
+                let attributes = EquippableAttributes::<DebugApi>::empty();
+                let name = ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID);
+
+                sc.uris_of_attributes(&attributes, &name)
                     .set(ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/empty"));
             },
         )

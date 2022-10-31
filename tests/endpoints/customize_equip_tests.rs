@@ -5,7 +5,6 @@ use customize_nft::constants::{
 };
 use customize_nft::libs::equippable_uris::EquippableUrisModule;
 use customize_nft::structs::equippable_attributes::EquippableAttributes;
-use customize_nft::structs::image_to_render::ImageToRender;
 use customize_nft::structs::item::Item;
 use customize_nft::structs::slot::Slot;
 use elrond_wasm::types::{EsdtTokenType, ManagedBuffer};
@@ -70,34 +69,24 @@ fn test_equip() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes_before_custom = &ImageToRender {
-                    attributes: EquippableAttributes::<DebugApi>::empty(),
-                    name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
-                };
+                let attributes_before_custom = EquippableAttributes::<DebugApi>::empty();
+                let name_before_custom = managed_buffer!(EQUIPPABLE_TOKEN_ID);
 
-                sc.uris_of_attributes(
-                    &attributes_before_custom.attributes,
-                    &attributes_before_custom.name,
-                )
-                .set(ManagedBuffer::new_from_bytes(
-                    b"https://ipfs.io/ipfs/cid before custom",
-                ));
+                sc.uris_of_attributes(&attributes_before_custom, &name_before_custom)
+                    .set(ManagedBuffer::new_from_bytes(
+                        b"https://ipfs.io/ipfs/cid before custom",
+                    ));
 
-                let attributes_after_custom = ImageToRender {
-                    attributes: EquippableAttributes::<DebugApi>::new(&[Item {
-                        name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
-                        slot: Slot::new_from_buffer(managed_buffer!(slot)),
-                    }]),
-                    name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
-                };
+                let attributes_after_custom = EquippableAttributes::<DebugApi>::new(&[Item {
+                    name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
+                    slot: Slot::new_from_buffer(managed_buffer!(slot)),
+                }]);
+                let name_after_custom = managed_buffer!(EQUIPPABLE_TOKEN_ID);
 
-                sc.uris_of_attributes(
-                    &attributes_after_custom.attributes,
-                    &attributes_after_custom.name,
-                )
-                .set(ManagedBuffer::new_from_bytes(
-                    b"https://ipfs.io/ipfs/after custom",
-                ));
+                sc.uris_of_attributes(&attributes_after_custom, &name_after_custom)
+                    .set(ManagedBuffer::new_from_bytes(
+                        b"https://ipfs.io/ipfs/after custom",
+                    ));
             },
         )
         .assert_ok();
@@ -202,37 +191,27 @@ fn should_replace_item() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes_before_custom = ImageToRender {
-                    attributes: EquippableAttributes::<DebugApi>::new(&[Item {
-                        name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
-                        slot: Slot::new_from_buffer(managed_buffer!(SHARED_SLOT)),
-                    }]),
-                    name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
-                };
+                let attributes_before_custom = EquippableAttributes::<DebugApi>::new(&[Item {
+                    name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
+                    slot: Slot::new_from_buffer(managed_buffer!(SHARED_SLOT)),
+                }]);
+                let name_before_custom = managed_buffer!(EQUIPPABLE_TOKEN_ID);
 
-                sc.uris_of_attributes(
-                    &attributes_before_custom.attributes,
-                    &attributes_before_custom.name,
-                )
-                .set(ManagedBuffer::new_from_bytes(
-                    b"https://ipfs.io/ipfs/cid before custom",
-                ));
+                sc.uris_of_attributes(&attributes_before_custom, &name_before_custom)
+                    .set(ManagedBuffer::new_from_bytes(
+                        b"https://ipfs.io/ipfs/cid before custom",
+                    ));
 
-                let attributes_after_custom = ImageToRender {
-                    attributes: EquippableAttributes::<DebugApi>::new(&[Item {
-                        name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
-                        slot: Slot::new_from_buffer(managed_buffer!(SHARED_SLOT)),
-                    }]),
-                    name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
-                };
+                let attributes_after_custom = EquippableAttributes::<DebugApi>::new(&[Item {
+                    name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
+                    slot: Slot::new_from_buffer(managed_buffer!(SHARED_SLOT)),
+                }]);
+                let name_after_custom = managed_buffer!(EQUIPPABLE_TOKEN_ID);
 
-                sc.uris_of_attributes(
-                    &attributes_after_custom.attributes,
-                    &attributes_after_custom.name,
-                )
-                .set(ManagedBuffer::new_from_bytes(
-                    b"https://ipfs.io/ipfs/cid after custom",
-                ));
+                sc.uris_of_attributes(&attributes_after_custom, &name_after_custom)
+                    .set(ManagedBuffer::new_from_bytes(
+                        b"https://ipfs.io/ipfs/cid after custom",
+                    ));
             },
         )
         .assert_ok();
@@ -559,34 +538,24 @@ fn equip_while_sending_twice_same_items() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes_before_custom = ImageToRender {
-                    attributes: EquippableAttributes::<DebugApi>::empty(),
-                    name: ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
-                };
+                let attributes_before_custom = EquippableAttributes::<DebugApi>::empty();
+                let name_before_custom = ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID);
 
-                let attributes_after_custom = ImageToRender {
-                    attributes: EquippableAttributes::<DebugApi>::new(&[Item {
-                        name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
-                        slot: Slot::new_from_bytes(SLOT),
-                    }]),
-                    name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
-                };
+                let attributes_after_custom = EquippableAttributes::<DebugApi>::new(&[Item {
+                    name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
+                    slot: Slot::new_from_bytes(SLOT),
+                }]);
+                let name_after_custom = managed_buffer!(EQUIPPABLE_TOKEN_ID);
 
-                sc.uris_of_attributes(
-                    &attributes_before_custom.attributes,
-                    &attributes_before_custom.name,
-                )
-                .set(&ManagedBuffer::new_from_bytes(
-                    b"https://ipfs.io/ipfs/cid before custom",
-                ));
+                sc.uris_of_attributes(&attributes_before_custom, &name_before_custom)
+                    .set(&ManagedBuffer::new_from_bytes(
+                        b"https://ipfs.io/ipfs/cid before custom",
+                    ));
 
-                sc.uris_of_attributes(
-                    &attributes_after_custom.attributes,
-                    &attributes_after_custom.name,
-                )
-                .set(&ManagedBuffer::new_from_bytes(
-                    b"https://ipfs.io/ipfs/cid after custom",
-                ));
+                sc.uris_of_attributes(&attributes_after_custom, &name_after_custom)
+                    .set(&ManagedBuffer::new_from_bytes(
+                        b"https://ipfs.io/ipfs/cid after custom",
+                    ));
             },
         )
         .assert_ok();
@@ -711,33 +680,24 @@ fn equip_while_sending_two_items_of_same_slot() {
             &setup.cf_wrapper,
             &rust_biguint!(0),
             |sc| {
-                let attributes_before_custom = ImageToRender {
-                    attributes: EquippableAttributes::<DebugApi>::empty(),
-                    name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
-                };
-                let attributes_after_custom = ImageToRender {
-                    attributes: EquippableAttributes::<DebugApi>::new(&[Item {
-                        name: ManagedBuffer::new_from_bytes(SECOND_ITEM_NAME),
-                        slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
-                    }]),
-                    name: managed_buffer!(EQUIPPABLE_TOKEN_ID),
-                };
+                let attributes_before_custom = EquippableAttributes::<DebugApi>::empty();
+                let name_before_custom = managed_buffer!(EQUIPPABLE_TOKEN_ID);
 
-                sc.uris_of_attributes(
-                    &attributes_before_custom.attributes,
-                    &attributes_before_custom.name,
-                )
-                .set(ManagedBuffer::new_from_bytes(
-                    b"https://ipfs.io/ipfs/cid before custom",
-                ));
+                let attributes_after_custom = EquippableAttributes::<DebugApi>::new(&[Item {
+                    name: ManagedBuffer::new_from_bytes(SECOND_ITEM_NAME),
+                    slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
+                }]);
+                let name_after_custom = managed_buffer!(EQUIPPABLE_TOKEN_ID);
 
-                sc.uris_of_attributes(
-                    &attributes_after_custom.attributes,
-                    &attributes_after_custom.name,
-                )
-                .set(ManagedBuffer::new_from_bytes(
-                    b"https://ipfs.io/ipfs/cid after custom",
-                ));
+                sc.uris_of_attributes(&attributes_before_custom, &name_before_custom)
+                    .set(ManagedBuffer::new_from_bytes(
+                        b"https://ipfs.io/ipfs/cid before custom",
+                    ));
+
+                sc.uris_of_attributes(&attributes_after_custom, &name_after_custom)
+                    .set(ManagedBuffer::new_from_bytes(
+                        b"https://ipfs.io/ipfs/cid after custom",
+                    ));
             },
         )
         .assert_ok();

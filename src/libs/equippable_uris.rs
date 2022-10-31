@@ -1,7 +1,4 @@
-use crate::{
-    constants::*,
-    structs::{equippable_attributes::EquippableAttributes, image_to_render::ImageToRender},
-};
+use crate::{constants::*, structs::equippable_attributes::EquippableAttributes};
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
@@ -9,7 +6,9 @@ elrond_wasm::derive_imports!();
 #[elrond_wasm::module]
 pub trait EquippableUrisModule: super::storage::StorageModule {
     #[storage_mapper("images_to_render")]
-    fn images_to_render(&self) -> UnorderedSetMapper<ImageToRender<Self::Api>>; // TODO: remove this
+    fn images_to_render(
+        &self,
+    ) -> MapMapper<ManagedBuffer<Self::Api>, EquippableAttributes<Self::Api>>;
 
     #[storage_mapper("uris_of_attributes")]
     fn uris_of_attributes(
@@ -34,26 +33,22 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
         attributes: &EquippableAttributes<Self::Api>,
         name: &ManagedBuffer<Self::Api>,
     ) {
-        let image_to_render = &ImageToRender {
-            attributes: attributes.clone(),
-            name: name.clone(),
-        };
-
         require!(
             self.call_value().egld_value() == BigUint::from(ENQUEUE_PRICE),
             ERR_PAY_0001_EGLD
         );
 
         require!(
-            self.uris_of_attributes(attributes, name).is_empty(),
+            self.uris_of_attributes(&attributes, &name).is_empty(),
             ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED
         );
         require!(
-            self.images_to_render().contains(image_to_render) == false,
+            self.images_to_render().contains_key(&name) == false,
             ERR_RENDER_ALREADY_IN_QUEUE
         );
 
-        self.images_to_render().insert(image_to_render.clone());
+        self.images_to_render()
+            .insert(name.clone(), attributes.clone());
     }
 
     #[view(getImagesToRender)]
@@ -62,8 +57,8 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
     ) -> MultiValueEncoded<MultiValue2<EquippableAttributes<Self::Api>, ManagedBuffer>> {
         let mut o = MultiValueEncoded::new();
 
-        for image_to_render in self.images_to_render().iter() {
-            o.push(image_to_render.to_multi_value_encoded());
+        for (name, attributes) in self.images_to_render().iter() {
+            o.push(MultiValue2::from((attributes, name)));
         }
 
         return o;
@@ -87,23 +82,18 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
         for kvp in uri_kvp {
             let (attributes, name, uri) = kvp.into_tuple();
 
-            let image_to_render = &ImageToRender {
-                attributes: attributes.clone(),
-                name: name.clone(),
-            };
-
             require!(
                 self.uris_of_attributes(&attributes, &name).is_empty(),
                 ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE
             );
 
             require!(
-                self.images_to_render().contains(&image_to_render),
+                self.images_to_render().contains_key(&name),
                 ERR_IMAGE_NOT_IN_RENDER_QUEUE
             );
 
             self.uris_of_attributes(&attributes, &name).set(uri);
-            self.images_to_render().swap_remove(&image_to_render);
+            self.images_to_render().remove(&name);
         }
     }
 

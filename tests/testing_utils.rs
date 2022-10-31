@@ -8,7 +8,6 @@ use customize_nft::constants::ENQUEUE_PRICE;
 use customize_nft::libs::customize::CustomizeModule;
 use customize_nft::libs::equippable_uris::EquippableUrisModule;
 use customize_nft::structs::equippable_attributes::EquippableAttributes;
-use customize_nft::structs::image_to_render::ImageToRender;
 use customize_nft::structs::item::Item;
 use customize_nft::structs::slot::Slot;
 use customize_nft::*;
@@ -343,7 +342,7 @@ where
 
     pub fn enqueue_attributes_to_render(
         &mut self,
-        get_image_to_render: &dyn Fn() -> ImageToRender<DebugApi>,
+        get_image_to_render: &dyn Fn() -> (EquippableAttributes<DebugApi>, ManagedBuffer<DebugApi>),
     ) {
         self.add_enqueue_price_balance_to_owner();
 
@@ -353,10 +352,7 @@ where
                 &self.cf_wrapper,
                 &rust_biguint!(ENQUEUE_PRICE),
                 |sc| {
-                    sc.enqueue_image_to_render(
-                        &get_image_to_render().attributes,
-                        &get_image_to_render().name,
-                    );
+                    sc.enqueue_image_to_render(&get_image_to_render().0, &get_image_to_render().1);
                 },
             )
             .assert_ok();
@@ -373,7 +369,7 @@ where
 
     pub fn enqueue_and_set_cid_of(
         &mut self,
-        get_image_to_render: &dyn Fn() -> ImageToRender<DebugApi>,
+        get_image_to_render: &dyn Fn() -> (EquippableAttributes<DebugApi>, ManagedBuffer<DebugApi>),
         uri: &[u8],
     ) {
         self.enqueue_attributes_to_render(get_image_to_render);
@@ -385,8 +381,8 @@ where
                 &rust_biguint!(0),
                 |sc| {
                     sc.set_uri_of_attributes(args_set_cid_of!(
-                        get_image_to_render().attributes,
-                        get_image_to_render().name,
+                        get_image_to_render().0,
+                        get_image_to_render().1,
                         managed_buffer!(uri)
                     ));
                 },

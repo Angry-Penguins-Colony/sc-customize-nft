@@ -43,8 +43,8 @@ fn returns_one_after_one_enqueue() {
                 let name = managed_buffer!(b"Equippable #512");
 
                 sc.enqueue_image_to_render(&attributes, &name);
-                assert_eq!(sc.images_to_render().len(), 1);
-                assert_eq!(sc.images_to_render().contains_key(&name), true);
+                assert_eq!(sc.attributes_to_render_by_name().len(), 1);
+                assert_eq!(sc.attributes_to_render_by_name().contains_key(&name), true);
 
                 let enqueued = sc.get_images_to_render();
                 assert_eq!(enqueued.len(), 1);
@@ -76,7 +76,7 @@ fn returns_zero_after_one_dequeue() {
                 let name = managed_buffer!(b"Equippable #512");
 
                 sc.enqueue_image_to_render(&attributes, &name);
-                sc.images_to_render().remove(&name);
+                sc.attributes_to_render_by_name().remove(&name);
 
                 assert_eq!(sc.get_images_to_render().len(), 0);
             },

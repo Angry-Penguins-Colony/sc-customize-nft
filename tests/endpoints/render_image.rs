@@ -27,8 +27,8 @@ fn works() {
 
                 sc.enqueue_image_to_render(&attributes, &name);
 
-                assert_eq!(sc.images_to_render().len(), 1);
-                assert_eq!(sc.images_to_render().contains_key(&name), true);
+                assert_eq!(sc.attributes_to_render_by_name().len(), 1);
+                assert_eq!(sc.attributes_to_render_by_name().contains_key(&name), true);
             },
         )
         .assert_ok();
@@ -50,8 +50,8 @@ fn panic_if_dont_send_egld() {
 
                 sc.enqueue_image_to_render(&attributes, &name);
 
-                assert_eq!(sc.images_to_render().len(), 1);
-                assert_eq!(sc.images_to_render().contains_key(&name), true);
+                assert_eq!(sc.attributes_to_render_by_name().len(), 1);
+                assert_eq!(sc.attributes_to_render_by_name().contains_key(&name), true);
             },
         )
         .assert_user_error(ERR_PAY_0001_EGLD);
@@ -77,8 +77,8 @@ fn panic_if_send_lesser_amount_of_egld() {
 
                 sc.enqueue_image_to_render(&attributes, &name);
 
-                assert_eq!(sc.images_to_render().len(), 1);
-                assert_eq!(sc.images_to_render().contains_key(&name), true);
+                assert_eq!(sc.attributes_to_render_by_name().len(), 1);
+                assert_eq!(sc.attributes_to_render_by_name().contains_key(&name), true);
             },
         )
         .assert_user_error(ERR_PAY_0001_EGLD);
@@ -104,8 +104,8 @@ fn panic_if_send_greater_amount_of_egld() {
 
                 sc.enqueue_image_to_render(&attributes, &name);
 
-                assert_eq!(sc.images_to_render().len(), 1);
-                assert_eq!(sc.images_to_render().contains_key(&name), true);
+                assert_eq!(sc.attributes_to_render_by_name().len(), 1);
+                assert_eq!(sc.attributes_to_render_by_name().contains_key(&name), true);
             },
         )
         .assert_user_error(ERR_PAY_0001_EGLD);

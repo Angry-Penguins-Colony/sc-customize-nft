@@ -5,8 +5,8 @@ elrond_wasm::derive_imports!();
 
 #[elrond_wasm::module]
 pub trait EquippableUrisModule: super::storage::StorageModule {
-    #[storage_mapper("images_to_render")]
-    fn images_to_render(
+    #[storage_mapper("attributes_to_render_by_name")]
+    fn attributes_to_render_by_name(
         &self,
     ) -> MapMapper<ManagedBuffer<Self::Api>, EquippableAttributes<Self::Api>>;
 
@@ -43,11 +43,11 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
             ERR_CANNOT_ENQUEUE_IMAGE_BECAUSE_ALREADY_RENDERED
         );
         require!(
-            self.images_to_render().contains_key(&name) == false,
+            self.attributes_to_render_by_name().contains_key(&name) == false,
             ERR_RENDER_ALREADY_IN_QUEUE
         );
 
-        self.images_to_render()
+        self.attributes_to_render_by_name()
             .insert(name.clone(), attributes.clone());
     }
 
@@ -57,7 +57,7 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
     ) -> MultiValueEncoded<MultiValue2<EquippableAttributes<Self::Api>, ManagedBuffer>> {
         let mut o = MultiValueEncoded::new();
 
-        for (name, attributes) in self.images_to_render().iter() {
+        for (name, attributes) in self.attributes_to_render_by_name().iter() {
             o.push(MultiValue2::from((attributes, name)));
         }
 
@@ -88,12 +88,12 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
             );
 
             require!(
-                self.images_to_render().contains_key(&name),
+                self.attributes_to_render_by_name().contains_key(&name),
                 ERR_IMAGE_NOT_IN_RENDER_QUEUE
             );
 
             self.uris_of_attributes(&attributes, &name).set(uri);
-            self.images_to_render().remove(&name);
+            self.attributes_to_render_by_name().remove(&name);
         }
     }
 

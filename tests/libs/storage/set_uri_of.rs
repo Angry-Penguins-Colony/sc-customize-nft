@@ -177,8 +177,8 @@ fn should_remove_enqueued_image_to_render() {
                 let name = managed_buffer!(b"Equippable #512");
 
                 sc.enqueue_image_to_render(&attributes, &name);
-                assert_eq!(sc.images_to_render().len(), 1);
-                assert_eq!(sc.images_to_render().contains_key(&name), true);
+                assert_eq!(sc.attributes_to_render_by_name().len(), 1);
+                assert_eq!(sc.attributes_to_render_by_name().contains_key(&name), true);
 
                 sc.set_uri_of_attributes(args_set_cid_of!(
                     attributes,
@@ -187,7 +187,7 @@ fn should_remove_enqueued_image_to_render() {
                 ));
 
                 assert_eq!(
-                    sc.images_to_render().len(),
+                    sc.attributes_to_render_by_name().len(),
                     0,
                     "The enqueud image to render should be has been removed."
                 );

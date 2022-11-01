@@ -109,7 +109,9 @@ pub trait CustomizeModule:
                                 &EgldOrEsdtTokenIdentifier::esdt(item_id.clone()),
                                 item_nonce
                             ) > 0,
-                            "Can't send unequipped items to the user. There is no SFT remaining."
+                            "Can't send {}-{:x} items to the user. There is no SFT remaining.",
+                            item_id,
+                            item_nonce
                         );
 
                         self.send().direct_esdt(

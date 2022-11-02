@@ -1,4 +1,7 @@
-use crate::structs::{item::Item, token::Token};
+use crate::{
+    structs::{item::Item, token::Token},
+    utils::bidimapper_utils::ContainsUtils,
+};
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
@@ -18,11 +21,15 @@ pub trait StorageModule {
     ) -> SingleValueMapper<bool>;
 
     fn has_item(&self, item: &Item<Self::Api>) -> bool {
-        return self.map_items_tokens().iter().any(|i| &i.0 == item);
+        return self
+            .map_items_tokens()
+            .contains_id(item, b"mapper_items_token");
     }
 
     fn has_token(&self, token: &Token<Self::Api>) -> bool {
-        return self.map_items_tokens().iter().any(|i| &i.1 == token);
+        return self
+            .map_items_tokens()
+            .contains_value(token, b"mapper_items_token");
     }
 
     fn get_item(&self, token: &Token<Self::Api>) -> Option<Item<Self::Api>> {

@@ -3,7 +3,6 @@ use customize_nft::constants::{
 };
 use customize_nft::libs::storage::StorageModule;
 use customize_nft::structs::item::Item;
-use customize_nft::structs::slot::Slot;
 use customize_nft::structs::token::Token;
 use customize_nft::*;
 use elrond_wasm::elrond_codec::multi_types::MultiValue4;
@@ -44,7 +43,7 @@ fn test_register_item() {
             assert_eq!(
                 result.unwrap(),
                 Item {
-                    slot: Slot::new_from_buffer(managed_buffer!(slot)),
+                    slot: managed_buffer!(slot),
                     name: managed_buffer!(ITEM_NAME)
                 }
             );
@@ -93,7 +92,7 @@ fn register_another_item_on_slot() {
                 ))
                 .unwrap(),
                 Item {
-                    slot: Slot::new_from_bytes(COMMON_SLOT),
+                    slot: managed_buffer!(COMMON_SLOT),
                     name: managed_buffer!(FIRST_ITEM_NAME)
                 }
             );
@@ -105,7 +104,7 @@ fn register_another_item_on_slot() {
                 ))
                 .unwrap(),
                 Item {
-                    slot: Slot::new_from_bytes(COMMON_SLOT),
+                    slot: managed_buffer!(COMMON_SLOT),
                     name: managed_buffer!(SECOND_ITEM_NAME)
                 }
             );
@@ -135,7 +134,7 @@ fn panic_if_override() {
             |sc| {
                 let mut items = MultiValueEncoded::new();
                 items.push(MultiValue4::from((
-                    Slot::new_from_bytes(first_slot),
+                    managed_buffer!(first_slot),
                     managed_buffer!(first_slot_item_name),
                     managed_token_id!(TOKEN_ID),
                     TOKEN_NONCE,
@@ -155,7 +154,7 @@ fn panic_if_override() {
             |sc| {
                 let mut items = MultiValueEncoded::new();
                 items.push(MultiValue4::from((
-                    Slot::new_from_bytes(second_slot),
+                    managed_buffer!(second_slot),
                     managed_buffer!(second_slot_item_name),
                     managed_token_id!(TOKEN_ID),
                     TOKEN_NONCE,
@@ -182,7 +181,7 @@ fn panic_if_register_equippable() {
             |sc| {
                 let mut items = MultiValueEncoded::new();
                 items.push(MultiValue4::from((
-                    Slot::new_from_bytes(slot),
+                    managed_buffer!(slot),
                     managed_buffer!(b"My Equippable"),
                     managed_token_id!(testing_utils::EQUIPPABLE_TOKEN_ID),
                     1,

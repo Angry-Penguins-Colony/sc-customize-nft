@@ -12,8 +12,6 @@ pub trait ManagedBufferUtils<M: ManagedTypeApi> {
 
     /// The replace method use new_buffer as ManagedBuffer because is it the easier way to implement    
     fn contains_char(&self, to_find: u8) -> bool;
-    fn to_lowercase(&self) -> ManagedBuffer<M>;
-    fn is_lowercase(&self) -> bool;
     fn get_last_char(&self) -> u8;
 
     /// Returns 0 if equals. Return 1 if self is after other in the alphabetically order. Returns 0 if self is before other in the alphabetically order.
@@ -77,26 +75,10 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
         return false;
     }
 
-    fn to_lowercase(&self) -> ManagedBuffer<M> {
-        let bytes = self.load_512_bytes();
-
-        let mut o = ManagedBuffer::<M>::new();
-
-        for i in 0..self.len() {
-            o.append_bytes(&[bytes[i].to_ascii_lowercase()]);
-        }
-
-        return o;
-    }
-
     fn compare(&self, other: &Self) -> Ordering {
         let a_bytes = self.load_512_bytes();
         let b_bytes = other.load_512_bytes();
 
         return a_bytes.cmp(&b_bytes);
-    }
-
-    fn is_lowercase(&self) -> bool {
-        return self == &self.to_lowercase();
     }
 }

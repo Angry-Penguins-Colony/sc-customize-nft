@@ -1,10 +1,10 @@
 use customize_nft::{
     constants::ERR_NEED_ONE_ITEM_OR_UNEQUIP_SLOT,
     libs::{customize::CustomizeModule, equippable_uris::EquippableUrisModule},
-    structs::{equippable_attributes::EquippableAttributes, item::Item, slot::Slot},
+    structs::{equippable_attributes::EquippableAttributes, item::Item},
 };
 use elrond_wasm::types::{ManagedBuffer, MultiValueEncoded};
-use elrond_wasm_debug::{rust_biguint, DebugApi};
+use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
 use crate::testing_utils::{self, New, TestItemAttributes};
 
@@ -65,36 +65,28 @@ fn customize_complete_flow() {
             &rust_biguint!(0),
             |sc| {
                 let attributes_before_custom = EquippableAttributes::new(&[Item {
-                    name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
-                    slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(
-                        ITEM_TO_UNEQUIP_SLOT,
-                    )),
+                    name: managed_buffer!(ITEM_TO_UNEQUIP_NAME),
+                    slot: managed_buffer!(ITEM_TO_UNEQUIP_SLOT),
                 }]);
 
                 let mut attributes_after_custom = attributes_before_custom.clone();
 
-                attributes_after_custom.empty_slot(&Slot::new_from_buffer(
-                    ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT),
-                ));
+                attributes_after_custom.empty_slot(&managed_buffer!(ITEM_TO_UNEQUIP_SLOT));
                 attributes_after_custom.set_item_if_empty(
-                    &Slot::new_from_buffer(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT)),
-                    Some(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME)),
+                    &managed_buffer!(ITEM_TO_EQUIP_SLOT),
+                    Some(managed_buffer!(ITEM_TO_EQUIP_NAME)),
                 );
 
                 sc.uris_of_attributes(
                     &attributes_before_custom,
-                    &ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
+                    &managed_buffer!(EQUIPPABLE_TOKEN_ID),
                 )
-                .set(ManagedBuffer::new_from_bytes(
-                    b"https://ipfs.io/ipfs/cid before custom",
-                ));
+                .set(managed_buffer!(b"https://ipfs.io/ipfs/cid before custom"));
                 sc.uris_of_attributes(
                     &attributes_after_custom,
-                    &ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID),
+                    &managed_buffer!(EQUIPPABLE_TOKEN_ID),
                 )
-                .set(ManagedBuffer::new_from_bytes(
-                    b"https://ipfs.io/ipfs/cid after custom",
-                ));
+                .set(managed_buffer!(b"https://ipfs.io/ipfs/cid after custom"));
             },
         )
         .assert_ok();
@@ -145,15 +137,13 @@ fn customize_complete_flow() {
     );
 
     let mut attributes_after_custom = EquippableAttributes::<DebugApi>::new(&[Item {
-        name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
-        slot: Slot::new_from_buffer(ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_SLOT)),
+        name: managed_buffer!(ITEM_TO_UNEQUIP_NAME),
+        slot: managed_buffer!(ITEM_TO_UNEQUIP_SLOT),
     }]);
-    attributes_after_custom.empty_slot(&Slot::new_from_buffer(ManagedBuffer::new_from_bytes(
-        ITEM_TO_UNEQUIP_SLOT,
-    )));
+    attributes_after_custom.empty_slot(&managed_buffer!(ITEM_TO_UNEQUIP_SLOT));
     attributes_after_custom.set_item_if_empty(
-        &Slot::new_from_buffer(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_SLOT)),
-        Some(ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME)),
+        &managed_buffer!(ITEM_TO_EQUIP_SLOT),
+        Some(managed_buffer!(ITEM_TO_EQUIP_NAME)),
     );
 
     setup.blockchain_wrapper.check_nft_balance(
@@ -189,7 +179,7 @@ fn customize_nothing_to_unequip_and_equip() {
         &setup.cf_wrapper,
         &transfers,
         |sc| {
-            let managed_slots = MultiValueEncoded::<DebugApi, Slot<DebugApi>>::new();
+            let managed_slots = MultiValueEncoded::<DebugApi, ManagedBuffer<DebugApi>>::new();
 
             let _ = sc.customize(managed_slots);
         },

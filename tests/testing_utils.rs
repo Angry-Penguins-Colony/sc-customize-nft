@@ -9,7 +9,6 @@ use customize_nft::libs::customize::CustomizeModule;
 use customize_nft::libs::equippable_uris::EquippableUrisModule;
 use customize_nft::structs::equippable_attributes::EquippableAttributes;
 use customize_nft::structs::item::Item;
-use customize_nft::structs::slot::Slot;
 use customize_nft::*;
 use elrond_wasm::types::MultiValueEncoded;
 use elrond_wasm::types::{
@@ -152,7 +151,7 @@ where
                 |sc| {
                     let mut items = MultiValueEncoded::new();
                     items.push(MultiValue4::from((
-                        Slot::new_from_bytes(slot),
+                        managed_buffer!(slot),
                         managed_buffer!(item_name),
                         managed_token_id!(item_id),
                         item_nonce,
@@ -243,8 +242,8 @@ where
         self.register_and_fill_item(slot, item_name, item_identifier, item_nonce, &attributes);
 
         let attributes = EquippableAttributes::<DebugApi>::new(&[Item {
-            name: ManagedBuffer::new_from_bytes(item_name),
-            slot: Slot::new_from_bytes(slot),
+            name: managed_buffer!(item_name),
+            slot: managed_buffer!(slot),
         }]);
 
         self.blockchain_wrapper.set_nft_balance(
@@ -269,10 +268,10 @@ where
             &transfers,
             |sc| {
                 let mut unequip_slots_managed =
-                    MultiValueEncoded::<DebugApi, Slot<DebugApi>>::new();
+                    MultiValueEncoded::<DebugApi, ManagedBuffer<DebugApi>>::new();
 
                 for s in unequip_slots {
-                    unequip_slots_managed.push(Slot::new_from_bytes(s));
+                    unequip_slots_managed.push(managed_buffer!(s));
                 }
 
                 let result = sc.customize(unequip_slots_managed);
@@ -331,7 +330,8 @@ where
             &self.cf_wrapper,
             &transfers,
             |sc| {
-                let result = sc.customize(MultiValueEncoded::<DebugApi, Slot<DebugApi>>::new());
+                let result =
+                    sc.customize(MultiValueEncoded::<DebugApi, ManagedBuffer<DebugApi>>::new());
 
                 opt_sc_result = Option::Some(result);
             },

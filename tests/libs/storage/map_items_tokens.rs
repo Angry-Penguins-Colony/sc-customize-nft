@@ -1,6 +1,6 @@
 use customize_nft::{
     libs::storage::StorageModule,
-    structs::{item::Item, slot::Slot, token::Token},
+    structs::{item::Item, token::Token},
 };
 use elrond_wasm_debug::{managed_buffer, managed_token_id, rust_biguint};
 
@@ -20,7 +20,7 @@ fn after_insert_should_returns_valid_values() {
                 let token = Token::new(managed_token_id!(b"HAT-a1a1a1"), 1);
                 let item = Item {
                     name: managed_buffer!(b"Pirate Hat"),
-                    slot: Slot::new_from_bytes(b"hat"),
+                    slot: managed_buffer!(b"hat"),
                 };
 
                 sc.map_items_tokens().insert(item.clone(), token.clone());
@@ -49,7 +49,7 @@ fn empty_storage_should_returns_false() {
                 let token = Token::new(managed_token_id!(b"HAT-a1a1a1"), 1);
                 let item = Item {
                     name: managed_buffer!(b"Pirate Hat"),
-                    slot: Slot::new_from_bytes(b"hat"),
+                    slot: managed_buffer!(b"hat"),
                 };
 
                 assert_eq!(sc.has_item(&item), false);

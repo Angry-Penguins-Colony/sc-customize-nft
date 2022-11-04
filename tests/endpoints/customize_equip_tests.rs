@@ -6,8 +6,7 @@ use customize_nft::constants::{
 use customize_nft::libs::equippable_uris::EquippableUrisModule;
 use customize_nft::structs::equippable_attributes::EquippableAttributes;
 use customize_nft::structs::item::Item;
-use customize_nft::structs::slot::Slot;
-use elrond_wasm::types::{EsdtTokenType, ManagedBuffer};
+use elrond_wasm::types::EsdtTokenType;
 use elrond_wasm_debug::managed_buffer;
 use elrond_wasm_debug::tx_mock::TxInputESDT;
 use elrond_wasm_debug::{rust_biguint, DebugApi};
@@ -73,20 +72,16 @@ fn test_equip() {
                 let name_before_custom = managed_buffer!(EQUIPPABLE_TOKEN_ID);
 
                 sc.uris_of_attributes(&attributes_before_custom, &name_before_custom)
-                    .set(ManagedBuffer::new_from_bytes(
-                        b"https://ipfs.io/ipfs/cid before custom",
-                    ));
+                    .set(managed_buffer!(b"https://ipfs.io/ipfs/cid before custom"));
 
                 let attributes_after_custom = EquippableAttributes::<DebugApi>::new(&[Item {
-                    name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
-                    slot: Slot::new_from_buffer(managed_buffer!(slot)),
+                    name: managed_buffer!(ITEM_TO_EQUIP_NAME),
+                    slot: managed_buffer!(slot),
                 }]);
                 let name_after_custom = managed_buffer!(EQUIPPABLE_TOKEN_ID);
 
                 sc.uris_of_attributes(&attributes_after_custom, &name_after_custom)
-                    .set(ManagedBuffer::new_from_bytes(
-                        b"https://ipfs.io/ipfs/after custom",
-                    ));
+                    .set(managed_buffer!(b"https://ipfs.io/ipfs/after custom"));
             },
         )
         .assert_ok();
@@ -122,8 +117,8 @@ fn test_equip() {
         1u64,
         &rust_biguint!(1),
         Option::Some(&EquippableAttributes::<DebugApi>::new(&[Item {
-            name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
-            slot: Slot::new_from_buffer(managed_buffer!(slot)),
+            name: managed_buffer!(ITEM_TO_EQUIP_NAME),
+            slot: managed_buffer!(slot),
         }])),
     );
 
@@ -192,26 +187,22 @@ fn should_replace_item() {
             &rust_biguint!(0),
             |sc| {
                 let attributes_before_custom = EquippableAttributes::<DebugApi>::new(&[Item {
-                    name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
-                    slot: Slot::new_from_buffer(managed_buffer!(SHARED_SLOT)),
+                    name: managed_buffer!(ITEM_TO_UNEQUIP_NAME),
+                    slot: managed_buffer!(SHARED_SLOT),
                 }]);
                 let name_before_custom = managed_buffer!(EQUIPPABLE_TOKEN_ID);
 
                 sc.uris_of_attributes(&attributes_before_custom, &name_before_custom)
-                    .set(ManagedBuffer::new_from_bytes(
-                        b"https://ipfs.io/ipfs/cid before custom",
-                    ));
+                    .set(managed_buffer!(b"https://ipfs.io/ipfs/cid before custom"));
 
                 let attributes_after_custom = EquippableAttributes::<DebugApi>::new(&[Item {
-                    name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
-                    slot: Slot::new_from_buffer(managed_buffer!(SHARED_SLOT)),
+                    name: managed_buffer!(ITEM_TO_EQUIP_NAME),
+                    slot: managed_buffer!(SHARED_SLOT),
                 }]);
                 let name_after_custom = managed_buffer!(EQUIPPABLE_TOKEN_ID);
 
                 sc.uris_of_attributes(&attributes_after_custom, &name_after_custom)
-                    .set(ManagedBuffer::new_from_bytes(
-                        b"https://ipfs.io/ipfs/cid after custom",
-                    ));
+                    .set(managed_buffer!(b"https://ipfs.io/ipfs/cid after custom"));
             },
         )
         .assert_ok();
@@ -268,8 +259,8 @@ fn should_replace_item() {
         1,
         &rust_biguint!(1),
         Option::Some(&EquippableAttributes::<DebugApi>::new(&[Item {
-            name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
-            slot: Slot::new_from_buffer(managed_buffer!(SHARED_SLOT)),
+            name: managed_buffer!(ITEM_TO_EQUIP_NAME),
+            slot: managed_buffer!(SHARED_SLOT),
         }])),
     );
 
@@ -405,8 +396,8 @@ fn panic_if_unequip_item_is_not_an_item() {
 
     // Register penguins w/ hat to remove
     let attributes = EquippableAttributes::<DebugApi>::new(&[Item {
-        name: ManagedBuffer::new_from_bytes(ITEM_TO_UNEQUIP_NAME),
-        slot: Slot::new_from_bytes(SHARED_SLOT),
+        name: managed_buffer!(ITEM_TO_UNEQUIP_NAME),
+        slot: managed_buffer!(SHARED_SLOT),
     }]);
 
     setup.blockchain_wrapper.set_nft_balance(
@@ -539,23 +530,19 @@ fn equip_while_sending_twice_same_items() {
             &rust_biguint!(0),
             |sc| {
                 let attributes_before_custom = EquippableAttributes::<DebugApi>::empty();
-                let name_before_custom = ManagedBuffer::new_from_bytes(EQUIPPABLE_TOKEN_ID);
+                let name_before_custom = managed_buffer!(EQUIPPABLE_TOKEN_ID);
 
                 let attributes_after_custom = EquippableAttributes::<DebugApi>::new(&[Item {
-                    name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
-                    slot: Slot::new_from_bytes(SLOT),
+                    name: managed_buffer!(ITEM_TO_EQUIP_NAME),
+                    slot: managed_buffer!(SLOT),
                 }]);
                 let name_after_custom = managed_buffer!(EQUIPPABLE_TOKEN_ID);
 
                 sc.uris_of_attributes(&attributes_before_custom, &name_before_custom)
-                    .set(&ManagedBuffer::new_from_bytes(
-                        b"https://ipfs.io/ipfs/cid before custom",
-                    ));
+                    .set(&managed_buffer!(b"https://ipfs.io/ipfs/cid before custom"));
 
                 sc.uris_of_attributes(&attributes_after_custom, &name_after_custom)
-                    .set(&ManagedBuffer::new_from_bytes(
-                        b"https://ipfs.io/ipfs/cid after custom",
-                    ));
+                    .set(&managed_buffer!(b"https://ipfs.io/ipfs/cid after custom"));
             },
         )
         .assert_ok();
@@ -611,8 +598,8 @@ fn equip_while_sending_twice_same_items() {
         1,
         &rust_biguint!(1),
         Option::Some(&EquippableAttributes::<DebugApi>::new(&[Item {
-            name: ManagedBuffer::new_from_bytes(ITEM_TO_EQUIP_NAME),
-            slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
+            name: managed_buffer!(ITEM_TO_EQUIP_NAME),
+            slot: managed_buffer!(SLOT),
         }])),
     );
 
@@ -684,20 +671,16 @@ fn equip_while_sending_two_items_of_same_slot() {
                 let name_before_custom = managed_buffer!(EQUIPPABLE_TOKEN_ID);
 
                 let attributes_after_custom = EquippableAttributes::<DebugApi>::new(&[Item {
-                    name: ManagedBuffer::new_from_bytes(SECOND_ITEM_NAME),
-                    slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
+                    name: managed_buffer!(SECOND_ITEM_NAME),
+                    slot: managed_buffer!(SLOT),
                 }]);
                 let name_after_custom = managed_buffer!(EQUIPPABLE_TOKEN_ID);
 
                 sc.uris_of_attributes(&attributes_before_custom, &name_before_custom)
-                    .set(ManagedBuffer::new_from_bytes(
-                        b"https://ipfs.io/ipfs/cid before custom",
-                    ));
+                    .set(managed_buffer!(b"https://ipfs.io/ipfs/cid before custom"));
 
                 sc.uris_of_attributes(&attributes_after_custom, &name_after_custom)
-                    .set(ManagedBuffer::new_from_bytes(
-                        b"https://ipfs.io/ipfs/cid after custom",
-                    ));
+                    .set(managed_buffer!(b"https://ipfs.io/ipfs/cid after custom"));
             },
         )
         .assert_ok();
@@ -771,8 +754,8 @@ fn equip_while_sending_two_items_of_same_slot() {
         1,
         &rust_biguint!(1),
         Option::Some(&EquippableAttributes::<DebugApi>::new(&[Item {
-            name: ManagedBuffer::new_from_bytes(SECOND_ITEM_NAME),
-            slot: Slot::new_from_buffer(managed_buffer!(SLOT)),
+            name: managed_buffer!(SECOND_ITEM_NAME),
+            slot: managed_buffer!(SLOT),
         }])),
     );
 

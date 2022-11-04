@@ -1,4 +1,4 @@
-use customize_nft::structs::{equippable_attributes::EquippableAttributes, item::Item, slot::Slot};
+use customize_nft::structs::{equippable_attributes::EquippableAttributes, item::Item};
 use elrond_wasm_debug::{managed_buffer, DebugApi};
 
 use crate::{assert_eq_symetry, assert_ne_symetry, testing_utils::New};
@@ -19,7 +19,7 @@ fn one_empty_should_not_equals() {
         EquippableAttributes::<DebugApi>::empty(),
         EquippableAttributes::<DebugApi>::new(&[Item {
             name: managed_buffer!(b"Pirate Hat"),
-            slot: Slot::new_from_bytes(b"hat"),
+            slot: managed_buffer!(b"hat"),
         },])
     );
 }
@@ -31,11 +31,11 @@ fn should_equals_if_same() {
     assert_eq_symetry!(
         EquippableAttributes::<DebugApi>::new(&[Item {
             name: managed_buffer!(b"Pirate Hat"),
-            slot: Slot::new_from_bytes(b"hat"),
+            slot: managed_buffer!(b"hat"),
         }]),
         EquippableAttributes::<DebugApi>::new(&[Item {
             name: managed_buffer!(b"Pirate Hat"),
-            slot: Slot::new_from_bytes(b"hat"),
+            slot: managed_buffer!(b"hat"),
         }])
     );
 }
@@ -48,21 +48,21 @@ fn should_equals_if_different_slot_order() {
         EquippableAttributes::<DebugApi>::new(&[
             Item {
                 name: managed_buffer!(b"Pirate Hat"),
-                slot: Slot::new_from_bytes(b"hat"),
+                slot: managed_buffer!(b"hat"),
             },
             Item {
                 name: managed_buffer!(b"Fishing Rod"),
-                slot: Slot::new_from_bytes(b"weapon"),
+                slot: managed_buffer!(b"weapon"),
             }
         ]),
         EquippableAttributes::<DebugApi>::new(&[
             Item {
                 name: managed_buffer!(b"Fishing Rod"),
-                slot: Slot::new_from_bytes(b"weapon"),
+                slot: managed_buffer!(b"weapon"),
             },
             Item {
                 name: managed_buffer!(b"Pirate Hat"),
-                slot: Slot::new_from_bytes(b"hat"),
+                slot: managed_buffer!(b"hat"),
             }
         ])
     );
@@ -76,25 +76,25 @@ fn different_size_should_return_false() {
         EquippableAttributes::<DebugApi>::new(&[
             Item {
                 name: managed_buffer!(b"Pirate Hat"),
-                slot: Slot::new_from_bytes(b"hat"),
+                slot: managed_buffer!(b"hat"),
             },
             Item {
                 name: managed_buffer!(b"Fishing Rod"),
-                slot: Slot::new_from_bytes(b"weapon"),
+                slot: managed_buffer!(b"weapon"),
             },
             Item {
                 name: managed_buffer!(b"Background 1"),
-                slot: Slot::new_from_bytes(b"background"),
+                slot: managed_buffer!(b"background"),
             }
         ]),
         EquippableAttributes::<DebugApi>::new(&[
             Item {
                 name: managed_buffer!(b"Fishing Rod"),
-                slot: Slot::new_from_bytes(b"weapon"),
+                slot: managed_buffer!(b"weapon"),
             },
             Item {
                 name: managed_buffer!(b"Pirate Hat"),
-                slot: Slot::new_from_bytes(b"hat"),
+                slot: managed_buffer!(b"hat"),
             }
         ])
     );
@@ -108,21 +108,21 @@ fn item_difference_should_false() {
         EquippableAttributes::<DebugApi>::new(&[
             Item {
                 name: managed_buffer!(b"Katana"),
-                slot: Slot::new_from_bytes(b"weapon"),
+                slot: managed_buffer!(b"weapon"),
             },
             Item {
                 name: managed_buffer!(b"Pirate Hat"),
-                slot: Slot::new_from_bytes(b"hat"),
+                slot: managed_buffer!(b"hat"),
             }
         ]),
         EquippableAttributes::<DebugApi>::new(&[
             Item {
                 name: managed_buffer!(b"Fishing Rod"),
-                slot: Slot::new_from_bytes(b"weapon"),
+                slot: managed_buffer!(b"weapon"),
             },
             Item {
                 name: managed_buffer!(b"Pirate Hat"),
-                slot: Slot::new_from_bytes(b"hat"),
+                slot: managed_buffer!(b"hat"),
             }
         ])
     );

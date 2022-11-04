@@ -1,6 +1,6 @@
 use customize_nft::{
     libs::equippable_uris::EquippableUrisModule,
-    structs::{equippable_attributes::EquippableAttributes, item::Item, slot::Slot},
+    structs::{equippable_attributes::EquippableAttributes, item::Item},
 };
 use elrond_wasm::{elrond_codec::multi_types::MultiValue3, types::MultiValueEncoded};
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
@@ -66,11 +66,11 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
             EquippableAttributes::<DebugApi>::new(&[
                 Item::<DebugApi> {
                     name: managed_buffer!(a_value),
-                    slot: Slot::new_from_bytes(a_slot),
+                    slot: managed_buffer!(a_slot),
                 },
                 Item::<DebugApi> {
                     name: managed_buffer!(b_value),
-                    slot: Slot::new_from_bytes(b_slot),
+                    slot: managed_buffer!(b_slot),
                 },
             ]),
             managed_buffer!(b"Equippable #512"),
@@ -82,11 +82,11 @@ fn should_return_cid_from_equivalent_but_not_exact_attr() {
             EquippableAttributes::<DebugApi>::new(&[
                 Item::<DebugApi> {
                     name: managed_buffer!(b_value),
-                    slot: Slot::new_from_bytes(b_slot),
+                    slot: managed_buffer!(b_slot),
                 },
                 Item::<DebugApi> {
                     name: managed_buffer!(a_value),
-                    slot: Slot::new_from_bytes(a_slot),
+                    slot: managed_buffer!(a_slot),
                 },
             ]),
             managed_buffer!(b"Equippable #512"),

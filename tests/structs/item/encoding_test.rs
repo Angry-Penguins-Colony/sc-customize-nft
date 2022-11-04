@@ -1,4 +1,4 @@
-use customize_nft::structs::{item::Item, slot::Slot};
+use customize_nft::structs::item::Item;
 use elrond_wasm::{
     elrond_codec::{NestedDecode, NestedEncode, TopDecode, TopEncode},
     types::{ManagedBuffer, ManagedBufferNestedDecodeInput},
@@ -14,7 +14,7 @@ fn top_should_works() {
     setup.blockchain_wrapper.execute_in_managed_environment(|| {
         let encoded_item = &Item {
             name: managed_buffer!(b"Pirate Hat"),
-            slot: Slot::<DebugApi>::new_from_bytes(b"hat"),
+            slot: ManagedBuffer::<DebugApi>::new_from_bytes(b"hat"),
         };
 
         let mut output = ManagedBuffer::<DebugApi>::new_from_bytes(b"");
@@ -40,7 +40,7 @@ fn nested_should_works() {
     setup.blockchain_wrapper.execute_in_managed_environment(|| {
         let encoded_item = &Item {
             name: managed_buffer!(b"Pirate Hat"),
-            slot: Slot::<DebugApi>::new_from_bytes(b"hat"),
+            slot: ManagedBuffer::<DebugApi>::new_from_bytes(b"hat"),
         };
 
         let mut output = ManagedBuffer::<DebugApi>::new_from_bytes(b"");

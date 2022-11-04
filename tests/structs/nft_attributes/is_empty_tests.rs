@@ -1,16 +1,15 @@
-use customize_nft::structs::{equippable_attributes::EquippableAttributes, item::Item, slot::Slot};
-use elrond_wasm::types::ManagedBuffer;
-use elrond_wasm_debug::DebugApi;
+use customize_nft::structs::{equippable_attributes::EquippableAttributes, item::Item};
+use elrond_wasm_debug::{managed_buffer, DebugApi};
 
 use crate::testing_utils::New;
 
 #[test]
 fn is_empty_while_not_empty() {
     DebugApi::dummy();
-    let slot = &Slot::new_from_bytes(b"hat");
+    let slot = &managed_buffer!(b"hat");
 
     let equippable_nft_attributes = EquippableAttributes::<DebugApi>::new(&[Item {
-        name: ManagedBuffer::new_from_bytes(b"item name"),
+        name: managed_buffer!(b"item name"),
         slot: slot.clone(),
     }]);
 
@@ -20,7 +19,7 @@ fn is_empty_while_not_empty() {
 #[test]
 fn is_empty_while_empty() {
     DebugApi::dummy();
-    let slot = &Slot::new_from_bytes(b"hat");
+    let slot = &managed_buffer!(b"hat");
 
     let equippable_nft_attributes = EquippableAttributes::<DebugApi>::empty();
 

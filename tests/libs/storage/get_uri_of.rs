@@ -1,10 +1,9 @@
 use crate::testing_utils::New;
 use crate::{args_set_cid_of, testing_utils};
 use customize_nft::libs::equippable_uris::EquippableUrisModule;
-use customize_nft::structs::slot::Slot;
 use elrond_wasm::types::ManagedBuffer;
 use elrond_wasm::types::MultiValueEncoded;
-use elrond_wasm_debug::DebugApi;
+use elrond_wasm_debug::{managed_buffer, DebugApi};
 
 use customize_nft::structs::equippable_attributes::EquippableAttributes;
 use customize_nft::structs::item::Item;
@@ -19,10 +18,10 @@ fn build_url_with_no_associated_cid() {
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |sc| {
             let attributes = EquippableAttributes::<DebugApi>::new(&[Item::<DebugApi> {
-                name: ManagedBuffer::new_from_bytes(b"item name"),
-                slot: Slot::new_from_bytes(b"hat"),
+                name: managed_buffer!(b"item name"),
+                slot: managed_buffer!(b"hat"),
             }]);
-            let name = ManagedBuffer::new_from_bytes(b"Equippable #512");
+            let name = managed_buffer!(b"Equippable #512");
 
             let _ = sc.get_uri_of(&attributes, &name);
         })
@@ -38,10 +37,10 @@ fn build_url_with_associated_cid() {
     let get_image_to_render = || {
         (
             EquippableAttributes::<DebugApi>::new(&[Item::<DebugApi> {
-                name: ManagedBuffer::new_from_bytes(b"item name"),
-                slot: Slot::new_from_bytes(b"hat"),
+                name: managed_buffer!(b"item name"),
+                slot: managed_buffer!(b"hat"),
             }]),
-            ManagedBuffer::new_from_bytes(b"Equippable #512"),
+            managed_buffer!(b"Equippable #512"),
         )
     };
 
@@ -59,7 +58,7 @@ fn build_url_with_associated_cid() {
                 sc.set_uri_of_attributes(args_set_cid_of!(
                     image_to_render.0,
                     image_to_render.1,
-                    ManagedBuffer::new_from_bytes(b"https://ipfs.io/ipfs/this is a CID")
+                    managed_buffer!(b"https://ipfs.io/ipfs/this is a CID")
                 ));
 
                 let url = sc.get_uri_of(&image_to_render.0, &image_to_render.1);

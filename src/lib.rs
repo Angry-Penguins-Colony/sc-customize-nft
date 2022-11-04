@@ -10,7 +10,7 @@ pub mod structs;
 pub mod utils;
 
 use libs::*;
-use structs::{item::Item, slot::Slot};
+use structs::item::Item;
 
 use crate::{constants::*, structs::token::Token};
 
@@ -29,7 +29,7 @@ pub trait Equip:
         &self,
         items: MultiValueEncoded<
             Self::Api,
-            MultiValue4<Slot<Self::Api>, ManagedBuffer, TokenIdentifier, u64>,
+            MultiValue4<ManagedBuffer<Self::Api>, ManagedBuffer, TokenIdentifier, u64>,
         >,
     ) {
         for item in items.into_iter() {

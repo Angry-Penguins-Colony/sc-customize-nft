@@ -1,9 +1,7 @@
 use crate::testing_utils::{self, TestItemAttributes};
 use customize_nft::{
-    constants::ERR_CANNOT_FILL_UNREGISTERED_ITEM,
-    libs::storage::StorageModule,
-    structs::{item::Item, slot::Slot},
-    EndpointWrappers, Equip,
+    constants::ERR_CANNOT_FILL_UNREGISTERED_ITEM, libs::storage::StorageModule,
+    structs::item::Item, EndpointWrappers, Equip,
 };
 use elrond_wasm::{elrond_codec::multi_types::MultiValue4, types::MultiValueEncoded};
 use elrond_wasm_debug::{managed_buffer, managed_token_id, rust_biguint};
@@ -37,7 +35,7 @@ fn works_if_is_the_owner() {
             |sc| {
                 let mut items = MultiValueEncoded::new();
                 items.push(MultiValue4::from((
-                    Slot::new_from_bytes(TOKEN_SLOT),
+                    managed_buffer!(TOKEN_SLOT),
                     managed_buffer!(TOKEN_NAME),
                     managed_token_id!(TOKEN_ID),
                     TOKEN_NONCE,
@@ -49,7 +47,7 @@ fn works_if_is_the_owner() {
 
                 let opt_token = sc.get_token(&Item {
                     name: managed_buffer!(TOKEN_NAME),
-                    slot: Slot::new_from_bytes(TOKEN_SLOT),
+                    slot: managed_buffer!(TOKEN_SLOT),
                 });
 
                 match opt_token {

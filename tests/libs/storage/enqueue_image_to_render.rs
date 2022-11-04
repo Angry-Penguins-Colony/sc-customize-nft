@@ -4,7 +4,7 @@ use customize_nft::{
         ERR_RENDER_ALREADY_IN_QUEUE,
     },
     libs::equippable_uris::EquippableUrisModule,
-    structs::{equippable_attributes::EquippableAttributes, item::Item, slot::Slot},
+    structs::{equippable_attributes::EquippableAttributes, item::Item},
 };
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
@@ -57,7 +57,7 @@ fn enqueue_two_differents_attributes() {
 
                 let attributes_b = EquippableAttributes::<DebugApi>::new(&[Item {
                     name: managed_buffer!(b"pirate hat"),
-                    slot: Slot::new_from_bytes(b"hat"),
+                    slot: managed_buffer!(b"hat"),
                 }]);
                 let name_b = managed_buffer!(b"Equippable #513");
 
@@ -149,11 +149,11 @@ fn panic_if_attributes_already_in_queue_but_in_another_order() {
             EquippableAttributes::<DebugApi>::new(&[
                 Item {
                     name: managed_buffer!(b"pirate hat"),
-                    slot: Slot::new_from_bytes(b"hat"),
+                    slot: managed_buffer!(b"hat"),
                 },
                 Item {
                     name: managed_buffer!(b"eel"),
-                    slot: Slot::new_from_bytes(b"beak"),
+                    slot: managed_buffer!(b"beak"),
                 },
             ]),
             managed_buffer!(b"Equippable #513"),
@@ -165,11 +165,11 @@ fn panic_if_attributes_already_in_queue_but_in_another_order() {
             EquippableAttributes::<DebugApi>::new(&[
                 Item {
                     name: managed_buffer!(b"eel"),
-                    slot: Slot::new_from_bytes(b"beak"),
+                    slot: managed_buffer!(b"beak"),
                 },
                 Item {
                     name: managed_buffer!(b"pirate hat"),
-                    slot: Slot::new_from_bytes(b"hat"),
+                    slot: managed_buffer!(b"hat"),
                 },
             ]),
             managed_buffer!(b"Equippable #513"),

@@ -5,8 +5,6 @@ use crate::{
 use core::ops::Deref;
 use elrond_wasm::{elrond_codec::TopEncode, formatter::SCDisplay};
 
-use super::slot::Slot;
-
 pub const ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS: &[u8] =
     b"A name can't contains colon or semicolons";
 
@@ -17,7 +15,7 @@ elrond_wasm::derive_imports!();
 
 #[derive(ManagedVecItem, NestedEncode, NestedDecode, PartialEq, TypeAbi, Clone, Debug)]
 struct EquippableAttribute<M: ManagedTypeApi> {
-    pub slot: Slot<M>,
+    pub slot: ManagedBuffer<M>,
     pub name: Option<ManagedBuffer<M>>,
 }
 
@@ -31,7 +29,7 @@ impl<M: ManagedTypeApi> EquippableAttribute<M> {
         let mut output = ManagedBuffer::<M>::new();
 
         // build buffer
-        output.append(&self.slot.get());
+        output.append(&self.slot);
         output.append_bytes(b":");
         output.append(&item_name);
 
@@ -54,7 +52,7 @@ impl<M: ManagedTypeApi> EquippableAttribute<M> {
         };
 
         return Self {
-            slot: Slot::new_from_buffer(parts.get(0).deref().to_lowercase()),
+            slot: parts.get(0).deref().clone(),
             name: opt_name,
         };
     }
@@ -161,7 +159,7 @@ impl<M: ManagedTypeApi> EquippableAttributes<M> {
         };
     }
 
-    pub fn get_name(&self, slot: &Slot<M>) -> Option<ManagedBuffer<M>> {
+    pub fn get_name(&self, slot: &ManagedBuffer<M>) -> Option<ManagedBuffer<M>> {
         if let Some(index) = self.get_index(&slot) {
             return self.items.get(index).name;
         } else {
@@ -169,7 +167,7 @@ impl<M: ManagedTypeApi> EquippableAttributes<M> {
         }
     }
 
-    pub fn set_item_if_empty(&mut self, slot: &Slot<M>, name: Option<ManagedBuffer<M>>) {
+    pub fn set_item_if_empty(&mut self, slot: &ManagedBuffer<M>, name: Option<ManagedBuffer<M>>) {
         if self.is_slot_empty(slot) == false {
             M::error_api_impl()
                 .signal_error(b"The slot is not empty. Please free it, before setting an item.");
@@ -178,7 +176,7 @@ impl<M: ManagedTypeApi> EquippableAttributes<M> {
         return self.set_item(slot, name);
     }
 
-    pub fn set_item(&mut self, slot: &Slot<M>, opt_name: Option<ManagedBuffer<M>>) {
+    pub fn set_item(&mut self, slot: &ManagedBuffer<M>, opt_name: Option<ManagedBuffer<M>>) {
         let index = self.get_index(&slot);
 
         panic_if_name_contains_unsupported_characters::<M>(&opt_name);
@@ -205,18 +203,18 @@ impl<M: ManagedTypeApi> EquippableAttributes<M> {
         self.items = self.items.sort_alphabetically();
     }
 
-    pub fn is_slot_empty(&self, slot: &Slot<M>) -> bool {
+    pub fn is_slot_empty(&self, slot: &ManagedBuffer<M>) -> bool {
         match self.get_name(slot) {
             Some(_) => false,
             None => true,
         }
     }
 
-    pub fn empty_slot(&mut self, slot: &Slot<M>) {
+    pub fn empty_slot(&mut self, slot: &ManagedBuffer<M>) {
         return self.set_item(&slot, Option::None);
     }
 
-    fn get_index(&self, slot: &Slot<M>) -> Option<usize> {
+    fn get_index(&self, slot: &ManagedBuffer<M>) -> Option<usize> {
         return self.items.iter().position(|kvp| &kvp.slot == slot);
     }
 }

@@ -1,5 +1,3 @@
-use super::slot::Slot;
-
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
@@ -16,7 +14,7 @@ elrond_wasm::derive_imports!();
 )]
 pub struct Item<M: ManagedTypeApi> {
     pub name: ManagedBuffer<M>,
-    pub slot: Slot<M>,
+    pub slot: ManagedBuffer<M>,
 }
 
 impl<M: ManagedTypeApi> Default for Item<M> {

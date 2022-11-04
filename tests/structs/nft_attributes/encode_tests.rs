@@ -1,4 +1,4 @@
-use customize_nft::structs::{equippable_attributes::EquippableAttributes, item::Item, slot::Slot};
+use customize_nft::structs::{equippable_attributes::EquippableAttributes, item::Item};
 use elrond_wasm::elrond_codec::TopEncode;
 use elrond_wasm_debug::{managed_buffer, DebugApi};
 
@@ -10,7 +10,7 @@ fn should_top_encode() {
 
     let equippable_nft_attributes = EquippableAttributes::new(&[Item::<DebugApi> {
         name: managed_buffer!(b"Pirate Hat"),
-        slot: Slot::new_from_bytes(b"hat"),
+        slot: managed_buffer!(b"hat"),
     }]);
 
     let expected = b"hat:Pirate Hat";
@@ -26,22 +26,22 @@ fn should_top_encode_two() {
     let attributes_order_one = EquippableAttributes::new(&[
         Item::<DebugApi> {
             name: managed_buffer!(b"Gun"),
-            slot: Slot::new_from_bytes(b"weapon"),
+            slot: managed_buffer!(b"weapon"),
         },
         Item::<DebugApi> {
             name: managed_buffer!(b"Pirate Hat"),
-            slot: Slot::new_from_bytes(b"hat"),
+            slot: managed_buffer!(b"hat"),
         },
     ]);
 
     let attributes_order_two = EquippableAttributes::new(&[
         Item::<DebugApi> {
             name: managed_buffer!(b"Pirate Hat"),
-            slot: Slot::new_from_bytes(b"hat"),
+            slot: managed_buffer!(b"hat"),
         },
         Item::<DebugApi> {
             name: managed_buffer!(b"Gun"),
-            slot: Slot::new_from_bytes(b"weapon"),
+            slot: managed_buffer!(b"weapon"),
         },
     ]);
 
@@ -55,9 +55,9 @@ fn should_top_encode_after_emptying() {
 
     let mut equippable_nft_attributes = EquippableAttributes::new(&[Item::<DebugApi> {
         name: managed_buffer!(b"Pirate Hat"),
-        slot: Slot::new_from_bytes(b"hat"),
+        slot: managed_buffer!(b"hat"),
     }]);
-    equippable_nft_attributes.empty_slot(&Slot::new_from_bytes(b"hat"));
+    equippable_nft_attributes.empty_slot(&managed_buffer!(b"hat"));
 
     let expected = b"hat:unequipped";
 
@@ -102,7 +102,7 @@ fn panic_if_more_that_512_bytes() {
         .blockchain_wrapper
         .execute_query(&setup.cf_wrapper, |_| {
             let equippable_nft_attributes = EquippableAttributes::new(&[Item::<DebugApi> {
-                slot: Slot::new_from_bytes(b"lorem"),
+                slot: managed_buffer!(b"lorem"),
                 name: managed_buffer!(NAME),
             }]);
 

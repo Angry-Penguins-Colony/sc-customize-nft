@@ -1,6 +1,6 @@
 use crate::{
     constants::*,
-    structs::{equippable_attributes::EquippableAttributes, item::Item, slot::Slot, token::Token},
+    structs::{equippable_attributes::EquippableAttributes, item::Item, token::Token},
 };
 
 elrond_wasm::imports!();
@@ -12,7 +12,7 @@ pub trait CustomizeModule:
 {
     #[payable("*")]
     #[endpoint(customize)]
-    fn customize(&self, to_unequip_slots: MultiValueEncoded<Slot<Self::Api>>) -> u64 {
+    fn customize(&self, to_unequip_slots: MultiValueEncoded<ManagedBuffer<Self::Api>>) -> u64 {
         let payments = self.call_value().all_esdt_transfers();
 
         self.require_equippable_collection_roles_set();
@@ -88,7 +88,7 @@ pub trait CustomizeModule:
     fn unequip_slot(
         &self,
         attributes: &mut EquippableAttributes<Self::Api>,
-        slot: &Slot<Self::Api>,
+        slot: &ManagedBuffer<Self::Api>,
     ) {
         let opt_name = attributes.get_name(&slot);
 
@@ -126,10 +126,9 @@ pub trait CustomizeModule:
                     }
 
                     None => {
-                        let slot_name = slot.get();
                         sc_panic!(
                             "The item you are unequipping at slot {} is not registered.",
-                            slot_name
+                            slot
                         );
                     }
                 }

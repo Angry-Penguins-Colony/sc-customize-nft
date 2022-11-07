@@ -1,12 +1,18 @@
 use customize_nft::constants::{
     ERR_CANNOT_OVERRIDE_REGISTERED_ITEM, ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM,
+    UNEQUIPPED_ITEM_NAME,
 };
 use customize_nft::libs::storage::StorageModule;
+use customize_nft::structs::equippable_attributes::{
+    ERR_NAME_CANNOT_BE_UNEQUIPPED, ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS,
+    ERR_SLOT_CONTAINS_UNSUPPORTED_CHARACTERS,
+};
 use customize_nft::structs::item::Item;
 use customize_nft::structs::token::Token;
 use customize_nft::*;
 use elrond_wasm::elrond_codec::multi_types::MultiValue4;
 use elrond_wasm::types::{MultiValueEncoded, TokenIdentifier};
+use elrond_wasm_debug::tx_mock::TxResult;
 use elrond_wasm_debug::{managed_buffer, managed_token_id};
 use elrond_wasm_debug::{rust_biguint, DebugApi};
 
@@ -208,4 +214,55 @@ fn panic_if_not_the_owner() {
             },
         )
         .assert_user_error("Endpoint can only be called by owner");
+}
+
+#[test]
+fn panic_if_name_contains_two_dots() {
+    call_register_item(b"hat", b"My:Hat", b"HAT-a1a1a1")
+        .assert_user_error(std::str::from_utf8(ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS).unwrap());
+}
+
+#[test]
+fn panic_if_name_contains_semicolon() {
+    call_register_item(b"hat", b"My;Hat", b"HAT-a1a1a1")
+        .assert_user_error(std::str::from_utf8(ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS).unwrap());
+}
+
+#[test]
+fn panic_if_name_equals_unequipped() {
+    call_register_item(b"hat", UNEQUIPPED_ITEM_NAME, b"HAT-a1a1a1")
+        .assert_user_error(std::str::from_utf8(ERR_NAME_CANNOT_BE_UNEQUIPPED).unwrap());
+}
+
+#[test]
+fn panic_if_slot_contains_semicolon() {
+    call_register_item(b"ha;t", b"My Hat", b"HAT-a1a1a1")
+        .assert_user_error(std::str::from_utf8(ERR_SLOT_CONTAINS_UNSUPPORTED_CHARACTERS).unwrap());
+}
+
+#[test]
+fn panic_if_slot_contains_twodots() {
+    call_register_item(b"ha:t", b"My Hat", b"HAT-a1a1a1")
+        .assert_user_error(std::str::from_utf8(ERR_SLOT_CONTAINS_UNSUPPORTED_CHARACTERS).unwrap());
+}
+
+fn call_register_item(slot: &[u8], name: &[u8], token_id: &[u8]) -> TxResult {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    return setup.blockchain_wrapper.execute_tx(
+        &setup.owner_address,
+        &setup.cf_wrapper,
+        &rust_biguint!(0u64),
+        |sc| {
+            let mut items = MultiValueEncoded::new();
+            items.push(MultiValue4::from((
+                managed_buffer!(slot),
+                managed_buffer!(name),
+                managed_token_id!(token_id),
+                1,
+            )));
+
+            sc.register_item(items);
+        },
+    );
 }

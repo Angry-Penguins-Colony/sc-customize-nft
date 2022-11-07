@@ -7,6 +7,8 @@ use elrond_wasm::{elrond_codec::TopEncode, formatter::SCDisplay};
 
 pub const ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS: &[u8] =
     b"A name can't contains colon or semicolons";
+pub const ERR_SLOT_CONTAINS_UNSUPPORTED_CHARACTERS: &[u8] =
+    b"A slot can't contains colon or semicolons";
 
 pub const ERR_NAME_CANNOT_BE_UNEQUIPPED: &[u8] = b"The name cannot be 'unequipped'.";
 
@@ -219,7 +221,7 @@ impl<M: ManagedTypeApi> EquippableAttributes<M> {
     }
 }
 
-fn panic_if_name_contains_unsupported_characters<M: ManagedTypeApi>(
+pub fn panic_if_name_contains_unsupported_characters<M: ManagedTypeApi>(
     opt_name: &Option<ManagedBuffer<M>>,
 ) {
     if let Some(name) = opt_name.clone() {
@@ -230,5 +232,11 @@ fn panic_if_name_contains_unsupported_characters<M: ManagedTypeApi>(
         if name == ManagedBuffer::new_from_bytes(UNEQUIPPED_ITEM_NAME) {
             M::error_api_impl().signal_error(ERR_NAME_CANNOT_BE_UNEQUIPPED);
         }
+    }
+}
+
+pub fn panic_if_slot_contains_unsupported_characters<M: ManagedTypeApi>(slot: &ManagedBuffer<M>) {
+    if slot.contains_char(b';') || slot.contains_char(b':') {
+        M::error_api_impl().signal_error(ERR_SLOT_CONTAINS_UNSUPPORTED_CHARACTERS);
     }
 }

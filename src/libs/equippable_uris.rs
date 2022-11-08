@@ -20,7 +20,7 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
     #[endpoint(authorizeAddressToSetUris)]
     #[only_owner]
     fn authorize_address_to_set_uris(&self, address: ManagedAddress) {
-        self.authorized_addresses_to_set_uris(&address).set(true);
+        self.authorized_addresses_to_set_uris().insert(address);
     }
 
     /**
@@ -75,7 +75,7 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
 
         require!(
             &self.blockchain().get_owner_address() == caller
-                || self.authorized_addresses_to_set_uris(caller).get() == true,
+                || self.authorized_addresses_to_set_uris().contains(caller) == true,
             "You don't have the permission to call this endpoint."
         );
 

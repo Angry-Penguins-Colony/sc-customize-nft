@@ -15,10 +15,7 @@ pub trait StorageModule {
     fn map_items_tokens(&self) -> BiDiMapper<Self::Api, Item<Self::Api>, Token<Self::Api>>;
 
     #[storage_mapper("authorized_addresses_to_set_uris")]
-    fn authorized_addresses_to_set_uris(
-        &self,
-        address: &ManagedAddress<Self::Api>,
-    ) -> SingleValueMapper<bool>;
+    fn authorized_addresses_to_set_uris(&self) -> UnorderedSetMapper<ManagedAddress<Self::Api>>;
 
     fn has_item(&self, item: &Item<Self::Api>) -> bool {
         return self

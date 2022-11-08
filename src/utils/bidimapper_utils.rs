@@ -2,7 +2,7 @@ use elrond_wasm::{
     api::StorageMapperApi,
     elrond_codec::{NestedDecode, NestedEncode, TopDecode, TopEncode},
     storage::{mappers::BiDiMapper, StorageKey},
-    storage_get, storage_get_len,
+    storage_get,
     types::ManagedType,
 };
 

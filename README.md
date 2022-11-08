@@ -90,7 +90,7 @@ TransferTransaction {
 
 ## Transfer required role
 
-On Elrond, we can not update the URI associated with an NFT (we can just add a new URI).   
+On Elrond, we cannot update the URI associated with an NFT (we can just add a new URI).   
 To update the visual, we burn and recreate a new NFT, with the wanted visual.
 
 > The total supply of your collection will stay the same.

@@ -10,7 +10,7 @@ pub const ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS: &[u8] =
 pub const ERR_SLOT_CONTAINS_UNSUPPORTED_CHARACTERS: &[u8] =
     b"A slot can't containscolon or semicolons";
 
-pub const ERR_NAME_CANNOT_BE_UNEQUIPPED: &[u8] = b"The name can not be 'unequipped'.";
+pub const ERR_NAME_CANNOT_BE_UNEQUIPPED: &[u8] = b"The name cannot be 'unequipped'.";
 
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
@@ -42,7 +42,7 @@ impl<M: ManagedTypeApi> EquippableAttribute<M> {
         let parts = input.split(b':');
 
         if parts.len() != 2 {
-            M::error_api_impl().signal_error(b"can not decode EquippableNftAttribute");
+            M::error_api_impl().signal_error(b"cannot decode EquippableNftAttribute");
         }
 
         let name = parts.get(1).deref().clone();

@@ -12,7 +12,6 @@ pub trait ManagedBufferUtils<M: ManagedTypeApi> {
 
     /// The replace method use new_buffer as ManagedBuffer because is it the easier way to implement    
     fn contains_char(&self, to_find: u8) -> bool;
-    fn get_last_char(&self) -> u8;
 
     /// Returns 0 if equals. Return 1 if self is after other in the alphabetically order. Returns 0 if self is before other in the alphabetically order.
     fn compare(&self, other: &Self) -> Ordering;
@@ -55,12 +54,6 @@ impl<M: ManagedTypeApi> ManagedBufferUtils<M> for ManagedBuffer<M> {
         }
 
         return output;
-    }
-
-    fn get_last_char(&self) -> u8 {
-        let bytes = self.load_512_bytes();
-
-        return bytes[self.len() - 1];
     }
 
     fn contains_char(&self, to_find: u8) -> bool {

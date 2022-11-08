@@ -1,13 +1,11 @@
 use elrond_wasm::{
     api::StorageMapperApi,
     elrond_codec::{NestedDecode, NestedEncode, TopDecode, TopEncode},
-    storage::{mappers::BiDiMapper, StorageKey},
-    storage_get,
-    types::ManagedType,
+    storage::{
+        mappers::{BiDiMapper, StorageMapper, UnorderedSetMapper},
+        StorageKey,
+    },
 };
-
-const NULL_ENTRY: usize = 0;
-const ITEM_INDEX: &[u8] = b".index";
 
 pub trait ContainsUtils<SA, K, V> {
     fn contains_id(&self, id: &K, base_key: &[u8]) -> bool;
@@ -23,18 +21,14 @@ where
     fn contains_id(&self, id: &K, base_key: &[u8]) -> bool {
         let mut key = StorageKey::<SA>::new(base_key);
         key.append_bytes(b"_id");
-        key.append_bytes(ITEM_INDEX);
-        key.append_item(id);
 
-        storage_get::<SA, usize>(key.as_ref()) != NULL_ENTRY
+        UnorderedSetMapper::new(key).contains(id)
     }
 
     fn contains_value(&self, value: &V, base_key: &[u8]) -> bool {
         let mut key = StorageKey::<SA>::new(base_key);
         key.append_bytes(b"_value");
-        key.append_bytes(ITEM_INDEX);
-        key.append_item(value);
 
-        storage_get::<SA, usize>(key.as_ref()) != NULL_ENTRY
+        UnorderedSetMapper::new(key).contains(value)
     }
 }

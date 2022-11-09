@@ -1,11 +1,11 @@
 use customize_nft::structs::{
     equippable_attributes::{
         EquippableAttributes, ERR_NAME_CANNOT_BE_UNEQUIPPED,
-        ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS,
+        ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS, ERR_SLOT_CONTAINS_UNSUPPORTED_CHARACTERS,
     },
     item::Item,
 };
-use elrond_wasm_debug::{managed_buffer, DebugApi};
+use elrond_wasm_debug::{managed_buffer, tx_mock::TxResult, DebugApi};
 use std::str;
 
 use crate::testing_utils::{self, New};
@@ -87,4 +87,29 @@ fn panic_if_name_is_unequipped() {
             }]);
         })
         .assert_user_error(str::from_utf8(ERR_NAME_CANNOT_BE_UNEQUIPPED).unwrap());
+}
+
+#[test]
+fn panic_if_slot_contains_colon() {
+    create_equippables_attributes(b"pirate hat", b"slo:t")
+        .assert_user_error(str::from_utf8(ERR_SLOT_CONTAINS_UNSUPPORTED_CHARACTERS).unwrap());
+}
+
+#[test]
+fn panic_if_slot_contains_semicolon() {
+    create_equippables_attributes(b"pirate hat", b"slo;t")
+        .assert_user_error(str::from_utf8(ERR_SLOT_CONTAINS_UNSUPPORTED_CHARACTERS).unwrap());
+}
+
+fn create_equippables_attributes(name: &[u8], slot: &[u8]) -> TxResult {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    return setup
+        .blockchain_wrapper
+        .execute_query(&setup.cf_wrapper, |_sc| {
+            let _ = EquippableAttributes::<DebugApi>::new(&[Item {
+                name: managed_buffer!(name),
+                slot: managed_buffer!(slot),
+            }]);
+        });
 }

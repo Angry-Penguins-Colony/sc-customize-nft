@@ -181,7 +181,8 @@ impl<M: ManagedTypeApi> EquippableAttributes<M> {
     pub fn set_item(&mut self, slot: &ManagedBuffer<M>, opt_name: Option<ManagedBuffer<M>>) {
         let index = self.get_index(&slot);
 
-        panic_if_name_contains_unsupported_characters::<M>(&opt_name);
+        panic_if_name_contains_unsupported_characters(&opt_name);
+        panic_if_slot_contains_unsupported_characters(slot);
 
         let new_equippable_attribute = EquippableAttribute {
             slot: slot.clone(),

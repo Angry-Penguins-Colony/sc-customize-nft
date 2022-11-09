@@ -3,6 +3,9 @@ use crate::{constants::*, structs::equippable_attributes::EquippableAttributes};
 elrond_wasm::imports!();
 elrond_wasm::derive_imports!();
 
+pub const ERR_ATTRIBUTES_MISMATCH: &str =
+    "The attributes you are assigning do not match the attributes in the render queue.";
+
 #[elrond_wasm::module]
 pub trait EquippableUrisModule: super::storage::StorageModule {
     #[storage_mapper("attributes_to_render_by_name")]
@@ -46,7 +49,6 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
             self.attributes_to_render_by_name().contains_key(&name) == false,
             ERR_RENDER_ALREADY_IN_QUEUE
         );
-
         self.attributes_to_render_by_name()
             .insert(name.clone(), attributes.clone());
     }
@@ -90,6 +92,11 @@ pub trait EquippableUrisModule: super::storage::StorageModule {
             require!(
                 self.attributes_to_render_by_name().contains_key(&name),
                 ERR_IMAGE_NOT_IN_RENDER_QUEUE
+            );
+
+            require!(
+                &self.attributes_to_render_by_name().get(&name).unwrap() == &attributes,
+                ERR_ATTRIBUTES_MISMATCH
             );
 
             self.uris_of_attributes(&attributes, &name).set(uri);

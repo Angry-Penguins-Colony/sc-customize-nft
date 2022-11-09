@@ -2,14 +2,17 @@ use customize_nft::{
     constants::{
         ENQUEUE_PRICE, ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE, ERR_IMAGE_NOT_IN_RENDER_QUEUE,
     },
-    libs::equippable_uris::{EndpointWrappers, EquippableUrisModule},
-    structs::equippable_attributes::EquippableAttributes,
+    libs::equippable_uris::{EndpointWrappers, EquippableUrisModule, ERR_ATTRIBUTES_MISMATCH},
+    structs::{equippable_attributes::EquippableAttributes, item::Item},
 };
 use elrond_wasm::elrond_codec::multi_types::MultiValue3;
 use elrond_wasm::types::MultiValueEncoded;
 use elrond_wasm_debug::{managed_buffer, rust_biguint, DebugApi};
 
-use crate::{args_set_cid_of, testing_utils};
+use crate::{
+    args_set_cid_of,
+    testing_utils::{self, New},
+};
 
 #[test]
 fn should_set_if_empty() {
@@ -48,6 +51,43 @@ fn should_set_if_empty() {
             },
         )
         .assert_ok();
+}
+
+#[test]
+fn panic_if_attributes_in_queue_mismatch_provided() {
+    let mut setup = testing_utils::setup(customize_nft::contract_obj);
+
+    let cid_bytes = b"https://ipfs.io/ipfs/some cid";
+    let name_bytes = b"Equippable #512";
+
+    setup.enqueue_attributes_to_render(&|| {
+        return (
+            EquippableAttributes::<DebugApi>::new(&[Item {
+                slot: managed_buffer!(b"hat"),
+                name: managed_buffer!(b"pirate hat"),
+            }]),
+            managed_buffer!(name_bytes),
+        );
+    });
+
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.cf_wrapper,
+            &rust_biguint!(0),
+            |sc| {
+                let name = managed_buffer!(name_bytes);
+                let attributes = EquippableAttributes::<DebugApi>::empty();
+
+                sc.set_uri_of_attributes(args_set_cid_of!(
+                    attributes,
+                    name,
+                    managed_buffer!(cid_bytes)
+                ));
+            },
+        )
+        .assert_user_error(ERR_ATTRIBUTES_MISMATCH);
 }
 
 #[test]

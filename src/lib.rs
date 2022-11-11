@@ -52,11 +52,9 @@ pub trait Equip:
             panic_if_name_contains_unsupported_characters(&Option::Some(name.clone()));
             panic_if_slot_contains_unsupported_characters(&slot);
 
-            let is_insert_successful = self
+            let _ = self
                 .map_items_tokens()
                 .insert(Item { name, slot }, Token::new(token_id, token_nonce));
-
-            require!(is_insert_successful, ERR_CANNOT_OVERRIDE_REGISTERED_ITEM);
         }
     }
 

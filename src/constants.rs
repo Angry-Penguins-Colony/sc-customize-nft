@@ -26,7 +26,6 @@ pub const ERR_RENDER_ALREADY_IN_QUEUE: &str = "This image is already in the queu
 pub const ERR_IMAGE_NOT_IN_QUEUE: &str = "This image is not in the queue";
 pub const ERR_PAY_0001_EGLD: &str = "You must pay 0.001 EGLD to call this endpoint.";
 pub const ERR_CANNOT_OVERRIDE_URI_OF_ATTRIBUTE: &str = "Another URI has been set previously.";
-pub const ERR_CANNOT_OVERRIDE_REGISTERED_ITEM: &str = "Item is already registered.";
 pub const ERR_CANNOT_FILL_UNREGISTERED_ITEM: &str =
     "An item must be registered before calling the fill endpoint.";
 pub const ERR_IMAGE_NOT_IN_RENDER_QUEUE: &str =

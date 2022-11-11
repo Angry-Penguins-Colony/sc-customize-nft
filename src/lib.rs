@@ -84,4 +84,22 @@ pub trait Equip:
         self.send()
             .direct_egld(&self.blockchain().get_owner_address(), &balance, b"");
     }
+
+    #[only_owner]
+    #[endpoint(claimItems)]
+    fn claims_items(&self) {
+        let owner = &self.blockchain().get_owner_address();
+
+        for (_, token) in self.map_items_tokens().iter() {
+            self.send().direct_esdt(
+                owner,
+                &token.token,
+                token.nonce,
+                &self
+                    .blockchain()
+                    .get_esdt_balance(owner, &token.token, token.nonce),
+                b"",
+            );
+        }
+    }
 }

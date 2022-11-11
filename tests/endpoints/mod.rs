@@ -1,4 +1,5 @@
 mod claim;
+mod claim_items;
 mod customize_equip_tests;
 mod customize_tests;
 mod customize_unequip_tests;

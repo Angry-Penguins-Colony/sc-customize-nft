@@ -89,17 +89,17 @@ pub trait Equip:
     #[endpoint(claimItems)]
     fn claims_items(&self) {
         let owner = &self.blockchain().get_owner_address();
+        let contract = &self.blockchain().get_sc_address();
 
         for (_, token) in self.map_items_tokens().iter() {
-            self.send().direct_esdt(
-                owner,
-                &token.token,
-                token.nonce,
-                &self
-                    .blockchain()
-                    .get_esdt_balance(owner, &token.token, token.nonce),
-                b"",
-            );
+            let balance = &self
+                .blockchain()
+                .get_esdt_balance(contract, &token.token, token.nonce);
+
+            if balance > &0 {
+                self.send()
+                    .direct_esdt(owner, &token.token, token.nonce, balance, b"");
+            }
         }
     }
 }

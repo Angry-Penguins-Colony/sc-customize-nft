@@ -1,5 +1,12 @@
 use crate::{
-    structs::{item::Item, token::Token},
+    structs::{
+        equippable_attributes::{
+            panic_if_name_contains_unsupported_characters,
+            panic_if_slot_contains_unsupported_characters,
+        },
+        item::Item,
+        token::Token,
+    },
     utils::bidimapper_utils::ContainsUtils,
 };
 
@@ -43,5 +50,20 @@ pub trait StorageModule {
         } else {
             return Some(self.map_items_tokens().get_value(item));
         }
+    }
+
+    fn insert_or_replace_item_token(&self, item: Item<Self::Api>, token: Token<Self::Api>) {
+        panic_if_name_contains_unsupported_characters(&Option::Some(item.name.clone()));
+        panic_if_slot_contains_unsupported_characters(&item.slot);
+
+        if self.has_item(&item) {
+            self.map_items_tokens().remove_by_id(&item);
+        }
+
+        if self.has_token(&token) {
+            self.map_items_tokens().remove_by_value(&token);
+        }
+
+        let _ = self.map_items_tokens().insert(item, token);
     }
 }

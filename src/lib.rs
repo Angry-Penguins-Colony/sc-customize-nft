@@ -12,16 +12,7 @@ pub mod utils;
 use libs::*;
 use structs::item::Item;
 
-use crate::{
-    constants::*,
-    structs::{
-        equippable_attributes::{
-            panic_if_name_contains_unsupported_characters,
-            panic_if_slot_contains_unsupported_characters,
-        },
-        token::Token,
-    },
-};
+use crate::{constants::*, structs::token::Token};
 
 #[elrond_wasm::derive::contract]
 pub trait Equip:
@@ -49,12 +40,10 @@ pub trait Equip:
                 ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM
             );
 
-            panic_if_name_contains_unsupported_characters(&Option::Some(name.clone()));
-            panic_if_slot_contains_unsupported_characters(&slot);
+            let item = Item { name, slot };
+            let token = Token::new(token_id, token_nonce);
 
-            let _ = self
-                .map_items_tokens()
-                .insert(Item { name, slot }, Token::new(token_id, token_nonce));
+            self.insert_or_replace_item_token(item, token);
         }
     }
 

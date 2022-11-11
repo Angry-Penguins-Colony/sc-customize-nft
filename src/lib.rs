@@ -100,4 +100,25 @@ pub trait Equip:
             }
         }
     }
+
+    #[view(getItems)]
+    fn get_items(
+        &self,
+    ) -> MultiValueEncoded<
+        MultiValue4<
+            ManagedBuffer<Self::Api>,
+            ManagedBuffer<Self::Api>,
+            TokenIdentifier<Self::Api>,
+            u64,
+        >,
+    > {
+        let mut output = MultiValueEncoded::new();
+
+        for (item, token) in self.map_items_tokens().iter() {
+            let multi_value = MultiValue4::from((item.slot, item.name, token.token, token.nonce));
+            output.push(multi_value);
+        }
+
+        return output;
+    }
 }

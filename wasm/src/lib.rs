@@ -13,6 +13,7 @@ elrond_wasm_node::wasm_endpoints! {
         customize
         fill
         getImagesToRender
+        getItems
         getUriOf
         registerItem
         renderImage

@@ -18,6 +18,9 @@ pub trait StorageModule {
     #[storage_mapper("equippable_token_id")]
     fn equippable_token_id(&self) -> SingleValueMapper<TokenIdentifier>;
 
+    #[storage_mapper("royalties_overrided")]
+    fn royalties_overrided(&self) -> SingleValueMapper<BigUint>;
+
     #[storage_mapper("mapper_items_token")]
     fn map_items_tokens(&self) -> BiDiMapper<Self::Api, Item<Self::Api>, Token<Self::Api>>;
 

@@ -5,5 +5,6 @@ mod customize_tests;
 mod customize_unequip_tests;
 mod fill_tests;
 mod init;
+mod override_royalties;
 mod register_item_tests;
 mod render_image;

@@ -159,7 +159,7 @@ pub trait CustomizeModule:
 
     fn update_equippable(
         &self,
-        equippable_nonce: u64,
+        input_nonce: u64,
         attributes: &EquippableAttributes<Self::Api>,
     ) -> u64 {
         let equippable_token_id = self.equippable_token_id().get();
@@ -168,28 +168,42 @@ pub trait CustomizeModule:
         let esdt_data = self.blockchain().get_esdt_token_data(
             &self.blockchain().get_sc_address(),
             &equippable_token_id,
-            equippable_nonce,
+            input_nonce,
         );
 
         // mint
         // royalties could be extraced from esdt_data but in mainnet, we already customize some penguins, so now there have 0% royalties
-        let royalties = &BigUint::from(500u32);
-        let token_nonce = self.mint_equippable(&attributes, &esdt_data.name, royalties);
+        let royalties = if self.royalties_overrided().is_empty() {
+            esdt_data.royalties
+        } else {
+            self.royalties_overrided().get()
+        };
+        let minted_nonce = self.mint_equippable(&attributes, &esdt_data.name, &royalties);
 
         // burn the old one
         self.send()
-            .esdt_local_burn(&equippable_token_id, equippable_nonce, &BigUint::from(1u32));
+            .esdt_local_burn(&equippable_token_id, input_nonce, &BigUint::from(1u32));
+        sc_print!("minted nonce {:x}", minted_nonce);
+
+        sc_print!(
+            "minted balance => {}",
+            self.blockchain().get_esdt_balance(
+                &self.blockchain().get_sc_address(),
+                &self.equippable_token_id().get(),
+                minted_nonce,
+            ),
+        );
 
         // send the new one
         self.send().direct_esdt(
             &caller,
             &equippable_token_id,
-            token_nonce,
+            minted_nonce,
             &BigUint::from(1u32),
             &[],
         );
 
-        return token_nonce;
+        return minted_nonce;
     }
 
     fn mint_equippable(

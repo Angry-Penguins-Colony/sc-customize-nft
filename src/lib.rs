@@ -14,6 +14,8 @@ use structs::item::Item;
 
 use crate::{constants::*, structs::token::Token};
 
+pub const ERR_BAD_ROYALTIES: &str = "The royalties must be between 0 and 10000";
+
 #[elrond_wasm::derive::contract]
 pub trait Equip:
     customize::CustomizeModule + storage::StorageModule + equippable_uris::EquippableUrisModule
@@ -88,6 +90,14 @@ pub trait Equip:
                     .direct_esdt(owner, &token.token, token.nonce, balance, b"");
             }
         }
+    }
+
+    #[only_owner]
+    #[endpoint(overrideRoyalties)]
+    fn override_royalties(&self, royalties: BigUint) {
+        require!(royalties >= 0 && royalties <= 10000, ERR_BAD_ROYALTIES);
+
+        self.royalties_overrided().set(&royalties);
     }
 
     #[view(getItems)]

@@ -173,7 +173,7 @@ pub trait CustomizeModule:
 
         // mint
         // royalties could be extraced from esdt_data but in mainnet, we already customize some penguins, so now there have 0% royalties
-        let royalties = &BigUint::from(250u32);
+        let royalties = &BigUint::from(500u32);
         let token_nonce = self.mint_equippable(&attributes, &esdt_data.name, royalties);
 
         // burn the old one

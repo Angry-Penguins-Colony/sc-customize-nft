@@ -15,6 +15,7 @@ elrond_wasm_node::wasm_endpoints! {
         getImagesToRender
         getItems
         getUriOf
+        overrideRoyalties
         registerItem
         renderImage
         setUriOfAttributes

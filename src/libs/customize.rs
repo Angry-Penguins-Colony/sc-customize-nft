@@ -165,17 +165,16 @@ pub trait CustomizeModule:
         let equippable_token_id = self.equippable_token_id().get();
         let caller = self.blockchain().get_caller();
 
-        let equippable_name = self
-            .blockchain()
-            .get_esdt_token_data(
-                &self.blockchain().get_sc_address(),
-                &equippable_token_id,
-                equippable_nonce,
-            )
-            .name;
+        let esdt_data = self.blockchain().get_esdt_token_data(
+            &self.blockchain().get_sc_address(),
+            &equippable_token_id,
+            equippable_nonce,
+        );
 
         // mint
-        let token_nonce = self.mint_equippable(&attributes, &equippable_name);
+        // royalties could be extraced from esdt_data but in mainnet, we already customize some penguins, so now there have 0% royalties
+        let royalties = &BigUint::from(250u32);
+        let token_nonce = self.mint_equippable(&attributes, &esdt_data.name, royalties);
 
         // burn the old one
         self.send()
@@ -197,6 +196,7 @@ pub trait CustomizeModule:
         &self,
         attributes: &EquippableAttributes<Self::Api>,
         name: &ManagedBuffer,
+        royalties: &BigUint<Self::Api>,
     ) -> u64 {
         let mut uris = ManagedVec::new();
         let thumbnail = self.get_uri_of(&attributes, name);
@@ -207,10 +207,10 @@ pub trait CustomizeModule:
             .esdt_nft_create::<EquippableAttributes<Self::Api>>(
                 &self.equippable_token_id().get(),
                 &BigUint::from(1u32),
-                &name,
-                &BigUint::zero(),
+                name,
+                royalties,
                 &ManagedBuffer::new(),
-                &attributes,
+                attributes,
                 &uris,
             );
 

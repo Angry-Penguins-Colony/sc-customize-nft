@@ -17,12 +17,12 @@
             "outfile": "interactions/deploy-devnet.interaction.json"
         },
         "upgrade": {
-            "proxy": "https://gateway.elrond.com",
-            "chain": "1",
+            "proxy": "https://devnet-gateway.elrond.com",
+            "chain": "D",
             "verbose": true,
             "bytecode": "output/customize_nft.wasm",
             "recall-nonce": true,
-            "pem": "wallets/erd1742zhmxt03855jsauy3jpkdzf55kpl4tn9s9sm7w3magwxqasc2s3lrydn.pem",
+            "pem": "wallets/erd1p2aa6n7pezz6m77dm90z6zyuqmh44thqt3qlvvyh3dzvhcr5mt7quz6thg.pem",
             "gas-limit": 600000000,
             "send": true,
             "outfile": "interactions/upgrade-devnet.interaction.json"

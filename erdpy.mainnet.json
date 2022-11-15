@@ -8,6 +8,9 @@
             "recall-nonce": true,
             "pem": "wallets/erd1742zhmxt03855jsauy3jpkdzf55kpl4tn9s9sm7w3magwxqasc2s3lrydn.pem",
             "gas-limit": 600000000,
+            "arguments": [
+                "0x4150432D393238343538"
+            ],
             "send": true,
             "outfile": "interactions/upgrade-devnet.interaction.json"
         }

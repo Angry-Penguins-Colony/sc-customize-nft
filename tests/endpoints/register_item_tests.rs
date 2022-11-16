@@ -1,4 +1,7 @@
-use customize_nft::constants::{ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM, UNEQUIPPED_ITEM_NAME};
+use customize_nft::constants::{
+    ERR_CANNOT_OVERRIDE_REGISTERED_ITEM, ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM,
+    UNEQUIPPED_ITEM_NAME,
+};
 use customize_nft::libs::storage::StorageModule;
 use customize_nft::structs::equippable_attributes::{
     ERR_NAME_CANNOT_BE_UNEQUIPPED, ERR_NAME_CONTAINS_UNSUPPORTED_CHARACTERS,
@@ -116,7 +119,7 @@ fn register_another_item_on_slot() {
 }
 
 #[test]
-fn can_override() {
+fn panic_if_override() {
     let mut setup = testing_utils::setup(customize_nft::contract_obj);
 
     const TOKEN_ID: &[u8] = b"HAT-a1a1a1";
@@ -166,7 +169,7 @@ fn can_override() {
                 sc.register_item(items);
             },
         )
-        .assert_ok();
+        .assert_user_error(ERR_CANNOT_OVERRIDE_REGISTERED_ITEM);
 }
 
 #[test]

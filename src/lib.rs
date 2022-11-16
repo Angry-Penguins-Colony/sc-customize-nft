@@ -12,7 +12,16 @@ pub mod utils;
 use libs::*;
 use structs::item::Item;
 
-use crate::{constants::*, structs::token::Token};
+use crate::{
+    constants::*,
+    structs::{
+        equippable_attributes::{
+            panic_if_name_contains_unsupported_characters,
+            panic_if_slot_contains_unsupported_characters,
+        },
+        token::Token,
+    },
+};
 
 pub const ERR_BAD_ROYALTIES: &str = "The royalties must be between 0 and 10000";
 
@@ -42,10 +51,15 @@ pub trait Equip:
                 ERR_CANNOT_REGISTER_EQUIPPABLE_AS_ITEM
             );
 
+            panic_if_name_contains_unsupported_characters(&Option::Some(name.clone()));
+            panic_if_slot_contains_unsupported_characters(&slot);
+
             let item = Item { name, slot };
             let token = Token::new(token_id, token_nonce);
 
-            self.insert_or_replace_item_token(item, token);
+            let is_insert_successful = self.map_items_tokens().insert(item, token);
+
+            require!(is_insert_successful, ERR_CANNOT_OVERRIDE_REGISTERED_ITEM);
         }
     }
 

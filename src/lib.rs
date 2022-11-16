@@ -75,24 +75,6 @@ pub trait Equip:
     }
 
     #[only_owner]
-    #[endpoint(claimItems)]
-    fn claims_items(&self) {
-        let owner = &self.blockchain().get_owner_address();
-        let contract = &self.blockchain().get_sc_address();
-
-        for (_, token) in self.map_items_tokens().iter() {
-            let balance = &self
-                .blockchain()
-                .get_esdt_balance(contract, &token.token, token.nonce);
-
-            if balance > &0 {
-                self.send()
-                    .direct_esdt(owner, &token.token, token.nonce, balance, b"");
-            }
-        }
-    }
-
-    #[only_owner]
     #[endpoint(overrideRoyalties)]
     fn override_royalties(&self, royalties: BigUint) {
         require!(royalties >= 0 && royalties <= 10000, ERR_BAD_ROYALTIES);

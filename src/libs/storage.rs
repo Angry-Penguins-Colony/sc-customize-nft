@@ -67,6 +67,8 @@ pub trait StorageModule {
             self.map_items_tokens().remove_by_value(&token);
         }
 
-        let _ = self.map_items_tokens().insert(item, token);
+        let insert_succesful = self.map_items_tokens().insert(item, token);
+
+        require!(insert_succesful, "Insert failed");
     }
 }

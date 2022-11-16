@@ -171,8 +171,7 @@ pub trait CustomizeModule:
             input_nonce,
         );
 
-        // mint
-        // royalties could be extraced from esdt_data but in mainnet, we already customize some penguins, so now there have 0% royalties
+        // mint a new one
         let royalties = if self.royalties_overrided().is_empty() {
             esdt_data.royalties
         } else {

@@ -183,16 +183,6 @@ pub trait CustomizeModule:
         // burn the old one
         self.send()
             .esdt_local_burn(&equippable_token_id, input_nonce, &BigUint::from(1u32));
-        sc_print!("minted nonce {:x}", minted_nonce);
-
-        sc_print!(
-            "minted balance => {}",
-            self.blockchain().get_esdt_balance(
-                &self.blockchain().get_sc_address(),
-                &self.equippable_token_id().get(),
-                minted_nonce,
-            ),
-        );
 
         // send the new one
         self.send().direct_esdt(

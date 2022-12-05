@@ -18,7 +18,7 @@ erdpy contract build
 
 ## Deploy contract
 
-There are three arguments to deploy the smart contract : 
+Here's the arguments to deploy the smart contract : 
 
 | Argument                                | Explication                                             |
 | --------------------------------------- | ------------------------------------------------------- |

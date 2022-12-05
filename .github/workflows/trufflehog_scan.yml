@@ -1,0 +1,31 @@
+
+name: TruffleHog Scanner
+
+on:
+  workflow_call:
+    inputs:
+      REPOSITORY_PATH:
+        type: string
+        required: false
+        default: ./
+
+jobs:
+  scan:
+    name: TruffleHog Scan
+    runs-on:
+      ubuntu-latest
+
+    steps:
+      ############# CHECKOUT #############
+      # https://github.com/actions/checkout
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      ############# SCAN #############
+      # https://github.com/marketplace/actions/trufflehog-oss
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@v3.4.1
+        with:
+          path: ${{ inputs.REPOSITORY_PATH }}
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD

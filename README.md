@@ -8,6 +8,8 @@ The customization smart contract of Angry Penguins Colony's customization system
 
 # How to set up the contract?
 
+# Setup 
+
 ## Build contract
 
 ```
@@ -18,11 +20,9 @@ erdpy contract build
 
 There are three arguments to deploy the smart contract : 
 
-| Argument                                | Explication                                                  |
-| --------------------------------------- | ------------------------------------------------------------ |
-| Collection identifier of the Equippable | For example, the Angry Penguins Colony is `APC-928458`.      |
-| IPFS Gateway                            | If you don't know what to put, https://ipfs.io/ipfs/ is recommended.<br />It is worth specifying another gateway if your visuals are hosted on services like Pinata.cloud. |
-| Equippable name format                  | This is the name of the Equippable.<br /><br />{number} must be included. It will be replaced the number (not the nonce) of the penguin<br />E.g. `Penguin #{number}` will become `Penguin #10` if the Equippable is the 10st |
+| Argument                                | Explication                                             |
+| --------------------------------------- | ------------------------------------------------------- |
+| Collection identifier of the Equippable | For example, the Angry Penguins Colony is `APC-928458`. |
 
 
 Fill erdpy.json, then run:
@@ -31,13 +31,12 @@ erdpy contract deploy
 ```
 
 
-## Register an item
+## Register an item to be equipped/unequipped
 
-To equip an Item, you must register it.
-
-### Register the collection to a slot
+### Register the token
 
 First, register the collection of your item to a slot.
+The same token or name cannot be registered twice.
 
 ```rust
 TransferTransaction {
@@ -47,29 +46,17 @@ TransferTransaction {
     GasLimit: 6_000_000
     Data: "registerItem" +
             "@" + <slot in hexadecimal encoding>
-            "@" + <collection identifier in hexadecimal neconding>
+    	    "@" + <name in hexadecimal encoding>
+            "@" + <collection identifier in hexadecimal encoding>
+    	    "@" + <nonce in hexadecimal encoding>
 }
 ```
 
-> **EXAMPLE**
->
-> Register the collection HAT-5e78d4 as a hat.
-> ```rust
-> TransferTransaction {
->     Sender: <account address of the sender>
->     Receiver: <smart contract address>
->     Value: 0
->     GasLimit: 6_000_000
->     Data: "registerItem" +
->        "@686174" + // hat
->        "@4841542D356537386434" // HAT-5e78d4
-> }
-> ```
+### Send the item to the smart contract
 
-### Fill each item
+:warning: If you add a new item to an already minted collection, skip this.
 
-The smart contract needs one SFT of each item to read its attributes.  
-So, we must send each.
+Now, you must send item so that it can be send to the user after it being unequipped from the Equippable.
 
 ```rust
 TransferTransaction {
@@ -121,6 +108,8 @@ AssigningBurnRoleTransaction {
 }
 ```
 
+# Users transactions
+
 ## Enqueue image to render 
 
 This endpoint makes the `server-push-renderer`, render the Equippable.
@@ -160,7 +149,8 @@ TransferTransaction {
 > But, if the server has not funds, he will not be able to send the transaction `setCidOf`. All the system would be frozen.  
 > Hopefully, before that happen, the server will claim the wallet of the smart contract. 
 
-# How to customize?
+
+
 ## Equip an Equippable
 
 Transfer the Equippable NFT and the Items SFT to the smart contract while calling the endpoint to `customize`.
@@ -257,7 +247,7 @@ cargo test -p customize_nft --test lib
 
 ## What can be improved ?
 
+- [ ] ADD `unregisterItem` endpoint
 - [ ] (optimization) RETAKE the sorting in EquippableNftAttributes to be more efficient. For the moment, we sort the entire array each time.
     - could we sort only in top_decode and top_encode ?
     - in `set_item`, could we insert the new item in the right index
-- [ ] ADD `unregisterItem` endpoint

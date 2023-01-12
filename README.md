@@ -1,5 +1,6 @@
 [![Rust](https://github.com/Angry-Penguins-Colony/sc-customize-nft/actions/workflows/rust.yml/badge.svg)](https://github.com/Angry-Penguins-Colony/sc-customize-nft/actions/workflows/rust.yml)
 
+
 # 📜 Smart Contract
 
 ## Description
@@ -245,10 +246,15 @@ cargo test -p customize_nft --test lib
 
 > The units and integrations tests are written with the Rust testing framework. So `erdpy contract test` will not work. 
 
-## What can be improved ?
+# I want to contribue
 
+Here's a suggestion of improvements that you can develop for this repo : 
 - [ ] ADD `unregisterItem` endpoint
 - [ ] ADD `removeFromRenderQueue` endpoint 
 - [ ] (optimization) RETAKE the sorting in EquippableNftAttributes to be more efficient. For the moment, we sort the entire array each time.
     - could we sort only in top_decode and top_encode ?
     - in `set_item`, could we insert the new item in the right index
+
+Or, you can reread the README.md and check for mistakes in transactions.
+
+Thank you for your participation !! =) 

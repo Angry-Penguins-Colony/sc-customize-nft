@@ -1,4 +1,4 @@
-[![Rust](https://github.com/Angry-Penguins-Colony/sc-customize-nft/actions/workflows/rust.yml/badge.svg)](https://github.com/Angry-Penguins-Colony/sc-customize-nft/actions/workflows/rust.yml)
+[![Rust](https://github.com/Angry-Penguins-Colony/sc-customize-nft/actions/workflows/rust.yml/badge.svg)](https://github.com/Angry-Penguins-Colony/sc-customize-nft/actions/workflows/rust.yml) [![Open Source Helpers](https://www.codetriage.com/angry-penguins-colony/sc-customize-nft/badges/users.svg)](https://www.codetriage.com/angry-penguins-colony/sc-customize-nft)
 
 
 # 📜 Smart Contract
